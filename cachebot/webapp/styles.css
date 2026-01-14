@@ -148,7 +148,10 @@ h2 {
 .profile-avatar {
   width: 28px;
   height: 28px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
+  overflow: hidden;
+  flex: 0 0 28px;
   background: var(--accent);
   color: #ffffff;
   display: inline-flex;
@@ -312,7 +315,9 @@ h2 {
 .profile-avatar-large {
   width: 40px;
   height: 40px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
+  overflow: hidden;
   background: var(--accent);
   color: #ffffff;
   display: flex;
@@ -357,7 +362,9 @@ h2 {
 .profile-avatar-preview {
   width: 48px;
   height: 48px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
+  overflow: hidden;
   background: var(--bg);
   border: 1px solid var(--border);
   color: var(--muted);
