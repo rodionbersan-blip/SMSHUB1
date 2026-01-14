@@ -6,15 +6,29 @@
   const sellModalClose = document.getElementById("sellModalClose");
   const sellForm = document.getElementById("sellForm");
   const sellAmount = document.getElementById("sellAmount");
+  const topupOpen = document.getElementById("topupOpen");
+  const topupModal = document.getElementById("topupModal");
+  const topupClose = document.getElementById("topupClose");
+  const topupForm = document.getElementById("topupForm");
+  const topupAmount = document.getElementById("topupAmount");
   const userBadge = document.getElementById("userBadge");
   const profileNameTop = document.getElementById("profileNameTop");
   const profileAvatar = document.getElementById("profileAvatar");
+  const profileAvatarLarge = document.getElementById("profileAvatarLarge");
+  const profileDisplayName = document.getElementById("profileDisplayName");
   const profileQuick = document.getElementById("profileQuick");
   const profileModal = document.getElementById("profileModal");
   const profileModalClose = document.getElementById("profileModalClose");
   const profileQuickName = document.getElementById("profileQuickName");
   const profileQuickUsername = document.getElementById("profileQuickUsername");
   const profileGo = document.getElementById("profileGo");
+  const profileEditOpen = document.getElementById("profileEditOpen");
+  const profileEditModal = document.getElementById("profileEditModal");
+  const profileEditClose = document.getElementById("profileEditClose");
+  const profileEditForm = document.getElementById("profileEditForm");
+  const profileEditName = document.getElementById("profileEditName");
+  const profileEditAvatar = document.getElementById("profileEditAvatar");
+  const profileEditPreview = document.getElementById("profileEditPreview");
   const themeToggle = document.getElementById("themeToggle");
   const navButtons = document.querySelectorAll(".nav-btn");
   const views = document.querySelectorAll(".view");
@@ -92,6 +106,15 @@
     logEl.prepend(line);
   };
 
+  const openLink = (url) => {
+    if (!url) return;
+    if (tg?.openLink) {
+      tg.openLink(url);
+      return;
+    }
+    window.open(url, "_blank");
+  };
+
   const applyTheme = (theme) => {
     document.documentElement.dataset.theme = theme;
     if (tg) {
@@ -109,16 +132,28 @@
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   };
 
+  const setAvatarNode = (node, display, avatarUrl) => {
+    if (!node) return;
+    if (avatarUrl) {
+      node.style.backgroundImage = `url(${avatarUrl})`;
+      node.textContent = "";
+    } else {
+      node.style.backgroundImage = "";
+      node.textContent = display.slice(0, 2).toUpperCase();
+    }
+  };
+
   const setAuthState = (user) => {
     state.user = user;
-    const display = user?.username
-      ? `@${user.username}`
-      : user?.first_name
-        ? user.first_name
-        : "Гость";
+    const display =
+      user?.display_name ||
+      user?.full_name ||
+      user?.first_name ||
+      (user?.username ? `@${user.username}` : "Гость");
     userBadge.textContent = display;
     if (profileNameTop) profileNameTop.textContent = display;
-    if (profileAvatar) profileAvatar.textContent = display.slice(0, 2).toUpperCase();
+    setAvatarNode(profileAvatar, display, user?.avatar_url);
+    setAvatarNode(profileAvatarLarge, display, user?.avatar_url);
   };
 
   const formatAmount = (value, digits = 3) => {
@@ -203,15 +238,19 @@
     if (!payload?.ok) return;
     const { data } = payload;
     const profile = data?.profile;
-    profileName.textContent = profile?.full_name || "Без имени";
-    profileUsername.textContent = profile?.username ? `@${profile.username}` : "Без ника";
+    const display = profile?.display_name || profile?.full_name || "Без имени";
+    profileName.textContent = display;
+    if (profileDisplayName) profileDisplayName.textContent = display;
+    profileUsername.textContent = "—";
     profileRegistered.textContent = profile?.registered_at
       ? `Регистрация: ${formatDate(profile.registered_at)}`
       : "Регистрация: —";
-    profileRole.textContent = data?.role === "buyer" ? "Мерчант" : "Продавец";
+    profileRole.textContent = data?.role === "buyer" ? "Мерчант" : "—";
     profileMerchantSince.textContent = data?.merchant_since
       ? `Мерчант с: ${formatDate(data.merchant_since)}`
       : "Мерчант с: —";
+    setAvatarNode(profileAvatar, display, profile?.avatar_url);
+    setAvatarNode(profileAvatarLarge, display, profile?.avatar_url);
   };
 
   const loadBalance = async () => {
@@ -236,7 +275,11 @@
     deals.forEach((deal) => {
       const item = document.createElement("div");
       item.className = "deal-item";
-      const counterparty = deal.counterparty?.full_name || deal.counterparty?.username || "—";
+      const counterparty =
+        deal.counterparty?.display_name ||
+        deal.counterparty?.full_name ||
+        deal.counterparty?.username ||
+        "—";
       item.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">Сделка #${deal.public_id}</div>
@@ -261,7 +304,7 @@
   const renderP2PItem = (ad, type) => {
     const item = document.createElement("div");
     item.className = "deal-item";
-    const owner = ad.owner?.full_name || ad.owner?.username || "—";
+    const owner = ad.owner?.display_name || ad.owner?.full_name || ad.owner?.username || "—";
     const limit = `₽${formatAmount(ad.min_rub, 2)}-₽${formatAmount(ad.max_rub, 2)}`;
     const price = `₽${formatAmount(ad.price_rub, 2)}/USDT`;
     if (type === "public") {
@@ -355,8 +398,8 @@
         p2pModal.classList.remove("open");
         await loadDeals();
         await loadPublicAds(ad.side === "sell" ? "sell" : "buy");
-        if (offer.pay_url && tg?.openLink) {
-          tg.openLink(offer.pay_url);
+        if (offer.pay_url) {
+          openLink(offer.pay_url);
         }
       }
     });
@@ -552,7 +595,8 @@
       mods.moderators.forEach((mod) => {
         const row = document.createElement("div");
         row.className = "admin-item";
-        const name = mod.profile?.full_name || mod.profile?.username || mod.user_id;
+        const name =
+          mod.profile?.display_name || mod.profile?.full_name || mod.profile?.username || mod.user_id;
         row.innerHTML = `
           <span>${name}</span>
           <span>Решено: ${mod.resolved}</span>
@@ -575,7 +619,10 @@
         const row = document.createElement("div");
         row.className = "admin-item";
         const name =
-          merchant.profile?.full_name || merchant.profile?.username || merchant.user_id;
+          merchant.profile?.display_name ||
+          merchant.profile?.full_name ||
+          merchant.profile?.username ||
+          merchant.user_id;
         const stats = merchant.stats || {};
         row.innerHTML = `
           <span>${name}</span>
@@ -602,8 +649,10 @@
     if (!payload?.ok) return;
     const dispute = payload.dispute;
     p2pModalTitle.textContent = `Спор по сделке #${dispute.deal.public_id}`;
-    const seller = dispute.seller?.full_name || dispute.seller?.username || "—";
-    const buyer = dispute.buyer?.full_name || dispute.buyer?.username || "—";
+    const seller =
+      dispute.seller?.display_name || dispute.seller?.full_name || dispute.seller?.username || "—";
+    const buyer =
+      dispute.buyer?.display_name || dispute.buyer?.full_name || dispute.buyer?.username || "—";
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>${seller}</div>
       <div class="deal-detail-row"><span>Мерчант:</span>${buyer}</div>
@@ -669,7 +718,11 @@
 
   const renderDealModal = (deal) => {
     dealModalTitle.textContent = `Сделка #${deal.public_id}`;
-    const counterparty = deal.counterparty?.full_name || deal.counterparty?.username || "—";
+    const counterparty =
+      deal.counterparty?.display_name ||
+      deal.counterparty?.full_name ||
+      deal.counterparty?.username ||
+      "—";
     const roleLabel = deal.role === "seller" ? "Продавец" : "Покупатель";
     dealModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Роль:</span>${roleLabel}</div>
@@ -738,7 +791,7 @@
     const user = await fetchMe();
     if (user) {
       setAuthState(user);
-      log(`Готово. Пользователь: ${user.username || user.first_name || user.id}`);
+      log(`Готово. Пользователь: ${user.display_name || user.full_name || user.first_name || user.id}`);
       await loadSummary();
       await loadProfile();
       await loadBalance();
@@ -764,7 +817,8 @@
     filtered.forEach((item) => {
       const row = document.createElement("div");
       row.className = "deal-item";
-      const author = item.author?.full_name || item.author?.username || "—";
+      const author =
+        item.author?.display_name || item.author?.full_name || item.author?.username || "—";
       row.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">${author}</div>
@@ -937,7 +991,7 @@
 
   profileQuick?.addEventListener("click", () => {
     profileQuickName.textContent = userBadge.textContent || "—";
-    profileQuickUsername.textContent = profileNameTop?.textContent || "—";
+    profileQuickUsername.textContent = state.user?.role === "buyer" ? "Мерчант" : "—";
     profileModal.classList.add("open");
   });
 
@@ -948,6 +1002,70 @@
   profileGo?.addEventListener("click", () => {
     setView("profile");
     profileModal.classList.remove("open");
+  });
+
+  profileEditOpen?.addEventListener("click", () => {
+    const display = profileDisplayName?.textContent?.trim() || userBadge.textContent || "";
+    if (profileEditName) profileEditName.value = display;
+    if (profileEditPreview) {
+      const avatarUrl = state.user?.avatar_url || "";
+      if (avatarUrl) {
+        profileEditPreview.style.backgroundImage = `url(${avatarUrl})`;
+        profileEditPreview.textContent = "";
+      } else {
+        profileEditPreview.style.backgroundImage = "";
+        profileEditPreview.textContent = display.slice(0, 2).toUpperCase();
+      }
+    }
+    profileEditModal?.classList.add("open");
+  });
+
+  profileEditClose?.addEventListener("click", () => {
+    profileEditModal?.classList.remove("open");
+  });
+
+  profileEditAvatar?.addEventListener("change", () => {
+    const file = profileEditAvatar.files?.[0];
+    if (!file || !profileEditPreview) return;
+    const previewUrl = URL.createObjectURL(file);
+    profileEditPreview.style.backgroundImage = `url(${previewUrl})`;
+    profileEditPreview.textContent = "";
+  });
+
+  profileEditForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const displayName = profileEditName?.value.trim();
+    if (!displayName) {
+      log("Введите имя", "warn");
+      return;
+    }
+    const payload = await fetchJson("/api/profile", {
+      method: "POST",
+      body: JSON.stringify({ display_name: displayName }),
+    });
+    if (!payload?.ok) return;
+    const file = profileEditAvatar?.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("avatar", file);
+      try {
+        const res = await fetch("/api/profile/avatar", {
+          method: "POST",
+          headers: { "X-Telegram-Init-Data": state.initData },
+          body: formData,
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `HTTP ${res.status}`);
+        }
+      } catch (err) {
+        log(`Ошибка API /api/profile/avatar: ${err.message}`, "error");
+      }
+    }
+    profileEditModal?.classList.remove("open");
+    const me = await fetchMe();
+    if (me) setAuthState(me);
+    await loadProfile();
   });
 
   sellQuick?.addEventListener("click", () => {
@@ -974,6 +1092,32 @@
       sellForm.reset();
       await loadDeals();
       setView("deals");
+    }
+  });
+
+  topupOpen?.addEventListener("click", () => {
+    topupModal.classList.add("open");
+  });
+
+  topupClose?.addEventListener("click", () => {
+    topupModal.classList.remove("open");
+  });
+
+  topupForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const amount = Number(topupAmount.value);
+    if (!amount || amount <= 0) {
+      log("Введите сумму в USDT", "warn");
+      return;
+    }
+    const payload = await fetchJson("/api/balance/topup", {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    });
+    if (payload?.ok) {
+      topupModal.classList.remove("open");
+      topupForm.reset();
+      openLink(payload.pay_url);
     }
   });
 

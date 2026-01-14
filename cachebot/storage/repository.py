@@ -12,6 +12,7 @@ from cachebot.models.deal import Deal
 from cachebot.models.dispute import Dispute
 from cachebot.models.review import Review
 from cachebot.models.user import MerchantApplication, UserProfile
+from cachebot.models.topup import Topup
 
 
 @dataclass(slots=True)
@@ -47,6 +48,7 @@ class StorageState:
     reviews: List[Review]
     disputes: List[Dispute]
     adverts: List[Advert]
+    topups: List[Topup]
     deal_sequence: int
     advert_sequence: int
     merchant_since: Dict[int, str]
@@ -84,6 +86,7 @@ class StateRepository:
                 reviews=self._state.reviews,
                 disputes=self._state.disputes,
                 adverts=self._state.adverts,
+                topups=self._state.topups,
                 deal_sequence=sequence,
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
@@ -104,6 +107,7 @@ class StateRepository:
                 reviews=self._state.reviews,
                 disputes=self._state.disputes,
                 adverts=self._state.adverts,
+                topups=self._state.topups,
                 deal_sequence=self._state.deal_sequence,
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
@@ -131,6 +135,7 @@ class StateRepository:
                 reviews=self._state.reviews,
                 disputes=self._state.disputes,
                 adverts=self._state.adverts,
+                topups=self._state.topups,
                 deal_sequence=self._state.deal_sequence,
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=merchant_since,
@@ -151,6 +156,7 @@ class StateRepository:
                 reviews=reviews,
                 disputes=self._state.disputes,
                 adverts=self._state.adverts,
+                topups=self._state.topups,
                 deal_sequence=self._state.deal_sequence,
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
@@ -171,6 +177,7 @@ class StateRepository:
                 reviews=self._state.reviews,
                 disputes=disputes,
                 adverts=self._state.adverts,
+                topups=self._state.topups,
                 deal_sequence=self._state.deal_sequence,
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
@@ -196,10 +203,32 @@ class StateRepository:
                 reviews=self._state.reviews,
                 disputes=self._state.disputes,
                 adverts=adverts,
+                topups=self._state.topups,
                 deal_sequence=self._state.deal_sequence,
                 advert_sequence=advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=p2p_trading_enabled,
+                moderators=self._state.moderators,
+            )
+            self._write_locked()
+
+    async def persist_topups(self, topups: List[Topup]) -> None:
+        async with self._lock:
+            self._state = StorageState(
+                deals=self._state.deals,
+                balances=self._state.balances,
+                settings=self._state.settings,
+                user_roles=self._state.user_roles,
+                applications=self._state.applications,
+                profiles=self._state.profiles,
+                reviews=self._state.reviews,
+                disputes=self._state.disputes,
+                adverts=self._state.adverts,
+                topups=topups,
+                deal_sequence=self._state.deal_sequence,
+                advert_sequence=self._state.advert_sequence,
+                merchant_since=self._state.merchant_since,
+                p2p_trading_enabled=self._state.p2p_trading_enabled,
                 moderators=self._state.moderators,
             )
             self._write_locked()
@@ -217,6 +246,7 @@ class StateRepository:
             "reviews": [review.to_dict() for review in self._state.reviews],
             "disputes": [dispute.to_dict() for dispute in self._state.disputes],
             "adverts": [advert.to_dict() for advert in self._state.adverts],
+            "topups": [topup.to_dict() for topup in self._state.topups],
             "deal_sequence": self._state.deal_sequence,
             "advert_sequence": self._state.advert_sequence,
             "merchant_since": self._state.merchant_since,
@@ -241,6 +271,7 @@ class StateRepository:
                 reviews=[],
                 disputes=[],
                 adverts=[],
+                topups=[],
                 deal_sequence=0,
                 advert_sequence=0,
                 merchant_since={},
@@ -266,6 +297,7 @@ class StateRepository:
         reviews = [Review.from_dict(item) for item in raw.get("reviews", [])]
         disputes = [Dispute.from_dict(item) for item in raw.get("disputes", [])]
         adverts = [Advert.from_dict(item) for item in raw.get("adverts", [])]
+        topups = [Topup.from_dict(item) for item in raw.get("topups", [])]
         merchant_since = {
             int(uid): value for uid, value in (raw.get("merchant_since") or {}).items()
         }
@@ -283,6 +315,7 @@ class StateRepository:
             reviews=reviews,
             disputes=disputes,
             adverts=adverts,
+            topups=topups,
             deal_sequence=int(raw.get("deal_sequence") or 0),
             advert_sequence=int(raw.get("advert_sequence") or 0),
             merchant_since=merchant_since,

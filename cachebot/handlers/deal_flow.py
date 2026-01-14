@@ -846,6 +846,8 @@ def _format_last_seen(profile: UserProfile | None) -> str:
 
 def _format_buyer_name(profile: UserProfile | None, fallback_id: int) -> str:
     if profile:
+        if getattr(profile, "display_name", None):
+            return profile.display_name
         if profile.full_name:
             return profile.full_name
         if profile.username:

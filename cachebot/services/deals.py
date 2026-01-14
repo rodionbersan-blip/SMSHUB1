@@ -81,6 +81,10 @@ class DealService:
         fee = base_usdt * fee_multiplier
         total_usdt = base_usdt + fee
         async with self._lock:
+            current = self._balances.get(seller_id, Decimal("0"))
+            if current < base_usdt:
+                raise ValueError("Недостаточно баланса")
+            self._balances[seller_id] = current - base_usdt
             now = datetime.now(timezone.utc)
             deal = Deal(
                 id=str(uuid4()),
@@ -236,6 +240,10 @@ class DealService:
             if is_seller and was_paid:
                 refund_amount = max(Decimal("0"), deal.usdt_amount - deal.fee_amount)
                 self._credit_balance_locked(actor_id, refund_amount)
+            if deal.is_p2p and not was_paid:
+                base_usdt = deal.usd_amount / deal.rate
+                if base_usdt > 0:
+                    self._credit_balance_locked(deal.seller_id, base_usdt)
             deal.status = DealStatus.CANCELED
             if not was_paid:
                 deal.buyer_id = None

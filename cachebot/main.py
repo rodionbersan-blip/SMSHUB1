@@ -19,6 +19,7 @@ from cachebot.services.disputes import DisputeService
 from cachebot.services.rate_provider import RateProvider
 from cachebot.services.reviews import ReviewService
 from cachebot.services.scheduler import dispute_timer_watcher, expiry_watcher, invoice_watcher
+from cachebot.services.topups import TopupService
 from cachebot.services.users import UserService
 from cachebot.storage import StateRepository
 from cachebot.webhook import create_app
@@ -43,6 +44,7 @@ async def run_bot() -> None:
     review_service = ReviewService(repository)
     dispute_service = DisputeService(repository)
     advert_service = AdvertService(repository)
+    topup_service = TopupService(repository)
     deal_service = DealService(
         repository,
         rate_provider,
@@ -61,6 +63,7 @@ async def run_bot() -> None:
             review_service=review_service,
             dispute_service=dispute_service,
             advert_service=advert_service,
+            topup_service=topup_service,
         )
     )
 

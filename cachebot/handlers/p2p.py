@@ -99,6 +99,8 @@ def _ad_button_label(ad: Advert) -> str:
 def _profile_display_name(profile) -> str:
     if not profile:
         return "—"
+    if getattr(profile, "display_name", None):
+        return profile.display_name
     if getattr(profile, "full_name", None):
         return profile.full_name
     if getattr(profile, "username", None):
@@ -111,6 +113,15 @@ def _ad_public_button_label(ad: Advert, owner_name: str) -> str:
     min_rub = _format_decimal(ad.min_rub)
     max_rub = _format_decimal(ad.max_rub)
     return f"{owner_name} | ₽{min_rub}-{max_rub} | ₽{price}/USDT"
+
+
+async def _ad_available_usdt(deps, ad: Advert) -> Decimal:
+    balance = await deps.deal_service.balance_of(ad.owner_id)
+    available = min(ad.remaining_usdt, balance)
+    max_possible = available * ad.price_rub
+    if ad.active and (available <= 0 or ad.min_rub > max_possible):
+        await deps.advert_service.update_ad(ad.id, active=False)
+    return available
 
 
 def _p2p_deal_button_label(deal: Deal, user_id: int, index: int) -> str:
@@ -266,6 +277,9 @@ async def send_p2p_ads(bot, chat_id: int, user_id: int, *, state: FSMContext | N
     deps = get_deps()
     trading_enabled = await deps.advert_service.trading_enabled(user_id)
     ads = await deps.advert_service.list_user_ads(user_id)
+    for ad in ads:
+        with suppress(Exception):
+            await _ad_available_usdt(deps, ad)
     builder = _ad_manage_keyboard(trading_enabled)
     for ad in ads:
         builder.row(
@@ -310,6 +324,9 @@ async def send_p2p_list(
             await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
         return
     for ad in ads:
+        available = await _ad_available_usdt(deps, ad)
+        if available <= 0 or not ad.active:
+            continue
         profile = await deps.user_service.profile_of(ad.owner_id)
         name = _profile_display_name(profile)
         builder.row(
@@ -318,6 +335,15 @@ async def send_p2p_list(
                 callback_data=f"{P2P_PUBLIC_VIEW_PREFIX}{ad.id}",
             )
         )
+    if not builder._buttons:
+        if state:
+            await state.update_data(back_action=P2P_MENU, p2p_last_list=back_action)
+        sent = await bot.send_message(
+            chat_id, "Пока нет доступных объявлений.", reply_markup=builder.as_markup()
+        )
+        if state:
+            await state.update_data(last_menu_message_id=sent.message_id, last_menu_chat_id=sent.chat.id)
+        return
     # back navigation via reply keyboard
     if state:
         await state.update_data(back_action=P2P_MENU, p2p_last_list=back_action)
@@ -753,14 +779,33 @@ async def _create_ad_from_state(message_or_cb, state: FSMContext, *, terms: str 
     user = message_or_cb.from_user
     if not user:
         return
+    balance = await deps.deal_service.balance_of(user.id)
+    volume = Decimal(str(data.get("volume") or "0"))
+    price = Decimal(str(data.get("price") or "0"))
+    min_rub = Decimal(str(data.get("min_rub") or "0"))
+    max_rub = Decimal(str(data.get("max_rub") or "0"))
+    if volume > balance:
+        if hasattr(message_or_cb, "answer"):
+            await message_or_cb.answer(
+                f"Недостаточно баланса. Доступно: {_format_decimal(balance)} USDT"
+            )
+        return
+    max_possible = volume * price
+    if max_possible > 0 and (min_rub > max_possible or max_rub > max_possible):
+        if hasattr(message_or_cb, "answer"):
+            await message_or_cb.answer(
+                "Не хватает объёма для такого лимита. "
+                "Введи лимит меньше или равный доступному объёму."
+            )
+        return
     try:
         ad = await deps.advert_service.create_ad(
             owner_id=user.id,
             side=data["side"],
-            total_usdt=data["volume"],
-            price_rub=data["price"],
-            min_rub=data["min_rub"],
-            max_rub=data["max_rub"],
+            total_usdt=volume,
+            price_rub=price,
+            min_rub=min_rub,
+            max_rub=max_rub,
             banks=data["banks"],
             terms=terms,
         )
@@ -789,6 +834,8 @@ async def p2p_ad_view(callback: CallbackQuery, state: FSMContext) -> None:
         await callback.answer("Объявление не найдено", show_alert=True)
         return
     trading_enabled = await deps.advert_service.trading_enabled(ad.owner_id)
+    with suppress(Exception):
+        await _ad_available_usdt(deps, ad)
     await state.update_data(back_action=P2P_ADS)
     await _delete_callback_message(callback)
     await callback.message.answer(
@@ -807,6 +854,13 @@ async def p2p_ad_toggle(callback: CallbackQuery, state: FSMContext) -> None:
         return
     advert_id, mode = payload.split(":", 1)
     active = mode == "on"
+    if active:
+        ad_check = await deps.advert_service.get_ad(advert_id)
+        if ad_check:
+            available = await _ad_available_usdt(deps, ad_check)
+            if available <= 0 or ad_check.min_rub > available * ad_check.price_rub:
+                await callback.answer("Недостаточно баланса для публикации", show_alert=True)
+                return
     try:
         ad = await deps.advert_service.toggle_active(advert_id, active)
     except Exception as exc:
@@ -979,7 +1033,9 @@ async def p2p_ad_edit_value(message: Message, state: FSMContext) -> None:
         if min_rub <= 0 or max_rub <= 0 or min_rub > max_rub:
             await message.answer("Некорректные лимиты")
             return
-        max_possible = ad.total_usdt * ad.price_rub
+        balance = await deps.deal_service.balance_of(ad.owner_id)
+        available = min(ad.total_usdt, balance)
+        max_possible = available * ad.price_rub
         if max_possible > 0 and (max_rub > max_possible or min_rub > max_possible):
             await message.answer(
                 "Не хватает объёма для такого лимита. "
@@ -997,8 +1053,30 @@ async def p2p_ad_edit_value(message: Message, state: FSMContext) -> None:
             await message.answer("Значение должно быть больше нуля")
             return
         if field == "price":
+            balance = await deps.deal_service.balance_of(ad.owner_id)
+            available = min(ad.total_usdt, balance)
+            max_possible = available * value
+            if max_possible > 0 and (ad.min_rub > max_possible or ad.max_rub > max_possible):
+                await message.answer(
+                    "Не хватает объёма для такого лимита. "
+                    "Введи лимит меньше или равный доступному объёму."
+                )
+                return
             ad = await deps.advert_service.update_ad(advert_id, price_rub=value)
         elif field == "volume":
+            balance = await deps.deal_service.balance_of(ad.owner_id)
+            if value > balance:
+                await message.answer(
+                    f"Недостаточно баланса. Доступно: {_format_decimal(balance)} USDT"
+                )
+                return
+            max_possible = value * ad.price_rub
+            if max_possible > 0 and (ad.min_rub > max_possible or ad.max_rub > max_possible):
+                await message.answer(
+                    "Не хватает объёма для такого лимита. "
+                    "Введи лимит меньше или равный доступному объёму."
+                )
+                return
             ad = await deps.advert_service.update_ad(
                 advert_id,
                 total_usdt=value,
@@ -1040,6 +1118,9 @@ async def p2p_buy_list(callback: CallbackQuery, state: FSMContext) -> None:
         await callback.answer()
         return
     for ad in ads:
+        available = await _ad_available_usdt(deps, ad)
+        if available <= 0 or not ad.active:
+            continue
         profile = await deps.user_service.profile_of(ad.owner_id)
         name = _profile_display_name(profile)
         builder.row(
@@ -1048,6 +1129,12 @@ async def p2p_buy_list(callback: CallbackQuery, state: FSMContext) -> None:
                 callback_data=f"{P2P_PUBLIC_VIEW_PREFIX}{ad.id}",
             )
         )
+    if not builder._buttons:
+        await state.update_data(back_action=P2P_MENU, p2p_last_list=P2P_BUY)
+        await _delete_callback_message(callback)
+        await callback.message.answer("Пока нет доступных объявлений.", reply_markup=builder.as_markup())
+        await callback.answer()
+        return
     # back navigation via reply keyboard
     await state.update_data(back_action=P2P_MENU, p2p_last_list=P2P_BUY)
     await _delete_callback_message(callback)
@@ -1075,6 +1162,9 @@ async def p2p_sell_list(callback: CallbackQuery, state: FSMContext) -> None:
         await callback.answer()
         return
     for ad in ads:
+        available = await _ad_available_usdt(deps, ad)
+        if available <= 0 or not ad.active:
+            continue
         profile = await deps.user_service.profile_of(ad.owner_id)
         name = _profile_display_name(profile)
         builder.row(
@@ -1083,6 +1173,12 @@ async def p2p_sell_list(callback: CallbackQuery, state: FSMContext) -> None:
                 callback_data=f"{P2P_PUBLIC_VIEW_PREFIX}{ad.id}",
             )
         )
+    if not builder._buttons:
+        await state.update_data(back_action=P2P_MENU, p2p_last_list=P2P_SELL)
+        await _delete_callback_message(callback)
+        await callback.message.answer("Пока нет доступных объявлений.", reply_markup=builder.as_markup())
+        await callback.answer()
+        return
     # back navigation via reply keyboard
     await state.update_data(back_action=P2P_MENU, p2p_last_list=P2P_SELL)
     await _delete_callback_message(callback)
@@ -1102,6 +1198,10 @@ async def p2p_public_view(callback: CallbackQuery, state: FSMContext) -> None:
         await callback.answer("Объявление не найдено", show_alert=True)
         return
     if not await deps.advert_service.trading_enabled(ad.owner_id):
+        await callback.answer("Объявление недоступно", show_alert=True)
+        return
+    available = await _ad_available_usdt(deps, ad)
+    if available <= 0 or not ad.active:
         await callback.answer("Объявление недоступно", show_alert=True)
         return
     builder = InlineKeyboardBuilder()
@@ -1156,7 +1256,10 @@ async def p2p_offer_amount(message: Message, state: FSMContext) -> None:
         await message.answer("Сумма должна быть в пределах лимитов объявления")
         return
     base_usdt = rub_amount / ad.price_rub
-    if base_usdt > ad.remaining_usdt:
+    seller_id = ad.owner_id if ad.side == AdvertSide.SELL else message.from_user.id
+    seller_balance = await deps.deal_service.balance_of(seller_id)
+    available = min(ad.remaining_usdt, seller_balance)
+    if base_usdt > available:
         await message.answer("В объявлении недостаточно объёма")
         return
     user = message.from_user
@@ -1191,6 +1294,8 @@ async def p2p_offer_amount(message: Message, state: FSMContext) -> None:
         )
         await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
     except Exception as exc:
+        with suppress(Exception):
+            await deps.deal_service.cancel_deal(deal.id, seller_id)
         with suppress(Exception):
             await deps.advert_service.restore_volume(ad.id, base_usdt)
         await message.answer(f"Не удалось создать счет: {exc}")

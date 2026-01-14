@@ -62,6 +62,8 @@ class UserProfile:
     user_id: int
     full_name: str | None
     username: str | None
+    display_name: str | None = None
+    avatar_path: str | None = None
     registered_at: datetime
     last_seen_at: datetime
 
@@ -70,6 +72,8 @@ class UserProfile:
             "user_id": self.user_id,
             "full_name": self.full_name,
             "username": self.username,
+            "display_name": self.display_name,
+            "avatar_path": self.avatar_path,
             "registered_at": self.registered_at.isoformat(),
             "last_seen_at": self.last_seen_at.isoformat(),
         }
@@ -81,6 +85,8 @@ class UserProfile:
             user_id=int(data["user_id"]),
             full_name=data.get("full_name"),
             username=data.get("username"),
+            display_name=data.get("display_name"),
+            avatar_path=data.get("avatar_path"),
             registered_at=registered,
             last_seen_at=datetime.fromisoformat(data.get("last_seen_at", data["registered_at"])),
         )

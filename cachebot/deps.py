@@ -11,6 +11,7 @@ from cachebot.services.kb_client import KBClient
 from cachebot.services.rate_provider import RateProvider
 from cachebot.services.disputes import DisputeService
 from cachebot.services.reviews import ReviewService
+from cachebot.services.topups import TopupService
 from cachebot.services.users import UserService
 
 
@@ -25,6 +26,7 @@ class AppDeps:
     review_service: ReviewService
     dispute_service: DisputeService
     advert_service: AdvertService
+    topup_service: TopupService
 
 
 _current: Optional[AppDeps] = None

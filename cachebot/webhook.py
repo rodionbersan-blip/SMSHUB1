@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import logging
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl
@@ -30,7 +31,11 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/app/{path:.*}", _webapp_static)
     app.router.add_get("/api/me", _api_me)
     app.router.add_get("/api/profile", _api_profile)
+    app.router.add_post("/api/profile", _api_profile_update)
+    app.router.add_post("/api/profile/avatar", _api_profile_avatar)
+    app.router.add_get("/api/avatar/{user_id}", _api_avatar)
     app.router.add_get("/api/balance", _api_balance)
+    app.router.add_post("/api/balance/topup", _api_balance_topup)
     app.router.add_get("/api/my-deals", _api_my_deals)
     app.router.add_post("/api/deals", _api_create_deal)
     app.router.add_get("/api/deals/{deal_id}", _api_deal_detail)
@@ -93,12 +98,20 @@ async def _crypto_pay_handler(request: web.Request) -> web.Response:
     invoice_id = invoice.get("invoice_id")
     status = (invoice.get("status") or "").lower()
     if invoice_id and status.startswith("paid"):
+        handled = False
         try:
             deal = await deps.deal_service.mark_invoice_paid(str(invoice_id))
             await handle_paid_invoice(deal, deps.kb_client, bot)
+            handled = True
+        except LookupError:
+            handled = False
         except Exception as exc:  # pragma: no cover
             logger.exception("Failed to handle paid invoice %s: %s", invoice_id, exc)
             raise web.HTTPInternalServerError()
+        if not handled:
+            topup = await deps.topup_service.pop_paid(str(invoice_id))
+            if topup:
+                await deps.deal_service.deposit_balance(topup.user_id, topup.amount)
 
     return web.json_response({"ok": True})
 
@@ -137,8 +150,15 @@ async def _api_ping(_: web.Request) -> web.Response:
 
 
 async def _api_me(request: web.Request) -> web.Response:
-    user, _ = await _require_user(request)
-    return web.json_response({"ok": True, "user": user})
+    deps: AppDeps = request.app["deps"]
+    user, user_id = await _require_user(request)
+    profile = await deps.user_service.profile_of(user_id)
+    payload = {
+        "id": user_id,
+        "display_name": profile.display_name if profile else None,
+        "avatar_url": _avatar_url(request, profile),
+    }
+    return web.json_response({"ok": True, "user": payload})
 
 
 async def _api_profile(request: web.Request) -> web.Response:
@@ -147,13 +167,71 @@ async def _api_profile(request: web.Request) -> web.Response:
     profile = await deps.user_service.profile_of(user_id)
     role = await deps.user_service.role_of(user_id)
     merchant_since = await deps.user_service.merchant_since_of(user_id)
+    include_private = _is_admin(user_id, deps)
     payload = {
         "user": user,
-        "profile": _profile_payload(profile),
+        "profile": _profile_payload(profile, request=request, include_private=include_private),
         "role": role.value if role else None,
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
     }
     return web.json_response({"ok": True, "data": payload})
+
+
+async def _api_profile_update(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    display_name = str(body.get("display_name") or "").strip()
+    if len(display_name) < 2 or len(display_name) > 32:
+        raise web.HTTPBadRequest(text="Некорректное имя")
+    profile = await deps.user_service.update_profile(user_id, display_name=display_name)
+    payload = _profile_payload(profile, request=request, include_private=_is_admin(user_id, deps))
+    return web.json_response({"ok": True, "profile": payload})
+
+
+async def _api_profile_avatar(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    reader = await request.multipart()
+    field = await reader.next()
+    if not field or field.name != "avatar":
+        raise web.HTTPBadRequest(text="Нет файла")
+    filename = field.filename or "avatar.jpg"
+    ext = Path(filename).suffix.lower()
+    if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
+        ext = ".jpg"
+    avatar_dir = _avatar_dir(deps)
+    avatar_dir.mkdir(parents=True, exist_ok=True)
+    avatar_path = avatar_dir / f"{user_id}{ext}"
+    with avatar_path.open("wb") as handle:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            handle.write(chunk)
+    profile = await deps.user_service.update_profile(user_id, avatar_path=str(avatar_path))
+    payload = _profile_payload(profile, request=request, include_private=_is_admin(user_id, deps))
+    return web.json_response({"ok": True, "profile": payload})
+
+
+async def _api_avatar(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    user_id = request.match_info.get("user_id", "")
+    try:
+        uid = int(user_id)
+    except ValueError:
+        raise web.HTTPNotFound()
+    profile = await deps.user_service.profile_of(uid)
+    if not profile or not profile.avatar_path:
+        raise web.HTTPNotFound()
+    avatar_dir = _avatar_dir(deps).resolve()
+    path = Path(profile.avatar_path).resolve()
+    if avatar_dir not in path.parents or not path.exists():
+        raise web.HTTPNotFound()
+    return web.FileResponse(path)
 
 
 async def _api_balance(request: web.Request) -> web.Response:
@@ -161,6 +239,29 @@ async def _api_balance(request: web.Request) -> web.Response:
     _, user_id = await _require_user(request)
     balance = await deps.deal_service.balance_of(user_id)
     return web.json_response({"ok": True, "balance": str(balance)})
+
+
+async def _api_balance_topup(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    try:
+        amount = Decimal(str(body.get("amount")))
+    except (InvalidOperation, TypeError):
+        raise web.HTTPBadRequest(text="Некорректная сумма")
+    if amount <= 0:
+        raise web.HTTPBadRequest(text="Сумма должна быть больше нуля")
+    invoice = await deps.crypto_pay.create_invoice(
+        amount=amount,
+        currency="USDT",
+        description="Пополнение баланса",
+        payload=f"topup:{user_id}",
+    )
+    await deps.topup_service.create(user_id=user_id, amount=amount, invoice_id=invoice.invoice_id)
+    return web.json_response({"ok": True, "invoice_id": invoice.invoice_id, "pay_url": invoice.pay_url})
 
 
 async def _api_summary(request: web.Request) -> web.Response:
@@ -185,7 +286,7 @@ async def _api_my_deals(request: web.Request) -> web.Response:
     deals.sort(key=lambda deal: deal.created_at, reverse=True)
     payload = []
     for deal in deals:
-        payload.append(await _deal_payload(deps, deal, user_id))
+        payload.append(await _deal_payload(deps, deal, user_id, request=request))
     return web.json_response({"ok": True, "deals": payload})
 
 
@@ -206,7 +307,7 @@ async def _api_create_deal(request: web.Request) -> web.Response:
     if rub_amount <= 0:
         raise web.HTTPBadRequest(text="Сумма должна быть больше нуля")
     deal = await deps.deal_service.create_deal(user_id, rub_amount)
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
 
@@ -219,7 +320,7 @@ async def _api_deal_detail(request: web.Request) -> web.Response:
         raise web.HTTPNotFound(text="Deal not found")
     if user_id not in {deal.seller_id, deal.buyer_id}:
         raise web.HTTPForbidden(text="Нет доступа к сделке")
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
 
@@ -233,7 +334,13 @@ async def _api_deal_cancel(request: web.Request) -> web.Response:
         raise web.HTTPForbidden(text="Отмена недоступна")
     except LookupError:
         raise web.HTTPNotFound(text="Deal not found")
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    if deal.is_p2p and deal.advert_id:
+        try:
+            base_usdt = deal.usd_amount / deal.rate
+            await deps.advert_service.restore_volume(deal.advert_id, base_usdt)
+        except Exception:
+            pass
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
 
@@ -245,7 +352,7 @@ async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
         deal = await deps.deal_service.buyer_ready_for_qr(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
 
@@ -257,7 +364,7 @@ async def _api_deal_seller_ready(request: web.Request) -> web.Response:
         deal = await deps.deal_service.seller_request_qr(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
 
@@ -269,7 +376,7 @@ async def _api_deal_confirm_buyer(request: web.Request) -> web.Response:
         deal, _ = await deps.deal_service.confirm_buyer_cash(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
 
@@ -281,7 +388,7 @@ async def _api_deal_confirm_seller(request: web.Request) -> web.Response:
         deal, _ = await deps.deal_service.confirm_seller_cash(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
 
@@ -293,7 +400,7 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
         deal = await deps.deal_service.open_dispute(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
 
@@ -320,7 +427,12 @@ async def _api_p2p_public_ads(request: web.Request) -> web.Response:
         AdvertSide(side),
         exclude_user_id=user_id,
     )
-    payload = [await _ad_payload(deps, ad) for ad in ads]
+    payload = []
+    for ad in ads:
+        ad, available = await _ensure_ad_availability(deps, ad)
+        if not ad.active or available <= 0:
+            continue
+        payload.append(await _ad_payload(deps, ad, available_usdt=available, request=request))
     return web.json_response({"ok": True, "ads": payload})
 
 
@@ -328,7 +440,14 @@ async def _api_p2p_my_ads(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
     ads = await deps.advert_service.list_user_ads(user_id)
-    payload = [await _ad_payload(deps, ad, include_owner=False) for ad in ads]
+    payload = []
+    for ad in ads:
+        ad, available = await _ensure_ad_availability(deps, ad)
+        payload.append(
+            await _ad_payload(
+                deps, ad, include_owner=False, available_usdt=available, request=request
+            )
+        )
     return web.json_response({"ok": True, "ads": payload})
 
 
@@ -357,7 +476,7 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
         banks=banks,
         terms=terms,
     )
-    payload = await _ad_payload(deps, ad, include_owner=False)
+    payload = await _ad_payload(deps, ad, include_owner=False, request=request)
     return web.json_response({"ok": True, "ad": payload})
 
 
@@ -387,6 +506,9 @@ async def _api_p2p_update_ad(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Некорректные лимиты")
     if not banks:
         raise web.HTTPBadRequest(text="Нужно выбрать банки")
+    balance = await deps.deal_service.balance_of(user_id)
+    if total_usdt > balance:
+        raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
     _validate_ad_limits(total_usdt, price_rub, min_rub, max_rub)
     updated = await deps.advert_service.update_ad(
         ad_id,
@@ -398,7 +520,7 @@ async def _api_p2p_update_ad(request: web.Request) -> web.Response:
         banks=banks,
         terms=terms,
     )
-    payload = await _ad_payload(deps, updated, include_owner=False)
+    payload = await _ad_payload(deps, updated, include_owner=False, request=request)
     return web.json_response({"ok": True, "ad": payload})
 
 
@@ -418,8 +540,14 @@ async def _api_p2p_toggle_ad(request: web.Request) -> web.Response:
         desired = None
     if desired is None:
         desired = not ad.active
+    if bool(desired):
+        _, available = await _ensure_ad_availability(deps, ad)
+        if available <= 0:
+            raise web.HTTPBadRequest(text="Недостаточно баланса для публикации")
+        if ad.min_rub > available * ad.price_rub:
+            raise web.HTTPBadRequest(text="Лимиты превышают доступный объём")
     updated = await deps.advert_service.toggle_active(ad_id, bool(desired))
-    payload = await _ad_payload(deps, updated, include_owner=False)
+    payload = await _ad_payload(deps, updated, include_owner=False, request=request)
     return web.json_response({"ok": True, "ad": payload})
 
 
@@ -471,14 +599,16 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
     if rub_amount < ad.min_rub or rub_amount > ad.max_rub:
         raise web.HTTPBadRequest(text="Сумма должна быть в пределах лимитов объявления")
     base_usdt = rub_amount / ad.price_rub
-    if base_usdt > ad.remaining_usdt:
-        raise web.HTTPBadRequest(text="В объявлении недостаточно объёма")
     if ad.side == AdvertSide.SELL:
         seller_id = ad.owner_id
         buyer_id = user_id
     else:
         seller_id = user_id
         buyer_id = ad.owner_id
+    seller_balance = await deps.deal_service.balance_of(seller_id)
+    available = min(ad.remaining_usdt, seller_balance)
+    if base_usdt > available:
+        raise web.HTTPBadRequest(text="В объявлении недостаточно объёма")
     try:
         deal = await deps.deal_service.create_p2p_deal(
             seller_id=seller_id,
@@ -497,6 +627,10 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
         )
         await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
     except Exception as exc:
+        with suppress(Exception):
+            await deps.deal_service.cancel_deal(deal.id, seller_id)
+        with suppress(Exception):
+            await deps.advert_service.restore_volume(ad.id, base_usdt)
         raise web.HTTPBadRequest(text=f"Не удалось создать сделку: {exc}")
     if buyer_id != user_id:
         await bot.send_message(
@@ -512,7 +646,7 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
             "inline_keyboard": [[{"text": "💸 Оплатить", "url": invoice.pay_url}]]
         },
     )
-    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response(
         {
             "ok": True,
@@ -572,6 +706,7 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
         raise web.HTTPNotFound(text="Сделка не найдена")
     seller = await deps.user_service.profile_of(deal.seller_id)
     buyer = await deps.user_service.profile_of(deal.buyer_id) if deal.buyer_id else None
+    include_private = _is_admin(user_id, deps)
     evidence = []
     for item in dispute.evidence:
         file_url = await _file_url(request, item.file_id)
@@ -600,9 +735,9 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
             for msg in dispute.messages
         ],
         "evidence": evidence,
-        "deal": await _deal_payload(deps, deal, user_id, with_actions=False),
-        "seller": _profile_payload(seller),
-        "buyer": _profile_payload(buyer),
+        "deal": await _deal_payload(deps, deal, user_id, with_actions=False, request=request),
+        "seller": _profile_payload(seller, request=request, include_private=include_private),
+        "buyer": _profile_payload(buyer, request=request, include_private=include_private),
     }
     return web.json_response({"ok": True, "dispute": payload})
 
@@ -716,7 +851,7 @@ async def _api_admin_moderators(request: web.Request) -> web.Response:
         payload.append(
             {
                 "user_id": mod_id,
-                "profile": _profile_payload(profile),
+                "profile": _profile_payload(profile, request=request, include_private=True),
                 "resolved": resolved,
             }
         )
@@ -764,7 +899,7 @@ async def _api_admin_merchants(request: web.Request) -> web.Response:
         payload.append(
             {
                 "user_id": rec.user_id,
-                "profile": _profile_payload(rec.profile),
+                "profile": _profile_payload(rec.profile, request=request, include_private=True),
                 "merchant_since": rec.merchant_since.isoformat() if rec.merchant_since else None,
                 "stats": stats,
             }
@@ -798,7 +933,7 @@ async def _api_reviews_list(request: web.Request) -> web.Response:
                 "rating": item.rating,
                 "comment": item.comment,
                 "created_at": item.created_at.isoformat(),
-                "author": _profile_payload(author),
+                "author": _profile_payload(author, request=request, include_private=False),
             }
         )
     positive = sum(1 for item in reviews if item.rating > 0)
@@ -815,6 +950,7 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
         return None
     data = dict(pairs)
     received_hash = data.pop("hash", "")
+    data.pop("signature", None)
     if not received_hash:
         return None
     data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(data.items()))
@@ -866,16 +1002,32 @@ async def _has_dispute_access(user_id: int, deps: AppDeps) -> bool:
     return await deps.user_service.is_moderator(user_id)
 
 
-def _profile_payload(profile) -> dict[str, Any] | None:
+def _avatar_dir(deps: AppDeps) -> Path:
+    return Path(deps.config.storage_path).parent / "avatars"
+
+
+def _avatar_url(request: web.Request, profile) -> str | None:
+    if not profile or not getattr(profile, "avatar_path", None):
+        return None
+    return str(request.url.with_path(f"/api/avatar/{profile.user_id}").with_query({}))
+
+
+def _profile_payload(
+    profile, *, request: web.Request | None = None, include_private: bool = False
+) -> dict[str, Any] | None:
     if not profile:
         return None
-    return {
+    payload = {
         "user_id": profile.user_id,
-        "full_name": profile.full_name,
-        "username": profile.username,
+        "display_name": getattr(profile, "display_name", None),
+        "avatar_url": _avatar_url(request, profile) if request else None,
         "registered_at": profile.registered_at.isoformat(),
         "last_seen_at": profile.last_seen_at.isoformat() if profile.last_seen_at else None,
     }
+    if include_private:
+        payload["full_name"] = profile.full_name
+        payload["username"] = profile.username
+    return payload
 
 
 def _parse_decimal(value, *, fallback: Decimal | None = None) -> Decimal:
@@ -944,22 +1096,42 @@ async def _merchant_stats(deps: AppDeps, user_id: int) -> dict[str, int]:
     return {"total": total, "completed": completed, "canceled": canceled}
 
 
-async def _ad_payload(deps: AppDeps, ad, *, include_owner: bool = True) -> dict[str, Any]:
+async def _ensure_ad_availability(
+    deps: AppDeps, ad
+) -> tuple[Any, Decimal]:
+    balance = await deps.deal_service.balance_of(ad.owner_id)
+    available = min(ad.remaining_usdt, balance)
+    max_possible = available * ad.price_rub
+    should_deactivate = available <= 0 or ad.min_rub > max_possible
+    if ad.active and should_deactivate:
+        ad = await deps.advert_service.update_ad(ad.id, active=False)
+    return ad, available
+
+
+async def _ad_payload(
+    deps: AppDeps,
+    ad,
+    *,
+    include_owner: bool = True,
+    available_usdt: Decimal | None = None,
+    request: web.Request | None = None,
+) -> dict[str, Any]:
     owner = await deps.user_service.profile_of(ad.owner_id) if include_owner else None
+    remaining = available_usdt if available_usdt is not None else ad.remaining_usdt
     return {
         "id": ad.id,
         "public_id": ad.public_id,
         "side": ad.side.value,
         "price_rub": str(ad.price_rub),
         "total_usdt": str(ad.total_usdt),
-        "remaining_usdt": str(ad.remaining_usdt),
+        "remaining_usdt": str(remaining),
         "min_rub": str(ad.min_rub),
         "max_rub": str(ad.max_rub),
         "banks": list(ad.banks),
         "terms": ad.terms,
         "active": ad.active,
         "created_at": ad.created_at.isoformat(),
-        "owner": _profile_payload(owner) if include_owner else None,
+        "owner": _profile_payload(owner, request=request, include_private=False) if include_owner else None,
     }
 
 
@@ -976,7 +1148,12 @@ async def _file_url(request: web.Request, file_id: str) -> str | None:
 
 
 async def _deal_payload(
-    deps: AppDeps, deal, user_id: int, *, with_actions: bool = False
+    deps: AppDeps,
+    deal,
+    user_id: int,
+    *,
+    with_actions: bool = False,
+    request: web.Request | None = None,
 ) -> dict[str, Any]:
     role = "seller" if deal.seller_id == user_id else "buyer"
     counterparty_id = deal.buyer_id if role == "seller" else deal.seller_id
@@ -992,7 +1169,7 @@ async def _deal_payload(
         "rate": str(deal.rate),
         "created_at": deal.created_at.isoformat(),
         "atm_bank": deal.atm_bank,
-        "counterparty": _profile_payload(counterparty),
+        "counterparty": _profile_payload(counterparty, request=request, include_private=False),
         "is_p2p": deal.is_p2p,
         "buyer_cash_confirmed": deal.buyer_cash_confirmed,
         "seller_cash_confirmed": deal.seller_cash_confirmed,

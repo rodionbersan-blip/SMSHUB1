@@ -659,10 +659,18 @@ async def view_user_profile(callback: CallbackQuery) -> None:
         return
     deals = await deps.deal_service.list_user_deals(target_id)
     reviews = await deps.review_service.list_for_user(target_id)
+    role = await deps.user_service.role_of(target_id)
+    show_private = bool(callback.from_user and callback.from_user.id in deps.config.admin_ids)
     builder = InlineKeyboardBuilder()
     builder.button(text="Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{target_id}:pos")
     await callback.message.answer(
-        _format_profile(profile, deals, review_summary=_review_summary_text(reviews)),
+        _format_profile(
+            profile,
+            deals,
+            review_summary=_review_summary_text(reviews),
+            role=role,
+            show_private=show_private,
+        ),
         reply_markup=builder.as_markup(),
     )
     await callback.answer()
@@ -703,12 +711,20 @@ async def reviews_back(callback: CallbackQuery) -> None:
         return
     deals = await deps.deal_service.list_user_deals(target_id)
     reviews = await deps.review_service.list_for_user(target_id)
+    role = await deps.user_service.role_of(target_id)
+    show_private = bool(callback.from_user and callback.from_user.id in deps.config.admin_ids)
     builder = InlineKeyboardBuilder()
     builder.button(text="Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{target_id}:pos")
     with suppress(TelegramBadRequest):
         await callback.message.delete()
     await callback.message.answer(
-        _format_profile(profile, deals, review_summary=_review_summary_text(reviews)),
+        _format_profile(
+            profile,
+            deals,
+            review_summary=_review_summary_text(reviews),
+            role=role,
+            show_private=show_private,
+        ),
         reply_markup=builder.as_markup(),
     )
     await callback.answer()
@@ -2865,6 +2881,7 @@ async def _send_profile(
     state: FSMContext | None = None,
 ) -> None:
     deps = get_deps()
+    role = await deps.user_service.role_of(user.id)
     profile = await deps.user_service.ensure_profile(
         user.id,
         full_name=user.full_name,
@@ -2876,7 +2893,13 @@ async def _send_profile(
     builder.button(text="Отзывы", callback_data=f"{REVIEWS_VIEW_PREFIX}{user.id}:pos")
     sent = await bot.send_message(
         chat_id,
-        _format_profile(profile, deals, review_summary=_review_summary_text(reviews)),
+        _format_profile(
+            profile,
+            deals,
+            review_summary=_review_summary_text(reviews),
+            role=role,
+            show_private=user.id in deps.config.admin_ids,
+        ),
         reply_markup=builder.as_markup(),
     )
     if state:
@@ -3381,25 +3404,35 @@ async def balance_withdraw_amount(message: Message, state: FSMContext) -> None:
 
 
 def _format_profile(
-    profile: UserProfile, deals: List[Deal], *, review_summary: str
+    profile: UserProfile,
+    deals: List[Deal],
+    *,
+    review_summary: str,
+    role: UserRole | None = None,
+    show_private: bool = False,
 ) -> str:
     total = len(deals)
     success = sum(1 for deal in deals if deal.status == DealStatus.COMPLETED)
     failed = sum(
         1 for deal in deals if deal.status in {DealStatus.CANCELED, DealStatus.EXPIRED}
     )
-    name = escape(profile.full_name) if profile.full_name else "—"
-    username_line = (
-        f"Ник: {escape(profile.username)}" if profile.username else "Ник: —"
-    )
+    display_name = getattr(profile, "display_name", None) or profile.full_name or "—"
+    name = escape(display_name)
     registered = profile.registered_at.astimezone(timezone.utc).strftime(
         "%d.%m.%Y %H:%M UTC"
     )
+    role_line = "Роль: Мерчант" if role == UserRole.BUYER else None
+    private_lines = []
+    if show_private:
+        real_name = escape(profile.full_name) if profile.full_name else "—"
+        username = escape(profile.username) if profile.username else "—"
+        private_lines = [f"Telegram имя: {real_name}", f"Username: @{username}"]
     lines = [
         "<b>👤 Мой профиль</b>",
         "──────────────",
         f"Имя: {name}",
-        username_line,
+        *([role_line] if role_line else []),
+        *private_lines,
         f"Дата регистрации: {registered}",
         "",
         f"Сделок всего: {total}",
@@ -3891,6 +3924,8 @@ def _deal_stage_label(deal: Deal, viewer_id: int) -> str:
 
 def _format_buyer_name(profile: UserProfile | None, fallback_id: int) -> str:
     if profile:
+        if getattr(profile, "display_name", None):
+            return profile.display_name
         if profile.full_name:
             return profile.full_name
         if profile.username:

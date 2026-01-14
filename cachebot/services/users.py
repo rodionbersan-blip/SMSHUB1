@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import random
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
@@ -95,11 +96,16 @@ class UserService:
         now = datetime.now(timezone.utc)
         async with self._lock:
             profile = self._profiles.get(user_id)
+            display_name = profile.display_name if profile else None
+            if not display_name:
+                display_name = _random_display_name()
             if not profile:
                 profile = UserProfile(
                     user_id=user_id,
                     full_name=full_name,
                     username=username,
+                    display_name=display_name,
+                    avatar_path=None,
                     registered_at=now,
                     last_seen_at=now,
                 )
@@ -108,9 +114,43 @@ class UserService:
                     user_id=user_id,
                     full_name=full_name if full_name is not None else profile.full_name,
                     username=username if username is not None else profile.username,
+                    display_name=display_name,
+                    avatar_path=profile.avatar_path,
                     registered_at=profile.registered_at,
                     last_seen_at=now,
                 )
+            self._profiles[user_id] = profile
+            await self._persist()
+            return profile
+
+    async def update_profile(
+        self,
+        user_id: int,
+        *,
+        display_name: str | None = None,
+        avatar_path: str | None = None,
+    ) -> UserProfile:
+        async with self._lock:
+            profile = self._profiles.get(user_id)
+            if not profile:
+                profile = UserProfile(
+                    user_id=user_id,
+                    full_name=None,
+                    username=None,
+                    display_name=_random_display_name(),
+                    avatar_path=None,
+                    registered_at=datetime.now(timezone.utc),
+                    last_seen_at=datetime.now(timezone.utc),
+                )
+            profile = UserProfile(
+                user_id=profile.user_id,
+                full_name=profile.full_name,
+                username=profile.username,
+                display_name=display_name or profile.display_name,
+                avatar_path=avatar_path if avatar_path is not None else profile.avatar_path,
+                registered_at=profile.registered_at,
+                last_seen_at=profile.last_seen_at,
+            )
             self._profiles[user_id] = profile
             await self._persist()
             return profile
@@ -177,3 +217,33 @@ class UserService:
             merchant_since={uid: value.isoformat() for uid, value in self._merchant_since.items()},
             moderators=sorted(self._moderators),
         )
+
+
+def _random_display_name() -> str:
+    adjectives = [
+        "Тихий",
+        "Северный",
+        "Быстрый",
+        "Смелый",
+        "Ровный",
+        "Золотой",
+        "Тёплый",
+        "Скрытный",
+        "Спокойный",
+        "Ясный",
+    ]
+    nouns = [
+        "Лис",
+        "Сокол",
+        "Ворон",
+        "Барс",
+        "Кедр",
+        "Огонёк",
+        "Орёл",
+        "Ёж",
+        "Ветер",
+        "Бриг",
+    ]
+    base = f"{random.choice(adjectives)} {random.choice(nouns)}"
+    suffix = random.randint(10, 999)
+    return f"{base} {suffix}"
