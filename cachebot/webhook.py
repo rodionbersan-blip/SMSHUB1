@@ -953,23 +953,37 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
     data.pop("signature", None)
     if not received_hash:
         return None
-    data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(data.items()))
+    data_check_sorted = "\n".join(f"{k}={v}" for k, v in sorted(data.items()))
+    raw_pairs = [(k, v) for k, v in pairs if k not in {"hash", "signature"}]
+    data_check_raw = "\n".join(f"{k}={v}" for k, v in raw_pairs)
     webapp_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
-    expected_hash = hmac.new(webapp_key, data_check_string.encode(), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(received_hash, expected_hash):
-        legacy_key = hashlib.sha256(bot_token.encode()).digest()
-        legacy_hash = hmac.new(legacy_key, data_check_string.encode(), hashlib.sha256).hexdigest()
-        if not hmac.compare_digest(received_hash, legacy_hash):
-            legacy_plain = hmac.new(bot_token.encode(), data_check_string.encode(), hashlib.sha256).hexdigest()
-            if not hmac.compare_digest(received_hash, legacy_plain):
-                logger.warning(
-                    "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s",
-                    received_hash[:12],
-                    expected_hash[:12],
-                    legacy_hash[:12],
-                    ",".join(sorted(data.keys())),
-                )
-                return None
+
+    def _hashes(data_check: str) -> tuple[str, str, str]:
+        expected = hmac.new(webapp_key, data_check.encode(), hashlib.sha256).hexdigest()
+        legacy = hmac.new(hashlib.sha256(bot_token.encode()).digest(), data_check.encode(), hashlib.sha256).hexdigest()
+        legacy_plain = hmac.new(bot_token.encode(), data_check.encode(), hashlib.sha256).hexdigest()
+        return expected, legacy, legacy_plain
+
+    expected_hash, legacy_hash, legacy_plain = _hashes(data_check_sorted)
+    if not (
+        hmac.compare_digest(received_hash, expected_hash)
+        or hmac.compare_digest(received_hash, legacy_hash)
+        or hmac.compare_digest(received_hash, legacy_plain)
+    ):
+        raw_expected, raw_legacy, raw_plain = _hashes(data_check_raw)
+        if not (
+            hmac.compare_digest(received_hash, raw_expected)
+            or hmac.compare_digest(received_hash, raw_legacy)
+            or hmac.compare_digest(received_hash, raw_plain)
+        ):
+            logger.warning(
+                "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s",
+                received_hash[:12],
+                expected_hash[:12],
+                legacy_hash[:12],
+                ",".join(sorted(data.keys())),
+            )
+            return None
     try:
         user_raw = data.get("user")
         return json.loads(user_raw) if user_raw else {}
