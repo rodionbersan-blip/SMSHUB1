@@ -67,6 +67,7 @@
   const adminAddModerator = document.getElementById("adminAddModerator");
   const adminModerators = document.getElementById("adminModerators");
   const adminMerchants = document.getElementById("adminMerchants");
+  const systemPanel = document.getElementById("systemPanel");
   const reviewsOpen = document.getElementById("reviewsOpen");
   const reviewsModal = document.getElementById("reviewsModal");
   const reviewsClose = document.getElementById("reviewsClose");
@@ -534,9 +535,11 @@
     const summary = await fetchJson("/api/admin/summary");
     if (!summary?.ok || !summary.can_access) {
       if (adminTab) adminTab.style.display = "none";
+      if (systemPanel) systemPanel.style.display = "none";
       return;
     }
     if (adminTab) adminTab.style.display = "inline-flex";
+    if (systemPanel) systemPanel.style.display = "block";
     const settings = await fetchJson("/api/admin/settings");
     if (settings?.ok) {
       adminRate.value = settings.usd_rate;
@@ -716,7 +719,7 @@
 
   const dealAction = async (action, dealId) => {
     const path = `/api/deals/${dealId}/${action}`;
-    const payload = await fetchJson(path);
+    const payload = await fetchJson(path, { method: "POST", body: "{}" });
     if (!payload?.ok) return;
     renderDealModal(payload.deal);
     await loadDeals();
