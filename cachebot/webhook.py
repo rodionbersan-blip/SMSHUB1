@@ -820,6 +820,13 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
     if not hmac.compare_digest(received_hash, expected_hash):
         legacy_hash = hmac.new(bot_token.encode(), data_check_string.encode(), hashlib.sha256).hexdigest()
         if not hmac.compare_digest(received_hash, legacy_hash):
+            logger.warning(
+                "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s",
+                received_hash[:12],
+                expected_hash[:12],
+                legacy_hash[:12],
+                ",".join(sorted(data.keys())),
+            )
             return None
     try:
         user_raw = data.get("user")
