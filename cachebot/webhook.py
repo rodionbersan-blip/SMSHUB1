@@ -508,6 +508,9 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
         f"✅ Сделка {deal.hashtag} закреплена за тобой.\n"
         f"Оплати {deal.usdt_amount.quantize(Decimal('0.01'), rounding=ROUND_UP)} USDT\n"
         "После оплаты начнется отсчет времени для открытия спора.",
+        reply_markup={
+            "inline_keyboard": [[{"text": "💸 Оплатить", "url": invoice.pay_url}]]
+        },
     )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True)
     return web.json_response(
