@@ -6,7 +6,6 @@
   const statStatus = document.getElementById("statStatus");
   const userBadge = document.getElementById("userBadge");
   const themeToggle = document.getElementById("themeToggle");
-  const checkAuthBtn = document.getElementById("checkAuth");
   const openMenuBtn = document.getElementById("openMenu");
 
   const state = {
@@ -85,21 +84,16 @@
       applyTheme(detectTheme());
       log("WebApp API не найден. Проверьте запуск через Telegram.", "warn");
     }
-    setAuthState(null);
-  };
-
-  themeToggle?.addEventListener("click", () => {
-    const current = document.documentElement.dataset.theme || "light";
-    applyTheme(current === "light" ? "dark" : "light");
-  });
-
-  checkAuthBtn?.addEventListener("click", async () => {
-    log("Проверяем авторизацию...");
     const user = await fetchMe();
     if (user) {
       setAuthState(user);
       log(`Готово. Пользователь: ${user.username || user.first_name || user.id}`);
     }
+  };
+
+  themeToggle?.addEventListener("click", () => {
+    const current = document.documentElement.dataset.theme || "light";
+    applyTheme(current === "light" ? "dark" : "light");
   });
 
   openMenuBtn?.addEventListener("click", () => {
