@@ -16,37 +16,24 @@
             <div class="brand-subtitle">P2P обмен в кэше</div>
           </div>
         </div>
-        <button id="themeToggle" class="btn ghost">Тема</button>
+        <div class="topbar-actions">
+          <button id="themeToggle" class="btn ghost">Тема</button>
+          <button id="profileQuick" class="profile-chip">
+            <span class="profile-avatar" id="profileAvatar">BC</span>
+            <span class="profile-name" id="profileNameTop">Гость</span>
+          </button>
+        </div>
       </header>
 
       <section class="hero">
         <div class="hero-card">
-          <h1>BC Cash WebApp</h1>
-          <p>
-            Удобный центр управления сделками, балансом и профилем. Вся логика
-            синхронизирована с ботом.
-          </p>
           <div class="hero-actions">
             <button class="btn primary nav-btn" data-view="profile">Профиль</button>
-            <button class="btn nav-btn" data-view="balance">Баланс</button>
             <button class="btn nav-btn" data-view="deals">Мои сделки</button>
             <button class="btn nav-btn" data-view="p2p">P2P</button>
             <button class="btn nav-btn" data-view="disputes" id="disputesTab">Споры</button>
             <button class="btn nav-btn" data-view="admin" id="adminTab">Админ</button>
-          </div>
-        </div>
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-label">Сделки</div>
-            <div class="stat-value" id="statDeals">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Баланс</div>
-            <div class="stat-value" id="statBalance">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Статус</div>
-            <div class="stat-value" id="statStatus">Ожидание</div>
+            <button id="sellQuick" class="btn">Продать</button>
           </div>
         </div>
       </section>
@@ -68,21 +55,14 @@
             <div id="profileRole" class="profile-value">—</div>
             <div id="profileMerchantSince" class="profile-muted">—</div>
           </div>
+          <div class="profile-card">
+            <div class="profile-title">Баланс</div>
+            <div id="profileBalance" class="profile-value">—</div>
+            <div class="profile-muted">USDT</div>
+          </div>
         </div>
         <div class="profile-actions">
           <button id="reviewsOpen" class="btn">Отзывы</button>
-        </div>
-      </section>
-
-      <section class="panel view" id="view-balance">
-        <div class="panel-header">
-          <h2>Баланс</h2>
-          <span class="badge">USDT</span>
-        </div>
-        <div class="balance-card">
-          <div class="balance-label">Доступно</div>
-          <div id="balanceAmount" class="balance-value">—</div>
-          <div class="balance-muted">Вывод оформляется через бота.</div>
         </div>
       </section>
 
@@ -212,6 +192,37 @@
               <textarea id="p2pTerms" rows="3" placeholder="Опционально"></textarea>
             </label>
             <button type="submit" class="btn primary">Создать</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal" id="profileModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Профиль</div>
+            <button id="profileModalClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div class="modal-body">
+            <div id="profileQuickName" class="profile-value">—</div>
+            <div id="profileQuickUsername" class="profile-muted">—</div>
+          </div>
+          <div class="modal-actions">
+            <button id="profileGo" class="btn primary">Перейти в профиль</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="sellModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Продать USDT</div>
+            <button id="sellModalClose" class="btn ghost">Закрыть</button>
+          </div>
+          <form id="sellForm" class="p2p-form">
+            <label>Сумма в RUB
+              <input id="sellAmount" type="number" step="0.01" min="0" placeholder="Например: 5000" />
+            </label>
+            <button type="submit" class="btn primary">Создать сделку</button>
           </form>
         </div>
       </div>

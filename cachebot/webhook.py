@@ -15,6 +15,7 @@ from cachebot.deps import AppDeps
 from cachebot.services.scheduler import handle_paid_invoice
 from cachebot.models.advert import AdvertSide
 from cachebot.constants import BANK_OPTIONS
+from cachebot.models.user import UserRole
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/profile", _api_profile)
     app.router.add_get("/api/balance", _api_balance)
     app.router.add_get("/api/my-deals", _api_my_deals)
+    app.router.add_post("/api/deals", _api_create_deal)
     app.router.add_get("/api/deals/{deal_id}", _api_deal_detail)
     app.router.add_post("/api/deals/{deal_id}/cancel", _api_deal_cancel)
     app.router.add_post("/api/deals/{deal_id}/buyer-ready", _api_deal_buyer_ready)
@@ -185,6 +187,27 @@ async def _api_my_deals(request: web.Request) -> web.Response:
     for deal in deals:
         payload.append(await _deal_payload(deps, deal, user_id))
     return web.json_response({"ok": True, "deals": payload})
+
+
+async def _api_create_deal(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    role = await deps.user_service.role_of(user_id)
+    if role != UserRole.SELLER:
+        raise web.HTTPForbidden(text="Доступно только продавцу")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    try:
+        rub_amount = Decimal(str(body.get("rub_amount")))
+    except InvalidOperation:
+        raise web.HTTPBadRequest(text="Некорректная сумма")
+    if rub_amount <= 0:
+        raise web.HTTPBadRequest(text="Сумма должна быть больше нуля")
+    deal = await deps.deal_service.create_deal(user_id, rub_amount)
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True)
+    return web.json_response({"ok": True, "deal": payload})
 
 
 async def _api_deal_detail(request: web.Request) -> web.Response:

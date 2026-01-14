@@ -1,10 +1,20 @@
 (() => {
   const tg = window.Telegram?.WebApp;
   const logEl = document.getElementById("log");
-  const statDeals = document.getElementById("statDeals");
-  const statBalance = document.getElementById("statBalance");
-  const statStatus = document.getElementById("statStatus");
+  const sellQuick = document.getElementById("sellQuick");
+  const sellModal = document.getElementById("sellModal");
+  const sellModalClose = document.getElementById("sellModalClose");
+  const sellForm = document.getElementById("sellForm");
+  const sellAmount = document.getElementById("sellAmount");
   const userBadge = document.getElementById("userBadge");
+  const profileNameTop = document.getElementById("profileNameTop");
+  const profileAvatar = document.getElementById("profileAvatar");
+  const profileQuick = document.getElementById("profileQuick");
+  const profileModal = document.getElementById("profileModal");
+  const profileModalClose = document.getElementById("profileModalClose");
+  const profileQuickName = document.getElementById("profileQuickName");
+  const profileQuickUsername = document.getElementById("profileQuickUsername");
+  const profileGo = document.getElementById("profileGo");
   const themeToggle = document.getElementById("themeToggle");
   const navButtons = document.querySelectorAll(".nav-btn");
   const views = document.querySelectorAll(".view");
@@ -14,7 +24,7 @@
   const profileRegistered = document.getElementById("profileRegistered");
   const profileRole = document.getElementById("profileRole");
   const profileMerchantSince = document.getElementById("profileMerchantSince");
-  const balanceAmount = document.getElementById("balanceAmount");
+  const profileBalance = document.getElementById("profileBalance");
   const dealsCount = document.getElementById("dealsCount");
   const dealsList = document.getElementById("dealsList");
   const dealModal = document.getElementById("dealModal");
@@ -100,14 +110,14 @@
 
   const setAuthState = (user) => {
     state.user = user;
-    if (user?.username) {
-      userBadge.textContent = `@${user.username}`;
-    } else if (user?.first_name) {
-      userBadge.textContent = user.first_name;
-    } else {
-      userBadge.textContent = "Гость";
-    }
-    statStatus.textContent = user ? "Готов" : "Ожидание";
+    const display = user?.username
+      ? `@${user.username}`
+      : user?.first_name
+        ? user.first_name
+        : "Гость";
+    userBadge.textContent = display;
+    if (profileNameTop) profileNameTop.textContent = display;
+    if (profileAvatar) profileAvatar.textContent = display.slice(0, 2).toUpperCase();
   };
 
   const formatAmount = (value, digits = 3) => {
@@ -206,7 +216,9 @@
     const payload = await fetchJson("/api/balance");
     if (!payload?.ok) return;
     state.balance = payload.balance;
-    balanceAmount.textContent = `${formatAmount(payload.balance)} USDT`;
+    if (profileBalance) {
+      profileBalance.textContent = `${formatAmount(payload.balance)} USDT`;
+    }
   };
 
   const loadDeals = async () => {
@@ -242,8 +254,6 @@
   const loadSummary = async () => {
     const payload = await fetchJson("/api/summary");
     if (!payload?.ok) return;
-    statDeals.textContent = `${payload.deals_total || 0}`;
-    statBalance.textContent = `${formatAmount(payload.balance)} USDT`;
   };
 
   const renderP2PItem = (ad, type) => {
@@ -919,6 +929,48 @@
       const rating = btn.dataset.tab === "positive" ? 1 : -1;
       renderReviews(reviews, rating);
     });
+  });
+
+  profileQuick?.addEventListener("click", () => {
+    profileQuickName.textContent = userBadge.textContent || "—";
+    profileQuickUsername.textContent = profileNameTop?.textContent || "—";
+    profileModal.classList.add("open");
+  });
+
+  profileModalClose?.addEventListener("click", () => {
+    profileModal.classList.remove("open");
+  });
+
+  profileGo?.addEventListener("click", () => {
+    setView("profile");
+    profileModal.classList.remove("open");
+  });
+
+  sellQuick?.addEventListener("click", () => {
+    sellModal.classList.add("open");
+  });
+
+  sellModalClose?.addEventListener("click", () => {
+    sellModal.classList.remove("open");
+  });
+
+  sellForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const amount = Number(sellAmount.value);
+    if (!amount || amount <= 0) {
+      log("Введите сумму в RUB", "warn");
+      return;
+    }
+    const payload = await fetchJson("/api/deals", {
+      method: "POST",
+      body: JSON.stringify({ rub_amount: amount }),
+    });
+    if (payload?.ok) {
+      sellModal.classList.remove("open");
+      sellForm.reset();
+      await loadDeals();
+      setView("deals");
+    }
   });
 
   initTelegram();
