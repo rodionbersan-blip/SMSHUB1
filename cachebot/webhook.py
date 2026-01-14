@@ -818,7 +818,9 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
     secret_key = hashlib.sha256(bot_token.encode()).digest()
     expected_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(received_hash, expected_hash):
-        return None
+        legacy_hash = hmac.new(bot_token.encode(), data_check_string.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(received_hash, legacy_hash):
+            return None
     try:
         user_raw = data.get("user")
         return json.loads(user_raw) if user_raw else {}
