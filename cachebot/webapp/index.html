@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BC Cash</title>
+    <link rel="stylesheet" href="/app/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark">BC</span>
+          <div>
+            <div class="brand-title">BC Cash</div>
+            <div class="brand-subtitle">P2P обмен в кэше</div>
+          </div>
+        </div>
+        <button id="themeToggle" class="btn ghost">Тема</button>
+      </header>
+
+      <section class="hero">
+        <div class="hero-card">
+          <h1>Мини‑приложение BC Cash</h1>
+          <p>
+            Подключаем WebApp. Здесь будет весь функционал: сделки, объявления,
+            споры и баланс. Сейчас можно проверить авторизацию Telegram.
+          </p>
+          <div class="hero-actions">
+            <button id="checkAuth" class="btn primary">Проверить вход</button>
+            <button id="openMenu" class="btn">Открыть меню</button>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Сделки</div>
+            <div class="stat-value" id="statDeals">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Баланс</div>
+            <div class="stat-value" id="statBalance">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Статус</div>
+            <div class="stat-value" id="statStatus">Ожидание</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Панель</h2>
+          <span id="userBadge" class="badge">Гость</span>
+        </div>
+        <div id="log" class="log"></div>
+      </section>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/app/app.js"></script>
+  </body>
+</html>
