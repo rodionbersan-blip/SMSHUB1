@@ -133,26 +133,30 @@
         renderer: "svg",
         loop: false,
         autoplay: false,
-        path: "/app/assets/money-rain.json",
+        path: "/app/assets/withdraw-success.json",
       });
     }
-    successAnim.classList.add("show");
+    successAnim.classList.remove("fade-out");
+    successAnim.classList.add("show", "blur");
     const startSegment = () => {
       const totalFrames = successAnimInstance.getDuration(true) || 0;
       if (!totalFrames) {
         return;
       }
-      const startFrame = Math.min(160, Math.max(0, totalFrames - 1));
       const endFrame = Math.max(1, totalFrames - 1);
       const handleComplete = () => {
-        successAnimInstance.stop();
-        successAnim.classList.remove("show");
+        successAnim.classList.add("fade-out");
+        successAnim.classList.remove("blur");
+        window.setTimeout(() => {
+          successAnim.classList.remove("show", "fade-out");
+          successAnimInstance.stop();
+        }, 350);
         successAnimInstance.removeEventListener("complete", handleComplete);
       };
       successAnimInstance.removeEventListener("complete", handleComplete);
       successAnimInstance.addEventListener("complete", handleComplete);
       successAnimInstance.setSpeed(1);
-      successAnimInstance.playSegments([startFrame, endFrame], true);
+      successAnimInstance.playSegments([0, endFrame], true);
     };
     if (successAnimInstance.isLoaded) {
       startSegment();

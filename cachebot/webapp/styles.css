@@ -915,12 +915,23 @@ h2 {
   justify-content: center;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: opacity 0.25s ease, backdrop-filter 0.35s ease, -webkit-backdrop-filter 0.35s ease;
   z-index: 60;
 }
 
 .success-anim.show {
   opacity: 1;
+}
+
+.success-anim.fade-out {
+  opacity: 0;
+}
+
+.success-anim.blur {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .success-anim > div,
