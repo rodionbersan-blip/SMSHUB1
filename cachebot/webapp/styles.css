@@ -709,6 +709,7 @@ h2 {
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 6px;
   margin-bottom: 12px;
@@ -722,6 +723,9 @@ h2 {
 .reviews-tabs .tab-btn {
   position: relative;
   z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
   padding: 0 18px;
   height: 38px;
@@ -731,6 +735,8 @@ h2 {
   font-weight: 600;
   letter-spacing: 0.1px;
   transition: color 0.2s ease;
+  line-height: 1;
+  text-align: center;
 }
 
 .reviews-tabs .tab-btn.active {
@@ -786,7 +792,7 @@ h2 {
 }
 
 .review-item .deal-row {
-  font-size: 12px;
+  font-size: 11px;
   margin-top: 0;
 }
 
