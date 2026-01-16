@@ -115,6 +115,13 @@ async def _crypto_pay_handler(request: web.Request) -> web.Response:
             topup = await deps.topup_service.pop_paid(str(invoice_id))
             if topup:
                 await deps.deal_service.deposit_balance(topup.user_id, topup.amount)
+                amount_str = f"{topup.amount.quantize(Decimal('0.01')):f}"
+                await bot.send_message(
+                    topup.user_id,
+                    "✅ Пополнение успешно.\n"
+                    f"Сумма: {amount_str} USDT\n"
+                    "Хороших сделок!",
+                )
 
     return web.json_response({"ok": True})
 
