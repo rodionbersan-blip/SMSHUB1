@@ -2,6 +2,7 @@
   const tg = window.Telegram?.WebApp;
   const logEl = document.getElementById("log");
   const successAnim = document.getElementById("successAnim");
+  const centerNotice = document.getElementById("centerNotice");
   const sellQuick = document.getElementById("sellQuick");
   const sellModal = document.getElementById("sellModal");
   const sellModalClose = document.getElementById("sellModalClose");
@@ -123,6 +124,19 @@
   };
 
   let successAnimInstance = null;
+  let successAnimHideTimer = null;
+  let noticeTimer = null;
+  const showNotice = (message) => {
+    if (!centerNotice) return;
+    centerNotice.textContent = message;
+    centerNotice.classList.add("show");
+    if (noticeTimer) {
+      window.clearTimeout(noticeTimer);
+    }
+    noticeTimer = window.setTimeout(() => {
+      centerNotice.classList.remove("show");
+    }, 2200);
+  };
   const playSuccessAnimation = () => {
     if (!successAnim || !window.lottie) {
       return;
@@ -138,8 +152,13 @@
     }
     successAnim.classList.remove("fade-out");
     successAnim.classList.add("show", "blur");
+    if (successAnimHideTimer) {
+      window.clearTimeout(successAnimHideTimer);
+      successAnimHideTimer = null;
+    }
     const startSegment = () => {
       const totalFrames = successAnimInstance.getDuration(true) || 0;
+      const totalSeconds = successAnimInstance.getDuration(false) || 0;
       if (!totalFrames) {
         return;
       }
@@ -155,13 +174,37 @@
       };
       successAnimInstance.removeEventListener("complete", handleComplete);
       successAnimInstance.addEventListener("complete", handleComplete);
+      const handleFail = () => {
+        successAnim.classList.add("fade-out");
+        successAnim.classList.remove("blur");
+        window.setTimeout(() => {
+          successAnim.classList.remove("show", "fade-out");
+          successAnimInstance.stop();
+        }, 350);
+        successAnimInstance.removeEventListener("data_failed", handleFail);
+      };
+      successAnimInstance.removeEventListener("data_failed", handleFail);
+      successAnimInstance.addEventListener("data_failed", handleFail);
       successAnimInstance.setSpeed(1);
       successAnimInstance.playSegments([0, endFrame], true);
+      if (totalSeconds) {
+        successAnimHideTimer = window.setTimeout(() => {
+          handleComplete();
+        }, Math.ceil(totalSeconds * 1000) + 150);
+      }
     };
     if (successAnimInstance.isLoaded) {
       startSegment();
     } else {
       successAnimInstance.addEventListener("DOMLoaded", startSegment, { once: true });
+      successAnimHideTimer = window.setTimeout(() => {
+        successAnim.classList.add("fade-out");
+        successAnim.classList.remove("blur");
+        window.setTimeout(() => {
+          successAnim.classList.remove("show", "fade-out");
+          successAnimInstance?.stop();
+        }, 350);
+      }, 2000);
     }
   };
 
@@ -1356,13 +1399,33 @@
     event.preventDefault();
     const amount = Number(withdrawAmount?.value);
     if (!amount || amount <= 0) {
+      showNotice("Вывод пока недоступен. Попробуйте немного позже.");
       log("Введите сумму в USDT", "warn");
       return;
     }
-    const payload = await fetchJson("/api/balance/withdraw", {
+    if (!state.initData) {
+      showNotice("Вывод пока недоступен. Попробуйте немного позже.");
+      return;
+    }
+    const res = await fetch("/api/balance/withdraw", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Telegram-Init-Data": state.initData,
+      },
       body: JSON.stringify({ amount }),
     });
+    if (!res.ok) {
+      const text = await res.text();
+      if (text.includes("Недостаточно")) {
+        showNotice("Вывод пока недоступен. Попробуйте немного позже.");
+      } else {
+        showNotice("Вывод пока недоступен. Попробуйте немного позже.");
+      }
+      log(`Ошибка API /api/balance/withdraw: ${text}`, "error");
+      return;
+    }
+    const payload = await res.json();
     if (payload?.ok) {
       withdrawModal?.classList.remove("open");
       withdrawForm?.reset();

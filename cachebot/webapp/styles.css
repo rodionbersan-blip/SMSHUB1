@@ -941,6 +941,32 @@ h2 {
   height: 100vh;
 }
 
+.center-notice {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.98);
+  opacity: 0;
+  pointer-events: none;
+  max-width: min(82vw, 420px);
+  text-align: center;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 16px 22px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(77, 163, 255, 0.28);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 70;
+}
+
+.center-notice.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
 @media (max-width: 860px) {
   .hero {
     grid-template-columns: 1fr;
