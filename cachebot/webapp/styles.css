@@ -4,6 +4,8 @@
   color-scheme: light;
   --bg: #f5f7fb;
   --card: #ffffff;
+  --card-contrast: rgba(15, 17, 21, 0.04);
+  --card-contrast-border: rgba(15, 17, 21, 0.08);
   --text: #0f1115;
   --muted: #6b7280;
   --border: #e5e7ef;
@@ -16,6 +18,8 @@
   color-scheme: dark;
   --bg: #0f1115;
   --card: #161a22;
+  --card-contrast: rgba(255, 255, 255, 0.04);
+  --card-contrast-border: rgba(255, 255, 255, 0.1);
   --text: #ffffff;
   --muted: #8b90a0;
   --border: #262b36;
@@ -353,9 +357,9 @@ h2 {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: var(--card-contrast);
+  border: 1px solid var(--card-contrast-border);
+  border-radius: 20px;
   padding: 16px;
   margin-bottom: 16px;
 }
