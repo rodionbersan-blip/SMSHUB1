@@ -25,8 +25,12 @@
   const profileQuick = document.getElementById("profileQuick");
   const profileModal = document.getElementById("profileModal");
   const profileModalClose = document.getElementById("profileModalClose");
+  const profileModalAvatar = document.getElementById("profileModalAvatar");
   const profileQuickName = document.getElementById("profileQuickName");
   const profileQuickUsername = document.getElementById("profileQuickUsername");
+  const profileQuickBalance = document.getElementById("profileQuickBalance");
+  const profileModalTopup = document.getElementById("profileModalTopup");
+  const profileModalWithdraw = document.getElementById("profileModalWithdraw");
   const profileGo = document.getElementById("profileGo");
   const profileEditOpen = document.getElementById("profileEditOpen");
   const profileEditModal = document.getElementById("profileEditModal");
@@ -49,7 +53,6 @@
   const profileWithdraw = document.getElementById("profileWithdraw");
   const profileDealsTotal = document.getElementById("profileDealsTotal");
   const profileDealsSuccess = document.getElementById("profileDealsSuccess");
-  const profileDealsFailure = document.getElementById("profileDealsFailure");
   const profileReviewsCount = document.getElementById("profileReviewsCount");
   const dealsCount = document.getElementById("dealsCount");
   const dealsList = document.getElementById("dealsList");
@@ -374,9 +377,6 @@
     if (profileDealsSuccess) {
       profileDealsSuccess.textContent = `Успешные: ${stats.success_percent ?? 0}%`;
     }
-    if (profileDealsFailure) {
-      profileDealsFailure.textContent = `Неуспешные: ${stats.fail_percent ?? 0}%`;
-    }
     if (profileReviewsCount) {
       profileReviewsCount.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
     }
@@ -428,6 +428,9 @@
     state.balance = payload.balance;
     if (profileBalance) {
       profileBalance.textContent = `${formatAmount(payload.balance, 2)} USDT`;
+    }
+    if (profileQuickBalance) {
+      profileQuickBalance.textContent = `${formatAmount(payload.balance, 2)} USDT`;
     }
   };
 
@@ -1296,8 +1299,14 @@
   });
 
   profileQuick?.addEventListener("click", () => {
-    profileQuickName.textContent = userBadge.textContent || "—";
+    const display = userBadge.textContent || "—";
+    profileQuickName.textContent = display;
     profileQuickUsername.textContent = state.user?.role === "buyer" ? "Мерчант" : "—";
+    setAvatarNode(profileModalAvatar, display, state.user?.avatar_url);
+    if (profileQuickBalance) {
+      const balance = state.balance ?? 0;
+      profileQuickBalance.textContent = `${formatAmount(balance, 2)} USDT`;
+    }
     profileModal.classList.add("open");
   });
 
@@ -1308,6 +1317,16 @@
   profileGo?.addEventListener("click", () => {
     setView("profile");
     profileModal.classList.remove("open");
+  });
+
+  profileModalTopup?.addEventListener("click", () => {
+    profileModal.classList.remove("open");
+    topupModal?.classList.add("open");
+  });
+
+  profileModalWithdraw?.addEventListener("click", () => {
+    profileModal.classList.remove("open");
+    withdrawModal?.classList.add("open");
   });
 
   profileEditOpen?.addEventListener("click", () => {

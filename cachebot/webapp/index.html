@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BC Cash</title>
-    <link rel="stylesheet" href="/app/styles.css?v=pay30" />
+    <link rel="stylesheet" href="/app/styles.css?v=pay31" />
   </head>
   <body>
     <div id="app">
@@ -76,7 +76,6 @@
             <div class="profile-title">Статистика</div>
             <div id="profileDealsTotal" class="profile-value">Сделок: —</div>
             <div id="profileDealsSuccess" class="profile-muted">Успешные: —%</div>
-            <div id="profileDealsFailure" class="profile-muted">Неуспешные: —%</div>
             <div id="profileReviewsCount" class="profile-muted">Отзывы: —</div>
           </div>
         </div>
@@ -237,21 +236,30 @@
         </div>
       </div>
 
-      <div class="modal" id="profileModal">
-        <div class="modal-card">
-          <div class="modal-header">
-            <div class="modal-title">Профиль</div>
-            <button id="profileModalClose" class="btn ghost">Закрыть</button>
-          </div>
-          <div class="modal-body">
+    <div class="modal" id="profileModal">
+      <div class="modal-card glass">
+        <div class="modal-header">
+          <div class="modal-title">Профиль</div>
+          <button id="profileModalClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body profile-quick">
+          <div class="profile-avatar-large" id="profileModalAvatar">BC</div>
+          <div>
             <div id="profileQuickName" class="profile-value">—</div>
             <div id="profileQuickUsername" class="profile-muted">—</div>
           </div>
-          <div class="modal-actions">
-            <button id="profileGo" class="btn primary">Перейти в профиль</button>
-          </div>
+        </div>
+        <div class="modal-body profile-quick-balance">
+          <div class="profile-muted">Баланс</div>
+          <div id="profileQuickBalance" class="profile-value">—</div>
+        </div>
+        <div class="modal-actions">
+          <button id="profileModalTopup" class="btn pill">Пополнить</button>
+          <button id="profileModalWithdraw" class="btn pill">Вывести</button>
+          <button id="profileGo" class="btn primary">Перейти в профиль</button>
         </div>
       </div>
+    </div>
 
       <div class="modal" id="profileEditModal">
         <div class="modal-card">
@@ -342,6 +350,6 @@
 
     <script src="/app/assets/lottie.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="/app/app.js?v=pay30"></script>
+    <script src="/app/app.js?v=pay33"></script>
   </body>
 </html>
