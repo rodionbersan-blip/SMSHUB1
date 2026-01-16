@@ -6,6 +6,8 @@
   --card: #ffffff;
   --card-contrast: rgba(15, 17, 21, 0.04);
   --card-contrast-border: rgba(15, 17, 21, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(15, 17, 21, 0.08);
   --text: #0f1115;
   --muted: #6b7280;
   --border: #e5e7ef;
@@ -20,6 +22,8 @@
   --card: #161a22;
   --card-contrast: rgba(255, 255, 255, 0.04);
   --card-contrast-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(22, 26, 34, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.12);
   --text: #ffffff;
   --muted: #8b90a0;
   --border: #262b36;
@@ -279,6 +283,17 @@ h2 {
   color: var(--accent);
   font-size: 13px;
   font-weight: 600;
+}
+
+.btn.oval {
+  height: 40px;
+  border-radius: 999px;
+  padding: 0 18px;
+}
+
+#profileGo {
+  height: 40px;
+  padding: 0 18px;
 }
 
 .btn.pill:hover {
@@ -931,6 +946,28 @@ h2 {
   border-radius: 12px;
   padding: 20px;
   box-shadow: var(--shadow);
+}
+
+.modal-card.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.profile-quick {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.profile-quick-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
 }
 
 .modal-header {
