@@ -299,7 +299,7 @@
       minute: "2-digit",
       hour12: false,
     }).format(dt);
-    return `${datePart} в ${timePart}`;
+    return `${datePart} ${timePart}`;
   };
 
   const statusLabel = (deal) => {
@@ -1044,9 +1044,8 @@
     const activeBtn = reviewsTabs.querySelector(".tab-btn.active");
     const indicator = reviewsTabs.querySelector(".tab-indicator");
     if (!activeBtn || !indicator) return;
-    const offset = activeBtn.offsetLeft;
     indicator.style.width = `${activeBtn.offsetWidth}px`;
-    indicator.style.transform = `translateX(${offset}px)`;
+    indicator.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
   };
 
   const renderReviewsPage = () => {
