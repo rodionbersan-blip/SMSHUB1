@@ -943,16 +943,17 @@ h2 {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--card);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
   box-shadow: var(--shadow);
 }
 
 .modal-card.glass {
-  background: var(--glass-bg);
+  background: color-mix(in srgb, var(--glass-bg) 58%, transparent);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  border-radius: 22px;
 }
 
 .profile-quick {
@@ -967,7 +968,8 @@ h2 {
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 10px;
+  margin-top: 6px;
+  padding-top: 14px;
 }
 
 .modal-header {
