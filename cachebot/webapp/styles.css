@@ -179,6 +179,12 @@ h2 {
   height: clamp(32px, 6vw, 44px);
   object-fit: contain;
   display: block;
+  filter: none;
+  transition: filter 0.25s ease;
+}
+
+:root[data-theme="dark"] .brand-mark {
+  filter: invert(1);
 }
 
 .brand-title {
