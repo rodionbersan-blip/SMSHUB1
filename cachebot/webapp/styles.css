@@ -818,11 +818,16 @@ h2 {
 .modal {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100dvh;
   display: none;
   align-items: center;
   justify-content: center;
   background: rgba(12, 12, 16, 0.5);
-  padding: 20px;
+  padding: calc(20px + env(safe-area-inset-top, 0px))
+    calc(16px + env(safe-area-inset-right, 0px))
+    calc(20px + env(safe-area-inset-bottom, 0px))
+    calc(16px + env(safe-area-inset-left, 0px));
   z-index: 50;
 }
 
@@ -832,6 +837,8 @@ h2 {
 
 .modal-card {
   width: min(560px, 100%);
+  max-height: calc(100dvh - 80px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
   background: var(--card);
   border-radius: 12px;
   padding: 20px;
