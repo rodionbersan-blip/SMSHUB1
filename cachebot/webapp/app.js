@@ -94,6 +94,7 @@
   const reviewsClose = document.getElementById("reviewsClose");
   const reviewsList = document.getElementById("reviewsList");
   const reviewsSummary = document.getElementById("reviewsSummary");
+  const reviewsPagination = document.getElementById("reviewsPagination");
   const reviewTabButtons = document.querySelectorAll(".tab-btn");
 
   const state = {
@@ -103,6 +104,9 @@
     p2pMode: "buy",
     p2pAds: [],
     myAds: [],
+    reviews: [],
+    reviewsPage: 0,
+    reviewsRating: 1,
   };
 
   const log = (message, type = "info") => {
@@ -272,7 +276,11 @@
     const display = profile?.display_name || profile?.full_name || "Без имени";
     profileName.textContent = display;
     if (profileDisplayName) profileDisplayName.textContent = display;
-    profileUsername.textContent = "—";
+    if (profileUsername) {
+      const username = profile?.username?.trim();
+      profileUsername.textContent = username ? `@${username}` : "";
+      profileUsername.style.display = username ? "" : "none";
+    }
     profileRegistered.textContent = profile?.registered_at
       ? `Регистрация: ${formatDate(profile.registered_at)}`
       : "Регистрация: —";
@@ -305,7 +313,7 @@
     if (!payload?.ok) return;
     state.balance = payload.balance;
     if (profileBalance) {
-      profileBalance.textContent = `${formatAmount(payload.balance)} USDT`;
+      profileBalance.textContent = `${formatAmount(payload.balance, 2)} USDT`;
     }
   };
 
@@ -917,14 +925,25 @@
     }
   };
 
-  const renderReviews = (reviews, rating) => {
-    reviewsList.innerHTML = "";
+  const renderReviewsPage = () => {
+    const reviews = state.reviews || [];
+    const rating = state.reviewsRating || 1;
     const filtered = reviews.filter((item) => item.rating === rating);
+    const perPage = 5;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+    const safePage = Math.max(0, Math.min(state.reviewsPage || 0, totalPages - 1));
+    state.reviewsPage = safePage;
+    const start = safePage * perPage;
+    const chunk = filtered.slice(start, start + perPage);
+    reviewsList.innerHTML = "";
     if (!filtered.length) {
       reviewsList.innerHTML = "<div class=\"deal-empty\">Пока нет отзывов.</div>";
+      if (reviewsPagination) {
+        reviewsPagination.innerHTML = "";
+      }
       return;
     }
-    filtered.forEach((item) => {
+    chunk.forEach((item) => {
       const row = document.createElement("div");
       row.className = "deal-item";
       const author =
@@ -940,12 +959,43 @@
       `;
       reviewsList.appendChild(row);
     });
+    if (reviewsPagination) {
+      const prevDisabled = safePage <= 0;
+      const nextDisabled = safePage >= totalPages - 1;
+      reviewsPagination.innerHTML = `
+        <button class="btn" ${prevDisabled ? "disabled" : ""} data-page="prev">Назад</button>
+        <div class="page-info">Стр. ${safePage + 1} / ${totalPages}</div>
+        <button class="btn" ${nextDisabled ? "disabled" : ""} data-page="next">Вперёд</button>
+      `;
+      const prevBtn = reviewsPagination.querySelector("[data-page=\"prev\"]");
+      const nextBtn = reviewsPagination.querySelector("[data-page=\"next\"]");
+      prevBtn?.addEventListener("click", () => {
+        if (state.reviewsPage > 0) {
+          state.reviewsPage -= 1;
+          renderReviewsPage();
+        }
+      });
+      nextBtn?.addEventListener("click", () => {
+        if (state.reviewsPage < totalPages - 1) {
+          state.reviewsPage += 1;
+          renderReviewsPage();
+        }
+      });
+    }
+  };
+
+  const renderReviews = (reviews, rating) => {
+    state.reviews = reviews || [];
+    state.reviewsRating = rating;
+    state.reviewsPage = 0;
+    renderReviewsPage();
   };
 
   const loadReviews = async () => {
     const payload = await fetchJson("/api/reviews");
     if (!payload?.ok) return null;
-    reviewsSummary.textContent = `👍 ${payload.positive} • 👎 ${payload.negative}`;
+    const successPercent = state.profileStats?.success_percent ?? 0;
+    reviewsSummary.textContent = `Успешные сделки: ${successPercent}%`;
     return payload.reviews || [];
   };
 
