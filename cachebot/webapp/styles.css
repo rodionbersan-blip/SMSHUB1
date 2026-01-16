@@ -374,7 +374,7 @@ h2 {
   gap: 16px;
   background: var(--card-contrast);
   border: 1px solid var(--card-contrast-border);
-  border-radius: 20px;
+  border-radius: 28px;
   padding: 16px;
   margin-bottom: 16px;
 }
