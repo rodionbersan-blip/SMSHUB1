@@ -175,9 +175,9 @@ h2 {
 }
 
 .brand-mark {
-  height: clamp(24px, 6vw, 36px);
+  height: 32px;
   width: auto;
-  max-width: clamp(120px, 28vw, 200px);
+  max-width: 160px;
   object-fit: contain;
   display: block;
   filter: none;
@@ -186,6 +186,13 @@ h2 {
 
 :root[data-theme="dark"] .brand-mark {
   filter: invert(1);
+}
+
+@media (min-width: 900px) {
+  .brand-mark {
+    height: 44px;
+    max-width: 220px;
+  }
 }
 
 .brand-title {
