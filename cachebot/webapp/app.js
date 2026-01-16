@@ -131,17 +131,27 @@
       successAnimInstance = window.lottie.loadAnimation({
         container: successAnim,
         renderer: "svg",
-        loop: false,
+        loop: true,
         autoplay: false,
         path: "/app/assets/money-rain.json",
       });
     }
     successAnim.classList.add("show");
-    successAnimInstance.stop();
-    successAnimInstance.play();
+    if (successAnimInstance.isLoaded) {
+      const totalFrames = successAnimInstance.getDuration(true) || 0;
+      const midFrame = Math.floor(totalFrames / 2);
+      successAnimInstance.goToAndPlay(midFrame, true);
+    } else {
+      successAnimInstance.addEventListener("DOMLoaded", () => {
+        const totalFrames = successAnimInstance.getDuration(true) || 0;
+        const midFrame = Math.floor(totalFrames / 2);
+        successAnimInstance.goToAndPlay(midFrame, true);
+      });
+    }
     window.setTimeout(() => {
       successAnim.classList.remove("show");
-    }, 2000);
+      successAnimInstance?.stop();
+    }, 3000);
   };
 
   const updateModalLock = () => {
