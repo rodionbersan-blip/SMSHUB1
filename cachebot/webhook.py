@@ -80,7 +80,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
 async def _crypto_pay_handler(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     bot = request.app["bot"]
-    secret = deps.config.crypto_pay_webhook_secret or deps.config.crypto_pay_token
+    secret = deps.config.crypto_pay_webhook_secret
     raw_body = await request.read()
     if secret:
         signature = request.headers.get("X-Crypto-Pay-Signature", "")
