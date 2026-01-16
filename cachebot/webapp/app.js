@@ -123,6 +123,7 @@
   };
 
   let successAnimInstance = null;
+  let successAnimTimer = null;
   const playSuccessAnimation = () => {
     if (!successAnim || !window.lottie) {
       return;
@@ -131,28 +132,39 @@
       successAnimInstance = window.lottie.loadAnimation({
         container: successAnim,
         renderer: "svg",
-        loop: true,
+        loop: false,
         autoplay: false,
         path: "/app/assets/money-rain.json",
       });
     }
     successAnim.classList.add("show");
-    const startFromMid = () => {
+    const startSegment = () => {
       const totalFrames = successAnimInstance.getDuration(true) || 0;
+      const totalSeconds = successAnimInstance.getDuration(false) || 0;
+      if (!totalFrames || !totalSeconds) {
+        return;
+      }
+      const fps = totalFrames / totalSeconds;
       const midFrame = Math.floor(totalFrames / 2);
-      successAnimInstance.goToAndPlay(midFrame, true);
+      const framesFor3s = Math.max(1, Math.floor(fps * 3));
+      const endFrame = Math.min(totalFrames - 1, midFrame + framesFor3s);
+      const segmentSeconds = (endFrame - midFrame) / fps;
+      const speed = segmentSeconds > 0 ? segmentSeconds / 3 : 1;
+      successAnimInstance.setSpeed(speed);
+      successAnimInstance.playSegments([midFrame, endFrame], true);
+      if (successAnimTimer) {
+        window.clearTimeout(successAnimTimer);
+      }
+      successAnimTimer = window.setTimeout(() => {
+        successAnimInstance.goToAndStop(midFrame, true);
+        successAnim.classList.remove("show");
+      }, 3000);
     };
     if (successAnimInstance.isLoaded) {
-      startFromMid();
+      startSegment();
     } else {
-      successAnimInstance.addEventListener("DOMLoaded", startFromMid, { once: true });
+      successAnimInstance.addEventListener("DOMLoaded", startSegment, { once: true });
     }
-    window.setTimeout(() => {
-      const totalFrames = successAnimInstance.getDuration(true) || 0;
-      const midFrame = Math.floor(totalFrames / 2);
-      successAnim.classList.remove("show");
-      successAnimInstance?.goToAndStop(midFrame, true);
-    }, 3000);
   };
 
   const updateModalLock = () => {
