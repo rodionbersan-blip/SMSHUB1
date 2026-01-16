@@ -902,32 +902,6 @@ h2 {
   color: #d6901a;
 }
 
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  transform: translate(-50%, 12px);
-  opacity: 0;
-  pointer-events: none;
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid rgba(77, 163, 255, 0.35);
-  border-radius: 14px;
-  padding: 12px 18px;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  z-index: 50;
-  max-width: min(92vw, 420px);
-  text-align: center;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
 .success-anim {
   position: fixed;
   inset: 0;
@@ -947,8 +921,8 @@ h2 {
 .success-anim > div,
 .success-anim svg,
 .success-anim canvas {
-  width: min(70vw, 420px);
-  height: min(70vw, 420px);
+  width: 100vw;
+  height: 100vh;
 }
 
 @media (max-width: 860px) {

@@ -1,7 +1,6 @@
 (() => {
   const tg = window.Telegram?.WebApp;
   const logEl = document.getElementById("log");
-  const toastEl = document.getElementById("toast");
   const successAnim = document.getElementById("successAnim");
   const sellQuick = document.getElementById("sellQuick");
   const sellModal = document.getElementById("sellModal");
@@ -121,19 +120,6 @@
     line.className = `log-line ${type}`;
     line.textContent = message;
     logEl.prepend(line);
-  };
-
-  let toastTimer = null;
-  const showToast = (message) => {
-    if (!toastEl) return;
-    toastEl.textContent = message;
-    toastEl.classList.add("show");
-    if (toastTimer) {
-      window.clearTimeout(toastTimer);
-    }
-    toastTimer = window.setTimeout(() => {
-      toastEl.classList.remove("show");
-    }, 2000);
   };
 
   let successAnimInstance = null;
@@ -1349,7 +1335,6 @@
       withdrawForm?.reset();
       await loadBalance();
       playSuccessAnimation();
-      showToast("Вывод выполнен. Средства отправлены в Crypto Bot.");
       log("Вывод выполнен. Средства отправлены в Crypto Bot.", "info");
     }
   });
