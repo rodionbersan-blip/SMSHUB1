@@ -6,8 +6,8 @@
   --card: #ffffff;
   --card-contrast: rgba(15, 17, 21, 0.04);
   --card-contrast-border: rgba(15, 17, 21, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(15, 17, 21, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(15, 17, 21, 0.18);
   --text: #0f1115;
   --muted: #6b7280;
   --border: #e5e7ef;
@@ -22,8 +22,8 @@
   --card: #161a22;
   --card-contrast: rgba(255, 255, 255, 0.04);
   --card-contrast-border: rgba(255, 255, 255, 0.1);
-  --glass-bg: rgba(22, 26, 34, 0.78);
-  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.18);
   --text: #ffffff;
   --muted: #8b90a0;
   --border: #262b36;
@@ -949,7 +949,7 @@ h2 {
 }
 
 .modal-card.glass {
-  background: color-mix(in srgb, var(--glass-bg) 58%, transparent);
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
