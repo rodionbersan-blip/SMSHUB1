@@ -928,6 +928,29 @@ h2 {
   transform: translate(-50%, 0);
 }
 
+.success-anim {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 60;
+}
+
+.success-anim.show {
+  opacity: 1;
+}
+
+.success-anim > div,
+.success-anim svg,
+.success-anim canvas {
+  width: min(70vw, 420px);
+  height: min(70vw, 420px);
+}
+
 @media (max-width: 860px) {
   .hero {
     grid-template-columns: 1fr;

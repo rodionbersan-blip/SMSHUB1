@@ -2,6 +2,7 @@
   const tg = window.Telegram?.WebApp;
   const logEl = document.getElementById("log");
   const toastEl = document.getElementById("toast");
+  const successAnim = document.getElementById("successAnim");
   const sellQuick = document.getElementById("sellQuick");
   const sellModal = document.getElementById("sellModal");
   const sellModalClose = document.getElementById("sellModalClose");
@@ -132,6 +133,28 @@
     }
     toastTimer = window.setTimeout(() => {
       toastEl.classList.remove("show");
+    }, 2000);
+  };
+
+  let successAnimInstance = null;
+  const playSuccessAnimation = () => {
+    if (!successAnim || !window.lottie) {
+      return;
+    }
+    if (!successAnimInstance) {
+      successAnimInstance = window.lottie.loadAnimation({
+        container: successAnim,
+        renderer: "svg",
+        loop: false,
+        autoplay: false,
+        path: "/app/assets/money-rain.json",
+      });
+    }
+    successAnim.classList.add("show");
+    successAnimInstance.stop();
+    successAnimInstance.play();
+    window.setTimeout(() => {
+      successAnim.classList.remove("show");
     }, 2000);
   };
 
@@ -1325,6 +1348,7 @@
       withdrawModal?.classList.remove("open");
       withdrawForm?.reset();
       await loadBalance();
+      playSuccessAnimation();
       showToast("Вывод выполнен. Средства отправлены в Crypto Bot.");
       log("Вывод выполнен. Средства отправлены в Crypto Bot.", "info");
     }
