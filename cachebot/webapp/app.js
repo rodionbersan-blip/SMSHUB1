@@ -157,23 +157,7 @@
       successAnimHideTimer = null;
     }
     const startSegment = () => {
-      const totalFrames = successAnimInstance.getDuration(true) || 0;
       const totalSeconds = successAnimInstance.getDuration(false) || 0;
-      if (!totalFrames) {
-        return;
-      }
-      const endFrame = Math.max(1, totalFrames - 1);
-      const handleComplete = () => {
-        successAnim.classList.add("fade-out");
-        successAnim.classList.remove("blur");
-        window.setTimeout(() => {
-          successAnim.classList.remove("show", "fade-out");
-          successAnimInstance.stop();
-        }, 350);
-        successAnimInstance.removeEventListener("complete", handleComplete);
-      };
-      successAnimInstance.removeEventListener("complete", handleComplete);
-      successAnimInstance.addEventListener("complete", handleComplete);
       const handleFail = () => {
         successAnim.classList.add("fade-out");
         successAnim.classList.remove("blur");
@@ -186,10 +170,15 @@
       successAnimInstance.removeEventListener("data_failed", handleFail);
       successAnimInstance.addEventListener("data_failed", handleFail);
       successAnimInstance.setSpeed(1);
-      successAnimInstance.playSegments([0, endFrame], true);
+      successAnimInstance.goToAndPlay(0, true);
       if (totalSeconds) {
         successAnimHideTimer = window.setTimeout(() => {
-          handleComplete();
+          successAnim.classList.add("fade-out");
+          successAnim.classList.remove("blur");
+          window.setTimeout(() => {
+            successAnim.classList.remove("show", "fade-out");
+            successAnimInstance.stop();
+          }, 350);
         }, Math.ceil(totalSeconds * 1000) + 150);
       }
     };
