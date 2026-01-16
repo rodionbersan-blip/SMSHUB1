@@ -144,6 +144,18 @@
     }, 2000);
   };
 
+  const updateModalLock = () => {
+    document.body.classList.toggle("modal-open", Boolean(document.querySelector(".modal.open")));
+  };
+
+  const observeModals = () => {
+    const observer = new MutationObserver(updateModalLock);
+    document.querySelectorAll(".modal").forEach((modal) => {
+      observer.observe(modal, { attributes: true, attributeFilter: ["class"] });
+    });
+    updateModalLock();
+  };
+
   const openLink = (url) => {
     if (!url) return;
     if (tg?.openTelegramLink && url.includes("t.me/")) {
@@ -1339,5 +1351,6 @@
     }
   });
 
+  observeModals();
   initTelegram();
 })();
