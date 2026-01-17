@@ -1329,11 +1329,6 @@ body.modal-open #app {
   gap: 12px;
 }
 
-.quick-deals-panel.open .quick-deals-card {
-  backdrop-filter: blur(20px) saturate(1.1);
-  -webkit-backdrop-filter: blur(20px) saturate(1.1);
-}
-
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root[data-theme="light"] .quick-deals-card {
     background: rgba(255, 255, 255, 0.98);
