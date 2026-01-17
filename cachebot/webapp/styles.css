@@ -72,10 +72,12 @@ h2 {
   gap: 20px;
   animation: fade-in 0.6s ease forwards;
   transition: filter 0.25s ease;
+  will-change: filter;
 }
 
 body.modal-open #app {
   filter: blur(8px);
+  transition: none;
 }
 
 .topbar {
@@ -1383,6 +1385,14 @@ body.modal-open #app {
 .deal-fab-icon {
   font-size: 18px;
   font-weight: 600;
+}
+
+.deal-fab-icon-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 }
 
 .deal-fab-badge {

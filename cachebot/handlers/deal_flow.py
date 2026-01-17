@@ -860,6 +860,8 @@ def _deal_stage_label(deal: Deal, viewer_id: int | None) -> str:
         if viewer_id == deal.seller_id:
             return "Ожидаем покупателя" if deal.is_p2p else "Ожидаем Мерчанта"
         return "Ждем оплату"
+    if deal.status == DealStatus.PENDING:
+        return "Ожидаем принятия"
     if deal.status == DealStatus.RESERVED:
         return "Ждем оплату"
     if deal.status == DealStatus.PAID:
