@@ -148,6 +148,7 @@
     activeDealId: null,
     dealRefreshTimer: null,
     reviewsTargetUserId: null,
+    canManageDisputes: false,
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -1083,6 +1084,7 @@
       return;
     }
     if (disputesTab) disputesTab.style.display = "inline-flex";
+    state.canManageDisputes = !!summary.can_manage;
     disputesCount.textContent = `${summary.count || 0}`;
     const payload = await fetchJson("/api/disputes");
     if (!payload?.ok) return;
@@ -1182,6 +1184,7 @@
     const payload = await fetchJson(`/api/disputes/${disputeId}`);
     if (!payload?.ok) return;
     const dispute = payload.dispute;
+    const canManage = !!dispute.can_manage;
     p2pModalTitle.textContent = `Спор по сделке #${dispute.deal.public_id}`;
     const seller =
       dispute.seller?.display_name || dispute.seller?.full_name || dispute.seller?.username || "—";
@@ -1210,7 +1213,7 @@
       p2pModalBody.appendChild(evidenceList);
     }
     p2pModalActions.innerHTML = "";
-    if (!dispute.assigned_to) {
+    if (canManage && !dispute.assigned_to) {
       const take = document.createElement("button");
       take.className = "btn primary";
       take.textContent = "Взять в работу";
@@ -1223,30 +1226,32 @@
       });
       p2pModalActions.appendChild(take);
     }
-    const sellerInput = document.createElement("input");
-    sellerInput.className = "p2p-offer-input";
-    sellerInput.placeholder = "USDT продавцу";
-    const buyerInput = document.createElement("input");
-    buyerInput.className = "p2p-offer-input";
-    buyerInput.placeholder = "USDT мерчанту";
-    const resolve = document.createElement("button");
-    resolve.className = "btn";
-    resolve.textContent = "Закрыть спор";
-    resolve.addEventListener("click", async () => {
-      const sellerAmount = Number(sellerInput.value || 0);
-      const buyerAmount = Number(buyerInput.value || 0);
-      const res = await fetchJson(`/api/disputes/${dispute.id}/resolve`, {
-        method: "POST",
-        body: JSON.stringify({ seller_amount: sellerAmount, buyer_amount: buyerAmount }),
+    if (canManage) {
+      const sellerInput = document.createElement("input");
+      sellerInput.className = "p2p-offer-input";
+      sellerInput.placeholder = "USDT продавцу";
+      const buyerInput = document.createElement("input");
+      buyerInput.className = "p2p-offer-input";
+      buyerInput.placeholder = "USDT мерчанту";
+      const resolve = document.createElement("button");
+      resolve.className = "btn";
+      resolve.textContent = "Закрыть спор";
+      resolve.addEventListener("click", async () => {
+        const sellerAmount = Number(sellerInput.value || 0);
+        const buyerAmount = Number(buyerInput.value || 0);
+        const res = await fetchJson(`/api/disputes/${dispute.id}/resolve`, {
+          method: "POST",
+          body: JSON.stringify({ seller_amount: sellerAmount, buyer_amount: buyerAmount }),
+        });
+        if (res?.ok) {
+          p2pModal.classList.remove("open");
+          await loadDisputes();
+        }
       });
-      if (res?.ok) {
-        p2pModal.classList.remove("open");
-        await loadDisputes();
-      }
-    });
-    p2pModalActions.appendChild(sellerInput);
-    p2pModalActions.appendChild(buyerInput);
-    p2pModalActions.appendChild(resolve);
+      p2pModalActions.appendChild(sellerInput);
+      p2pModalActions.appendChild(buyerInput);
+      p2pModalActions.appendChild(resolve);
+    }
     p2pModal.classList.add("open");
   };
 

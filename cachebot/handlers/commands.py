@@ -1617,7 +1617,11 @@ async def dispute_open(callback: CallbackQuery, state: FSMContext) -> None:
         return
     existing = await deps.dispute_service.dispute_for_deal(deal.id)
     if existing:
-        await callback.answer("Спор уже открыт", show_alert=True)
+        await state.clear()
+        await state.set_state(DisputeState.waiting_append_evidence)
+        await state.update_data(dispute_deal_id=deal.id)
+        await callback.message.answer("Спор уже открыт. Прикрепи дополнительные доказательства.")
+        await callback.answer()
         return
     now = datetime.now(timezone.utc)
     if deal.dispute_available_at and now < deal.dispute_available_at:
