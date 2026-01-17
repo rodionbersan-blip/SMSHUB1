@@ -44,6 +44,7 @@ class ChatService:
         text: str | None,
         file_path: str | None,
         file_name: str | None,
+        system: bool = False,
     ) -> ChatMessage:
         async with self._lock:
             msg = ChatMessage(
@@ -54,8 +55,15 @@ class ChatService:
                 file_path=file_path,
                 file_name=file_name,
                 created_at=datetime.now(timezone.utc),
+                system=system,
             )
             bucket = self._chats.setdefault(deal_id, [])
             bucket.append(msg)
             await self._repository.persist_chats(self._chats)
             return msg
+
+    async def purge_chat(self, deal_id: str) -> None:
+        async with self._lock:
+            if deal_id in self._chats:
+                self._chats.pop(deal_id, None)
+                await self._repository.persist_chats(self._chats)

@@ -1591,6 +1591,12 @@
     (messages || []).forEach((msg) => {
       const item = document.createElement("div");
       item.className = `chat-message ${msg.sender_id === state.userId ? "self" : ""}`.trim();
+      if (msg.system) {
+        const label = document.createElement("div");
+        label.className = "chat-system-label";
+        label.textContent = "BC Cash";
+        item.appendChild(label);
+      }
       const fileName = (msg.file_name || "").toLowerCase();
       const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileName);
       if (msg.file_url) {

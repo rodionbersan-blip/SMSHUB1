@@ -533,17 +533,19 @@ async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text=str(exc))
     await deps.chat_service.add_message(
         deal_id=deal_id,
-        sender_id=user_id,
+        sender_id=0,
         text="Покупатель готов сканировать QR.",
         file_path=None,
         file_name=None,
+        system=True,
     )
     await deps.chat_service.add_message(
         deal_id=deal_id,
-        sender_id=user_id,
+        sender_id=0,
         text="Нужно отправить QR в приложении.",
         file_path=None,
         file_name=None,
+        system=True,
     )
     with suppress(Exception):
         await bot.send_message(
@@ -565,10 +567,11 @@ async def _api_deal_seller_ready(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text=str(exc))
     await deps.chat_service.add_message(
         deal_id=deal_id,
-        sender_id=user_id,
+        sender_id=0,
         text="Продавец запросил готовность покупателя.",
         file_path=None,
         file_name=None,
+        system=True,
     )
     if deal.buyer_id:
         with suppress(Exception):
@@ -630,10 +633,11 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
         )
     await deps.chat_service.add_message(
         deal_id=deal_id,
-        sender_id=user_id,
+        sender_id=0,
         text="Открыт спор.",
         file_path=None,
         file_name=None,
+        system=True,
     )
     with suppress(Exception):
         reason_keyboard = InlineKeyboardMarkup(
@@ -697,6 +701,7 @@ async def _api_deal_upload_qr(request: web.Request) -> web.Response:
         text="QR код",
         file_path=str(file_path),
         file_name=filename,
+        system=False,
     )
     if deal.buyer_id:
         with suppress(Exception):
