@@ -838,6 +838,12 @@ body.modal-open #app {
   -webkit-backdrop-filter: blur(14px);
 }
 
+:root[data-theme="light"] .reviews-tabs {
+  background: rgba(15, 17, 21, 0.05);
+  border: 1px solid rgba(15, 17, 21, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
 .reviews-tabs .tab-btn {
   position: relative;
   z-index: 1;
@@ -857,8 +863,16 @@ body.modal-open #app {
   text-align: center;
 }
 
+:root[data-theme="light"] .reviews-tabs .tab-btn {
+  color: #606878;
+}
+
 .reviews-tabs .tab-btn.active {
   color: var(--accent);
+}
+
+:root[data-theme="light"] .reviews-tabs .tab-btn.active {
+  color: #2f7fdc;
 }
 
 .reviews-tabs .tab-indicator {
@@ -871,6 +885,11 @@ body.modal-open #app {
   background: rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   transition: transform 0.25s ease, width 0.25s ease;
+}
+
+:root[data-theme="light"] .reviews-tabs .tab-indicator {
+  background: rgba(77, 163, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .reviews-summary {
