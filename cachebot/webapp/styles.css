@@ -1232,7 +1232,7 @@ body.modal-open #app {
 .quick-deals-btn {
   position: fixed;
   left: 18px;
-  bottom: calc(64px + env(safe-area-inset-bottom));
+  bottom: calc(32px + env(safe-area-inset-bottom));
   width: 54px;
   height: 54px;
   border-radius: 50%;
