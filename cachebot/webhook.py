@@ -482,37 +482,18 @@ async def _api_deal_accept(request: web.Request) -> web.Response:
         deal = await deps.deal_service.accept_p2p_offer(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
-    try:
-        invoice = await deps.crypto_pay.create_invoice(
-            amount=deal.usdt_amount,
-            currency="USDT",
-            description=f"Сделка {deal.hashtag} на {deal.usd_amount} RUB",
-            payload=deal.id,
-        )
-        deal = await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
-    except Exception as exc:
-        with suppress(Exception):
-            canceled, base_usdt = await deps.deal_service.cancel_deal(deal.id, user_id)
-            if canceled.is_p2p and canceled.advert_id and base_usdt:
-                await deps.advert_service.restore_volume(canceled.advert_id, base_usdt)
-        raise web.HTTPBadRequest(text=f"Не удалось создать счет: {exc}")
-    pay_amount = deal.usdt_amount.quantize(Decimal("0.01"), rounding=ROUND_UP)
     await bot.send_message(
         deal.seller_id,
         f"✅ Сделка {deal.hashtag} закреплена за тобой.\n"
-        f"Оплати {format(pay_amount, 'f')} USDT\n"
-        "После оплаты начнется отсчет времени для открытия спора.",
-        reply_markup={
-            "inline_keyboard": [[{"text": "💸 Оплатить", "url": invoice.pay_url}]]
-        },
+        "Оплата подтверждена, можно продолжать сделку.",
     )
     if deal.buyer_id:
         await bot.send_message(
             deal.buyer_id,
-            f"✅ Сделка {deal.hashtag} создана.\nОжидаем оплату продавца.",
+            f"✅ Сделка {deal.hashtag} создана.\nОплата подтверждена, можно продолжать сделку.",
         )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
-    return web.json_response({"ok": True, "deal": payload, "pay_url": invoice.pay_url})
+    return web.json_response({"ok": True, "deal": payload})
 
 
 async def _api_deal_decline(request: web.Request) -> web.Response:
