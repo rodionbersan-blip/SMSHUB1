@@ -1161,7 +1161,7 @@
       return;
     }
     if (disputesTab) disputesTab.style.display = "inline-flex";
-    state.canManageDisputes = true;
+    state.canManageDisputes = !!summary.can_access;
     disputesCount.textContent = `${summary.count || 0}`;
     const payload = await fetchJson("/api/disputes");
     if (!payload?.ok) return;
@@ -1261,7 +1261,7 @@
     const payload = await fetchJson(`/api/disputes/${disputeId}`);
     if (!payload?.ok) return;
     const dispute = payload.dispute;
-    const canManage = state.canManageDisputes;
+    const canManage = !!dispute.can_manage;
     p2pModalTitle.textContent = `Спор по сделке #${dispute.deal.public_id}`;
     const seller =
       dispute.seller?.display_name || dispute.seller?.full_name || dispute.seller?.username || "—";
@@ -1424,7 +1424,7 @@
     if (actions.confirm_buyer) {
       addAction(topRow, "Успешно снял", () => dealAction("confirm-buyer", deal.id), true);
     }
-    if (deal.buyer_id && deal.seller_id && ["reserved", "paid", "dispute", "completed"].includes(deal.status)) {
+    if (deal.buyer_id && deal.seller_id && ["reserved", "paid", "dispute"].includes(deal.status)) {
       const hasUnread = isChatUnread(deal);
       addAction(topRow, "Открыть чат", () => openDealChat(deal), false, "", {
         badge: hasUnread,

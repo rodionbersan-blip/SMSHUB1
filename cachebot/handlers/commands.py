@@ -3338,6 +3338,7 @@ def _format_deal_detail(deal: Deal, user_id: int, buyer_profile: UserProfile | N
 
 async def _handle_deal_completed(deal: Deal, deps, bot) -> None:
     await deps.dispute_service.resolve_for_deal(deal.id, resolved_by=0)
+    await deps.chat_service.purge_chat(deal.id)
     if deal.buyer_id:
         kb_configured = bool(deps.config.kb_api_url and deps.config.kb_api_token)
         credited = True
@@ -3421,6 +3422,9 @@ async def seller_qr_photo(message: Message, state: FSMContext) -> None:
             f"Продавец прикрепил новый QR по сделке {deal.hashtag}.",
             reply_markup=builder.as_markup(),
         )
+
+    if deal.status == DealStatus.COMPLETED:
+        await deps.chat_service.purge_chat(deal.id)
 
 
 @router.message(WithdrawState.waiting_amount)

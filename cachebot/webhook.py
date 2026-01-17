@@ -1109,6 +1109,7 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
     seller = await deps.user_service.profile_of(deal.seller_id)
     buyer = await deps.user_service.profile_of(deal.buyer_id) if deal.buyer_id else None
     include_private = _is_admin(user_id, deps)
+    can_manage = await _has_dispute_access(user_id, deps)
     evidence = []
     for item in dispute.evidence:
         file_url = await _file_url(request, item.file_id)
@@ -1128,6 +1129,7 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
         "reason": dispute.reason,
         "comment": dispute.comment,
         "assigned_to": dispute.assigned_to,
+        "can_manage": can_manage,
         "messages": [
             {
                 "author_id": msg.author_id,
