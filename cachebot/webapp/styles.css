@@ -6,8 +6,8 @@
   --card: #ffffff;
   --card-contrast: rgba(15, 17, 21, 0.04);
   --card-contrast-border: rgba(15, 17, 21, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.82);
-  --glass-border: rgba(15, 17, 21, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(15, 17, 21, 0.08);
   --text: #0f1115;
   --muted: #6b7280;
   --border: #e5e7ef;
@@ -1057,6 +1057,10 @@ body.modal-open #app {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-radius: 22px;
+}
+
+:root[data-theme="light"] .modal-card.glass {
+  box-shadow: 0 20px 44px rgba(15, 17, 21, 0.14);
 }
 
 .profile-quick {
