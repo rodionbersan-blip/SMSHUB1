@@ -138,11 +138,13 @@
     reviewsPage: 0,
     reviewsRating: "all",
     unreadDeals: new Set(),
+    chatLastRead: {},
     activeChatDealId: null,
     reviewsTargetUserId: null,
   };
 
   const unreadStorageKey = "quickDealsUnread";
+  const chatReadStorageKey = "dealChatLastRead";
   const loadUnreadDeals = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(unreadStorageKey) || "[]");
@@ -159,6 +161,22 @@
     }
   };
   state.unreadDeals = loadUnreadDeals();
+  const loadChatRead = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(chatReadStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+  const persistChatRead = () => {
+    try {
+      window.localStorage.setItem(chatReadStorageKey, JSON.stringify(state.chatLastRead || {}));
+    } catch {
+      // ignore storage errors
+    }
+  };
+  state.chatLastRead = loadChatRead();
 
   const log = (message, type = "info") => {
     if (!logEl) return;
@@ -584,11 +602,41 @@
   const updateQuickDealsButton = (activeDeals) => {
     if (!quickDealsBtn) return;
     const deals = activeDeals || [];
+    const unreadDealIds = new Set(state.unreadDeals);
+    deals.forEach((deal) => {
+      if (isChatUnread(deal)) {
+        unreadDealIds.add(deal.id);
+      }
+    });
+    state.unreadDealIds = unreadDealIds;
     if (quickDealsBadge) {
-      const count = state.unreadDeals.size;
+      const count = unreadDealIds.size;
       quickDealsBadge.textContent = count > 9 ? "9+" : `${count}`;
       quickDealsBadge.classList.toggle("show", count > 0);
     }
+  };
+
+  const parseTime = (value) => {
+    if (!value) return null;
+    const ms = Date.parse(value);
+    return Number.isNaN(ms) ? null : ms;
+  };
+
+  const isChatUnread = (deal) => {
+    if (!deal?.chat_last_at) return false;
+    const lastMs = parseTime(deal.chat_last_at);
+    if (!lastMs) return false;
+    const readAt = state.chatLastRead?.[deal.id];
+    const readMs = parseTime(readAt);
+    return !readMs || lastMs > readMs;
+  };
+
+  const markChatRead = (dealId, isoValue) => {
+    if (!dealId) return;
+    const value = isoValue || new Date().toISOString();
+    state.chatLastRead = state.chatLastRead || {};
+    state.chatLastRead[dealId] = value;
+    persistChatRead();
   };
 
   const syncUnreadDeals = (deals) => {
@@ -616,6 +664,7 @@
     const deals = (state.deals || []).filter(
       (deal) => !["completed", "canceled", "expired"].includes(deal.status)
     );
+    const unreadDealIds = state.unreadDealIds || new Set(state.unreadDeals);
     quickDealsList.innerHTML = "";
     if (!deals.length) {
       quickDealsList.innerHTML = '<div class="deal-empty">Активных сделок нет.</div>';
@@ -624,6 +673,9 @@
     deals.forEach((deal) => {
       const row = document.createElement("div");
       row.className = "quick-deal-item";
+      if (unreadDealIds.has(deal.id)) {
+        row.classList.add("unread");
+      }
       const amountText = `₽${formatAmount(deal.cash_rub, 0)} · ${formatAmount(
         deal.usdt_amount,
         3
@@ -634,6 +686,7 @@
           <div class="quick-deal-meta">${amountText}</div>
         </div>
         <div class="quick-deal-status">${statusLabel(deal)}</div>
+        <div class="quick-deal-unread" aria-hidden="true"></div>
       `;
       row.addEventListener("click", () => {
         quickDealsPanel?.classList.remove("open");
@@ -1205,12 +1258,23 @@
     }
     dealModalActions.innerHTML = "";
     const actions = deal.actions || {};
-    const addAction = (label, handler, primary = false, extraClass = "") => {
+    const addAction = (label, handler, primary = false, extraClass = "", options = {}) => {
       const btn = document.createElement("button");
       btn.className = `btn ${primary ? "primary" : ""} ${extraClass}`.trim();
+      if (options.className) {
+        btn.classList.add(options.className);
+      }
       btn.textContent = label;
       btn.addEventListener("click", handler);
+      if (options.badge) {
+        const badge = document.createElement("span");
+        badge.className = `btn-badge ${options.badgeClass || ""}`.trim();
+        badge.textContent = options.badgeText || "";
+        btn.classList.add("has-badge");
+        btn.appendChild(badge);
+      }
       dealModalActions.appendChild(btn);
+      return btn;
     };
     if (actions.accept_offer) {
       addAction("Принять", () => dealAction("accept", deal.id), true);
@@ -1236,7 +1300,12 @@
       addAction("Успешно снял", () => dealAction("confirm-buyer", deal.id), true);
     }
     if (deal.buyer_id && deal.seller_id && ["reserved", "paid", "dispute", "completed"].includes(deal.status)) {
-      addAction("Открыть чат", () => openDealChat(deal), false);
+      const hasUnread = isChatUnread(deal);
+      addAction("Открыть чат", () => openDealChat(deal), false, "", {
+        badge: hasUnread,
+        badgeClass: "dot",
+        className: "deal-chat-btn",
+      });
     }
     if (deal.dispute_available_at && deal.status === "paid") {
       addAction(
@@ -1340,7 +1409,9 @@
   const loadChatMessages = async (dealId) => {
     const payload = await fetchJson(`/api/deals/${dealId}/chat`);
     if (!payload?.ok) return;
-    renderChatMessages(payload.messages || []);
+    const messages = payload.messages || [];
+    renderChatMessages(messages);
+    return messages;
   };
 
   const openDealChat = async (deal) => {
@@ -1349,13 +1420,35 @@
     if (chatModalTitle) {
       chatModalTitle.textContent = `Чат сделки #${deal.public_id}`;
     }
-    await loadChatMessages(deal.id);
+    const messages = await loadChatMessages(deal.id);
+    const lastMessage = Array.isArray(messages) && messages.length ? messages[messages.length - 1] : null;
+    if (lastMessage?.created_at) {
+      markChatRead(deal.id, lastMessage.created_at);
+    } else if (deal.chat_last_at) {
+      markChatRead(deal.id, deal.chat_last_at);
+    } else {
+      markChatRead(deal.id);
+    }
+    updateQuickDealsButton(state.deals || []);
+    if (quickDealsPanel?.classList.contains("open")) {
+      renderQuickDeals();
+    }
+    const chatBtn = dealModalActions?.querySelector(".deal-chat-btn");
+    chatBtn?.classList.remove("has-badge");
     chatModal.classList.add("open");
   };
 
   const openDealModal = async (dealId) => {
     const payload = await fetchJson(`/api/deals/${dealId}`);
     if (!payload?.ok) return;
+    if (state.unreadDeals.has(dealId)) {
+      state.unreadDeals.delete(dealId);
+      persistUnreadDeals();
+      updateQuickDealsButton(state.deals || []);
+      if (quickDealsPanel?.classList.contains("open")) {
+        renderQuickDeals();
+      }
+    }
     renderDealModal(payload.deal);
     dealModal.classList.add("open");
   };
@@ -1565,6 +1658,7 @@
       return;
     }
     try {
+      let sentMessage = null;
       if (file) {
         const form = new FormData();
         form.append("file", file);
@@ -1581,6 +1675,8 @@
           showNotice(errText || "Не удалось отправить файл");
           return;
         }
+        const payload = await res.json();
+        sentMessage = payload?.message || null;
       } else {
         const payload = await fetchJson(`/api/deals/${dealId}/chat`, {
           method: "POST",
@@ -1589,10 +1685,20 @@
         if (!payload?.ok) {
           return;
         }
+        sentMessage = payload.message || null;
       }
       if (chatInput) chatInput.value = "";
       if (chatFile) chatFile.value = "";
       await loadChatMessages(dealId);
+      if (sentMessage?.created_at) {
+        markChatRead(dealId, sentMessage.created_at);
+      } else {
+        markChatRead(dealId);
+      }
+      updateQuickDealsButton(state.deals || []);
+      if (quickDealsPanel?.classList.contains("open")) {
+        renderQuickDeals();
+      }
     } catch (err) {
       showNotice(`Ошибка: ${err.message}`);
     }

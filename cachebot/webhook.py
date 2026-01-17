@@ -528,6 +528,13 @@ async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
         deal = await deps.deal_service.buyer_ready_for_qr(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
+    await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=user_id,
+        text="Покупатель готов сканировать QR.",
+        file_path=None,
+        file_name=None,
+    )
     with suppress(Exception):
         await bot.send_message(
             deal.seller_id,
@@ -546,6 +553,13 @@ async def _api_deal_seller_ready(request: web.Request) -> web.Response:
         deal = await deps.deal_service.seller_request_qr(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
+    await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=user_id,
+        text="Продавец запросил готовность покупателя.",
+        file_path=None,
+        file_name=None,
+    )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
@@ -590,6 +604,13 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
         deal = await deps.deal_service.open_dispute(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
+    await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=user_id,
+        text="Открыт спор.",
+        file_path=None,
+        file_name=None,
+    )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
@@ -1574,6 +1595,8 @@ async def _deal_payload(
         if deal.dispute_available_at
         else None,
     }
+    last_chat_at = await deps.chat_service.latest_message_at(deal.id)
+    payload["chat_last_at"] = last_chat_at.isoformat() if last_chat_at else None
     if with_actions:
         payload["actions"] = _deal_actions(deal, user_id)
     return payload
