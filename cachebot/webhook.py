@@ -45,6 +45,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/deals", _api_create_deal)
     app.router.add_get("/api/deals/{deal_id}", _api_deal_detail)
     app.router.add_post("/api/deals/{deal_id}/cancel", _api_deal_cancel)
+    app.router.add_post("/api/deals/{deal_id}/accept", _api_deal_accept)
+    app.router.add_post("/api/deals/{deal_id}/decline", _api_deal_decline)
     app.router.add_post("/api/deals/{deal_id}/buyer-ready", _api_deal_buyer_ready)
     app.router.add_post("/api/deals/{deal_id}/seller-ready", _api_deal_seller_ready)
     app.router.add_post("/api/deals/{deal_id}/confirm-buyer", _api_deal_confirm_buyer)
@@ -463,6 +465,70 @@ async def _api_deal_cancel(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "deal": payload})
 
 
+async def _api_deal_accept(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    bot = request.app["bot"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    try:
+        deal = await deps.deal_service.accept_p2p_offer(deal_id, user_id)
+    except (PermissionError, ValueError) as exc:
+        raise web.HTTPBadRequest(text=str(exc))
+    try:
+        invoice = await deps.crypto_pay.create_invoice(
+            amount=deal.usdt_amount,
+            currency="USDT",
+            description=f"Сделка {deal.hashtag} на {deal.usd_amount} RUB",
+            payload=deal.id,
+        )
+        deal = await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
+    except Exception as exc:
+        with suppress(Exception):
+            canceled, base_usdt = await deps.deal_service.cancel_deal(deal.id, user_id)
+            if canceled.is_p2p and canceled.advert_id and base_usdt:
+                await deps.advert_service.restore_volume(canceled.advert_id, base_usdt)
+        raise web.HTTPBadRequest(text=f"Не удалось создать счет: {exc}")
+    pay_amount = deal.usdt_amount.quantize(Decimal("0.01"), rounding=ROUND_UP)
+    await bot.send_message(
+        deal.seller_id,
+        f"✅ Сделка {deal.hashtag} закреплена за тобой.\n"
+        f"Оплати {format(pay_amount, 'f')} USDT\n"
+        "После оплаты начнется отсчет времени для открытия спора.",
+        reply_markup={
+            "inline_keyboard": [[{"text": "💸 Оплатить", "url": invoice.pay_url}]]
+        },
+    )
+    if deal.buyer_id:
+        await bot.send_message(
+            deal.buyer_id,
+            f"✅ Сделка {deal.hashtag} создана.\nОжидаем оплату продавца.",
+        )
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
+    return web.json_response({"ok": True, "deal": payload, "pay_url": invoice.pay_url})
+
+
+async def _api_deal_decline(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    bot = request.app["bot"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    try:
+        deal, base_usdt = await deps.deal_service.decline_p2p_offer(deal_id, user_id)
+    except (PermissionError, ValueError) as exc:
+        raise web.HTTPBadRequest(text=str(exc))
+    if deal.is_p2p and deal.advert_id and base_usdt:
+        with suppress(Exception):
+            await deps.advert_service.restore_volume(deal.advert_id, base_usdt)
+    initiator_id = deal.offer_initiator_id
+    if initiator_id and initiator_id != user_id:
+        await bot.send_message(
+            initiator_id,
+            f"❌ Предложение по сделке {deal.hashtag} отклонено.",
+        )
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
+    return web.json_response({"ok": True, "deal": payload})
+
+
 async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
@@ -729,50 +795,41 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
     if base_usdt > available:
         raise web.HTTPBadRequest(text="В объявлении недостаточно объёма")
     try:
-        deal = await deps.deal_service.create_p2p_deal(
+        deal = await deps.deal_service.create_p2p_offer(
             seller_id=seller_id,
             buyer_id=buyer_id,
+            initiator_id=user_id,
             usd_amount=rub_amount,
             rate=ad.price_rub,
             advert_id=ad.id,
             comment=ad.terms,
         )
         await deps.advert_service.reduce_volume(ad.id, base_usdt)
-        invoice = await deps.crypto_pay.create_invoice(
-            amount=deal.usdt_amount,
-            currency="USDT",
-            description=f"Сделка {deal.hashtag} на {deal.usd_amount} RUB",
-            payload=deal.id,
-        )
-        await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
     except Exception as exc:
-        with suppress(Exception):
-            await deps.deal_service.cancel_deal(deal.id, seller_id)
-        with suppress(Exception):
-            await deps.advert_service.restore_volume(ad.id, base_usdt)
-        raise web.HTTPBadRequest(text=f"Не удалось создать сделку: {exc}")
+        raise web.HTTPBadRequest(text=f"Не удалось создать предложение: {exc}")
+    offer_text = (
+        f"📝 Новое предложение по объявлению {ad.public_id}\n"
+        f"Сумма: ₽{rub_amount}\n"
+        f"USDT: {deal.usdt_amount.quantize(Decimal('0.001'))}\n"
+        f"Сделка: {deal.hashtag}"
+    )
     if buyer_id != user_id:
-        await bot.send_message(
-            buyer_id,
-            f"✅ Сделка {deal.hashtag} создана.\nОжидаем оплату продавца.",
+        markup = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="✅ Принять", callback_data=f"p2p:offer:accept:{deal.id}"),
+                    InlineKeyboardButton(text="❌ Отклонить", callback_data=f"p2p:offer:decline:{deal.id}"),
+                ],
+                [InlineKeyboardButton(text="К сделке", callback_data=f"deal_info:{deal.id}")],
+            ]
         )
+        await bot.send_message(buyer_id, offer_text, reply_markup=markup)
     await bot.send_message(
-        seller_id,
-        f"✅ Сделка {deal.hashtag} закреплена за тобой.\n"
-        f"Оплати {deal.usdt_amount.quantize(Decimal('0.01'), rounding=ROUND_UP)} USDT\n"
-        "После оплаты начнется отсчет времени для открытия спора.",
-        reply_markup={
-            "inline_keyboard": [[{"text": "💸 Оплатить", "url": invoice.pay_url}]]
-        },
+        user_id,
+        f"✅ Предложение отправлено.\nОжидаем принятия по сделке {deal.hashtag}.",
     )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
-    return web.json_response(
-        {
-            "ok": True,
-            "deal": payload,
-            "pay_url": invoice.pay_url if user_id == seller_id else None,
-        }
-    )
+    return web.json_response({"ok": True, "deal": payload})
 
 
 async def _api_disputes_summary(request: web.Request) -> web.Response:
@@ -1336,6 +1393,8 @@ async def _deal_payload(
         "is_p2p": deal.is_p2p,
         "buyer_cash_confirmed": deal.buyer_cash_confirmed,
         "seller_cash_confirmed": deal.seller_cash_confirmed,
+        "offer_initiator_id": deal.offer_initiator_id,
+        "offer_expires_at": deal.offer_expires_at.isoformat() if deal.offer_expires_at else None,
         "dispute_available_at": deal.dispute_available_at.isoformat()
         if deal.dispute_available_at
         else None,
@@ -1348,10 +1407,14 @@ async def _deal_payload(
 def _deal_actions(deal, user_id: int) -> dict[str, bool]:
     is_seller = user_id == deal.seller_id
     is_buyer = user_id == deal.buyer_id
+    is_initiator = deal.offer_initiator_id == user_id
+    is_recipient = (user_id in {deal.seller_id, deal.buyer_id}) and not is_initiator
     can_cancel = bool(
-        (is_buyer)
-        or (is_seller and deal.status.value in {"open", "reserved", "paid"})
+        (is_buyer or is_seller)
+        and deal.status.value in {"open", "reserved", "paid"}
     )
+    can_accept_offer = bool(deal.status.value == "pending" and is_recipient)
+    can_decline_offer = bool(deal.status.value == "pending" and (is_recipient or is_initiator))
     can_buyer_ready = bool(is_buyer and deal.qr_stage.value == "awaiting_buyer_ready")
     can_seller_ready = bool(
         is_seller and deal.qr_stage.value in {"awaiting_seller_attach", "awaiting_buyer_ready"}
@@ -1369,6 +1432,8 @@ def _deal_actions(deal, user_id: int) -> dict[str, bool]:
     )
     return {
         "cancel": can_cancel,
+        "accept_offer": can_accept_offer,
+        "decline_offer": can_decline_offer,
         "buyer_ready": can_buyer_ready,
         "seller_ready": can_seller_ready,
         "confirm_buyer": can_confirm_buyer,

@@ -62,6 +62,8 @@
   const dealModalBody = document.getElementById("dealModalBody");
   const dealModalActions = document.getElementById("dealModalActions");
   const dealModalClose = document.getElementById("dealModalClose");
+  const dealFab = document.getElementById("dealFab");
+  const dealFabBadge = document.getElementById("dealFabBadge");
   const p2pList = document.getElementById("p2pList");
   const p2pTradingBadge = document.getElementById("p2pTradingBadge");
   const p2pTradingToggle = document.getElementById("p2pTradingToggle");
@@ -78,6 +80,7 @@
   const userModalTitle = document.getElementById("userModalTitle");
   const userModalBody = document.getElementById("userModalBody");
   const userModalClose = document.getElementById("userModalClose");
+  const userModalReviews = document.getElementById("userModalReviews");
   const p2pCreateModal = document.getElementById("p2pCreateModal");
   const p2pCreateClose = document.getElementById("p2pCreateClose");
   const p2pCreateForm = document.getElementById("p2pCreateForm");
@@ -311,6 +314,7 @@
 
   const statusLabel = (deal) => {
     if (deal.status === "open") return "Ожидаем Мерчанта";
+    if (deal.status === "pending") return "Ожидаем принятия";
     if (deal.status === "reserved") return "Ждем оплату";
     if (deal.status === "paid") {
       if (deal.qr_stage === "awaiting_buyer_ready") return "Ожидаем готовность";
@@ -391,6 +395,7 @@
     if (!payload?.ok) return;
     const { data } = payload;
     const profile = data?.profile;
+    state.userId = profile?.user_id ?? null;
     const display = profile?.display_name || profile?.full_name || "Без имени";
     profileName.textContent = display;
     if (profileDisplayName) profileDisplayName.textContent = display;
@@ -508,6 +513,7 @@
     dealsCount.textContent = `${deals.length}`;
     state.deals = deals;
     state.dealsPage = 0;
+    updateDealFab();
     const totalDeals = deals.length;
     const successDeals = deals.filter((deal) => deal.status === "completed").length;
     const failedDeals = deals.filter(
@@ -529,6 +535,31 @@
     };
     applyProfileStats(state.profileStats);
     renderDealsPage();
+  };
+
+  const updateDealFab = () => {
+    if (!dealFab) return;
+    const deals = state.deals || [];
+    const active = deals.filter((deal) =>
+      ["open", "pending", "reserved", "paid", "dispute"].includes(deal.status)
+    );
+    if (!active.length) {
+      dealFab.classList.remove("show");
+      dealFab.classList.remove("alert");
+      return;
+    }
+    dealFab.classList.add("show");
+    const hasIncoming = active.some(
+      (deal) =>
+        deal.status === "pending" &&
+        deal.offer_initiator_id &&
+        state.userId &&
+        deal.offer_initiator_id !== state.userId
+    );
+    dealFab.classList.toggle("alert", hasIncoming);
+    if (dealFabBadge) {
+      dealFabBadge.textContent = `${active.length}`;
+    }
   };
 
   const loadSummary = async () => {
@@ -599,6 +630,15 @@
     const avatarNode = userModalBody.querySelector("#userModalAvatar");
     setAvatarNode(avatarNode, display, profile.avatar_url);
     userModal.classList.add("open");
+    if (userModalReviews) {
+      userModalReviews.onclick = async () => {
+        const reviewsPayload = await fetchJson(`/api/reviews?user_id=${userId}`);
+        if (!reviewsPayload?.ok) return;
+        renderReviews(reviewsPayload.reviews || [], "all");
+        reviewsModal.classList.add("open");
+        window.setTimeout(updateReviewsIndicator, 0);
+      };
+    }
   };
 
   const loadP2PSummary = async () => {
@@ -677,18 +717,36 @@
         log("Введите сумму в RUB", "warn");
         return;
       }
-      const offer = await fetchJson(`/api/p2p/ads/${ad.id}/offer`, {
-        method: "POST",
-        body: JSON.stringify({ rub_amount: rub }),
+      p2pModalActions.innerHTML = "";
+      const confirm = document.createElement("div");
+      confirm.className = "deal-row";
+      confirm.textContent = `Подтвердите сумму ₽${formatAmount(rub, 0)} для сделки.`;
+      const confirmBtn = document.createElement("button");
+      confirmBtn.className = "btn primary";
+      confirmBtn.textContent = "Предложить сделку";
+      const cancelBtn = document.createElement("button");
+      cancelBtn.className = "btn";
+      cancelBtn.textContent = "Отмена";
+      cancelBtn.addEventListener("click", () => {
+        p2pModalActions.innerHTML = "";
+        p2pModalActions.appendChild(input);
+        p2pModalActions.appendChild(btn);
       });
-      if (offer?.ok) {
-        p2pModal.classList.remove("open");
-        await loadDeals();
-        await loadPublicAds(ad.side === "sell" ? "sell" : "buy");
-        if (offer.pay_url) {
-          openLink(offer.pay_url);
+      confirmBtn.addEventListener("click", async () => {
+        const offer = await fetchJson(`/api/p2p/ads/${ad.id}/offer`, {
+          method: "POST",
+          body: JSON.stringify({ rub_amount: rub }),
+        });
+        if (offer?.ok) {
+          p2pModal.classList.remove("open");
+          await loadDeals();
+          await loadPublicAds(ad.side === "sell" ? "sell" : "buy");
+          showNotice("Предложение отправлено");
         }
-      }
+      });
+      p2pModalActions.appendChild(confirm);
+      p2pModalActions.appendChild(confirmBtn);
+      p2pModalActions.appendChild(cancelBtn);
     });
     p2pModalActions.appendChild(input);
     p2pModalActions.appendChild(btn);
@@ -1037,6 +1095,12 @@
     if (actions.cancel) {
       addAction("Отменить сделку", () => dealAction("cancel", deal.id), false);
     }
+    if (actions.accept_offer) {
+      addAction("Принять", () => dealAction("accept", deal.id), true);
+    }
+    if (actions.decline_offer) {
+      addAction("Отклонить", () => dealAction("decline", deal.id), false);
+    }
     if (actions.seller_ready) {
       addAction("Готов отправить QR", () => dealAction("seller-ready", deal.id), true);
     }
@@ -1210,6 +1274,10 @@
     btn.addEventListener("click", () => {
       setView(btn.dataset.view);
     });
+  });
+
+  dealFab?.addEventListener("click", () => {
+    setView("deals");
   });
 
   dealModalClose?.addEventListener("click", () => {

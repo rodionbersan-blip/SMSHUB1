@@ -9,6 +9,7 @@ from typing import Any
 
 class DealStatus(str, Enum):
     OPEN = "open"
+    PENDING = "pending"
     RESERVED = "reserved"
     PAID = "paid"
     DISPUTE = "dispute"
@@ -39,6 +40,8 @@ class Deal:
     expires_at: datetime
     status: DealStatus = DealStatus.OPEN
     buyer_id: int | None = None
+    offer_initiator_id: int | None = None
+    offer_expires_at: datetime | None = None
     invoice_id: str | None = None
     invoice_url: str | None = None
     comment: str | None = None
@@ -74,6 +77,10 @@ class Deal:
             "expires_at": self.expires_at.isoformat(),
             "status": self.status.value,
             "buyer_id": self.buyer_id,
+            "offer_initiator_id": self.offer_initiator_id,
+            "offer_expires_at": self.offer_expires_at.isoformat()
+            if self.offer_expires_at
+            else None,
             "invoice_id": self.invoice_id,
             "invoice_url": self.invoice_url,
             "comment": self.comment,
@@ -111,6 +118,12 @@ class Deal:
             expires_at=datetime.fromisoformat(data["expires_at"]),
             status=DealStatus(data["status"]),
             buyer_id=data.get("buyer_id"),
+            offer_initiator_id=data.get("offer_initiator_id"),
+            offer_expires_at=(
+                datetime.fromisoformat(data["offer_expires_at"])
+                if data.get("offer_expires_at")
+                else None
+            ),
             invoice_id=data.get("invoice_id"),
             invoice_url=data.get("invoice_url"),
             comment=data.get("comment"),

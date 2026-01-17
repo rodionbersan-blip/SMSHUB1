@@ -17,6 +17,7 @@ class DealService:
         repository: StateRepository,
         rate_provider: RateProvider,
         payment_window_minutes: int,
+        offer_window_minutes: int | None = None,
         *,
         admin_ids: set[int] | None = None,
     ) -> None:
@@ -27,6 +28,9 @@ class DealService:
         self._deals: Dict[str, Deal] = {deal.id: deal for deal in snapshot.deals}
         self._balances: Dict[int, Decimal] = snapshot.balances.copy()
         self._payment_window = timedelta(minutes=payment_window_minutes)
+        self._offer_window = timedelta(
+            minutes=offer_window_minutes if offer_window_minutes is not None else payment_window_minutes
+        )
         self._admin_ids = admin_ids or set()
         self._deal_seq = snapshot.deal_sequence or len(self._deals)
 
@@ -109,6 +113,103 @@ class DealService:
             self._reset_qr_locked(deal)
             await self._persist()
         return deal
+
+    async def create_p2p_offer(
+        self,
+        *,
+        seller_id: int,
+        buyer_id: int,
+        initiator_id: int,
+        usd_amount: Decimal,
+        rate: Decimal,
+        advert_id: str | None = None,
+        comment: str | None = None,
+    ) -> Deal:
+        if usd_amount <= Decimal("0"):
+            raise ValueError("Amount must be greater than zero")
+        if rate <= Decimal("0"):
+            raise ValueError("Rate must be greater than zero")
+        rate_snapshot = await self._rate_provider.snapshot()
+        fee_multiplier = rate_snapshot.fee_multiplier
+        base_usdt = usd_amount / rate
+        fee = base_usdt * fee_multiplier
+        total_usdt = base_usdt + fee
+        async with self._lock:
+            current = self._balances.get(seller_id, Decimal("0"))
+            if current < base_usdt:
+                raise ValueError("Недостаточно баланса")
+            self._balances[seller_id] = current - base_usdt
+            now = datetime.now(timezone.utc)
+            expires_at = now + self._offer_window
+            deal = Deal(
+                id=str(uuid4()),
+                seller_id=seller_id,
+                usd_amount=usd_amount,
+                rate=rate,
+                fee_percent=rate_snapshot.fee_percent,
+                fee_amount=fee,
+                usdt_amount=total_usdt,
+                created_at=now,
+                expires_at=expires_at,
+                status=DealStatus.PENDING,
+                buyer_id=buyer_id,
+                offer_initiator_id=initiator_id,
+                offer_expires_at=expires_at,
+                comment=comment,
+                public_id=self._next_public_id_locked(),
+                is_p2p=True,
+                advert_id=advert_id,
+            )
+            deal.dispute_available_at = None
+            deal.dispute_notified = False
+            self._deals[deal.id] = deal
+            self._reset_qr_locked(deal)
+            await self._persist()
+        return deal
+
+    async def accept_p2p_offer(self, deal_id: str, actor_id: int) -> Deal:
+        async with self._lock:
+            deal = self._ensure_deal(deal_id)
+            if deal.status != DealStatus.PENDING:
+                raise ValueError("Предложение уже обработано")
+            if deal.offer_initiator_id == actor_id:
+                raise PermissionError("Нельзя принять собственное предложение")
+            if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
+                raise PermissionError("Нет доступа")
+            now = datetime.now(timezone.utc)
+            if deal.offer_expires_at and deal.offer_expires_at <= now:
+                raise ValueError("Предложение истекло")
+            deal.status = DealStatus.RESERVED
+            deal.offer_expires_at = None
+            deal.expires_at = now
+            self._deals[deal.id] = deal
+            await self._persist()
+            return deal
+
+    async def decline_p2p_offer(
+        self,
+        deal_id: str,
+        actor_id: int,
+        *,
+        expired: bool = False,
+    ) -> tuple[Deal, Decimal]:
+        async with self._lock:
+            deal = self._ensure_deal(deal_id)
+            if deal.status != DealStatus.PENDING:
+                raise ValueError("Предложение уже обработано")
+            if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
+                raise PermissionError("Нет доступа")
+            base_usdt = deal.usd_amount / deal.rate
+            if base_usdt > 0:
+                self._credit_balance_locked(deal.seller_id, base_usdt)
+            deal.status = DealStatus.EXPIRED if expired else DealStatus.CANCELED
+            deal.offer_expires_at = None
+            deal.invoice_id = None
+            deal.invoice_url = None
+            self._reset_qr_locked(deal)
+            self._deals[deal.id] = deal
+            await self._persist()
+            return deal, base_usdt
 
     async def list_open_deals(self) -> List[Deal]:
         async with self._lock:
@@ -230,6 +331,20 @@ class DealService:
     async def cancel_deal(self, deal_id: str, actor_id: int) -> tuple[Deal, Decimal | None]:
         async with self._lock:
             deal = self._ensure_deal(deal_id)
+            if deal.status == DealStatus.PENDING:
+                if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
+                    raise PermissionError("Not allowed to cancel")
+                base_usdt = deal.usd_amount / deal.rate
+                if base_usdt > 0:
+                    self._credit_balance_locked(deal.seller_id, base_usdt)
+                deal.status = DealStatus.CANCELED
+                deal.offer_expires_at = None
+                deal.invoice_id = None
+                deal.invoice_url = None
+                self._reset_qr_locked(deal)
+                self._deals[deal.id] = deal
+                await self._persist()
+                return deal, base_usdt
             if not self._can_cancel(deal, actor_id):
                 raise PermissionError("Not allowed to cancel")
             if deal.status in {DealStatus.CANCELED, DealStatus.COMPLETED, DealStatus.DISPUTE}:
@@ -255,7 +370,28 @@ class DealService:
             return deal, refund_amount
 
     async def cleanup_expired(self) -> List[Deal]:
-        return []
+        now = datetime.now(timezone.utc)
+        expired: List[Deal] = []
+        async with self._lock:
+            for deal in list(self._deals.values()):
+                if deal.status != DealStatus.PENDING:
+                    continue
+                expires_at = deal.offer_expires_at or deal.expires_at
+                if not expires_at or expires_at > now:
+                    continue
+                base_usdt = deal.usd_amount / deal.rate
+                if base_usdt > 0:
+                    self._credit_balance_locked(deal.seller_id, base_usdt)
+                deal.status = DealStatus.EXPIRED
+                deal.offer_expires_at = None
+                deal.invoice_id = None
+                deal.invoice_url = None
+                self._reset_qr_locked(deal)
+                self._deals[deal.id] = deal
+                expired.append(deal)
+            if expired:
+                await self._persist()
+        return expired
 
     async def list_dispute_ready(self) -> List[Deal]:
         now = datetime.now(timezone.utc)

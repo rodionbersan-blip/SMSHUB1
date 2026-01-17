@@ -49,6 +49,7 @@ async def run_bot() -> None:
         repository,
         rate_provider,
         config.payment_window_minutes,
+        config.offer_window_minutes,
         admin_ids=config.admin_ids,
     )
 
@@ -76,7 +77,7 @@ async def run_bot() -> None:
     dp.include_router(deal_flow.router)
     dp.include_router(p2p.router)
 
-    expiry_task = asyncio.create_task(expiry_watcher(deal_service, bot))
+    expiry_task = asyncio.create_task(expiry_watcher(deal_service, advert_service, bot))
     invoice_task = asyncio.create_task(
         invoice_watcher(
             deal_service,

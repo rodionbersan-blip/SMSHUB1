@@ -15,6 +15,7 @@ class Config:
     crypto_pay_token: str | None
     admin_ids: Set[int]
     payment_window_minutes: int = 15
+    offer_window_minutes: int = 15
     invoice_poll_interval: int = 30
     storage_path: Path = Path("var/state.json")
     kb_api_url: str | None = None
@@ -41,6 +42,7 @@ class Config:
             project_root = Path(__file__).resolve().parent.parent
             storage_path = (project_root / storage_path).resolve()
         payment_window = int(os.getenv("DEAL_TTL_MINUTES", "15"))
+        offer_window = int(os.getenv("OFFER_TTL_MINUTES", "15"))
         poll_interval = int(os.getenv("INVOICE_POLL_INTERVAL", "30"))
         kb_api_url = os.getenv("KB_API_URL") or None
         kb_api_token = os.getenv("KB_API_TOKEN") or None
@@ -57,6 +59,7 @@ class Config:
             crypto_pay_token=crypto_pay_token,
             admin_ids=admin_ids,
             payment_window_minutes=payment_window,
+            offer_window_minutes=offer_window,
             invoice_poll_interval=poll_interval,
             storage_path=storage_path,
             kb_api_url=kb_api_url,

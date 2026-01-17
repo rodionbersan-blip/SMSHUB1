@@ -1196,6 +1196,74 @@ body.modal-open #app {
   transform: translate(-50%, -50%) scale(1);
 }
 
+.deal-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 96px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(77, 163, 255, 0.18);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 50;
+}
+
+.deal-fab.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.deal-fab.alert {
+  animation: deal-fab-pulse 1.4s ease-in-out infinite;
+}
+
+.deal-fab-icon {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.deal-fab-badge {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes deal-fab-pulse {
+  0% {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 10px 24px rgba(77, 163, 255, 0.45);
+    transform: translateY(-2px);
+  }
+  100% {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 860px) {
   .hero {
     grid-template-columns: 1fr;

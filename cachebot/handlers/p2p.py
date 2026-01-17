@@ -38,6 +38,10 @@ P2P_AD_EDIT_PREFIX = "p2p:ad:edit:"
 P2P_TRADING_TOGGLE = "p2p:trading:toggle"
 P2P_PUBLIC_VIEW_PREFIX = "p2p:public:view:"
 P2P_PUBLIC_OFFER_PREFIX = "p2p:public:offer:"
+P2P_PUBLIC_CONFIRM_PREFIX = "p2p:public:confirm:"
+P2P_PUBLIC_CONFIRM_CANCEL = "p2p:public:confirm:cancel"
+P2P_OFFER_ACCEPT_PREFIX = "p2p:offer:accept:"
+P2P_OFFER_DECLINE_PREFIX = "p2p:offer:decline:"
 P2P_BANK_PREFIX = "p2p:bank:"
 P2P_TERMS_SKIP = "p2p:terms:skip"
 P2P_EDIT_CANCEL = "p2p:edit:cancel"
@@ -63,6 +67,7 @@ class P2PAdEditState(StatesGroup):
 
 class P2PDealState(StatesGroup):
     waiting_amount = State()
+    confirm_offer = State()
 
 
 def _format_decimal(value: Decimal) -> str:
@@ -1289,19 +1294,79 @@ async def p2p_offer_amount(message: Message, state: FSMContext) -> None:
     if base_usdt > available:
         await message.answer("В объявлении недостаточно объёма")
         return
-    user = message.from_user
-    if not user:
+    await state.update_data(rub_amount=str(rub_amount), base_usdt=str(base_usdt))
+    await state.set_state(P2PDealState.confirm_offer)
+    side_label = _ad_side_label(ad.side)
+    confirm = InlineKeyboardBuilder()
+    confirm.button(
+        text="Предложить сделку",
+        callback_data=f"{P2P_PUBLIC_CONFIRM_PREFIX}{ad.id}",
+    )
+    confirm.button(text="Отмена", callback_data=P2P_PUBLIC_CONFIRM_CANCEL)
+    confirm.adjust(1)
+    await message.answer(
+        f"Проверь параметры предложения:\n"
+        f"{side_label} • {rub_amount} RUB\n"
+        f"Курс: {ad.price_rub} RUB\n"
+        "Отправить предложение?",
+        reply_markup=confirm.as_markup(),
+    )
+
+
+@router.callback_query(F.data == P2P_PUBLIC_CONFIRM_CANCEL)
+async def p2p_offer_confirm_cancel(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    await _delete_callback_message(callback)
+    await callback.message.answer("Предложение отменено.")
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith(P2P_PUBLIC_CONFIRM_PREFIX))
+async def p2p_offer_confirm(callback: CallbackQuery, state: FSMContext) -> None:
+    deps = get_deps()
+    if not callback.from_user:
+        await state.clear()
         return
+    advert_id = callback.data[len(P2P_PUBLIC_CONFIRM_PREFIX) :]
+    data = await state.get_data()
+    rub_amount_raw = data.get("rub_amount")
+    try:
+        rub_amount = Decimal(str(rub_amount_raw))
+    except InvalidOperation:
+        await callback.answer("Сумма некорректна", show_alert=True)
+        await state.clear()
+        return
+    ad = await deps.advert_service.get_ad(advert_id)
+    if not ad or not ad.active:
+        await callback.answer("Объявление недоступно", show_alert=True)
+        await state.clear()
+        return
+    if callback.from_user and callback.from_user.id == ad.owner_id:
+        await callback.answer("Нельзя создать сделку по своему объявлению", show_alert=True)
+        await state.clear()
+        return
+    if rub_amount < ad.min_rub or rub_amount > ad.max_rub:
+        await callback.answer("Сумма вне лимитов", show_alert=True)
+        await state.clear()
+        return
+    base_usdt = rub_amount / ad.price_rub
     if ad.side == AdvertSide.SELL:
         seller_id = ad.owner_id
-        buyer_id = user.id
+        buyer_id = callback.from_user.id if callback.from_user else ad.owner_id
     else:
-        seller_id = user.id
+        seller_id = callback.from_user.id if callback.from_user else ad.owner_id
         buyer_id = ad.owner_id
+    seller_balance = await deps.deal_service.balance_of(seller_id)
+    available = min(ad.remaining_usdt, seller_balance)
+    if base_usdt > available:
+        await callback.answer("В объявлении недостаточно объёма", show_alert=True)
+        await state.clear()
+        return
     try:
-        deal = await deps.deal_service.create_p2p_deal(
+        deal = await deps.deal_service.create_p2p_offer(
             seller_id=seller_id,
             buyer_id=buyer_id,
+            initiator_id=callback.from_user.id,
             usd_amount=rub_amount,
             rate=ad.price_rub,
             advert_id=ad.id,
@@ -1309,8 +1374,44 @@ async def p2p_offer_amount(message: Message, state: FSMContext) -> None:
         )
         await deps.advert_service.reduce_volume(ad.id, base_usdt)
     except Exception as exc:
-        await message.answer(f"Не удалось создать сделку: {exc}")
+        await callback.answer(f"Ошибка: {exc}", show_alert=True)
         await state.clear()
+        return
+    await state.clear()
+    offer_text = (
+        f"📝 Новое предложение по объявлению {ad.public_id}\n"
+        f"Сумма: ₽{rub_amount}\n"
+        f"USDT: {deal.usdt_amount.quantize(Decimal('0.001'))}\n"
+        f"Сделка: {deal.hashtag}"
+    )
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✅ Принять", callback_data=f"{P2P_OFFER_ACCEPT_PREFIX}{deal.id}")
+    builder.button(text="❌ Отклонить", callback_data=f"{P2P_OFFER_DECLINE_PREFIX}{deal.id}")
+    builder.adjust(2)
+    builder.row(InlineKeyboardButton(text="К сделке", callback_data=f"{DEAL_INFO_PREFIX}{deal.id}"))
+    if buyer_id != callback.from_user.id:
+        await callback.bot.send_message(buyer_id, offer_text, reply_markup=builder.as_markup())
+    await _delete_callback_message(callback)
+    info_builder = InlineKeyboardBuilder()
+    info_builder.button(text="К сделке", callback_data=f"{DEAL_INFO_PREFIX}{deal.id}")
+    info_builder.adjust(1)
+    await callback.message.answer(
+        f"✅ Предложение отправлено.\nОжидаем принятия по сделке {deal.hashtag}.",
+        reply_markup=info_builder.as_markup(),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith(P2P_OFFER_ACCEPT_PREFIX))
+async def p2p_offer_accept(callback: CallbackQuery) -> None:
+    deps = get_deps()
+    if not callback.from_user:
+        return
+    deal_id = callback.data[len(P2P_OFFER_ACCEPT_PREFIX) :]
+    try:
+        deal = await deps.deal_service.accept_p2p_offer(deal_id, callback.from_user.id)
+    except (PermissionError, ValueError) as exc:
+        await callback.answer(str(exc), show_alert=True)
         return
     try:
         invoice = await deps.crypto_pay.create_invoice(
@@ -1319,36 +1420,56 @@ async def p2p_offer_amount(message: Message, state: FSMContext) -> None:
             description=f"Сделка {deal.hashtag} на {deal.usd_amount} RUB",
             payload=deal.id,
         )
-        await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
+        deal = await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
     except Exception as exc:
         with suppress(Exception):
-            await deps.deal_service.cancel_deal(deal.id, seller_id)
-        with suppress(Exception):
-            await deps.advert_service.restore_volume(ad.id, base_usdt)
-        await message.answer(f"Не удалось создать счет: {exc}")
-        await state.clear()
+            canceled, base_usdt = await deps.deal_service.cancel_deal(deal.id, callback.from_user.id)
+            if canceled.is_p2p and canceled.advert_id and base_usdt:
+                await deps.advert_service.restore_volume(canceled.advert_id, base_usdt)
+        await callback.answer(f"Не удалось создать счет: {exc}", show_alert=True)
         return
-    await state.clear()
-    info_builder = InlineKeyboardBuilder()
-    info_builder.button(text="К сделке", callback_data=f"{DEAL_INFO_PREFIX}{deal.id}")
-    await message.answer(
-        f"✅ Сделка {deal.hashtag} создана.\nОжидаем оплату продавца.",
-        reply_markup=info_builder.as_markup(),
-    )
-    if buyer_id != message.from_user.id:
-        await message.bot.send_message(
-            buyer_id,
-            f"✅ Сделка {deal.hashtag} создана.\nОжидаем оплату продавца.",
-            reply_markup=info_builder.as_markup(),
-        )
     amount = Decimal(str(invoice.amount)).quantize(Decimal("0.01"), rounding=ROUND_UP)
     pay_builder = InlineKeyboardBuilder()
     pay_builder.button(text="💸 Оплатить", url=invoice.pay_url)
     pay_builder.adjust(1)
-    await message.bot.send_message(
+    await callback.bot.send_message(
         deal.seller_id,
         f"✅ Сделка {deal.hashtag} закреплена за тобой.\n"
         f"Оплати {format(amount, 'f')} USDT\n"
         "После оплаты начнется отсчет времени для открытия спора.",
         reply_markup=pay_builder.as_markup(),
     )
+    if deal.buyer_id:
+        await callback.bot.send_message(
+            deal.buyer_id,
+            f"✅ Сделка {deal.hashtag} создана.\nОжидаем оплату продавца.",
+        )
+    await _delete_callback_message(callback)
+    await callback.message.answer("✅ Предложение принято.")
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith(P2P_OFFER_DECLINE_PREFIX))
+async def p2p_offer_decline(callback: CallbackQuery) -> None:
+    deps = get_deps()
+    if not callback.from_user:
+        return
+    deal_id = callback.data[len(P2P_OFFER_DECLINE_PREFIX) :]
+    try:
+        deal, base_usdt = await deps.deal_service.decline_p2p_offer(
+            deal_id, callback.from_user.id
+        )
+    except (PermissionError, ValueError) as exc:
+        await callback.answer(str(exc), show_alert=True)
+        return
+    if deal.is_p2p and deal.advert_id and base_usdt:
+        with suppress(Exception):
+            await deps.advert_service.restore_volume(deal.advert_id, base_usdt)
+    if deal.offer_initiator_id and deal.offer_initiator_id != callback.from_user.id:
+        await callback.bot.send_message(
+            deal.offer_initiator_id,
+            f"❌ Предложение по сделке {deal.hashtag} отклонено.",
+        )
+    await _delete_callback_message(callback)
+    await callback.message.answer("Предложение отклонено.")
+    await callback.answer()

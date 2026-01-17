@@ -10,17 +10,29 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from cachebot.models.deal import Deal, DealStatus
 from cachebot.services.crypto_pay import CryptoPayClient
 from cachebot.services.deals import DealService
+from cachebot.services.adverts import AdvertService
 from cachebot.services.kb_client import KBClient
 
 logger = logging.getLogger(__name__)
 
 
-async def expiry_watcher(deal_service: DealService, bot: Bot, interval: int = 30) -> None:
+async def expiry_watcher(
+    deal_service: DealService,
+    advert_service: AdvertService,
+    bot: Bot,
+    interval: int = 30,
+) -> None:
     while True:
         try:
             expired = await deal_service.cleanup_expired()
             for deal in expired:
-                text = f"❗️ Сделка {deal.hashtag} истекла"
+                if deal.is_p2p and deal.advert_id:
+                    try:
+                        base_usdt = deal.usd_amount / deal.rate
+                        await advert_service.restore_volume(deal.advert_id, base_usdt)
+                    except Exception:
+                        pass
+                text = f"⏳ Предложение {deal.hashtag} не было принято вовремя и отменено."
                 await bot.send_message(deal.seller_id, text)
                 if deal.buyer_id:
                     await bot.send_message(deal.buyer_id, text)
