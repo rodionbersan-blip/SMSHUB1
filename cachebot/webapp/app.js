@@ -393,7 +393,7 @@
     if (profileUsername) {
       const username = profile?.username?.trim();
       profileUsername.textContent = username ? `@${username}` : "";
-      profileUsername.style.display = username ? "" : "none";
+      profileUsername.style.display = "none";
     }
     profileRegistered.textContent = profile?.registered_at
       ? `Регистрация: ${formatDate(profile.registered_at)}`
@@ -1301,7 +1301,9 @@
   profileQuick?.addEventListener("click", () => {
     const display = userBadge.textContent || "—";
     profileQuickName.textContent = display;
-    profileQuickUsername.textContent = state.user?.role === "buyer" ? "Мерчант" : "—";
+    const quickRole = state.user?.role === "buyer" ? "Мерчант" : "";
+    profileQuickUsername.textContent = quickRole;
+    profileQuickUsername.style.display = quickRole ? "" : "none";
     setAvatarNode(profileModalAvatar, display, state.user?.avatar_url);
     if (profileQuickBalance) {
       const balance = state.balance ?? 0;
