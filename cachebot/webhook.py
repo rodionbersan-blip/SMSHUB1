@@ -538,6 +538,13 @@ async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
         file_path=None,
         file_name=None,
     )
+    await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=user_id,
+        text="Нужно отправить QR в приложении.",
+        file_path=None,
+        file_name=None,
+    )
     with suppress(Exception):
         await bot.send_message(
             deal.seller_id,
@@ -563,6 +570,12 @@ async def _api_deal_seller_ready(request: web.Request) -> web.Response:
         file_path=None,
         file_name=None,
     )
+    if deal.buyer_id:
+        with suppress(Exception):
+            await request.app["bot"].send_message(
+                deal.buyer_id,
+                "Продавец готов отправить QR.\nНажмите «Готов сканировать».",
+            )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 

@@ -1378,11 +1378,24 @@
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>
     `;
+    if (deal.qr_stage === "awaiting_seller_attach" && deal.role === "seller") {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent =
+        "Как будете у банкомата\nНажмите Готов отправить!\nВажно отправить сразу!";
+      dealModalBody.appendChild(alert);
+    }
+    if (deal.qr_stage === "awaiting_seller_attach" && deal.role === "buyer") {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent = "Ожидаем пока продавец дойдет до банкомата.";
+      dealModalBody.appendChild(alert);
+    }
     if (deal.qr_stage === "awaiting_buyer_ready" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent =
-        "⚠️ Ожидайте готовность покупателя!\nНе выходите из сети!\nКак покупатель будет готов вам придет уведомление.";
+        "⚠️ Ожидайте готовность покупателя!\nКак покупатель будет готов вам придет уведомление.";
       dealModalBody.appendChild(alert);
     }
     if (deal.qr_stage === "awaiting_buyer_ready" && deal.role === "buyer") {
@@ -1440,10 +1453,10 @@
       addAction(topRow, "Отменить", () => dealAction("decline", deal.id), false, "status-bad");
     }
     if (actions.seller_ready) {
-      addAction(topRow, "Готов отправить QR", () => dealAction("seller-ready", deal.id), true);
+      addAction(topRow, "Готов отправить", () => dealAction("seller-ready", deal.id), false, "status-ok");
     }
     if (actions.buyer_ready) {
-      addAction(topRow, "Готов сканировать", () => dealAction("buyer-ready", deal.id), true);
+      addAction(topRow, "Готов сканировать", () => dealAction("buyer-ready", deal.id), false, "status-ok");
     }
     if (actions.confirm_seller) {
       if (deal.buyer_cash_confirmed) {
