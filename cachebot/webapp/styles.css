@@ -1230,7 +1230,7 @@ body.modal-open #app {
 .quick-deals-btn {
   position: fixed;
   left: 18px;
-  bottom: 96px;
+  bottom: calc(64px + env(safe-area-inset-bottom));
   width: 54px;
   height: 54px;
   border-radius: 50%;
@@ -1278,7 +1278,7 @@ body.modal-open #app {
 .quick-deals-panel {
   position: fixed;
   left: 16px;
-  bottom: 160px;
+  bottom: calc(140px + env(safe-area-inset-bottom));
   width: min(92vw, 360px);
   max-height: 60vh;
   opacity: 0;
@@ -1295,11 +1295,11 @@ body.modal-open #app {
 }
 
 .quick-deals-card {
-  background: rgba(22, 26, 34, 0.92);
-  border-radius: 18px;
+  background: var(--glass-bg);
+  border-radius: 26px;
   padding: 16px;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   max-height: 60vh;
@@ -1327,22 +1327,29 @@ body.modal-open #app {
   padding-right: 2px;
 }
 
+.quick-deals-list .deal-empty {
+  background: var(--card-contrast);
+  border: 1px solid var(--card-contrast-border);
+  color: var(--muted);
+  border-radius: 16px;
+}
+
 .quick-deal-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  border: 1px solid var(--card-contrast-border);
+  background: var(--card-contrast);
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .quick-deal-item:hover {
   border-color: rgba(77, 163, 255, 0.4);
-  background: rgba(77, 163, 255, 0.08);
+  background: rgba(77, 163, 255, 0.12);
 }
 
 .quick-deal-info {
