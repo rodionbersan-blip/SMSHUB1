@@ -564,7 +564,9 @@
     if (!quickDealsBtn) return;
     const deals = activeDeals || [];
     if (quickDealsBadge) {
-      quickDealsBadge.classList.toggle("show", state.unreadDeals.size > 0);
+      const count = state.unreadDeals.size;
+      quickDealsBadge.textContent = count > 9 ? "9+" : `${count}`;
+      quickDealsBadge.classList.toggle("show", count > 0);
     }
   };
 
@@ -572,11 +574,8 @@
     if (!state.userId) return;
     const incomingPending = new Set();
     (deals || []).forEach((deal) => {
-      const isIncoming =
-        deal.status === "pending" &&
-        deal.offer_initiator_id &&
-        deal.offer_initiator_id !== state.userId;
-      if (isIncoming) {
+      const isPending = deal.status === "pending" && deal.offer_initiator_id;
+      if (isPending) {
         incomingPending.add(deal.id);
         state.unreadDeals.add(deal.id);
       }
