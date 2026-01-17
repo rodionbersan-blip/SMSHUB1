@@ -1196,6 +1196,7 @@ body.modal-open #app {
   height: calc(100dvh - 48px);
   display: flex;
   flex-direction: column;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px) + 72px);
 }
 
 #chatModal .chat-list {
