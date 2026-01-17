@@ -144,6 +144,9 @@
     reviewsRating: "all",
     unreadDeals: new Set(),
     chatLastRead: {},
+    chatUnreadCounts: {},
+    chatLastSeenAt: {},
+    chatInitDone: false,
     activeChatDealId: null,
     activeDealId: null,
     dealRefreshTimer: null,
@@ -155,6 +158,8 @@
 
   const unreadStorageKey = "quickDealsUnread";
   const chatReadStorageKey = "dealChatLastRead";
+  const chatUnreadStorageKey = "dealChatUnreadCounts";
+  const chatSeenStorageKey = "dealChatLastSeenAt";
   const loadUnreadDeals = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(unreadStorageKey) || "[]");
@@ -187,6 +192,44 @@
     }
   };
   state.chatLastRead = loadChatRead();
+  const loadChatUnreadCounts = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(chatUnreadStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+  const persistChatUnreadCounts = () => {
+    try {
+      window.localStorage.setItem(
+        chatUnreadStorageKey,
+        JSON.stringify(state.chatUnreadCounts || {})
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
+  const loadChatSeen = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(chatSeenStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+  const persistChatSeen = () => {
+    try {
+      window.localStorage.setItem(
+        chatSeenStorageKey,
+        JSON.stringify(state.chatLastSeenAt || {})
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
+  state.chatUnreadCounts = loadChatUnreadCounts();
+  state.chatLastSeenAt = loadChatSeen();
 
   const log = (message, type = "info") => {
     if (!logEl) return;
@@ -581,6 +624,15 @@
     const payload = await fetchJson("/api/my-deals");
     if (!payload?.ok) return;
     const deals = payload.deals || [];
+    if (!state.chatInitDone) {
+      deals.forEach((deal) => {
+        if (deal.chat_last_at) {
+          state.chatLastSeenAt[deal.id] = deal.chat_last_at;
+        }
+      });
+      state.chatInitDone = true;
+      persistChatSeen();
+    }
     dealsCount.textContent = `${deals.length}`;
     state.deals = deals;
     state.dealsPage = 0;
@@ -623,6 +675,25 @@
     state.unreadDeals = pendingSet;
     persistUnreadDeals();
     const unreadDealIds = new Set(pendingSet);
+    const chatUnreadCounts = state.chatUnreadCounts || {};
+    const chatSeen = state.chatLastSeenAt || {};
+    deals.forEach((deal) => {
+      if (!deal.chat_last_at) return;
+      if (deal.chat_last_sender_id && deal.chat_last_sender_id === state.userId) return;
+      const lastSeen = chatSeen[deal.id];
+      if (!lastSeen) {
+        chatSeen[deal.id] = deal.chat_last_at;
+        return;
+      }
+      if (deal.chat_last_at !== lastSeen) {
+        chatUnreadCounts[deal.id] = (chatUnreadCounts[deal.id] || 0) + 1;
+        chatSeen[deal.id] = deal.chat_last_at;
+      }
+    });
+    state.chatUnreadCounts = chatUnreadCounts;
+    state.chatLastSeenAt = chatSeen;
+    persistChatUnreadCounts();
+    persistChatSeen();
     deals.forEach((deal) => {
       if (isChatUnread(deal)) {
         unreadDealIds.add(deal.id);
@@ -634,7 +705,8 @@
       quickDealsCount.classList.toggle("show", activeCount > 0);
     }
     if (quickDealsBadge) {
-      const count = unreadDealIds.size;
+      const chatCount = Object.values(chatUnreadCounts).reduce((sum, value) => sum + (Number(value) || 0), 0);
+      const count = chatCount + pendingSet.size;
       quickDealsBadge.textContent = count > 9 ? "9+" : `${count}`;
       quickDealsBadge.classList.toggle("show", count > 0);
     }
@@ -651,11 +723,8 @@
     if (deal.chat_last_sender_id && deal.chat_last_sender_id === state.userId) {
       return false;
     }
-    const lastMs = parseTime(deal.chat_last_at);
-    if (!lastMs) return false;
-    const readAt = state.chatLastRead?.[deal.id];
-    const readMs = parseTime(readAt);
-    return !readMs || lastMs > readMs;
+    const unread = state.chatUnreadCounts?.[deal.id] || 0;
+    return unread > 0;
   };
 
   const markChatRead = (dealId, isoValue) => {
@@ -664,6 +733,12 @@
     state.chatLastRead = state.chatLastRead || {};
     state.chatLastRead[dealId] = value;
     persistChatRead();
+    state.chatLastSeenAt = state.chatLastSeenAt || {};
+    state.chatLastSeenAt[dealId] = value;
+    persistChatSeen();
+    state.chatUnreadCounts = state.chatUnreadCounts || {};
+    state.chatUnreadCounts[dealId] = 0;
+    persistChatUnreadCounts();
   };
 
   const syncUnreadDeals = (deals) => {
