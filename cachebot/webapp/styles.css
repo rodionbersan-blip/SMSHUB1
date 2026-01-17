@@ -1264,9 +1264,25 @@ body.modal-open #app {
 
 .modal-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   margin-top: 16px;
+}
+
+.modal-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.modal-actions-bottom {
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.modal-actions-bottom .btn {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .modal-note {
