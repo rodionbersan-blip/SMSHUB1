@@ -522,7 +522,7 @@ body.modal-open #app {
 .deal-item {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 16px;
 }
 
@@ -544,6 +544,16 @@ body.modal-open #app {
   border-radius: 999px;
   background: rgba(77, 163, 255, 0.15);
   color: var(--accent);
+}
+
+.deal-status.status-ok {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+}
+
+.deal-status.status-bad {
+  background: rgba(229, 83, 61, 0.2);
+  color: #e5533d;
 }
 
 .deal-row {

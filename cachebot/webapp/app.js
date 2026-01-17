@@ -535,27 +535,31 @@
   const renderP2PItem = (ad, type) => {
     const item = document.createElement("div");
     item.className = "deal-item";
-    const owner = ad.owner?.display_name || ad.owner?.full_name || ad.owner?.username || "—";
-    const limit = `₽${formatAmount(ad.min_rub, 2)}-₽${formatAmount(ad.max_rub, 2)}`;
-    const price = `₽${formatAmount(ad.price_rub, 2)}/USDT`;
+    const sideLabel = ad.side === "sell" ? "Продажа" : "Покупка";
+    const limit = `₽${formatAmount(ad.min_rub, 0)}-₽${formatAmount(ad.max_rub, 0)}`;
+    const price = `${formatAmount(ad.price_rub, 0)}р`;
     if (type === "public") {
       item.innerHTML = `
         <div class="deal-header">
-          <div class="deal-id">${owner} | ${limit} | ${price}</div>
-          <div class="deal-status">${ad.side === "sell" ? "Продажа" : "Покупка"}</div>
+          <div class="deal-id">${sideLabel} • USDT - ${price}</div>
+          <div class="deal-status">${sideLabel}</div>
         </div>
-        <div class="deal-row">Доступно: ${formatAmount(ad.remaining_usdt)} USDT</div>
-        <div class="deal-row">Банки: ${(ad.banks || []).join(", ") || "—"}</div>
+        <div class="deal-row">Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</div>
+        <div class="deal-row">Лимиты: ${limit}</div>
       `;
       item.addEventListener("click", () => openP2PAd(ad.id));
     } else {
       const status = ad.active ? "Активно" : "Не активно";
+      const statusClass = ad.active ? "status-ok" : "status-bad";
       item.innerHTML = `
         <div class="deal-header">
-          <div class="deal-id">${ad.side === "sell" ? "Продажа" : "Покупка"} • ${price}</div>
-          <div class="deal-status">${status}</div>
+          <div class="deal-id">${sideLabel} • USDT - ${price}</div>
+          <div class="deal-status ${statusClass}">${status}</div>
         </div>
-        <div class="deal-row">Остаток: ${formatAmount(ad.remaining_usdt)} / ${formatAmount(ad.total_usdt)} USDT</div>
+        <div class="deal-row">Объем: ${formatAmount(ad.remaining_usdt, 0)} / ${formatAmount(
+        ad.total_usdt,
+        0
+      )} USDT</div>
         <div class="deal-row">Лимиты: ${limit}</div>
       `;
       item.addEventListener("click", () => openMyAd(ad.id));
@@ -576,6 +580,7 @@
     state.p2pMode = side === "sell" ? "buy" : "sell";
     state.p2pAds = payload.ads || [];
     p2pList.innerHTML = "";
+    if (p2pCreateBtn) p2pCreateBtn.style.display = "none";
     if (!state.p2pAds.length) {
       p2pList.innerHTML = "<div class=\"deal-empty\">Нет объявлений.</div>";
       return;
@@ -588,6 +593,7 @@
     if (!payload?.ok) return;
     state.myAds = payload.ads || [];
     p2pList.innerHTML = "";
+    if (p2pCreateBtn) p2pCreateBtn.style.display = "";
     if (!state.myAds.length) {
       p2pList.innerHTML = "<div class=\"deal-empty\">Объявлений пока нет.</div>";
       return;
