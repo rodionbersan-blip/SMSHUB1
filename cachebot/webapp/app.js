@@ -1212,9 +1212,6 @@
       btn.addEventListener("click", handler);
       dealModalActions.appendChild(btn);
     };
-    if (actions.cancel) {
-      addAction("Отменить сделку", () => dealAction("cancel", deal.id), false, "status-bad");
-    }
     if (actions.accept_offer) {
       addAction("Принять", () => dealAction("accept", deal.id), true);
     }
@@ -1228,7 +1225,9 @@
       addAction("Готов сканировать", () => dealAction("buyer-ready", deal.id), true);
     }
     if (actions.confirm_seller) {
-      addAction("Получил нал", () => dealAction("confirm-seller", deal.id), true);
+      if (deal.buyer_cash_confirmed) {
+        addAction("Получил нал", () => dealAction("confirm-seller", deal.id), true);
+      }
     }
     if (actions.confirm_buyer) {
       addAction("Успешно снял", () => dealAction("confirm-buyer", deal.id), true);
@@ -1253,6 +1252,9 @@
         false,
         "status-bad"
       );
+    }
+    if (actions.cancel) {
+      addAction("Отменить сделку", () => dealAction("cancel", deal.id), false, "status-bad");
     }
   };
 
