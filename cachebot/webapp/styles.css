@@ -6,7 +6,7 @@
   --card: #ffffff;
   --card-contrast: rgba(15, 17, 21, 0.04);
   --card-contrast-border: rgba(15, 17, 21, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.38);
+  --glass-bg: rgba(255, 255, 255, 0.28);
   --glass-border: rgba(15, 17, 21, 0.08);
   --text: #0f1115;
   --muted: #6b7280;
@@ -236,16 +236,16 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .modal-card.glass .btn.pill {
-  background: linear-gradient(135deg, rgba(77, 163, 255, 0.55), rgba(77, 163, 255, 0.3));
-  border: 1px solid rgba(59, 146, 240, 0.5);
-  color: #1f5fa8;
-  box-shadow: 0 10px 18px rgba(77, 163, 255, 0.25);
+  background: linear-gradient(135deg, rgba(120, 186, 255, 0.4), rgba(120, 186, 255, 0.2));
+  border: 1px solid rgba(77, 163, 255, 0.45);
+  color: #2b6fb9;
+  box-shadow: 0 10px 18px rgba(77, 163, 255, 0.18);
 }
 
 :root[data-theme="light"] .modal-card.glass .btn.pill:hover {
-  background: linear-gradient(135deg, rgba(77, 163, 255, 0.7), rgba(77, 163, 255, 0.4));
-  border-color: rgba(59, 146, 240, 0.65);
-  color: #1b5596;
+  background: linear-gradient(135deg, rgba(120, 186, 255, 0.55), rgba(120, 186, 255, 0.3));
+  border-color: rgba(77, 163, 255, 0.6);
+  color: #245e9e;
 }
 
 
