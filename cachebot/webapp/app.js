@@ -1179,7 +1179,7 @@
       dealModalActions.appendChild(btn);
     };
     if (actions.cancel) {
-      addAction("Отменить сделку", () => dealAction("cancel", deal.id), false);
+      addAction("Отменить сделку", () => dealAction("cancel", deal.id), false, "status-bad");
     }
     if (actions.accept_offer) {
       addAction("Принять", () => dealAction("accept", deal.id), true);
