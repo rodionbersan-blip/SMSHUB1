@@ -1268,13 +1268,23 @@
         item.appendChild(text);
       }
       if (msg.file_url) {
-        const link = document.createElement("a");
-        link.href = msg.file_url;
-        link.target = "_blank";
-        link.rel = "noopener";
-        link.className = "chat-file";
-        link.textContent = msg.file_name || "Файл";
-        item.appendChild(link);
+        const fileName = (msg.file_name || "").toLowerCase();
+        const isImage = /\.(png|jpe?g|gif|webp)$/i.test(fileName);
+        if (isImage) {
+          const img = document.createElement("img");
+          img.src = msg.file_url;
+          img.alt = msg.file_name || "Фото";
+          img.className = "chat-image";
+          item.appendChild(img);
+        } else {
+          const link = document.createElement("a");
+          link.href = msg.file_url;
+          link.target = "_blank";
+          link.rel = "noopener";
+          link.className = "chat-file";
+          link.textContent = msg.file_name || "Файл";
+          item.appendChild(link);
+        }
       }
       const meta = document.createElement("div");
       meta.className = "chat-meta";
