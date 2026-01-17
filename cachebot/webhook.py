@@ -1612,8 +1612,9 @@ async def _deal_payload(
         if deal.dispute_available_at
         else None,
     }
-    last_chat_at = await deps.chat_service.latest_message_at(deal.id)
-    payload["chat_last_at"] = last_chat_at.isoformat() if last_chat_at else None
+    last_chat = await deps.chat_service.latest_message(deal.id)
+    payload["chat_last_at"] = last_chat.created_at.isoformat() if last_chat else None
+    payload["chat_last_sender_id"] = last_chat.sender_id if last_chat else None
     if with_actions:
         payload["actions"] = _deal_actions(deal, user_id)
     return payload

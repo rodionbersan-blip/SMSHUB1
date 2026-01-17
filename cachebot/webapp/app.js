@@ -636,6 +636,9 @@
 
   const isChatUnread = (deal) => {
     if (!deal?.chat_last_at) return false;
+    if (deal.chat_last_sender_id && deal.chat_last_sender_id === state.userId) {
+      return false;
+    }
     const lastMs = parseTime(deal.chat_last_at);
     if (!lastMs) return false;
     const readAt = state.chatLastRead?.[deal.id];

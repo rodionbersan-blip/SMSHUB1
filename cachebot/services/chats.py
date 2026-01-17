@@ -29,6 +29,13 @@ class ChatService:
                 return None
             return messages[-1].created_at
 
+    async def latest_message(self, deal_id: str) -> ChatMessage | None:
+        async with self._lock:
+            messages = self._chats.get(deal_id, [])
+            if not messages:
+                return None
+            return messages[-1]
+
     async def add_message(
         self,
         *,
