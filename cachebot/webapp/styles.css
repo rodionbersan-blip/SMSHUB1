@@ -1281,21 +1281,30 @@ body.modal-open #app {
   pointer-events: none;
   max-width: min(82vw, 420px);
   text-align: center;
-  background: var(--card);
-  color: var(--text);
+  background: rgba(18, 22, 30, 0.55);
+  color: #f6f9ff;
   border-radius: 999px;
   padding: 16px 22px;
   font-size: 15px;
   font-weight: 500;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(77, 163, 255, 0.28);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  transition: opacity 0.22s ease, transform 0.22s ease;
   z-index: 70;
 }
 
 .center-notice.show {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
+}
+
+:root[data-theme="light"] .center-notice {
+  background: rgba(255, 255, 255, 0.55);
+  color: #0f1115;
+  border: 1px solid rgba(15, 17, 21, 0.1);
+  box-shadow: 0 16px 36px rgba(15, 17, 21, 0.18);
 }
 
 .quick-deals-btn {
