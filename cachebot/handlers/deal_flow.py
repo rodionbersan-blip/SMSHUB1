@@ -248,18 +248,6 @@ async def accept(callback: CallbackQuery) -> None:
     except Exception as exc:
         await callback.answer(str(exc), show_alert=True)
         return
-    try:
-        invoice = await deps.crypto_pay.create_invoice(
-            amount=deal.usdt_amount,
-            currency="USDT",
-            description=f"Сделка {deal.hashtag} на {deal.usd_amount} RUB",
-            payload=deal.id,
-        )
-    except Exception as exc:
-        await deps.deal_service.release_deal(deal.id)
-        await callback.answer(f"Не удалось создать счет: {exc}", show_alert=True)
-        return
-    await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
     await callback.answer()
     chat_id = callback.message.chat.id if callback.message else callback.from_user.id
     await _delete_callback_message(callback)
@@ -267,19 +255,8 @@ async def accept(callback: CallbackQuery) -> None:
     info_builder.button(text="К сделке", callback_data=f"{DEAL_INFO_PREFIX}{deal.id}")
     await callback.bot.send_message(
         chat_id,
-        f"Сделка {deal.hashtag} закреплена. Ожидаем оплату продавца.",
+        f"Сделка {deal.hashtag} закреплена. Оплата подтверждена.",
         reply_markup=info_builder.as_markup(),
-    )
-    amount = Decimal(str(invoice.amount)).quantize(Decimal("0.01"), rounding=ROUND_UP)
-    pay_builder = InlineKeyboardBuilder()
-    pay_builder.button(text="💸 Оплатить", url=invoice.pay_url)
-    pay_builder.adjust(1)
-    await callback.bot.send_message(
-        deal.seller_id,
-        f"✅ Сделка {deal.hashtag} закреплена за тобой.\n"
-        f"Оплати {format(amount, 'f')} USDT\n"
-        "После оплаты начнется отсчет времени для открытия спора.",
-        reply_markup=pay_builder.as_markup(),
     )
     buyer_profile = await deps.user_service.ensure_profile(
         callback.from_user.id,
@@ -291,7 +268,7 @@ async def accept(callback: CallbackQuery) -> None:
     builder.button(text="К сделке", callback_data=f"{DEAL_INFO_PREFIX}{deal.id}")
     await callback.bot.send_message(
         deal.seller_id,
-        f"Покупатель {buyer_name} взял сделку {deal.hashtag}. Ожидаем оплату через Crypto Pay.",
+        f"Покупатель {buyer_name} взял сделку {deal.hashtag}. Оплата подтверждена.",
         reply_markup=builder.as_markup(),
     )
 
