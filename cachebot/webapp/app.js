@@ -1482,6 +1482,10 @@
     } else {
       markChatRead(deal.id);
     }
+    if (state.unreadDeals.has(deal.id)) {
+      state.unreadDeals.delete(deal.id);
+      persistUnreadDeals();
+    }
     updateQuickDealsButton(state.deals || []);
     if (quickDealsPanel?.classList.contains("open")) {
       renderQuickDeals();
