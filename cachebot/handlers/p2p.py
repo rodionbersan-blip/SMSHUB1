@@ -28,6 +28,7 @@ P2P_SELL = "p2p:sell"
 P2P_MY_DEALS = "p2p:mydeals"
 P2P_MY_DEALS_PAGE_PREFIX = "p2p:mydeals:page:"
 P2P_MY_DEALS_VIEW_PREFIX = "p2p:mydeals:view:"
+P2P_PROFILE = "p2p:profile"
 P2P_ADS = "p2p:ads"
 P2P_AD_CREATE = "p2p:ad:create"
 P2P_AD_VIEW_PREFIX = "p2p:ad:view:"
@@ -151,8 +152,9 @@ def _p2p_menu_keyboard(active: int, total: int) -> InlineKeyboardBuilder:
     builder.button(text="Продать", callback_data=P2P_SELL)
     builder.button(text="Мои сделки", callback_data=P2P_MY_DEALS)
     builder.button(text=f"Объявления {active}/{total}", callback_data=P2P_ADS)
+    builder.button(text="Мой профиль", callback_data=P2P_PROFILE)
     builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
-    builder.adjust(2, 2, 1)
+    builder.adjust(2, 2, 1, 1)
     return builder
 
 
@@ -447,6 +449,19 @@ async def p2p_menu(callback: CallbackQuery, state: FSMContext) -> None:
 @router.callback_query(F.data == P2P_MENU)
 async def p2p_menu_back(callback: CallbackQuery, state: FSMContext) -> None:
     await _show_p2p_menu(callback, state=state)
+    await callback.answer()
+
+
+@router.callback_query(F.data == P2P_PROFILE)
+async def p2p_profile(callback: CallbackQuery, state: FSMContext) -> None:
+    deps = get_deps()
+    user = callback.from_user
+    if not user:
+        await callback.answer()
+        return
+    await state.update_data(back_action=P2P_MENU)
+    await _delete_callback_message(callback)
+    await _send_profile(user, callback.message.chat.id, callback.bot, state=state)
     await callback.answer()
 
 

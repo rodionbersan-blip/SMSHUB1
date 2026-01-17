@@ -667,6 +667,19 @@ async def balance_withdraw_start(callback: CallbackQuery, state: FSMContext) -> 
     await callback.answer()
 
 
+@router.callback_query(F.data == MenuAction.PROFILE.value)
+async def profile_from_menu(callback: CallbackQuery, state: FSMContext) -> None:
+    user = callback.from_user
+    if not user:
+        await callback.answer()
+        return
+    await state.update_data(back_action=None)
+    chat_id = callback.message.chat.id if callback.message else user.id
+    await _delete_callback_message(callback)
+    await _send_profile(user, chat_id, callback.bot, state=state)
+    await callback.answer()
+
+
 @router.callback_query(F.data.startswith(PROFILE_VIEW_PREFIX))
 async def view_user_profile(callback: CallbackQuery) -> None:
     data = callback.data[len(PROFILE_VIEW_PREFIX) :]

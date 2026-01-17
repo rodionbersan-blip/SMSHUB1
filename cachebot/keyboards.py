@@ -24,6 +24,7 @@ class MenuAction(str, Enum):
     P2P = "menu:p2p"
     OPEN_DEALS = "menu:open_deals"
     MY_DEALS = "menu:my_deals"
+    PROFILE = "menu:profile"
     SETTINGS = "menu:settings"
     SETTINGS_MERCHANT = "menu:settings:merchant"
     SETTINGS_SELLER = "menu:settings:seller"
@@ -54,14 +55,16 @@ def inline_menu(role: UserRole) -> InlineKeyboardMarkup:
         builder.button(text="⚡️ Продать", callback_data=MenuAction.SELL.value)
         builder.button(text="💠 P2P", callback_data=MenuAction.P2P.value)
         builder.button(text="📂 Мои сделки", callback_data=MenuAction.MY_DEALS.value)
+        builder.button(text="👤 Мой профиль", callback_data=MenuAction.PROFILE.value)
         builder.button(text="⚙️ Настройки", callback_data=MenuAction.SETTINGS.value)
         builder.button(text="💰 Баланс", callback_data=MenuAction.BALANCE.value)
-        builder.adjust(2, 2, 1)
+        builder.adjust(2, 2, 2)
     else:
         builder.button(text="📋 Купить", callback_data=MenuAction.OPEN_DEALS.value)
         builder.button(text="💠 P2P", callback_data=MenuAction.P2P.value)
         builder.button(text="📂 Мои сделки", callback_data=MenuAction.MY_DEALS.value)
+        builder.button(text="👤 Мой профиль", callback_data=MenuAction.PROFILE.value)
         builder.button(text="⚙️ Настройки", callback_data=MenuAction.SETTINGS.value)
         builder.button(text="💰 Баланс", callback_data=MenuAction.BALANCE.value)
-        builder.adjust(2, 2, 1)
+        builder.adjust(2, 2, 2)
     return builder.as_markup()
