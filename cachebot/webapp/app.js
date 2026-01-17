@@ -147,6 +147,8 @@
     activeChatDealId: null,
     activeDealId: null,
     dealRefreshTimer: null,
+    livePollTimer: null,
+    livePollInFlight: false,
     reviewsTargetUserId: null,
     canManageDisputes: false,
   };
@@ -1568,6 +1570,28 @@
     }, 5000);
   };
 
+  const startLivePolling = () => {
+    if (state.livePollTimer) return;
+    state.livePollTimer = window.setInterval(async () => {
+      if (state.livePollInFlight) return;
+      state.livePollInFlight = true;
+      try {
+        await loadDeals();
+        if (state.activeDealId && dealModal?.classList.contains("open")) {
+          const payload = await fetchJson(`/api/deals/${state.activeDealId}`);
+          if (payload?.ok) {
+            renderDealModal(payload.deal);
+          }
+        }
+        if (state.activeChatDealId && chatModal?.classList.contains("open")) {
+          await loadChatMessages(state.activeChatDealId);
+        }
+      } finally {
+        state.livePollInFlight = false;
+      }
+    }, 1000);
+  };
+
   const initTelegram = async () => {
     if (tg) {
       tg.ready();
@@ -1592,6 +1616,7 @@
       await loadDeals();
       await loadP2PSummary();
       await loadPublicAds("sell");
+      startLivePolling();
       if (p2pBalanceHint && state.balance !== null) {
         p2pBalanceHint.textContent = `Баланс: ${formatAmount(state.balance)} USDT`;
       }
