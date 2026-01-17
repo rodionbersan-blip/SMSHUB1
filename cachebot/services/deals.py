@@ -257,8 +257,10 @@ class DealService:
                 raise ValueError("Seller cannot accept own deal")
             now = datetime.now(timezone.utc)
             deal.buyer_id = buyer_id
-            deal.status = DealStatus.RESERVED
+            deal.status = DealStatus.PAID
             deal.expires_at = now
+            deal.dispute_available_at = now + self._payment_window
+            deal.dispute_notified = False
             self._deals[deal.id] = deal
             await self._persist()
             return deal

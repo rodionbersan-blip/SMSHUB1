@@ -52,6 +52,10 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/deals/{deal_id}/confirm-buyer", _api_deal_confirm_buyer)
     app.router.add_post("/api/deals/{deal_id}/confirm-seller", _api_deal_confirm_seller)
     app.router.add_post("/api/deals/{deal_id}/open-dispute", _api_deal_open_dispute)
+    app.router.add_get("/api/deals/{deal_id}/chat", _api_deal_chat_list)
+    app.router.add_post("/api/deals/{deal_id}/chat", _api_deal_chat_send)
+    app.router.add_post("/api/deals/{deal_id}/chat/file", _api_deal_chat_send_file)
+    app.router.add_get("/api/chat-files/{deal_id}/{filename}", _api_chat_file)
     app.router.add_get("/api/p2p/summary", _api_p2p_summary)
     app.router.add_get("/api/p2p/banks", _api_p2p_banks)
     app.router.add_get("/api/p2p/ads", _api_p2p_public_ads)
@@ -585,12 +589,126 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
     deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    now = datetime.now(timezone.utc)
+    if deal.dispute_available_at and deal.dispute_available_at > now:
+        remaining = deal.dispute_available_at - now
+        minutes = max(1, int(remaining.total_seconds() // 60))
+        raise web.HTTPBadRequest(text=f"Спор доступен через {minutes} мин")
     try:
         deal = await deps.deal_service.open_dispute(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
+
+
+async def _api_deal_chat_list(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id not in {deal.seller_id, deal.buyer_id} and user_id not in deps.config.admin_ids:
+        raise web.HTTPForbidden(text="Нет доступа")
+    messages = await deps.chat_service.list_messages(deal_id)
+    payload = [
+        {
+            **msg.to_dict(),
+            "file_url": _chat_file_url(request, msg) if msg.file_path else None,
+        }
+        for msg in messages
+    ]
+    return web.json_response({"ok": True, "messages": payload})
+
+
+async def _api_deal_chat_send(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id not in {deal.seller_id, deal.buyer_id} and user_id not in deps.config.admin_ids:
+        raise web.HTTPForbidden(text="Нет доступа")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    text = (body.get("text") or "").strip()
+    if not text:
+        raise web.HTTPBadRequest(text="Пустое сообщение")
+    msg = await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=user_id,
+        text=text,
+        file_path=None,
+        file_name=None,
+    )
+    payload = {**msg.to_dict(), "file_url": None}
+    return web.json_response({"ok": True, "message": payload})
+
+
+async def _api_deal_chat_send_file(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id not in {deal.seller_id, deal.buyer_id} and user_id not in deps.config.admin_ids:
+        raise web.HTTPForbidden(text="Нет доступа")
+    reader = await request.multipart()
+    field = await reader.next()
+    if not field or field.name != "file":
+        raise web.HTTPBadRequest(text="Файл не найден")
+    filename = Path(field.filename or "file").name
+    chat_dir = _chat_dir(deps) / deal_id
+    chat_dir.mkdir(parents=True, exist_ok=True)
+    file_path = chat_dir / filename
+    with file_path.open("wb") as handle:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            handle.write(chunk)
+    text_field = await reader.next()
+    text = None
+    if text_field and text_field.name == "text":
+        raw = await text_field.text()
+        text = raw.strip() if raw else None
+    msg = await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=user_id,
+        text=text,
+        file_path=str(file_path),
+        file_name=filename,
+    )
+    payload = {
+        **msg.to_dict(),
+        "file_url": _chat_file_url(request, msg),
+    }
+    return web.json_response({"ok": True, "message": payload})
+
+
+async def _api_chat_file(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    filename = request.match_info["filename"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id not in {deal.seller_id, deal.buyer_id} and user_id not in deps.config.admin_ids:
+        raise web.HTTPForbidden(text="Нет доступа")
+    chat_dir = _chat_dir(deps).resolve()
+    path = (chat_dir / deal_id / filename).resolve()
+    if chat_dir not in path.parents or not path.exists():
+        raise web.HTTPNotFound()
+    return web.FileResponse(path)
 
 
 async def _api_p2p_summary(request: web.Request) -> web.Response:
@@ -1228,6 +1346,18 @@ async def _has_dispute_access(user_id: int, deps: AppDeps) -> bool:
 
 def _avatar_dir(deps: AppDeps) -> Path:
     return Path(deps.config.storage_path).parent / "avatars"
+
+
+def _chat_dir(deps: AppDeps) -> Path:
+    return Path(deps.config.storage_path).parent / "chat"
+
+
+def _chat_file_url(request: web.Request, msg) -> str | None:
+    if not msg.file_path or not msg.file_name:
+        return None
+    return str(
+        request.url.with_path(f"/api/chat-files/{msg.deal_id}/{msg.file_name}").with_query({})
+    )
 
 
 def _avatar_url(request: web.Request, profile) -> str | None:

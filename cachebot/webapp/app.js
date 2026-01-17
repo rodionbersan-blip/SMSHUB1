@@ -64,6 +64,13 @@
   const dealModalBody = document.getElementById("dealModalBody");
   const dealModalActions = document.getElementById("dealModalActions");
   const dealModalClose = document.getElementById("dealModalClose");
+  const chatModal = document.getElementById("chatModal");
+  const chatModalTitle = document.getElementById("chatModalTitle");
+  const chatModalClose = document.getElementById("chatModalClose");
+  const chatList = document.getElementById("chatList");
+  const chatForm = document.getElementById("chatForm");
+  const chatInput = document.getElementById("chatInput");
+  const chatFile = document.getElementById("chatFile");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
@@ -131,6 +138,7 @@
     reviewsPage: 0,
     reviewsRating: "all",
     unreadDeals: new Set(),
+    activeChatDealId: null,
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -1181,6 +1189,12 @@
       <div class="deal-detail-row"><span>Банкомат:</span>${deal.atm_bank || "—"}</div>
       <div class="deal-detail-row"><span>Контрагент:</span>${counterparty}</div>
     `;
+    if (deal.qr_stage === "awaiting_buyer_ready") {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent = "Ожидаем готовность покупателя!";
+      dealModalBody.appendChild(alert);
+    }
     dealModalActions.innerHTML = "";
     const actions = deal.actions || {};
     const addAction = (label, handler, primary = false, extraClass = "") => {
@@ -1211,9 +1225,72 @@
     if (actions.confirm_buyer) {
       addAction("Успешно снял", () => dealAction("confirm-buyer", deal.id), true);
     }
-    if (actions.open_dispute) {
-      addAction("Открыть спор", () => dealAction("open-dispute", deal.id), false);
+    if (deal.buyer_id && deal.seller_id && ["reserved", "paid", "dispute", "completed"].includes(deal.status)) {
+      addAction("Открыть чат", () => openDealChat(deal), false);
     }
+    if (deal.dispute_available_at && deal.status === "paid") {
+      addAction(
+        "Открыть спор",
+        () => {
+          const availableAt = new Date(deal.dispute_available_at);
+          const now = new Date();
+          if (availableAt > now) {
+            const diffMs = availableAt - now;
+            const minutes = Math.ceil(diffMs / 60000);
+            showNotice(`Открыть спор можно через ${minutes} мин`);
+            return;
+          }
+          dealAction("open-dispute", deal.id);
+        },
+        false,
+        "status-bad"
+      );
+    }
+  };
+
+  const renderChatMessages = (messages) => {
+    if (!chatList) return;
+    chatList.innerHTML = "";
+    (messages || []).forEach((msg) => {
+      const item = document.createElement("div");
+      item.className = `chat-message ${msg.sender_id === state.userId ? "self" : ""}`.trim();
+      if (msg.text) {
+        const text = document.createElement("div");
+        text.textContent = msg.text;
+        item.appendChild(text);
+      }
+      if (msg.file_url) {
+        const link = document.createElement("a");
+        link.href = msg.file_url;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.className = "chat-file";
+        link.textContent = msg.file_name || "Файл";
+        item.appendChild(link);
+      }
+      const meta = document.createElement("div");
+      meta.className = "chat-meta";
+      meta.textContent = formatDate(msg.created_at);
+      item.appendChild(meta);
+      chatList.appendChild(item);
+    });
+    chatList.scrollTop = chatList.scrollHeight;
+  };
+
+  const loadChatMessages = async (dealId) => {
+    const payload = await fetchJson(`/api/deals/${dealId}/chat`);
+    if (!payload?.ok) return;
+    renderChatMessages(payload.messages || []);
+  };
+
+  const openDealChat = async (deal) => {
+    if (!chatModal) return;
+    state.activeChatDealId = deal.id;
+    if (chatModalTitle) {
+      chatModalTitle.textContent = `Чат сделки #${deal.public_id}`;
+    }
+    await loadChatMessages(deal.id);
+    chatModal.classList.add("open");
   };
 
   const openDealModal = async (dealId) => {
@@ -1389,6 +1466,10 @@
     dealModal.classList.remove("open");
   });
 
+  chatModalClose?.addEventListener("click", () => {
+    chatModal?.classList.remove("open");
+  });
+
   p2pModalClose?.addEventListener("click", () => {
     p2pModal.classList.remove("open");
   });
@@ -1403,6 +1484,54 @@
 
   p2pCreateBtn?.addEventListener("click", () => {
     p2pCreateModal.classList.add("open");
+  });
+
+  chatForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const dealId = state.activeChatDealId;
+    if (!dealId) return;
+    const text = (chatInput?.value || "").trim();
+    const file = chatFile?.files?.[0] || null;
+    if (!text && !file) {
+      showNotice("Введите сообщение или выберите файл");
+      return;
+    }
+    if (!state.initData) {
+      showNotice("initData не найден. Откройте WebApp из Telegram.");
+      return;
+    }
+    try {
+      if (file) {
+        const form = new FormData();
+        form.append("file", file);
+        if (text) {
+          form.append("text", text);
+        }
+        const res = await fetch(`/api/deals/${dealId}/chat/file`, {
+          method: "POST",
+          headers: { "X-Telegram-Init-Data": state.initData },
+          body: form,
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          showNotice(errText || "Не удалось отправить файл");
+          return;
+        }
+      } else {
+        const payload = await fetchJson(`/api/deals/${dealId}/chat`, {
+          method: "POST",
+          body: JSON.stringify({ text }),
+        });
+        if (!payload?.ok) {
+          return;
+        }
+      }
+      if (chatInput) chatInput.value = "";
+      if (chatFile) chatFile.value = "";
+      await loadChatMessages(dealId);
+    } catch (err) {
+      showNotice(`Ошибка: ${err.message}`);
+    }
   });
 
   p2pVolumeMax?.addEventListener("click", async () => {

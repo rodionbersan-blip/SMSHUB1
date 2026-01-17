@@ -13,6 +13,7 @@ from cachebot.services.disputes import DisputeService
 from cachebot.services.reviews import ReviewService
 from cachebot.services.topups import TopupService
 from cachebot.services.users import UserService
+from cachebot.services.chats import ChatService
 
 
 @dataclass(slots=True)
@@ -27,6 +28,7 @@ class AppDeps:
     dispute_service: DisputeService
     advert_service: AdvertService
     topup_service: TopupService
+    chat_service: ChatService
 
 
 _current: Optional[AppDeps] = None

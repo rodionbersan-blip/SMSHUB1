@@ -1070,6 +1070,77 @@ body.modal-open #app {
   box-shadow: var(--shadow);
 }
 
+.deal-alert {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--accent);
+  background: rgba(77, 163, 255, 0.14);
+  border: 1px solid rgba(77, 163, 255, 0.3);
+}
+
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 4px 2px 8px;
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 78%;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--card-contrast);
+  border: 1px solid var(--card-contrast-border);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.chat-message.self {
+  align-self: flex-end;
+  background: rgba(77, 163, 255, 0.16);
+  border-color: rgba(77, 163, 255, 0.3);
+}
+
+.chat-meta {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.chat-file {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chat-form input[type="text"] {
+  background: var(--card-contrast);
+  border: 1px solid var(--card-contrast-border);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0 14px;
+  height: 40px;
+}
+
+.chat-attach input {
+  display: none;
+}
+
 .modal-card.glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
