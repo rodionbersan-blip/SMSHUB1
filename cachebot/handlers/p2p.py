@@ -1413,36 +1413,16 @@ async def p2p_offer_accept(callback: CallbackQuery) -> None:
     except (PermissionError, ValueError) as exc:
         await callback.answer(str(exc), show_alert=True)
         return
-    try:
-        invoice = await deps.crypto_pay.create_invoice(
-            amount=deal.usdt_amount,
-            currency="USDT",
-            description=f"Сделка {deal.hashtag} на {deal.usd_amount} RUB",
-            payload=deal.id,
-        )
-        deal = await deps.deal_service.attach_invoice(deal.id, invoice.invoice_id, invoice.pay_url)
-    except Exception as exc:
-        with suppress(Exception):
-            canceled, base_usdt = await deps.deal_service.cancel_deal(deal.id, callback.from_user.id)
-            if canceled.is_p2p and canceled.advert_id and base_usdt:
-                await deps.advert_service.restore_volume(canceled.advert_id, base_usdt)
-        await callback.answer(f"Не удалось создать счет: {exc}", show_alert=True)
-        return
-    amount = Decimal(str(invoice.amount)).quantize(Decimal("0.01"), rounding=ROUND_UP)
-    pay_builder = InlineKeyboardBuilder()
-    pay_builder.button(text="💸 Оплатить", url=invoice.pay_url)
-    pay_builder.adjust(1)
     await callback.bot.send_message(
         deal.seller_id,
-        f"✅ Сделка {deal.hashtag} закреплена за тобой.\n"
-        f"Оплати {format(amount, 'f')} USDT\n"
-        "После оплаты начнется отсчет времени для открытия спора.",
-        reply_markup=pay_builder.as_markup(),
+        f"✅ Сделка {deal.hashtag} подтверждена.\n"
+        "Средства списаны с баланса, можно продолжать сделку.",
     )
     if deal.buyer_id:
         await callback.bot.send_message(
             deal.buyer_id,
-            f"✅ Сделка {deal.hashtag} создана.\nОжидаем оплату продавца.",
+            f"✅ Сделка {deal.hashtag} создана.\n"
+            "Оплата подтверждена, можно продолжать сделку.",
         )
     await _delete_callback_message(callback)
     await callback.message.answer("✅ Предложение принято.")

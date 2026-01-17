@@ -179,9 +179,14 @@ class DealService:
             now = datetime.now(timezone.utc)
             if deal.offer_expires_at and deal.offer_expires_at <= now:
                 raise ValueError("Предложение истекло")
-            deal.status = DealStatus.RESERVED
+            deal.status = DealStatus.PAID
             deal.offer_expires_at = None
             deal.expires_at = now
+            deal.invoice_id = None
+            deal.invoice_url = None
+            deal.dispute_available_at = now + self._payment_window
+            deal.dispute_notified = False
+            self._reset_qr_locked(deal)
             self._deals[deal.id] = deal
             await self._persist()
             return deal
