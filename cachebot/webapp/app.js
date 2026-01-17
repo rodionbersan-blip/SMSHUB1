@@ -1397,6 +1397,12 @@
       alert.textContent = "📎 Прикрепите QR по кнопке ниже.";
       dealModalBody.appendChild(alert);
     }
+    if (deal.qr_stage === "ready" && deal.role === "seller") {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent = "✅ QR прикреплен и отправлен в чат.";
+      dealModalBody.appendChild(alert);
+    }
     const ownerLink = dealModalBody.querySelector(".owner-link");
     if (ownerLink && deal.counterparty?.user_id) {
       ownerLink.addEventListener("click", () => openUserProfile(deal.counterparty.user_id));

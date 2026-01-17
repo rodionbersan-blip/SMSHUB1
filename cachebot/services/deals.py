@@ -187,6 +187,7 @@ class DealService:
             deal.dispute_available_at = now + self._payment_window
             deal.dispute_notified = False
             self._reset_qr_locked(deal)
+            deal.qr_stage = QrStage.AWAITING_BUYER_READY
             self._deals[deal.id] = deal
             await self._persist()
             return deal
@@ -261,6 +262,8 @@ class DealService:
             deal.expires_at = now
             deal.dispute_available_at = now + self._payment_window
             deal.dispute_notified = False
+            self._reset_qr_locked(deal)
+            deal.qr_stage = QrStage.AWAITING_BUYER_READY
             self._deals[deal.id] = deal
             await self._persist()
             return deal
