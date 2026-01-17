@@ -139,6 +139,7 @@
     reviewsRating: "all",
     unreadDeals: new Set(),
     activeChatDealId: null,
+    reviewsTargetUserId: null,
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -712,9 +713,10 @@
     userModal.classList.add("open");
     if (userModalReviews) {
       userModalReviews.onclick = async () => {
-        const reviewsPayload = await fetchJson(`/api/reviews?user_id=${userId}`);
-        if (!reviewsPayload?.ok) return;
-        renderReviews(reviewsPayload.reviews || [], "all");
+        state.reviewsTargetUserId = userId;
+        const reviews = await loadReviews(userId);
+        if (!reviews) return;
+        renderReviews(reviews, "all");
         reviewsModal.classList.add("open");
         window.setTimeout(updateReviewsIndicator, 0);
       };
@@ -1436,10 +1438,14 @@
     renderReviewsPage();
   };
 
-  const loadReviews = async () => {
-    const payload = await fetchJson("/api/reviews");
+  const loadReviews = async (userId = null) => {
+    const path = userId ? `/api/reviews?user_id=${userId}` : "/api/reviews";
+    const payload = await fetchJson(path);
     if (!payload?.ok) return null;
-    const successPercent = state.profileStats?.success_percent ?? 0;
+    const positive = payload.positive ?? 0;
+    const negative = payload.negative ?? 0;
+    const total = positive + negative;
+    const successPercent = total ? Math.round((positive / total) * 100) : 0;
     reviewsSummary.textContent = `Успешные сделки: ${successPercent}%`;
     return payload.reviews || [];
   };
@@ -1642,6 +1648,7 @@
   });
 
   reviewsOpen?.addEventListener("click", async () => {
+    state.reviewsTargetUserId = null;
     const reviews = await loadReviews();
     if (!reviews) return;
     renderReviews(reviews, "all");
@@ -1657,7 +1664,7 @@
     btn.addEventListener("click", async () => {
       reviewTabButtons.forEach((item) => item.classList.remove("active"));
       btn.classList.add("active");
-      const reviews = await loadReviews();
+      const reviews = await loadReviews(state.reviewsTargetUserId);
       if (!reviews) return;
       const rating =
         btn.dataset.tab === "positive" ? 1 : btn.dataset.tab === "negative" ? -1 : "all";

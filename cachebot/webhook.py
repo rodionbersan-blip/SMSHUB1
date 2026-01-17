@@ -1220,7 +1220,14 @@ async def _api_admin_merchant_revoke(request: web.Request) -> web.Response:
 async def _api_reviews_list(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
-    reviews = await deps.review_service.list_for_user(user_id)
+    target_id = user_id
+    raw_target = request.query.get("user_id")
+    if raw_target:
+        try:
+            target_id = int(raw_target)
+        except ValueError:
+            raise web.HTTPBadRequest(text="Некорректный user_id")
+    reviews = await deps.review_service.list_for_user(target_id)
     reviews.sort(key=lambda item: item.created_at, reverse=True)
     payload = []
     for item in reviews:
