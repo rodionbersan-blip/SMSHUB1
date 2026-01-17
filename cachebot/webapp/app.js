@@ -1502,39 +1502,39 @@
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>
     `;
-    if (deal.qr_stage === "awaiting_seller_attach" && deal.role === "seller") {
+    if (deal.status === "paid" && deal.qr_stage === "awaiting_seller_attach" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent =
         "Как будете у банкомата\nНажмите Готов отправить!\nВажно отправить сразу!";
       dealModalBody.appendChild(alert);
     }
-    if (deal.qr_stage === "awaiting_seller_attach" && deal.role === "buyer") {
+    if (deal.status === "paid" && deal.qr_stage === "awaiting_seller_attach" && deal.role === "buyer") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent = "Ожидаем пока продавец дойдет до банкомата.";
       dealModalBody.appendChild(alert);
     }
-    if (deal.qr_stage === "awaiting_buyer_ready" && deal.role === "seller") {
+    if (deal.status === "paid" && deal.qr_stage === "awaiting_buyer_ready" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent =
         "⚠️ Ожидайте готовность покупателя!\nКак покупатель будет готов вам придет уведомление.";
       dealModalBody.appendChild(alert);
     }
-    if (deal.qr_stage === "awaiting_buyer_ready" && deal.role === "buyer") {
+    if (deal.status === "paid" && deal.qr_stage === "awaiting_buyer_ready" && deal.role === "buyer") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent = "⚠️ Продавец готов отправить QR.\nНажмите «Готов сканировать».";
       dealModalBody.appendChild(alert);
     }
-    if (deal.qr_stage === "awaiting_seller_photo" && deal.role === "seller") {
+    if (deal.status === "paid" && deal.qr_stage === "awaiting_seller_photo" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent = "📎 Прикрепите QR по кнопке ниже.";
       dealModalBody.appendChild(alert);
     }
-    if (deal.qr_stage === "ready" && deal.role === "seller") {
+    if (deal.status === "paid" && deal.qr_stage === "ready" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent = "✅ QR прикреплен и отправлен в чат.";
@@ -1585,7 +1585,11 @@
     if (actions.confirm_seller && deal.qr_stage === "ready") {
       addAction(topRow, "Получил нал", () => dealAction("confirm-seller", deal.id), true);
     }
-    if (deal.role === "seller" && ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)) {
+    if (
+      deal.status === "paid" &&
+      deal.role === "seller" &&
+      ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)
+    ) {
       addAction(topRow, "Прикрепить QR", () => uploadQrForDeal(deal.id), true);
     }
     if (actions.confirm_buyer && deal.qr_stage === "ready") {
