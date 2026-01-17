@@ -74,6 +74,7 @@
   const chatFileHint = document.getElementById("chatFileHint");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
+  const quickDealsCount = document.getElementById("quickDealsCount");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
   const quickDealsList = document.getElementById("quickDealsList");
   const quickDealsClose = document.getElementById("quickDealsClose");
@@ -603,6 +604,9 @@
   const updateQuickDealsButton = (activeDeals) => {
     if (!quickDealsBtn) return;
     const deals = activeDeals || [];
+    const activeCount = deals.filter(
+      (deal) => !["completed", "canceled", "expired"].includes(deal.status)
+    ).length;
     const unreadDealIds = new Set(state.unreadDeals);
     deals.forEach((deal) => {
       if (isChatUnread(deal)) {
@@ -610,6 +614,10 @@
       }
     });
     state.unreadDealIds = unreadDealIds;
+    if (quickDealsCount) {
+      quickDealsCount.textContent = activeCount > 9 ? "9+" : `${activeCount}`;
+      quickDealsCount.classList.toggle("show", activeCount > 0);
+    }
     if (quickDealsBadge) {
       const count = unreadDealIds.size;
       quickDealsBadge.textContent = count > 9 ? "9+" : `${count}`;
