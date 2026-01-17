@@ -1187,13 +1187,19 @@
       <div class="deal-detail-row"><span>Курс:</span>1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
       <div class="deal-detail-row"><span>Создано:</span>${formatDate(deal.created_at)}</div>
       <div class="deal-detail-row"><span>Банкомат:</span>${deal.atm_bank || "—"}</div>
-      <div class="deal-detail-row"><span>Контрагент:</span>${counterparty}</div>
+      <div class="deal-detail-row"><span>Контрагент:</span>
+        <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
+      </div>
     `;
     if (deal.qr_stage === "awaiting_buyer_ready") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent = "Ожидаем готовность покупателя!";
       dealModalBody.appendChild(alert);
+    }
+    const ownerLink = dealModalBody.querySelector(".owner-link");
+    if (ownerLink && deal.counterparty?.user_id) {
+      ownerLink.addEventListener("click", () => openUserProfile(deal.counterparty.user_id));
     }
     dealModalActions.innerHTML = "";
     const actions = deal.actions || {};
