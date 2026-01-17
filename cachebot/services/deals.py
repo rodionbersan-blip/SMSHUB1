@@ -610,6 +610,19 @@ class DealService:
             await self._persist()
             return deal
 
+    async def attach_qr_web(self, deal_id: str, seller_id: int, file_name: str) -> Deal:
+        async with self._lock:
+            deal = self._ensure_deal(deal_id)
+            if deal.seller_id != seller_id:
+                raise PermissionError("Нет доступа к сделке")
+            if deal.qr_stage not in {QrStage.AWAITING_SELLER_PHOTO, QrStage.READY}:
+                raise ValueError("Сейчас не требуется отправлять QR")
+            deal.qr_photo_id = f"web:{file_name}"
+            deal.qr_stage = QrStage.READY
+            self._deals[deal.id] = deal
+            await self._persist()
+            return deal
+
     async def confirm_buyer_cash(self, deal_id: str, buyer_id: int) -> tuple[Deal, bool]:
         async with self._lock:
             deal = self._ensure_deal(deal_id)

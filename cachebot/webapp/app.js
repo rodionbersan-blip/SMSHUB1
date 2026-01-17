@@ -1196,7 +1196,7 @@
     if (deal.qr_stage === "awaiting_buyer_ready") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
-      alert.textContent = "Ожидаем готовность покупателя!";
+      alert.textContent = "Ожидайте готовность покупателя!\nНе выходите из сети!\nКак покупатель будет готов вам придет уведомление.";
       dealModalBody.appendChild(alert);
     }
     const ownerLink = dealModalBody.querySelector(".owner-link");
@@ -1229,6 +1229,9 @@
         addAction("Получил нал", () => dealAction("confirm-seller", deal.id), true);
       }
     }
+    if (deal.role === "seller" && ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)) {
+      addAction("Отправить QR", () => uploadQrForDeal(deal.id), true);
+    }
     if (actions.confirm_buyer) {
       addAction("Успешно снял", () => dealAction("confirm-buyer", deal.id), true);
     }
@@ -1256,6 +1259,43 @@
     if (actions.cancel) {
       addAction("Отменить сделку", () => dealAction("cancel", deal.id), false, "status-bad");
     }
+  };
+
+  const uploadQrForDeal = async (dealId) => {
+    if (!state.initData) {
+      showNotice("initData не найден. Откройте WebApp из Telegram.");
+      return;
+    }
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const form = new FormData();
+      form.append("file", file);
+      try {
+        const res = await fetch(`/api/deals/${dealId}/qr`, {
+          method: "POST",
+          headers: { "X-Telegram-Init-Data": state.initData },
+          body: form,
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          showNotice(text || "Не удалось отправить QR");
+          return;
+        }
+        showNotice("QR отправлен");
+        await loadChatMessages(dealId);
+        const payload = await fetchJson(`/api/deals/${dealId}`);
+        if (payload?.ok) {
+          renderDealModal(payload.deal);
+        }
+      } catch (err) {
+        showNotice(`Ошибка: ${err.message}`);
+      }
+    };
+    input.click();
   };
 
   const renderChatMessages = (messages) => {

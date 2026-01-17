@@ -52,6 +52,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/deals/{deal_id}/confirm-buyer", _api_deal_confirm_buyer)
     app.router.add_post("/api/deals/{deal_id}/confirm-seller", _api_deal_confirm_seller)
     app.router.add_post("/api/deals/{deal_id}/open-dispute", _api_deal_open_dispute)
+    app.router.add_post("/api/deals/{deal_id}/qr", _api_deal_upload_qr)
     app.router.add_get("/api/deals/{deal_id}/chat", _api_deal_chat_list)
     app.router.add_post("/api/deals/{deal_id}/chat", _api_deal_chat_send)
     app.router.add_post("/api/deals/{deal_id}/chat/file", _api_deal_chat_send_file)
@@ -520,12 +521,19 @@ async def _api_deal_decline(request: web.Request) -> web.Response:
 
 async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
+    bot = request.app["bot"]
     _, user_id = await _require_user(request)
     deal_id = request.match_info["deal_id"]
     try:
         deal = await deps.deal_service.buyer_ready_for_qr(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
+    with suppress(Exception):
+        await bot.send_message(
+            deal.seller_id,
+            "🔔 Новое уведомление по сделке\n"
+            "Отправьте QR в течение 5 минут.",
+        )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
@@ -584,6 +592,44 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text=str(exc))
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
+
+
+async def _api_deal_upload_qr(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id != deal.seller_id and user_id not in deps.config.admin_ids:
+        raise web.HTTPForbidden(text="Нет доступа")
+    reader = await request.multipart()
+    field = await reader.next()
+    if not field or field.name != "file":
+        raise web.HTTPBadRequest(text="Файл не найден")
+    filename = Path(field.filename or "qr.png").name
+    qr_dir = _qr_dir(deps) / deal_id
+    qr_dir.mkdir(parents=True, exist_ok=True)
+    file_path = qr_dir / filename
+    with file_path.open("wb") as handle:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            handle.write(chunk)
+    await deps.deal_service.attach_qr_web(deal_id, deal.seller_id, filename)
+    msg = await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=user_id,
+        text="QR код",
+        file_path=str(file_path),
+        file_name=filename,
+    )
+    payload = {
+        **msg.to_dict(),
+        "file_url": _chat_file_url(request, msg),
+    }
+    return web.json_response({"ok": True, "message": payload})
 
 
 async def _api_deal_chat_list(request: web.Request) -> web.Response:
@@ -1340,6 +1386,9 @@ def _avatar_dir(deps: AppDeps) -> Path:
 
 def _chat_dir(deps: AppDeps) -> Path:
     return Path(deps.config.storage_path).parent / "chat"
+
+def _qr_dir(deps: AppDeps) -> Path:
+    return Path(deps.config.storage_path).parent / "qr"
 
 
 def _chat_file_url(request: web.Request, msg) -> str | None:
