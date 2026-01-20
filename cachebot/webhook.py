@@ -91,6 +91,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/reviews", _api_reviews_add)
     app.router.add_get("/api/summary", _api_summary)
     app.router.add_get("/api/ping", _api_ping)
+    app.router.add_post("/api/debug/initdata", _api_debug_initdata)
     return app
 
 
@@ -181,6 +182,24 @@ async def _webapp_static(request: web.Request) -> web.Response:
 
 
 async def _api_ping(_: web.Request) -> web.Response:
+    return web.json_response({"ok": True})
+
+
+async def _api_debug_initdata(request: web.Request) -> web.Response:
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+    init_data = (payload.get("init_data") or "").strip()
+    unsafe = payload.get("unsafe") or {}
+    logger.warning(
+        "WebApp init debug: has_init=%s len=%s has_unsafe=%s user=%s ua=%s",
+        bool(init_data),
+        len(init_data),
+        bool(unsafe),
+        (unsafe or {}).get("user"),
+        request.headers.get("User-Agent"),
+    )
     return web.json_response({"ok": True})
 
 

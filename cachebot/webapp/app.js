@@ -2340,6 +2340,18 @@
     if (!state.initData) {
       showNotice("Нет initData. Откройте WebApp из Telegram.");
     }
+    try {
+      await fetch("/api/debug/initdata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          init_data: state.initData || "",
+          unsafe: tg?.initDataUnsafe || null,
+        }),
+      });
+    } catch {
+      // ignore debug errors
+    }
     if (!tg && !state.tgRetryTimer) {
       state.tgRetryTimer = window.setInterval(() => {
         if (window.Telegram?.WebApp) {
