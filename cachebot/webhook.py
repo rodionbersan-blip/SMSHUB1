@@ -1675,9 +1675,7 @@ def _apply_rounded_eyes(img: Image.Image, qr) -> Image.Image:
         outer = 7 * box
         inner = 5 * box
         center = 3 * box
-        radius_outer = int(outer * 0.22)
-        radius_inner = int(inner * 0.22)
-        radius_center = int(center * 0.22)
+        base_radius = max(2, int(box * 1.2))
 
         def draw_eye(x, y):
             x0 = (border + x) * box
@@ -1687,19 +1685,19 @@ def _apply_rounded_eyes(img: Image.Image, qr) -> Image.Image:
             # rounded outer
             draw.rounded_rectangle(
                 (x0, y0, x0 + outer, y0 + outer),
-                radius=radius_outer,
+                radius=min(base_radius, int(outer / 2)),
                 fill=(0, 0, 0),
             )
             # rounded inner
             draw.rounded_rectangle(
                 (x0 + box, y0 + box, x0 + box + inner, y0 + box + inner),
-                radius=radius_inner,
+                radius=min(base_radius, int(inner / 2)),
                 fill=(255, 255, 255),
             )
             # rounded center
             draw.rounded_rectangle(
                 (x0 + 2 * box, y0 + 2 * box, x0 + 2 * box + center, y0 + 2 * box + center),
-                radius=radius_center,
+                radius=min(base_radius, int(center / 2)),
                 fill=(0, 0, 0),
             )
 
