@@ -192,8 +192,10 @@ async def _api_debug_initdata(request: web.Request) -> web.Response:
         payload = {}
     init_data = (payload.get("init_data") or "").strip()
     unsafe = payload.get("unsafe") or {}
+    tag = payload.get("tag") or "-"
     logger.warning(
-        "WebApp init debug: has_init=%s len=%s has_unsafe=%s user=%s ua=%s",
+        "WebApp init debug: tag=%s has_init=%s len=%s has_unsafe=%s user=%s ua=%s",
+        tag,
         bool(init_data),
         len(init_data),
         bool(unsafe),
