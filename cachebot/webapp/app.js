@@ -80,7 +80,6 @@
   const quickDealsCount = document.getElementById("quickDealsCount");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
   const quickDealsList = document.getElementById("quickDealsList");
-  const quickDealsClose = document.getElementById("quickDealsClose");
   const systemNotice = document.getElementById("systemNotice");
   const systemNoticeList = document.getElementById("systemNoticeList");
   const systemNoticeReadAll = document.getElementById("systemNoticeReadAll");
@@ -2120,15 +2119,30 @@
     });
   });
 
+  const setQuickDealsOpen = (open) => {
+    if (!quickDealsPanel) return;
+    quickDealsPanel.classList.toggle("open", open);
+    quickDealsPanel.setAttribute("aria-hidden", open ? "false" : "true");
+  };
+
   quickDealsBtn?.addEventListener("click", () => {
+    const isOpen = quickDealsPanel?.classList.contains("open");
+    if (isOpen) {
+      setQuickDealsOpen(false);
+      return;
+    }
     renderQuickDeals();
-    quickDealsPanel?.classList.add("open");
-    quickDealsPanel?.setAttribute("aria-hidden", "false");
+    setQuickDealsOpen(true);
   });
 
-  quickDealsClose?.addEventListener("click", () => {
-    quickDealsPanel?.classList.remove("open");
-    quickDealsPanel?.setAttribute("aria-hidden", "true");
+  document.addEventListener("click", (event) => {
+    if (!quickDealsPanel?.classList.contains("open")) return;
+    const target = event.target;
+    if (!target) return;
+    if (quickDealsPanel.contains(target) || quickDealsBtn?.contains(target)) {
+      return;
+    }
+    setQuickDealsOpen(false);
   });
 
   systemNoticeReadAll?.addEventListener("click", () => {
