@@ -318,6 +318,12 @@ body.modal-open #app {
   font-size: 0;
 }
 
+.deal-chat-btn .btn-badge,
+.deal-chat-btn .btn-badge.dot {
+  top: -6px;
+  right: -6px;
+}
+
 .btn:hover {
   color: #ffffff;
 }
