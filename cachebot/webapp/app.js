@@ -592,7 +592,7 @@
     let buffer = "";
     let firstPin = "";
     const savedHash = loadPinHash();
-    const biometricEnabled = loadBioFlag();
+    let biometricEnabled = loadBioFlag();
     let autoBioTried = false;
 
     const setHint = (text = "") => {
@@ -604,7 +604,8 @@
       renderPinDots(0);
     };
 
-    const triggerBiometric = () => {
+    const triggerBiometric = (options = {}) => {
+      const { enroll = false, unlockAfter = false } = options;
       const biometric = tg?.BiometricManager;
       if (!biometric || typeof biometric.authenticate !== "function") {
         setHint("Face ID недоступен");
@@ -613,10 +614,13 @@
       const runAuth = () => {
         biometric.authenticate({ reason: "Вход в BC Cash" }, (result) => {
           if (result) {
-            if (mode === "biometric") {
+            if (enroll) {
               saveBioFlag(true);
+              biometricEnabled = true;
             }
-            unlock();
+            if (unlockAfter) {
+              unlock();
+            }
           } else {
             setHint("Face ID не сработал");
           }
@@ -656,21 +660,21 @@
       if (mode === "setup1") pinTitle.textContent = "Придумайте PIN";
       if (mode === "setup2") pinTitle.textContent = "Повторите PIN";
       if (mode === "unlock") pinTitle.textContent = "Введите PIN";
-      if (mode === "biometric") pinTitle.textContent = "Включить Face ID?";
+      const biometricSupported = !!(tg?.BiometricManager && typeof tg.BiometricManager.authenticate === "function");
+      const biometricAvailable = biometricEnabled || (tg?.BiometricManager && tg.BiometricManager.isAccessGranted);
       if (pinActions) {
-        pinActions.classList.toggle("show", mode === "biometric" || (mode === "unlock" && biometricEnabled));
+        pinActions.classList.toggle("show", mode === "unlock" && biometricSupported);
       }
       if (pinBiometric) {
-        pinBiometric.style.display =
-          mode === "unlock" && biometricEnabled ? "block" : mode === "biometric" ? "block" : "none";
+        pinBiometric.style.display = mode === "unlock" && biometricSupported ? "block" : "none";
       }
       if (pinSkipBiometric) {
-        pinSkipBiometric.style.display = mode === "biometric" ? "block" : "none";
+        pinSkipBiometric.style.display = "none";
       }
-      if (mode === "unlock" && biometricEnabled && !autoBioTried) {
+      if (mode === "unlock" && biometricAvailable && !autoBioTried) {
         autoBioTried = true;
         setTimeout(() => {
-          triggerBiometric();
+          triggerBiometric({ unlockAfter: true });
         }, 400);
       }
     };
@@ -709,7 +713,8 @@
         }
         const pinHash = await hashPin(pin);
         savePinHash(pinHash);
-        setMode("biometric");
+        setMode("unlock");
+        triggerBiometric({ enroll: true, unlockAfter: true });
         return;
       }
       if (mode === "unlock") {
@@ -747,7 +752,7 @@
     });
 
     pinBiometric?.addEventListener("click", () => {
-      triggerBiometric();
+      triggerBiometric({ enroll: true, unlockAfter: true });
     });
 
     pinSkipBiometric?.addEventListener("click", () => {
