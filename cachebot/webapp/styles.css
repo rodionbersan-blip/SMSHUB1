@@ -1369,11 +1369,11 @@ body.modal-open #app {
   min-width: 0;
 }
 
-#dealModal .modal-actions-row .btn {
+.modal-actions-row .btn {
   width: 100%;
 }
 
-#dealModal .deal-chat-btn {
+.deal-chat-btn {
   border-radius: 999px;
 }
 
