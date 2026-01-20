@@ -1633,6 +1633,10 @@ body.modal-open #app {
   gap: 10px;
 }
 
+.system-notice-actions .btn {
+  width: 100%;
+}
+
 .system-notice-rate {
   display: none;
   gap: 10px;
@@ -1653,6 +1657,22 @@ body.modal-open #app {
   gap: 10px;
 }
 
+.system-notice-rate-actions .btn {
+  width: 100%;
+}
+
+.system-notice-rate-actions .btn.active {
+  color: #fff;
+  background: rgba(77, 163, 255, 0.9);
+  border-color: rgba(77, 163, 255, 0.95);
+  box-shadow: 0 0 0 1px rgba(77, 163, 255, 0.35), 0 10px 24px rgba(77, 163, 255, 0.3);
+}
+
+.system-notice-rate-actions .btn.status-bad.active {
+  background: rgba(255, 91, 91, 0.92);
+  border-color: rgba(255, 91, 91, 0.95);
+  box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.35), 0 10px 24px rgba(255, 91, 91, 0.25);
+}
 .system-notice-rate textarea {
   width: 100%;
   border: 1px solid var(--border);
