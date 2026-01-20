@@ -1797,8 +1797,18 @@
     input.click();
   };
 
-  const renderChatMessages = (messages) => {
+  const isChatAtBottom = () => {
+    if (!chatList) return true;
+    const threshold = 24;
+    return chatList.scrollTop + chatList.clientHeight >= chatList.scrollHeight - threshold;
+  };
+
+  const renderChatMessages = (messages, options = {}) => {
     if (!chatList) return;
+    const keepPosition = options.keepPosition;
+    const wasAtBottom = keepPosition ? isChatAtBottom() : true;
+    const prevScrollTop = chatList.scrollTop;
+    const prevScrollHeight = chatList.scrollHeight;
     chatList.innerHTML = "";
     (messages || []).forEach((msg) => {
       const item = document.createElement("div");
@@ -1846,14 +1856,19 @@
       item.appendChild(meta);
       chatList.appendChild(item);
     });
-    chatList.scrollTop = chatList.scrollHeight;
+    if (keepPosition && !wasAtBottom) {
+      const nextScrollHeight = chatList.scrollHeight;
+      chatList.scrollTop = prevScrollTop + (nextScrollHeight - prevScrollHeight);
+    } else {
+      chatList.scrollTop = chatList.scrollHeight;
+    }
   };
 
   const loadChatMessages = async (dealId) => {
     const payload = await fetchJson(`/api/deals/${dealId}/chat`);
     if (!payload?.ok) return;
     const messages = payload.messages || [];
-    renderChatMessages(messages);
+    renderChatMessages(messages, { keepPosition: true });
     return messages;
   };
 
