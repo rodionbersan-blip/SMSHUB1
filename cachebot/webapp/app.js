@@ -2249,6 +2249,12 @@
       const urlParams = new URLSearchParams(window.location.search);
       const initFromUrl = urlParams.get("initData");
       state.initData = tg.initData || initFromUrl || "";
+      if (!state.initData && tg.initDataUnsafe) {
+        for (let i = 0; i < 8 && !state.initData; i += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 150));
+          state.initData = tg.initData || initFromUrl || "";
+        }
+      }
       const theme = detectTheme();
       applyTheme(theme);
       updateThemeToggle(theme);
@@ -2259,7 +2265,7 @@
       log("WebApp API не найден. Проверьте запуск через Telegram.", "warn");
     }
     const unsafeUser = tg?.initDataUnsafe?.user;
-    if (unsafeUser && !state.user) {
+    if (unsafeUser) {
       const fullName = [unsafeUser.first_name, unsafeUser.last_name].filter(Boolean).join(" ");
       setAuthState({
         display_name: null,
