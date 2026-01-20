@@ -2798,12 +2798,12 @@
 
   p2pVolumeMax?.addEventListener("click", async () => {
     if (state.balance !== null) {
-      p2pVolume.value = state.balance;
+      p2pVolume.value = formatAmount(state.balance, 3);
       return;
     }
     const balancePayload = await fetchJson("/api/balance");
     if (balancePayload?.ok) {
-      p2pVolume.value = balancePayload.balance;
+      p2pVolume.value = formatAmount(balancePayload.balance, 3);
     }
   });
 
