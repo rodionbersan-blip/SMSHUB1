@@ -2178,7 +2178,7 @@
     if (["completed", "canceled", "expired"].includes(payload.deal.status)) {
       stopDealAutoRefresh();
     }
-    }, 5000);
+    }, 2000);
   };
 
   const startLivePolling = () => {
@@ -2201,7 +2201,7 @@
       } finally {
         state.livePollInFlight = false;
       }
-    }, 1000);
+    }, 500);
   };
 
   const initTelegram = async () => {
