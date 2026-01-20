@@ -54,6 +54,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/deals/{deal_id}/seller-ready", _api_deal_seller_ready)
     app.router.add_post("/api/deals/{deal_id}/confirm-buyer", _api_deal_confirm_buyer)
     app.router.add_post("/api/deals/{deal_id}/confirm-seller", _api_deal_confirm_seller)
+    app.router.add_post("/api/deals/{deal_id}/buyer-proof", _api_deal_buyer_proof)
     app.router.add_post("/api/deals/{deal_id}/open-dispute", _api_deal_open_dispute)
     app.router.add_post("/api/deals/{deal_id}/qr", _api_deal_upload_qr)
     app.router.add_post("/api/deals/{deal_id}/qr-text", _api_deal_upload_qr_text)
@@ -598,8 +599,57 @@ async def _api_deal_confirm_buyer(request: web.Request) -> web.Response:
         deal, _ = await deps.deal_service.confirm_buyer_cash(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
+    if deal.seller_id:
+        await deps.chat_service.add_message(
+            deal_id=deal_id,
+            sender_id=0,
+            text="Покупатель подтвердил перевод. Ожидается фото операции.",
+            file_path=None,
+            file_name=None,
+            system=True,
+            recipient_id=deal.seller_id,
+        )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
+
+
+async def _api_deal_buyer_proof(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id != deal.buyer_id and user_id not in deps.config.admin_ids:
+        raise web.HTTPForbidden(text="Нет доступа")
+    reader = await request.multipart()
+    field = await reader.next()
+    if not field or field.name != "file":
+        raise web.HTTPBadRequest(text="Файл не найден")
+    filename = Path(field.filename or "proof.png").name
+    chat_dir = _chat_dir(deps) / deal_id
+    chat_dir.mkdir(parents=True, exist_ok=True)
+    file_path = chat_dir / filename
+    with file_path.open("wb") as handle:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            handle.write(chunk)
+    msg = await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=0,
+        text="Фото операции от покупателя.",
+        file_path=str(file_path),
+        file_name=filename,
+        system=True,
+        recipient_id=deal.seller_id,
+    )
+    payload = {
+        **msg.to_dict(),
+        "file_url": _chat_file_url(request, msg),
+    }
+    return web.json_response({"ok": True, "message": payload})
 
 
 async def _api_deal_confirm_seller(request: web.Request) -> web.Response:

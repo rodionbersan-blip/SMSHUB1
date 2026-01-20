@@ -1704,7 +1704,10 @@
       addAction(topRow, "Прикрепить QR", () => uploadQrForDeal(deal.id), true);
     }
     if (actions.confirm_buyer && deal.qr_stage === "ready") {
-      addAction(topRow, "Успешно снял", () => dealAction("confirm-buyer", deal.id), true);
+      addAction(topRow, "Успешно снял", () => confirmBuyerWithProof(deal.id), true);
+    } else if (deal.buyer_cash_confirmed) {
+      const doneBtn = addAction(topRow, "Снятие подтверждено", () => {}, false, "status-ok");
+      doneBtn.disabled = true;
     }
     if (deal.buyer_id && deal.seller_id && ["reserved", "paid", "dispute"].includes(deal.status)) {
       const hasUnread = isChatUnread(deal);
@@ -1842,6 +1845,50 @@
       handleScan(data);
       return true;
     });
+  };
+
+  const uploadBuyerProof = async (dealId) => {
+    if (!state.initData) {
+      showNotice("initData не найден. Откройте WebApp из Telegram.");
+      return;
+    }
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const form = new FormData();
+      form.append("file", file);
+      try {
+        const res = await fetch(`/api/deals/${dealId}/buyer-proof`, {
+          method: "POST",
+          headers: { "X-Telegram-Init-Data": state.initData },
+          body: form,
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          showNotice(text || "Не удалось отправить фото");
+          return;
+        }
+        showNotice("Фото операции отправлено");
+        await loadChatMessages(dealId);
+      } catch (err) {
+        showNotice(`Ошибка: ${err.message}`);
+      }
+    };
+    input.click();
+  };
+
+  const confirmBuyerWithProof = async (dealId) => {
+    const payload = await fetchJson(`/api/deals/${dealId}/confirm-buyer`, {
+      method: "POST",
+      body: "{}",
+    });
+    if (!payload?.ok) return;
+    maybeRenderDealModal(payload.deal);
+    showNotice("Подтверждение отправлено. Прикрепите фото операции.");
+    uploadBuyerProof(dealId);
   };
 
   const uploadQrForDeal = async (dealId) => {
