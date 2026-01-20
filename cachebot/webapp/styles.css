@@ -1688,6 +1688,123 @@ body.modal-open #app {
   font-size: 16px;
 }
 
+.pin-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: calc(24px + env(safe-area-inset-top, 0px))
+    calc(20px + env(safe-area-inset-right, 0px))
+    calc(24px + env(safe-area-inset-bottom, 0px))
+    calc(20px + env(safe-area-inset-left, 0px));
+  background: rgba(12, 14, 18, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 80;
+}
+
+.pin-overlay.show {
+  display: flex;
+}
+
+.pin-card {
+  width: min(92vw, 420px);
+  background: rgba(20, 24, 32, 0.86);
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  color: var(--text);
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme="light"] .pin-card {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(15, 17, 21, 0.12);
+  color: #0f1115;
+}
+
+.pin-title {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pin-dots {
+  display: grid;
+  grid-template-columns: repeat(4, 14px);
+  justify-content: center;
+  gap: 10px;
+}
+
+.pin-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(77, 163, 255, 0.5);
+  background: transparent;
+}
+
+.pin-dot.filled {
+  background: rgba(77, 163, 255, 0.9);
+  border-color: rgba(77, 163, 255, 0.9);
+  box-shadow: 0 0 0 4px rgba(77, 163, 255, 0.18);
+}
+
+.pin-hint {
+  min-height: 18px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  justify-items: center;
+}
+
+.pin-key {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px solid rgba(77, 163, 255, 0.35);
+  background: rgba(77, 163, 255, 0.12);
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pin-key:active {
+  transform: scale(0.97);
+}
+
+.pin-key-spacer {
+  width: 64px;
+  height: 64px;
+}
+
+.pin-key-back {
+  font-size: 18px;
+}
+
+.pin-actions {
+  display: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pin-actions.show {
+  display: grid;
+}
+
+.btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
 .btn.loading {
   opacity: 0.7;
   pointer-events: none;

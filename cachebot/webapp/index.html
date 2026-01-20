@@ -445,6 +445,32 @@
       </div>
     </div>
 
+    <div id="pinOverlay" class="pin-overlay" aria-live="polite">
+      <div class="pin-card glass">
+        <div id="pinTitle" class="pin-title">Введите PIN</div>
+        <div id="pinDots" class="pin-dots"></div>
+        <div id="pinHint" class="pin-hint"></div>
+        <div id="pinKeypad" class="pin-keypad" role="group" aria-label="PIN">
+          <button class="pin-key" data-digit="1">1</button>
+          <button class="pin-key" data-digit="2">2</button>
+          <button class="pin-key" data-digit="3">3</button>
+          <button class="pin-key" data-digit="4">4</button>
+          <button class="pin-key" data-digit="5">5</button>
+          <button class="pin-key" data-digit="6">6</button>
+          <button class="pin-key" data-digit="7">7</button>
+          <button class="pin-key" data-digit="8">8</button>
+          <button class="pin-key" data-digit="9">9</button>
+          <span class="pin-key-spacer"></span>
+          <button class="pin-key" data-digit="0">0</button>
+          <button class="pin-key pin-key-back" data-action="back">⌫</button>
+        </div>
+        <div id="pinActions" class="pin-actions">
+          <button id="pinBiometric" class="btn pill">Face ID</button>
+          <button id="pinSkipBiometric" class="btn pill">Пропустить</button>
+        </div>
+      </div>
+    </div>
+
     <script src="/app/assets/lottie.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -473,6 +499,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay66"></script>
+    <script src="/app/app.js?v=pay67"></script>
   </body>
 </html>

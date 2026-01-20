@@ -36,6 +36,14 @@
   const successAnim = document.getElementById("successAnim");
   const centerNotice = document.getElementById("centerNotice");
   const sellQuick = document.getElementById("sellQuick");
+  const pinOverlay = document.getElementById("pinOverlay");
+  const pinTitle = document.getElementById("pinTitle");
+  const pinDots = document.getElementById("pinDots");
+  const pinHint = document.getElementById("pinHint");
+  const pinKeypad = document.getElementById("pinKeypad");
+  const pinActions = document.getElementById("pinActions");
+  const pinBiometric = document.getElementById("pinBiometric");
+  const pinSkipBiometric = document.getElementById("pinSkipBiometric");
   const sellModal = document.getElementById("sellModal");
   const sellModalClose = document.getElementById("sellModalClose");
   const sellForm = document.getElementById("sellForm");
@@ -231,6 +239,8 @@
   const buyerProofStorageKey = "buyerProofSent";
   const completedNoticeStorageKey = "dealCompletedNotified";
   const themeStorageKey = "preferredTheme";
+  const pinHashStorageKey = "appPinHash";
+  const pinBioStorageKey = "appPinBio";
   const loadUnreadDeals = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(unreadStorageKey) || "[]");
@@ -518,6 +528,190 @@
     noticeTimer = window.setTimeout(() => {
       centerNotice.classList.remove("show");
     }, 2200);
+  };
+
+  const loadPinHash = () => {
+    try {
+      return window.localStorage.getItem(pinHashStorageKey) || "";
+    } catch {
+      return "";
+    }
+  };
+  const savePinHash = (hash) => {
+    try {
+      window.localStorage.setItem(pinHashStorageKey, hash);
+    } catch {
+      // ignore
+    }
+  };
+  const loadBioFlag = () => {
+    try {
+      return window.localStorage.getItem(pinBioStorageKey) === "1";
+    } catch {
+      return false;
+    }
+  };
+  const saveBioFlag = (value) => {
+    try {
+      window.localStorage.setItem(pinBioStorageKey, value ? "1" : "0");
+    } catch {
+      // ignore
+    }
+  };
+
+  const hashPin = async (pin) => {
+    const enc = new TextEncoder().encode(pin);
+    const buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  };
+
+  const renderPinDots = (len) => {
+    if (!pinDots) return;
+    pinDots.innerHTML = "";
+    for (let i = 0; i < 4; i += 1) {
+      const dot = document.createElement("span");
+      dot.className = `pin-dot ${i < len ? "filled" : ""}`;
+      pinDots.appendChild(dot);
+    }
+  };
+
+  const showPinOverlay = () => {
+    pinOverlay?.classList.add("show");
+  };
+  const hidePinOverlay = () => {
+    pinOverlay?.classList.remove("show");
+  };
+
+  const initPinGate = () => {
+    if (!pinOverlay || !pinKeypad || !pinTitle) return Promise.resolve(true);
+    let mode = "unlock";
+    let buffer = "";
+    let firstPin = "";
+    const savedHash = loadPinHash();
+    const biometricEnabled = loadBioFlag();
+
+    const setHint = (text = "") => {
+      if (pinHint) pinHint.textContent = text;
+    };
+
+    const resetBuffer = () => {
+      buffer = "";
+      renderPinDots(0);
+    };
+
+    const setMode = (next) => {
+      mode = next;
+      resetBuffer();
+      setHint("");
+      if (mode === "setup1") pinTitle.textContent = "Придумайте PIN";
+      if (mode === "setup2") pinTitle.textContent = "Повторите PIN";
+      if (mode === "unlock") pinTitle.textContent = "Введите PIN";
+      if (mode === "biometric") pinTitle.textContent = "Включить Face ID?";
+      if (pinActions) {
+        pinActions.classList.toggle("show", mode === "biometric" || (mode === "unlock" && biometricEnabled));
+      }
+      if (pinBiometric) {
+        pinBiometric.style.display =
+          mode === "unlock" && biometricEnabled ? "block" : mode === "biometric" ? "block" : "none";
+      }
+      if (pinSkipBiometric) {
+        pinSkipBiometric.style.display = mode === "biometric" ? "block" : "none";
+      }
+    };
+
+    const unlock = () => {
+      hidePinOverlay();
+      resolveGate();
+    };
+
+    let resolveGate = () => {};
+    const gatePromise = new Promise((resolve) => {
+      resolveGate = resolve;
+    });
+
+    if (!savedHash) {
+      setMode("setup1");
+      showPinOverlay();
+    } else {
+      setMode("unlock");
+      showPinOverlay();
+    }
+
+    const handleComplete = async () => {
+      if (buffer.length < 4) return;
+      const pin = buffer;
+      if (mode === "setup1") {
+        firstPin = pin;
+        setMode("setup2");
+        return;
+      }
+      if (mode === "setup2") {
+        if (pin !== firstPin) {
+          setHint("PIN не совпадает. Попробуйте снова.");
+          setMode("setup1");
+          return;
+        }
+        const pinHash = await hashPin(pin);
+        savePinHash(pinHash);
+        setMode("biometric");
+        return;
+      }
+      if (mode === "unlock") {
+        const pinHash = await hashPin(pin);
+        if (pinHash !== savedHash) {
+          setHint("Неверный PIN");
+          resetBuffer();
+          return;
+        }
+        unlock();
+      }
+    };
+
+    pinKeypad.addEventListener("click", async (event) => {
+      const btn = event.target.closest(".pin-key");
+      if (!btn || mode === "biometric") return;
+      const digit = btn.dataset.digit;
+      const action = btn.dataset.action;
+      if (action === "back") {
+        buffer = buffer.slice(0, -1);
+        renderPinDots(buffer.length);
+        return;
+      }
+      if (!digit) return;
+      if (buffer.length >= 4) return;
+      buffer += digit;
+      renderPinDots(buffer.length);
+      if (buffer.length === 4) {
+        await handleComplete();
+      }
+    });
+
+    pinBiometric?.addEventListener("click", async () => {
+      const biometric = tg?.BiometricManager;
+      if (!biometric || typeof biometric.authenticate !== "function") {
+        setHint("Face ID недоступен");
+        return;
+      }
+      biometric.authenticate({ reason: "Вход в BC Cash" }, (result) => {
+        if (result) {
+          if (mode === "biometric") {
+            saveBioFlag(true);
+          }
+          unlock();
+        } else {
+          setHint("Face ID не сработал");
+        }
+      });
+    });
+
+    pinSkipBiometric?.addEventListener("click", () => {
+      saveBioFlag(false);
+      unlock();
+    });
+
+    return gatePromise;
   };
   const playSuccessAnimation = () => {
     if (!successAnim || !window.lottie) {
@@ -3165,5 +3359,11 @@
   });
 
   observeModals();
-  initTelegram();
+  const startApp = async () => {
+    await initTelegram();
+  };
+
+  initPinGate().then(() => {
+    startApp();
+  });
 })();
