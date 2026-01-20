@@ -2309,6 +2309,9 @@
       if (typeof el.scrollIntoView === "function") {
         el.scrollIntoView({ block: "center", behavior: "smooth" });
       }
+      if (p2pModal?.classList.contains("open") && p2pModal.contains(el)) {
+        p2pModalActions?.scrollIntoView({ block: "end", behavior: "smooth" });
+      }
     }, 60);
   });
 
