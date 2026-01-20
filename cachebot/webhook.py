@@ -755,11 +755,12 @@ async def _api_deal_upload_qr(request: web.Request) -> web.Response:
         system=False,
     )
     if deal.buyer_id:
+        deal_label = f"#{deal.public_id}" if getattr(deal, "public_id", None) else deal_id
         with suppress(Exception):
             await request.app["bot"].send_photo(
                 deal.buyer_id,
                 FSInputFile(str(file_path)),
-                caption="QR по сделке.",
+                caption=f"QR по сделке {deal_label}.",
             )
     payload = {
         **msg.to_dict(),
@@ -827,11 +828,12 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
         system=False,
     )
     if deal.buyer_id:
+        deal_label = f"#{deal.public_id}" if getattr(deal, "public_id", None) else deal_id
         with suppress(Exception):
             await request.app["bot"].send_photo(
                 deal.buyer_id,
                 FSInputFile(str(file_path)),
-                caption="QR по сделке.",
+                caption=f"QR по сделке {deal_label}.",
             )
     payload = {
         **msg.to_dict(),

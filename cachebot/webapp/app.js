@@ -1743,7 +1743,7 @@
     }
     if (actions.confirm_buyer && deal.qr_stage === "ready" && !deal.buyer_cash_confirmed) {
       addAction(topRow, "Успешно снял", () => openBuyerProofModal(deal.id), true);
-    } else if (deal.role === "buyer" && deal.buyer_cash_confirmed) {
+    } else if (deal.role === "buyer" && deal.buyer_cash_confirmed && deal.status === "paid") {
       const doneBtn = addAction(topRow, "Снятие подтверждено", () => {}, false, "status-ok");
       doneBtn.disabled = true;
     }
