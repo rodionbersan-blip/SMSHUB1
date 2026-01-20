@@ -739,7 +739,7 @@ body.modal-open #app {
   padding: 10px 12px;
   background: var(--bg);
   color: var(--text);
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .p2p-input-row {
@@ -750,6 +750,7 @@ body.modal-open #app {
 
 .p2p-input-row input {
   flex: 1;
+  font-size: 16px;
 }
 
 .p2p-hint {
@@ -782,6 +783,7 @@ body.modal-open #app {
   padding: 10px 12px;
   background: var(--bg);
   color: var(--text);
+  font-size: 16px;
 }
 
 .p2p-evidence {

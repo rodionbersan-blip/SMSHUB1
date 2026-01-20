@@ -2300,6 +2300,18 @@
     updateReviewsIndicator();
   });
 
+  document.addEventListener("focusin", (event) => {
+    const el = event.target;
+    if (!el) return;
+    const tag = el.tagName;
+    if (tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT") return;
+    window.setTimeout(() => {
+      if (typeof el.scrollIntoView === "function") {
+        el.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+    }, 60);
+  });
+
   profileQuick?.addEventListener("click", () => {
     const display = userBadge.textContent || "—";
     profileQuickName.textContent = display;
