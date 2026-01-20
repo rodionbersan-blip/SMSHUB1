@@ -626,6 +626,7 @@
         autoBioTried = true;
         setTimeout(() => {
           pinBiometric?.click();
+          setTimeout(() => pinBiometric?.click(), 700);
         }, 300);
       }
     };
