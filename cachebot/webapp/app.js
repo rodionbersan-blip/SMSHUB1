@@ -2603,9 +2603,19 @@
   systemNoticeSubmit?.addEventListener("click", async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    if (!systemNoticeSubmit) return;
+    if (systemNoticeSubmit.disabled) {
+      showNotice("Выберите оценку");
+      return;
+    }
+    systemNoticeSubmit.disabled = true;
+    systemNoticeSubmit.classList.add("loading");
+    showNotice("Отправка…");
     const active = state.systemNoticeActive;
     if (!active?.deal_id || !pendingReviewRating) {
       showNotice("Выберите оценку");
+      systemNoticeSubmit.disabled = false;
+      systemNoticeSubmit.classList.remove("loading");
       return;
     }
     const comment = systemNoticeComment?.value || "";
@@ -2617,7 +2627,11 @@
         comment,
       }),
     });
-    if (!payload?.ok) return;
+    if (!payload?.ok) {
+      systemNoticeSubmit.disabled = false;
+      systemNoticeSubmit.classList.remove("loading");
+      return;
+    }
     pendingReviewRating = null;
     if (systemNoticeComment) systemNoticeComment.value = "";
     removeSystemNotice(active.key);
