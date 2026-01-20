@@ -429,7 +429,9 @@
     systemNoticeList.appendChild(row);
     systemNoticeActions?.classList.remove("hidden");
     systemNoticeRateForm?.classList.remove("show");
-    pendingReviewRating = null;
+    if (typeof pendingReviewRating !== "undefined") {
+      pendingReviewRating = null;
+    }
     systemNoticeLike?.classList.remove("active");
     systemNoticeDislike?.classList.remove("active");
     if (systemNoticeSubmit) systemNoticeSubmit.disabled = true;
