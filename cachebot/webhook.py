@@ -743,8 +743,11 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
         import qrcode
         from qrcode.image.styledpil import StyledPilImage
         from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
-        from qrcode.image.styles.eyedrawers import RoundedEyeDrawer
         from qrcode.image.styles.colormasks import SolidFillColorMask
+        try:
+            from qrcode.image.styles.eyedrawers import RoundedEyeDrawer
+        except Exception:
+            RoundedEyeDrawer = None
     except Exception:
         raise web.HTTPInternalServerError(text="QR генератор недоступен")
     chat_dir = _chat_dir(deps) / deal_id
@@ -758,12 +761,14 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
     )
     qr.add_data(text)
     qr.make(fit=True)
-    img = qr.make_image(
+    image_kwargs = dict(
         image_factory=StyledPilImage,
         module_drawer=RoundedModuleDrawer(),
-        eye_drawer=RoundedEyeDrawer(),
         color_mask=SolidFillColorMask(back_color=(255, 255, 255), front_color=(0, 0, 0)),
-    ).convert("RGBA")
+    )
+    if RoundedEyeDrawer:
+        image_kwargs["eye_drawer"] = RoundedEyeDrawer()
+    img = qr.make_image(**image_kwargs).convert("RGBA")
     img = _apply_qr_logo(img)
     img.save(file_path)
     await deps.deal_service.attach_qr_web(deal_id, deal.seller_id, filename)
