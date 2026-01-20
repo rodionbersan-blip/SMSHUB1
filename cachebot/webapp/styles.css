@@ -1300,9 +1300,12 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] #profileModal .modal-title,
-:root[data-theme="light"] #profileModal .profile-value,
-:root[data-theme="light"] #profileModal .profile-muted {
+:root[data-theme="light"] #profileModal .profile-value {
   color: #fff;
+}
+
+:root[data-theme="light"] #profileModal .profile-muted {
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .modal-header {
