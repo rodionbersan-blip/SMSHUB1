@@ -1356,19 +1356,25 @@ body.modal-open #app {
 }
 
 .modal-actions-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .modal-actions-bottom {
-  flex-wrap: nowrap;
-  justify-content: space-between;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .modal-actions-bottom .btn {
-  flex: 1 1 0;
   min-width: 0;
+}
+
+#dealModal .modal-actions-row .btn {
+  width: 100%;
+}
+
+#dealModal .deal-chat-btn {
+  border-radius: 999px;
 }
 
 .modal-note {
