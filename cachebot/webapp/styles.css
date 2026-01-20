@@ -1715,6 +1715,16 @@ body.pin-lock {
   overscroll-behavior: none;
 }
 
+body.pin-lock,
+body.pin-lock #app,
+body.pin-lock .app {
+  background: transparent;
+}
+
+.pin-overlay {
+  overscroll-behavior: none;
+}
+
 .pin-card {
   width: min(92vw, 420px);
   background: transparent;
@@ -1800,6 +1810,19 @@ body.pin-lock {
 
 .pin-key-back {
   font-size: 18px;
+}
+
+.pin-key-bio {
+  font-size: 18px;
+}
+
+.pin-key-bio::after {
+  content: "Face ID";
+  display: block;
+  font-size: 9px;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.6px;
 }
 
 .pin-key-num {

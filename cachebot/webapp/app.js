@@ -681,6 +681,10 @@
         renderPinDots(buffer.length);
         return;
       }
+      if (action === "bio") {
+        pinBiometric?.click();
+        return;
+      }
       if (!digit) return;
       if (buffer.length >= 4) return;
       buffer += digit;
