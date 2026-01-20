@@ -153,6 +153,7 @@
     pendingRead: {},
     systemNotifications: [],
     dealStatusMap: {},
+    lastQuickBadgeCount: 0,
     activeChatDealId: null,
     activeDealId: null,
     dealRefreshTimer: null,
@@ -874,6 +875,14 @@
       const count = chatCount + pendingSet.size;
       quickDealsBadge.textContent = count > 9 ? "9+" : `${count}`;
       quickDealsBadge.classList.toggle("show", count > 0);
+      if (count > state.lastQuickBadgeCount) {
+        try {
+          tg?.HapticFeedback?.notificationOccurred("success");
+        } catch {
+          // ignore haptics errors
+        }
+      }
+      state.lastQuickBadgeCount = count;
     }
   };
 
