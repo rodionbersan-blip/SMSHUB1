@@ -1635,6 +1635,9 @@ body.modal-open #app {
 
 .system-notice-actions .btn {
   width: 100%;
+  height: 46px;
+  padding: 0 18px;
+  font-size: 14px;
 }
 
 .system-notice-rate {

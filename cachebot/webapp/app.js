@@ -394,6 +394,10 @@
     systemNoticeList.appendChild(row);
     systemNoticeActions?.classList.remove("hidden");
     systemNoticeRateForm?.classList.remove("show");
+    pendingReviewRating = null;
+    systemNoticeLike?.classList.remove("active");
+    systemNoticeDislike?.classList.remove("active");
+    if (systemNoticeSubmit) systemNoticeSubmit.disabled = true;
     systemNotice.classList.add("show");
     clearSystemNoticeTimer();
     if (autoClose) {
@@ -2441,6 +2445,9 @@
     pendingReviewRating = value;
     systemNoticeLike?.classList.toggle("active", value === 1);
     systemNoticeDislike?.classList.toggle("active", value === -1);
+    if (systemNoticeSubmit) {
+      systemNoticeSubmit.disabled = !pendingReviewRating;
+    }
   };
 
   systemNoticeLike?.addEventListener("click", () => setReviewRating(1));
