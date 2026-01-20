@@ -193,15 +193,26 @@ async def _api_debug_initdata(request: web.Request) -> web.Response:
     init_data = (payload.get("init_data") or "").strip()
     unsafe = payload.get("unsafe") or {}
     tag = payload.get("tag") or "-"
+    message = payload.get("message")
+    source = payload.get("source")
+    line = payload.get("line")
+    col = payload.get("col")
+    stack = payload.get("stack")
     logger.warning(
-        "WebApp init debug: tag=%s has_init=%s len=%s has_unsafe=%s user=%s ua=%s",
+        "WebApp init debug: tag=%s has_init=%s len=%s has_unsafe=%s user=%s ua=%s msg=%s src=%s line=%s col=%s",
         tag,
         bool(init_data),
         len(init_data),
         bool(unsafe),
         (unsafe or {}).get("user"),
         request.headers.get("User-Agent"),
+        message,
+        source,
+        line,
+        col,
     )
+    if stack:
+        logger.warning("WebApp init debug: stack=%s", stack)
     return web.json_response({"ok": True})
 
 
