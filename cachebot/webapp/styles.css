@@ -51,6 +51,13 @@ body {
   line-height: 1.6;
 }
 
+input,
+textarea,
+select {
+  font: inherit;
+  font-size: 16px;
+}
+
 body.modal-open {
   overflow: hidden;
   touch-action: none;
