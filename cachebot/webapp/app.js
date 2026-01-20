@@ -502,6 +502,7 @@
     logEl.prepend(line);
   };
 
+  let pendingReviewRating = null;
   let successAnimInstance = null;
   let successAnimHideTimer = null;
   let noticeTimer = null;
@@ -2580,7 +2581,6 @@
     }
   });
 
-  let pendingReviewRating = null;
   const setReviewRating = (value) => {
     pendingReviewRating = value;
     systemNoticeLike?.classList.toggle("active", value === 1);
