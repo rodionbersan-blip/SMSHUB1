@@ -14,6 +14,7 @@ class ChatMessage:
     file_name: str | None
     created_at: datetime
     system: bool = False
+    recipient_id: int | None = None
 
     def to_dict(self) -> dict[str, str | int | bool | None]:
         return {
@@ -25,10 +26,13 @@ class ChatMessage:
             "file_name": self.file_name,
             "created_at": self.created_at.isoformat(),
             "system": self.system,
+            "recipient_id": self.recipient_id,
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, str | int | bool | None]) -> "ChatMessage":
+        recipient = data.get("recipient_id")
+        recipient_id = int(recipient) if recipient is not None else None
         return cls(
             id=str(data["id"]),
             deal_id=str(data["deal_id"]),
@@ -38,4 +42,5 @@ class ChatMessage:
             file_name=data.get("file_name"),
             created_at=datetime.fromisoformat(str(data["created_at"])),
             system=bool(data.get("system", False)),
+            recipient_id=recipient_id,
         )

@@ -538,6 +538,7 @@ async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
         file_path=None,
         file_name=None,
         system=True,
+        recipient_id=deal.seller_id,
     )
     await deps.chat_service.add_message(
         deal_id=deal_id,
@@ -546,6 +547,7 @@ async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
         file_path=None,
         file_name=None,
         system=True,
+        recipient_id=deal.seller_id,
     )
     with suppress(Exception):
         await bot.send_message(
@@ -572,6 +574,7 @@ async def _api_deal_seller_ready(request: web.Request) -> web.Response:
         file_path=None,
         file_name=None,
         system=True,
+        recipient_id=deal.buyer_id,
     )
     if deal.buyer_id:
         with suppress(Exception):
@@ -732,7 +735,10 @@ async def _api_deal_chat_list(request: web.Request) -> web.Response:
         raise web.HTTPNotFound(text="Сделка не найдена")
     if user_id not in {deal.seller_id, deal.buyer_id} and user_id not in deps.config.admin_ids:
         raise web.HTTPForbidden(text="Нет доступа")
-    messages = await deps.chat_service.list_messages(deal_id)
+    include_all = user_id in deps.config.admin_ids
+    messages = await deps.chat_service.list_messages_for_user(
+        deal_id, user_id, include_all=include_all
+    )
     payload = [
         {
             **msg.to_dict(),
@@ -1762,7 +1768,10 @@ async def _deal_payload(
     if deal.status == DealStatus.DISPUTE:
         dispute = await deps.dispute_service.dispute_for_deal(deal.id)
         payload["dispute_id"] = dispute.id if dispute else None
-    last_chat = await deps.chat_service.latest_message(deal.id)
+    include_all = user_id in deps.config.admin_ids
+    last_chat = await deps.chat_service.latest_message_for_user(
+        deal.id, user_id, include_all=include_all
+    )
     payload["chat_last_at"] = last_chat.created_at.isoformat() if last_chat else None
     payload["chat_last_sender_id"] = last_chat.sender_id if last_chat else None
     if with_actions:

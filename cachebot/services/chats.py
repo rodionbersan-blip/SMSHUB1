@@ -45,6 +45,7 @@ class ChatService:
         file_path: str | None,
         file_name: str | None,
         system: bool = False,
+        recipient_id: int | None = None,
     ) -> ChatMessage:
         async with self._lock:
             msg = ChatMessage(
@@ -56,11 +57,39 @@ class ChatService:
                 file_name=file_name,
                 created_at=datetime.now(timezone.utc),
                 system=system,
+                recipient_id=recipient_id,
             )
             bucket = self._chats.setdefault(deal_id, [])
             bucket.append(msg)
             await self._repository.persist_chats(self._chats)
             return msg
+
+    async def list_messages_for_user(
+        self,
+        deal_id: str,
+        user_id: int,
+        *,
+        include_all: bool = False,
+    ) -> List[ChatMessage]:
+        async with self._lock:
+            messages = list(self._chats.get(deal_id, []))
+        if include_all:
+            return messages
+        return [
+            msg
+            for msg in messages
+            if msg.recipient_id is None or msg.recipient_id == user_id
+        ]
+
+    async def latest_message_for_user(
+        self,
+        deal_id: str,
+        user_id: int,
+        *,
+        include_all: bool = False,
+    ) -> ChatMessage | None:
+        messages = await self.list_messages_for_user(deal_id, user_id, include_all=include_all)
+        return messages[-1] if messages else None
 
     async def purge_chat(self, deal_id: str) -> None:
         async with self._lock:
