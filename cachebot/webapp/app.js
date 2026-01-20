@@ -10,6 +10,7 @@
           source: event.filename,
           line: event.lineno,
           col: event.colno,
+          stack: event?.error?.stack || null,
         }),
       });
     } catch {
