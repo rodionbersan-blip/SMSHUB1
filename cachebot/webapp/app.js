@@ -2258,6 +2258,15 @@
   };
 
   const initTelegram = async () => {
+    try {
+      await fetch("/api/debug/initdata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag: "init-start" }),
+      });
+    } catch {
+      // ignore debug
+    }
     if (!tg && window.Telegram?.WebApp) {
       tg = window.Telegram.WebApp;
     }
@@ -2318,6 +2327,18 @@
     };
 
     await bootstrapApp();
+    try {
+      await fetch("/api/debug/initdata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tag: "init-after",
+          has_init: Boolean(state.initData),
+        }),
+      });
+    } catch {
+      // ignore debug
+    }
     if (!state.bootstrapDone && tg) {
       state.initRetryTimer = window.setInterval(async () => {
         if (state.bootstrapDone) {
