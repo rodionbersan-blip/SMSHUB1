@@ -169,6 +169,7 @@
   const pendingReadStorageKey = "dealPendingRead";
   const systemNoticeStorageKey = "systemNotifications";
   const dealStatusStorageKey = "dealStatusMap";
+  const themeStorageKey = "preferredTheme";
   const loadUnreadDeals = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(unreadStorageKey) || "[]");
@@ -462,6 +463,14 @@
     }
   };
 
+  const persistTheme = (theme) => {
+    try {
+      window.localStorage.setItem(themeStorageKey, theme);
+    } catch {
+      // ignore storage errors
+    }
+  };
+
   const updateThemeToggle = (theme) => {
     if (!themeToggle) return;
     const label = themeToggle.querySelector(".theme-switch-label");
@@ -472,6 +481,12 @@
   };
 
   const detectTheme = () => {
+    try {
+      const saved = window.localStorage.getItem(themeStorageKey);
+      if (saved === "light" || saved === "dark") return saved;
+    } catch {
+      // ignore storage errors
+    }
     if (tg?.colorScheme) return tg.colorScheme;
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   };
@@ -2025,6 +2040,7 @@
     const next = current === "light" ? "dark" : "light";
     applyTheme(next);
     updateThemeToggle(next);
+    persistTheme(next);
   });
 
   navButtons.forEach((btn) => {
