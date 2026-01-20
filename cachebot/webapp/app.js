@@ -2569,9 +2569,14 @@
     renderSystemNotifications();
   };
 
-  systemNoticeRate?.addEventListener("click", () => {
+  systemNoticeRate?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     clearSystemNoticeTimer();
     systemNoticeRateForm?.classList.add("show");
+    if (systemNoticeSubmit) {
+      systemNoticeSubmit.disabled = !pendingReviewRating;
+    }
   });
 
   systemNoticeSkip?.addEventListener("click", () => {
@@ -2595,7 +2600,9 @@
   systemNoticeLike?.addEventListener("click", () => setReviewRating(1));
   systemNoticeDislike?.addEventListener("click", () => setReviewRating(-1));
 
-  systemNoticeSubmit?.addEventListener("click", async () => {
+  systemNoticeSubmit?.addEventListener("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     const active = state.systemNoticeActive;
     if (!active?.deal_id || !pendingReviewRating) {
       showNotice("Выберите оценку");

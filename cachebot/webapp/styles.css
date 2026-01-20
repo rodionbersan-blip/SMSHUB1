@@ -1643,6 +1643,8 @@ body.modal-open #app {
 .system-notice-rate {
   display: none;
   gap: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .system-notice-rate.show {
