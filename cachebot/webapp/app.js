@@ -2550,6 +2550,14 @@
     }
     if (tg) {
       tg.ready();
+      const platform = (tg.platform || "").toLowerCase();
+      const isMobile =
+        platform === "android" ||
+        platform === "ios" ||
+        /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+      if (isMobile) {
+        tg.expand();
+      }
       const urlParams = new URLSearchParams(window.location.search);
       const initFromUrl = urlParams.get("initData");
       state.initData = tg.initData || initFromUrl || "";
