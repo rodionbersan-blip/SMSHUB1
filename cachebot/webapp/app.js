@@ -579,9 +579,11 @@
 
   const showPinOverlay = () => {
     pinOverlay?.classList.add("show");
+    document.body.classList.add("pin-lock");
   };
   const hidePinOverlay = () => {
     pinOverlay?.classList.remove("show");
+    document.body.classList.remove("pin-lock");
   };
 
   const initPinGate = () => {
