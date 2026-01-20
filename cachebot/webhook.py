@@ -1097,8 +1097,14 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
         rub_amount = Decimal(str(body.get("rub_amount")))
     except (InvalidOperation, TypeError):
         raise web.HTTPBadRequest(text="Некорректная сумма")
+    bank = (body.get("bank") or "").strip()
     if rub_amount < ad.min_rub or rub_amount > ad.max_rub:
         raise web.HTTPBadRequest(text="Сумма должна быть в пределах лимитов объявления")
+    if ad.banks:
+        if not bank:
+            raise web.HTTPBadRequest(text="Выберите банкомат")
+        if bank not in ad.banks:
+            raise web.HTTPBadRequest(text="Некорректный банкомат")
     base_usdt = rub_amount / ad.price_rub
     if ad.side == AdvertSide.SELL:
         seller_id = ad.owner_id
@@ -1117,6 +1123,7 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
             initiator_id=user_id,
             usd_amount=rub_amount,
             rate=ad.price_rub,
+            atm_bank=bank if ad.banks else None,
             advert_id=ad.id,
             comment=ad.terms,
         )

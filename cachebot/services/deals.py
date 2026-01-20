@@ -122,6 +122,7 @@ class DealService:
         initiator_id: int,
         usd_amount: Decimal,
         rate: Decimal,
+        atm_bank: str | None = None,
         advert_id: str | None = None,
         comment: str | None = None,
     ) -> Deal:
@@ -159,6 +160,7 @@ class DealService:
                 public_id=self._next_public_id_locked(),
                 is_p2p=True,
                 advert_id=advert_id,
+                atm_bank=atm_bank,
             )
             deal.dispute_available_at = None
             deal.dispute_notified = False

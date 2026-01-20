@@ -1169,6 +1169,24 @@
     const btn = document.createElement("button");
     btn.className = "btn primary";
     btn.textContent = ad.side === "sell" ? "Купить" : "Продать";
+    let selectedBank = ad.banks?.length === 1 ? ad.banks[0] : "";
+    const bankChoices = document.createElement("div");
+    bankChoices.className = "p2p-bank-choices";
+    if (ad.banks && ad.banks.length > 1) {
+      ad.banks.forEach((bank) => {
+        const bankBtn = document.createElement("button");
+        bankBtn.type = "button";
+        bankBtn.className = "btn pill p2p-bank-btn";
+        bankBtn.textContent = bank;
+        bankBtn.addEventListener("click", () => {
+          selectedBank = bank;
+          bankChoices.querySelectorAll(".p2p-bank-btn").forEach((el) => {
+            el.classList.toggle("active", el.textContent === bank);
+          });
+        });
+        bankChoices.appendChild(bankBtn);
+      });
+    }
     btn.addEventListener("click", async () => {
       const rub = Number(input.value);
       if (!rub || rub <= 0) {
@@ -1176,20 +1194,38 @@
         return;
       }
       p2pModalActions.innerHTML = "";
+      if (ad.banks && ad.banks.length > 1) {
+        const bankTitle = document.createElement("div");
+        bankTitle.className = "deal-row";
+        bankTitle.textContent = "Выберите банкомат:";
+        p2pModalActions.appendChild(bankTitle);
+        p2pModalActions.appendChild(bankChoices);
+      }
       const confirm = document.createElement("div");
       confirm.className = "deal-row";
       confirm.textContent = `Подтвердите сумму ₽${formatAmount(rub, 0)} для сделки.`;
       const confirmBtn = document.createElement("button");
       confirmBtn.className = "btn primary";
       confirmBtn.textContent = "Предложить сделку";
+      if (ad.banks && ad.banks.length > 1 && !selectedBank) {
+        confirmBtn.disabled = true;
+      }
       const cancelBtn = document.createElement("button");
       cancelBtn.className = "btn";
       cancelBtn.textContent = "Отмена";
       cancelBtn.addEventListener("click", () => {
         p2pModalActions.innerHTML = "";
         p2pModalActions.appendChild(input);
+        if (ad.banks && ad.banks.length > 1) {
+          p2pModalActions.appendChild(bankChoices);
+        }
         p2pModalActions.appendChild(btn);
       });
+      if (ad.banks && ad.banks.length > 1) {
+        bankChoices.addEventListener("click", () => {
+          confirmBtn.disabled = !selectedBank;
+        });
+      }
       confirmBtn.addEventListener("click", async () => {
         if (!state.initData) {
           showNotice("initData не найден. Откройте WebApp из Telegram.");
@@ -1202,7 +1238,7 @@
               "Content-Type": "application/json",
               "X-Telegram-Init-Data": state.initData,
             },
-            body: JSON.stringify({ rub_amount: rub }),
+            body: JSON.stringify({ rub_amount: rub, bank: selectedBank }),
           });
           if (!res.ok) {
             let message = "Не удалось создать сделку.";
@@ -1233,6 +1269,9 @@
       p2pModalActions.appendChild(cancelBtn);
     });
     p2pModalActions.appendChild(input);
+    if (ad.banks && ad.banks.length > 1) {
+      p2pModalActions.appendChild(bankChoices);
+    }
     p2pModalActions.appendChild(btn);
     p2pModal.classList.add("open");
     const ownerLink = p2pModalBody.querySelector(".owner-link");
