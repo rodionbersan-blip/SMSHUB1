@@ -1922,6 +1922,7 @@
       await loadProfile();
       await loadBalance();
       await loadDeals();
+      setView("profile");
       await loadP2PSummary();
       await loadPublicAds("sell");
       startLivePolling();
