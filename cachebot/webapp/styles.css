@@ -1172,7 +1172,7 @@ body.modal-open #app {
 
 .chat-form {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr) 44px minmax(120px, 36%);
   gap: 8px;
   margin-top: 12px;
   align-items: center;
