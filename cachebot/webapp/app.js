@@ -75,6 +75,14 @@
   const imageModal = document.getElementById("imageModal");
   const imageModalImg = document.getElementById("imageModalImg");
   const imageModalClose = document.getElementById("imageModalClose");
+  const buyerProofModal = document.getElementById("buyerProofModal");
+  const buyerProofClose = document.getElementById("buyerProofClose");
+  const buyerProofPick = document.getElementById("buyerProofPick");
+  const buyerProofSend = document.getElementById("buyerProofSend");
+  const buyerProofPreview = document.getElementById("buyerProofPreview");
+  const buyerProofImg = document.getElementById("buyerProofImg");
+  const buyerProofTitle = document.getElementById("buyerProofTitle");
+  const buyerProofActions = document.getElementById("buyerProofActions");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsCount = document.getElementById("quickDealsCount");
@@ -166,6 +174,7 @@
     activeDealSnapshot: null,
     buyerProofDraft: {},
     buyerProofSent: {},
+    buyerProofDealId: null,
     systemNoticeShownOnce: false,
     systemNoticeTimer: null,
     systemNoticeActive: null,
@@ -368,8 +377,15 @@
     clearSystemNoticeTimer();
     if (autoClose) {
       state.systemNoticeTimer = window.setTimeout(() => {
+        if (item?.key) {
+          state.systemNotifications = (state.systemNotifications || []).filter(
+            (entry) => entry.key !== item.key
+          );
+          persistSystemNotifications();
+        }
         hideSystemNotice();
-      }, 3000);
+        renderSystemNotifications();
+      }, 4000);
     }
   };
 
@@ -1673,60 +1689,6 @@
       alert.textContent = "✅ QR прикреплен и отправлен в чат.";
       dealModalBody.appendChild(alert);
     }
-    if (deal.role === "buyer" && deal.buyer_cash_confirmed && deal.status === "paid") {
-      const proofWrap = document.createElement("div");
-      proofWrap.className = "deal-proof";
-      const title = document.createElement("div");
-      title.className = "deal-proof-title";
-      title.textContent = "Прикрепите фото операции и нажмите отправить.";
-      const preview = document.createElement("div");
-      preview.className = "deal-proof-preview";
-      const img = document.createElement("img");
-      img.alt = "Фото операции";
-      preview.appendChild(img);
-      const actions = document.createElement("div");
-      actions.className = "deal-proof-actions";
-      const pickBtn = document.createElement("button");
-      pickBtn.className = "btn pill";
-      pickBtn.textContent = "Выбрать фото";
-      const sendBtn = document.createElement("button");
-      sendBtn.className = "btn primary";
-      sendBtn.textContent = "Отправить фото";
-      sendBtn.disabled = true;
-      const draft = state.buyerProofDraft?.[deal.id];
-      const proofSent = state.buyerProofSent?.[deal.id];
-      if (proofSent) {
-        title.textContent = "Фото операции отправлено.";
-        pickBtn.disabled = true;
-        sendBtn.disabled = true;
-      } else if (draft?.url) {
-        img.src = draft.url;
-        preview.classList.add("show");
-        sendBtn.disabled = false;
-      }
-      pickBtn.addEventListener("click", () => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = () => {
-          const file = input.files?.[0];
-          if (!file) return;
-          const url = URL.createObjectURL(file);
-          state.buyerProofDraft[deal.id] = { file, url };
-          img.src = url;
-          preview.classList.add("show");
-          sendBtn.disabled = false;
-        };
-        input.click();
-      });
-      sendBtn.addEventListener("click", () => uploadBuyerProof(deal.id));
-      actions.appendChild(pickBtn);
-      actions.appendChild(sendBtn);
-      proofWrap.appendChild(title);
-      proofWrap.appendChild(preview);
-      proofWrap.appendChild(actions);
-      dealModalBody.appendChild(proofWrap);
-    }
     const ownerLink = dealModalBody.querySelector(".owner-link");
     if (ownerLink && deal.counterparty?.user_id) {
       ownerLink.addEventListener("click", () => openUserProfile(deal.counterparty.user_id));
@@ -1779,9 +1741,9 @@
     ) {
       addAction(topRow, "Прикрепить QR", () => uploadQrForDeal(deal.id), true);
     }
-    if (actions.confirm_buyer && deal.qr_stage === "ready") {
-      addAction(topRow, "Успешно снял", () => confirmBuyerWithProof(deal.id), true);
-    } else if (deal.buyer_cash_confirmed) {
+    if (actions.confirm_buyer && deal.qr_stage === "ready" && !deal.buyer_cash_confirmed) {
+      addAction(topRow, "Успешно снял", () => openBuyerProofModal(deal.id), true);
+    } else if (deal.role === "buyer" && deal.buyer_cash_confirmed) {
       const doneBtn = addAction(topRow, "Снятие подтверждено", () => {}, false, "status-ok");
       doneBtn.disabled = true;
     }
@@ -1923,6 +1885,42 @@
     });
   };
 
+  const resetBuyerProofModal = (dealId) => {
+    if (!buyerProofModal) return;
+    if (buyerProofTitle) {
+      buyerProofTitle.textContent = "Прикрепите фото операции и нажмите отправить.";
+    }
+    if (buyerProofImg) buyerProofImg.removeAttribute("src");
+    buyerProofPreview?.classList.remove("show");
+    if (buyerProofSend) buyerProofSend.disabled = true;
+    if (buyerProofPick) buyerProofPick.disabled = false;
+    buyerProofActions?.classList.remove("is-hidden");
+    const draft = state.buyerProofDraft?.[dealId];
+    if (draft?.url && buyerProofImg && buyerProofPreview && buyerProofSend) {
+      buyerProofImg.src = draft.url;
+      buyerProofPreview.classList.add("show");
+      buyerProofSend.disabled = false;
+    }
+    if (state.buyerProofSent?.[dealId]) {
+      if (buyerProofTitle) buyerProofTitle.textContent = "Фото операции отправлено.";
+      buyerProofActions?.classList.add("is-hidden");
+      if (buyerProofSend) buyerProofSend.disabled = true;
+      if (buyerProofPick) buyerProofPick.disabled = true;
+    }
+  };
+
+  const openBuyerProofModal = (dealId) => {
+    if (!buyerProofModal) return;
+    state.buyerProofDealId = dealId;
+    resetBuyerProofModal(dealId);
+    buyerProofModal.classList.add("open");
+  };
+
+  const closeBuyerProofModal = () => {
+    buyerProofModal?.classList.remove("open");
+    state.buyerProofDealId = null;
+  };
+
   const uploadBuyerProof = async (dealId) => {
     if (!state.initData) {
       showNotice("initData не найден. Откройте WebApp из Telegram.");
@@ -1950,20 +1948,15 @@
       state.buyerProofSent[dealId] = true;
       persistBuyerProofSent();
       state.buyerProofDraft[dealId] = null;
+      resetBuyerProofModal(dealId);
+      const dealPayload = await fetchJson(`/api/deals/${dealId}`);
+      if (dealPayload?.ok) {
+        maybeRenderDealModal(dealPayload.deal);
+      }
       await loadChatMessages(dealId);
     } catch (err) {
       showNotice(`Ошибка: ${err.message}`);
     }
-  };
-
-  const confirmBuyerWithProof = async (dealId) => {
-    const payload = await fetchJson(`/api/deals/${dealId}/confirm-buyer`, {
-      method: "POST",
-      body: "{}",
-    });
-    if (!payload?.ok) return;
-    maybeRenderDealModal(payload.deal);
-    showNotice("Подтверждение отправлено. Прикрепите фото операции.");
   };
 
   const uploadQrForDeal = async (dealId) => {
@@ -2538,6 +2531,34 @@
 
   imageModalClose?.addEventListener("click", () => {
     imageModal?.classList.remove("open");
+  });
+
+  buyerProofClose?.addEventListener("click", () => {
+    closeBuyerProofModal();
+  });
+
+  buyerProofPick?.addEventListener("click", () => {
+    const dealId = state.buyerProofDealId;
+    if (!dealId) return;
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      state.buyerProofDraft[dealId] = { file, url };
+      if (buyerProofImg) buyerProofImg.src = url;
+      buyerProofPreview?.classList.add("show");
+      if (buyerProofSend) buyerProofSend.disabled = false;
+    };
+    input.click();
+  });
+
+  buyerProofSend?.addEventListener("click", () => {
+    const dealId = state.buyerProofDealId;
+    if (!dealId) return;
+    uploadBuyerProof(dealId);
   });
 
   chatFile?.addEventListener("change", updateChatFileHint);

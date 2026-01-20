@@ -599,14 +599,6 @@ async def _api_deal_confirm_buyer(request: web.Request) -> web.Response:
         deal, _ = await deps.deal_service.confirm_buyer_cash(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
-    await deps.chat_service.add_message(
-        deal_id=deal_id,
-        sender_id=0,
-        text="Покупатель подтвердил перевод. Прикрепит фото операции.",
-        file_path=None,
-        file_name=None,
-        system=True,
-    )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
@@ -624,6 +616,10 @@ async def _api_deal_buyer_proof(request: web.Request) -> web.Response:
     field = await reader.next()
     if not field or field.name != "file":
         raise web.HTTPBadRequest(text="Файл не найден")
+    try:
+        deal, _ = await deps.deal_service.confirm_buyer_cash(deal_id, deal.buyer_id or user_id)
+    except (PermissionError, ValueError):
+        deal = await deps.deal_service.get_deal(deal_id)
     filename = Path(field.filename or "proof.png").name
     chat_dir = _chat_dir(deps) / deal_id
     chat_dir.mkdir(parents=True, exist_ok=True)
@@ -642,15 +638,6 @@ async def _api_deal_buyer_proof(request: web.Request) -> web.Response:
         file_name=filename,
         system=True,
         recipient_id=deal.seller_id,
-    )
-    await deps.chat_service.add_message(
-        deal_id=deal_id,
-        sender_id=0,
-        text="Фото операции отправлено.",
-        file_path=None,
-        file_name=None,
-        system=True,
-        recipient_id=deal.buyer_id,
     )
     payload = {
         **msg.to_dict(),
