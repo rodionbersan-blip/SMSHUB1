@@ -164,6 +164,8 @@
     activeChatDealId: null,
     activeDealId: null,
     activeDealSnapshot: null,
+    buyerProofDraft: {},
+    buyerProofSent: {},
     systemNoticeShownOnce: false,
     systemNoticeTimer: null,
     systemNoticeActive: null,
@@ -181,6 +183,7 @@
   const pendingReadStorageKey = "dealPendingRead";
   const systemNoticeStorageKey = "systemNotifications";
   const dealStatusStorageKey = "dealStatusMap";
+  const buyerProofStorageKey = "buyerProofSent";
   const themeStorageKey = "preferredTheme";
   const loadUnreadDeals = () => {
     try {
@@ -315,8 +318,27 @@
       // ignore storage errors
     }
   };
+  const loadBuyerProofSent = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(buyerProofStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+  const persistBuyerProofSent = () => {
+    try {
+      window.localStorage.setItem(
+        buyerProofStorageKey,
+        JSON.stringify(state.buyerProofSent || {})
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
   state.systemNotifications = loadSystemNotifications();
   state.dealStatusMap = loadDealStatusMap();
+  state.buyerProofSent = loadBuyerProofSent();
 
   const clearSystemNoticeTimer = () => {
     if (state.systemNoticeTimer) {
@@ -1651,6 +1673,60 @@
       alert.textContent = "✅ QR прикреплен и отправлен в чат.";
       dealModalBody.appendChild(alert);
     }
+    if (deal.role === "buyer" && deal.buyer_cash_confirmed && deal.status === "paid") {
+      const proofWrap = document.createElement("div");
+      proofWrap.className = "deal-proof";
+      const title = document.createElement("div");
+      title.className = "deal-proof-title";
+      title.textContent = "Прикрепите фото операции и нажмите отправить.";
+      const preview = document.createElement("div");
+      preview.className = "deal-proof-preview";
+      const img = document.createElement("img");
+      img.alt = "Фото операции";
+      preview.appendChild(img);
+      const actions = document.createElement("div");
+      actions.className = "deal-proof-actions";
+      const pickBtn = document.createElement("button");
+      pickBtn.className = "btn pill";
+      pickBtn.textContent = "Выбрать фото";
+      const sendBtn = document.createElement("button");
+      sendBtn.className = "btn primary";
+      sendBtn.textContent = "Отправить фото";
+      sendBtn.disabled = true;
+      const draft = state.buyerProofDraft?.[deal.id];
+      const proofSent = state.buyerProofSent?.[deal.id];
+      if (proofSent) {
+        title.textContent = "Фото операции отправлено.";
+        pickBtn.disabled = true;
+        sendBtn.disabled = true;
+      } else if (draft?.url) {
+        img.src = draft.url;
+        preview.classList.add("show");
+        sendBtn.disabled = false;
+      }
+      pickBtn.addEventListener("click", () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.onchange = () => {
+          const file = input.files?.[0];
+          if (!file) return;
+          const url = URL.createObjectURL(file);
+          state.buyerProofDraft[deal.id] = { file, url };
+          img.src = url;
+          preview.classList.add("show");
+          sendBtn.disabled = false;
+        };
+        input.click();
+      });
+      sendBtn.addEventListener("click", () => uploadBuyerProof(deal.id));
+      actions.appendChild(pickBtn);
+      actions.appendChild(sendBtn);
+      proofWrap.appendChild(title);
+      proofWrap.appendChild(preview);
+      proofWrap.appendChild(actions);
+      dealModalBody.appendChild(proofWrap);
+    }
     const ownerLink = dealModalBody.querySelector(".owner-link");
     if (ownerLink && deal.counterparty?.user_id) {
       ownerLink.addEventListener("click", () => openUserProfile(deal.counterparty.user_id));
@@ -1852,32 +1928,32 @@
       showNotice("initData не найден. Откройте WebApp из Telegram.");
       return;
     }
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      const form = new FormData();
-      form.append("file", file);
-      try {
-        const res = await fetch(`/api/deals/${dealId}/buyer-proof`, {
-          method: "POST",
-          headers: { "X-Telegram-Init-Data": state.initData },
-          body: form,
-        });
-        if (!res.ok) {
-          const text = await res.text();
-          showNotice(text || "Не удалось отправить фото");
-          return;
-        }
-        showNotice("Фото операции отправлено");
-        await loadChatMessages(dealId);
-      } catch (err) {
-        showNotice(`Ошибка: ${err.message}`);
+    const draft = state.buyerProofDraft?.[dealId];
+    if (!draft?.file) {
+      showNotice("Выберите фото операции");
+      return;
+    }
+    const form = new FormData();
+    form.append("file", draft.file);
+    try {
+      const res = await fetch(`/api/deals/${dealId}/buyer-proof`, {
+        method: "POST",
+        headers: { "X-Telegram-Init-Data": state.initData },
+        body: form,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        showNotice(text || "Не удалось отправить фото");
+        return;
       }
-    };
-    input.click();
+      showNotice("Фото операции отправлено");
+      state.buyerProofSent[dealId] = true;
+      persistBuyerProofSent();
+      state.buyerProofDraft[dealId] = null;
+      await loadChatMessages(dealId);
+    } catch (err) {
+      showNotice(`Ошибка: ${err.message}`);
+    }
   };
 
   const confirmBuyerWithProof = async (dealId) => {
@@ -1888,7 +1964,6 @@
     if (!payload?.ok) return;
     maybeRenderDealModal(payload.deal);
     showNotice("Подтверждение отправлено. Прикрепите фото операции.");
-    uploadBuyerProof(dealId);
   };
 
   const uploadQrForDeal = async (dealId) => {

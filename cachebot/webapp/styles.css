@@ -1164,6 +1164,44 @@ body.modal-open #app {
   white-space: pre-line;
 }
 
+.deal-proof {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(77, 163, 255, 0.08);
+  border: 1px solid rgba(77, 163, 255, 0.2);
+  display: grid;
+  gap: 10px;
+}
+
+.deal-proof-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.deal-proof-preview {
+  display: none;
+  justify-content: center;
+}
+
+.deal-proof-preview.show {
+  display: flex;
+}
+
+.deal-proof-preview img {
+  max-width: 140px;
+  max-height: 140px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.deal-proof-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .chat-list {
   display: flex;
   flex-direction: column;
