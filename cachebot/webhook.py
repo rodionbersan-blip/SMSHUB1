@@ -20,6 +20,7 @@ from cachebot.models.advert import AdvertSide
 from cachebot.models.deal import DealStatus
 from cachebot.models.dispute import EvidenceItem
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile
+from PIL import Image
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
 
@@ -746,10 +747,15 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
     chat_dir.mkdir(parents=True, exist_ok=True)
     filename = f"qr-{int(time.time())}.png"
     file_path = chat_dir / filename
-    qr = qrcode.QRCode(box_size=12, border=2)
+    qr = qrcode.QRCode(
+        box_size=12,
+        border=2,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+    )
     qr.add_data(text)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
+    img = _apply_qr_logo(img)
     img.save(file_path)
     await deps.deal_service.attach_qr_web(deal_id, deal.seller_id, filename)
     msg = await deps.chat_service.add_message(
@@ -1589,6 +1595,28 @@ def _avatar_dir(deps: AppDeps) -> Path:
 
 def _chat_dir(deps: AppDeps) -> Path:
     return Path(deps.config.storage_path).parent / "chat"
+
+
+def _qr_logo_path() -> Path:
+    return Path(__file__).resolve().parent / "webapp" / "assets" / "minilogo.png"
+
+
+def _apply_qr_logo(image: Image.Image) -> Image.Image:
+    try:
+        logo_path = _qr_logo_path()
+        if not logo_path.exists():
+            return image
+        logo = Image.open(logo_path).convert("RGBA")
+        qr = image.convert("RGBA")
+        qr_w, qr_h = qr.size
+        max_logo = int(min(qr_w, qr_h) * 0.22)
+        logo.thumbnail((max_logo, max_logo), Image.Resampling.LANCZOS)
+        logo_w, logo_h = logo.size
+        pos = ((qr_w - logo_w) // 2, (qr_h - logo_h) // 2)
+        qr.alpha_composite(logo, dest=pos)
+        return qr
+    except Exception:
+        return image
 
 def _qr_dir(deps: AppDeps) -> Path:
     return Path(deps.config.storage_path).parent / "qr"
