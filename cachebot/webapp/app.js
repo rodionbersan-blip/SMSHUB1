@@ -1213,8 +1213,10 @@
       persistChatSeen();
     }
     dealsCount.textContent = `${deals.length}`;
+    const desiredPage = state.dealsPage ?? 0;
     state.deals = deals;
-    state.dealsPage = 0;
+    const totalPages = Math.max(1, Math.ceil(deals.length / 5));
+    state.dealsPage = Math.max(0, Math.min(desiredPage, totalPages - 1));
     syncUnreadDeals(deals);
     updateQuickDealsButton(deals);
     const totalDeals = deals.length;
