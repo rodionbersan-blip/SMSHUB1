@@ -699,6 +699,13 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
     deal_id = request.match_info["deal_id"]
+    comment = None
+    with suppress(Exception):
+        payload = await request.json()
+        if isinstance(payload, dict):
+            raw_comment = payload.get("comment")
+            if isinstance(raw_comment, str):
+                comment = raw_comment.strip() or None
     deal = await deps.deal_service.get_deal(deal_id)
     if not deal:
         raise web.HTTPNotFound(text="Сделка не найдена")
@@ -716,7 +723,7 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
             deal_id=deal_id,
             opened_by=user_id,
             reason="Открыт через WebApp",
-            comment=None,
+            comment=comment,
             evidence=[],
         )
     await deps.chat_service.add_message(
@@ -1405,7 +1412,13 @@ async def _api_dispute_evidence_upload(request: web.Request) -> web.Response:
             if not chunk:
                 break
             handle.write(chunk)
-    kind = "photo" if filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")) else "document"
+    lower_name = filename.lower()
+    if lower_name.endswith((".mp4", ".mov", ".m4v", ".webm", ".avi", ".mkv")):
+        kind = "video"
+    elif lower_name.endswith((".png", ".jpg", ".jpeg", ".webp", ".gif")):
+        kind = "photo"
+    else:
+        kind = "document"
     await deps.dispute_service.append_evidence(
         dispute_id,
         EvidenceItem(kind=kind, file_id=f"web:{dispute_id}/{filename}", author_id=user_id),

@@ -129,6 +129,12 @@
   const buyerProofImg = document.getElementById("buyerProofImg");
   const buyerProofTitle = document.getElementById("buyerProofTitle");
   const buyerProofActions = document.getElementById("buyerProofActions");
+  const disputeOpenModal = document.getElementById("disputeOpenModal");
+  const disputeOpenClose = document.getElementById("disputeOpenClose");
+  const disputeVideoPick = document.getElementById("disputeVideoPick");
+  const disputeOpenSend = document.getElementById("disputeOpenSend");
+  const disputeVideoName = document.getElementById("disputeVideoName");
+  const disputeComment = document.getElementById("disputeComment");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsCount = document.getElementById("quickDealsCount");
@@ -221,6 +227,8 @@
     buyerProofDraft: {},
     buyerProofSent: {},
     buyerProofDealId: null,
+    disputeOpenDealId: null,
+    disputeOpenDraft: null,
     completedNotified: {},
     bootstrapDone: false,
     initRetryTimer: null,
@@ -2236,7 +2244,7 @@
     if (deal.dispute_available_at && deal.status === "paid") {
       addAction(
         bottomRow,
-        "Открыть спор",
+        "⚠️ Открыть спор",
         () => {
           const availableAt = new Date(deal.dispute_available_at);
           const now = new Date();
@@ -2246,7 +2254,7 @@
             showNotice(`Открыть спор можно через ${minutes} мин`);
             return;
           }
-          dealAction("open-dispute", deal.id);
+          openDisputeModal(deal.id);
         },
         false,
         "status-bad"
@@ -2433,6 +2441,84 @@
         maybeRenderDealModal(dealPayload.deal);
       }
       await loadChatMessages(dealId);
+    } catch (err) {
+      showNotice(`Ошибка: ${err.message}`);
+    }
+  };
+
+  const resetDisputeOpenModal = () => {
+    if (disputeVideoName) {
+      disputeVideoName.textContent = "Видео не выбрано.";
+    }
+    if (disputeComment) {
+      disputeComment.value = "";
+    }
+    if (disputeOpenSend) {
+      disputeOpenSend.disabled = true;
+    }
+    state.disputeOpenDraft = null;
+  };
+
+  const openDisputeModal = (dealId) => {
+    if (!disputeOpenModal) return;
+    state.disputeOpenDealId = dealId;
+    resetDisputeOpenModal();
+    disputeOpenModal.classList.add("open");
+  };
+
+  const closeDisputeOpenModal = () => {
+    disputeOpenModal?.classList.remove("open");
+    state.disputeOpenDealId = null;
+  };
+
+  const submitOpenDispute = async (dealId) => {
+    if (!state.initData) {
+      showNotice("initData не найден. Откройте WebApp из Telegram.");
+      return;
+    }
+    const draft = state.disputeOpenDraft;
+    if (!draft?.file) {
+      showNotice("Прикрепите видео с банкомата");
+      return;
+    }
+    const comment = (disputeComment?.value || "").trim() || null;
+    const payload = await fetchJson(`/api/deals/${dealId}/open-dispute`, {
+      method: "POST",
+      body: JSON.stringify({ comment }),
+    });
+    if (!payload?.ok) {
+      showNotice("Не удалось открыть спор");
+      return;
+    }
+    let disputeId = payload.deal?.dispute_id || null;
+    if (!disputeId) {
+      const dealPayload = await fetchJson(`/api/deals/${dealId}`);
+      disputeId = dealPayload?.deal?.dispute_id || null;
+    }
+    if (!disputeId) {
+      showNotice("Спор открыт, но ID не найден");
+      closeDisputeOpenModal();
+      return;
+    }
+    const form = new FormData();
+    form.append("file", draft.file);
+    try {
+      const res = await fetch(`/api/disputes/${disputeId}/evidence`, {
+        method: "POST",
+        headers: { "X-Telegram-Init-Data": state.initData },
+        body: form,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        showNotice(text || "Не удалось отправить видео");
+        return;
+      }
+      showNotice("Спор открыт");
+      closeDisputeOpenModal();
+      const dealPayload = await fetchJson(`/api/deals/${dealId}`);
+      if (dealPayload?.ok) {
+        maybeRenderDealModal(dealPayload.deal);
+      }
     } catch (err) {
       showNotice(`Ошибка: ${err.message}`);
     }
@@ -3286,6 +3372,38 @@
     const dealId = state.buyerProofDealId;
     if (!dealId) return;
     uploadBuyerProof(dealId);
+  });
+
+  disputeOpenClose?.addEventListener("click", () => {
+    closeDisputeOpenModal();
+  });
+
+  disputeVideoPick?.addEventListener("click", () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "video/*";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (!file.type || !file.type.startsWith("video/")) {
+        showNotice("Нужен видеофайл");
+        return;
+      }
+      state.disputeOpenDraft = { file, name: file.name || "Видео" };
+      if (disputeVideoName) {
+        disputeVideoName.textContent = state.disputeOpenDraft.name;
+      }
+      if (disputeOpenSend) {
+        disputeOpenSend.disabled = false;
+      }
+    };
+    input.click();
+  });
+
+  disputeOpenSend?.addEventListener("click", () => {
+    const dealId = state.disputeOpenDealId;
+    if (!dealId) return;
+    submitOpenDispute(dealId);
   });
 
   chatFile?.addEventListener("change", updateChatFileHint);
