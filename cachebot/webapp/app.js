@@ -1631,6 +1631,10 @@
         });
       }
       confirmBtn.addEventListener("click", async () => {
+        if (ad.banks && ad.banks.length > 1 && !selectedBank) {
+          showNotice("Выберите банкомат");
+          return;
+        }
         if (!state.initData) {
           showNotice("initData не найден. Откройте WebApp из Telegram.");
           return;
