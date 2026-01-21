@@ -2089,7 +2089,13 @@
       <div class="deal-detail-row"><span>USDT:</span>${formatAmount(deal.usdt_amount)} USDT</div>
       <div class="deal-detail-row"><span>Курс:</span>1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
       <div class="deal-detail-row"><span>Создано:</span>${formatDate(deal.created_at)}</div>
-      <div class="deal-detail-row"><span>Банкомат:</span>${deal.atm_bank ? bankLabel(deal.atm_bank) : "—"}</div>
+      <div class="deal-detail-row"><span>Банкомат:</span>${deal.atm_bank ? (() => {
+        const label = bankLabel(deal.atm_bank);
+        const icon = bankIcon(deal.atm_bank);
+        return icon
+          ? `<span class="bank-inline"><img class="bank-inline-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span></span>`
+          : label;
+      })() : "—"}</div>
       <div class="deal-detail-row"><span>Контрагент:</span>
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>

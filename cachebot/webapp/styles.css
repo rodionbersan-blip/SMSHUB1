@@ -922,6 +922,19 @@ body.modal-open #app {
   display: block;
 }
 
+.bank-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bank-inline-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: inline-block;
+}
+
 .p2p-evidence {
   display: grid;
   gap: 6px;
