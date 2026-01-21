@@ -1915,14 +1915,32 @@ body.pin-lock .app {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.18);
+  transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease;
 }
 
 .pin-dot.filled {
   background: #ffffff;
   border-color: #ffffff;
-  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+  transform: scale(1.08);
+}
+
+.pin-dot.pop {
+  animation: pinDotPop 0.18s ease;
+}
+
+@keyframes pinDotPop {
+  0% {
+    transform: scale(0.9);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1.08);
+  }
 }
 
 .pin-hint {

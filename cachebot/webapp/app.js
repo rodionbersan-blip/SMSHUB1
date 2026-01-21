@@ -590,7 +590,7 @@
     pinDots.innerHTML = "";
     for (let i = 0; i < 4; i += 1) {
       const dot = document.createElement("span");
-      dot.className = `pin-dot ${i < len ? "filled" : ""}`;
+      dot.className = `pin-dot ${i < len ? "filled pop" : ""}`;
       pinDots.appendChild(dot);
     }
   };
