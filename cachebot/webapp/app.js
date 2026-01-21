@@ -104,6 +104,11 @@
   const dealModalBody = document.getElementById("dealModalBody");
   const dealModalActions = document.getElementById("dealModalActions");
   const dealModalClose = document.getElementById("dealModalClose");
+  const confirmCompleteModal = document.getElementById("confirmCompleteModal");
+  const confirmCompleteClose = document.getElementById("confirmCompleteClose");
+  const confirmCompleteCancel = document.getElementById("confirmCompleteCancel");
+  const confirmCompleteSubmit = document.getElementById("confirmCompleteSubmit");
+  const confirmCompleteText = document.getElementById("confirmCompleteText");
   const chatModal = document.getElementById("chatModal");
   const chatModalTitle = document.getElementById("chatModalTitle");
   const chatModalClose = document.getElementById("chatModalClose");
@@ -614,6 +619,7 @@
     let autoBioTried = false;
     let biometricInFlight = false;
     let biometricResetTimer = null;
+    let externalUnlockResolver = null;
 
     const setHint = (text = "") => {
       if (pinHint) pinHint.textContent = text;
@@ -723,6 +729,10 @@
     const unlock = () => {
       hidePinOverlay();
       resolveGate();
+      if (externalUnlockResolver) {
+        externalUnlockResolver(true);
+        externalUnlockResolver = null;
+      }
     };
 
     let resolveGate = () => {};
@@ -737,6 +747,27 @@
       setMode("unlock");
       showPinOverlay();
     }
+
+    const requestPinUnlock = () => {
+      if (!savedHash) {
+        showNotice("PIN не настроен");
+        return Promise.resolve(false);
+      }
+      return new Promise((resolve) => {
+        externalUnlockResolver = resolve;
+        setMode("unlock");
+        showPinOverlay();
+        const biometricAvailable =
+          biometricEnabled || (tg?.BiometricManager && tg.BiometricManager.isAccessGranted);
+        if (biometricAvailable) {
+          setTimeout(() => {
+            triggerBiometric({ unlockAfter: true });
+          }, 200);
+        }
+      });
+    };
+
+    window.requestPinUnlock = requestPinUnlock;
 
     const handleComplete = async () => {
       if (buffer.length < 4) return;
@@ -2150,7 +2181,7 @@
       addAction(topRow, "Готов сканировать", () => dealAction("buyer-ready", deal.id), false, "status-ok");
     }
     if (actions.confirm_seller && deal.qr_stage === "ready") {
-      addAction(topRow, "Получил нал", () => dealAction("confirm-seller", deal.id), true);
+      addAction(topRow, "Получил нал", () => openConfirmComplete(deal), true);
     }
     if (
       deal.status === "paid" &&
@@ -2585,6 +2616,41 @@
     if (!payload?.ok) return;
     maybeRenderDealModal(payload.deal);
     await loadDeals();
+  };
+
+  const openConfirmComplete = (deal) => {
+    if (!confirmCompleteModal || !confirmCompleteSubmit) {
+      dealAction("confirm-seller", deal.id);
+      return;
+    }
+    if (confirmCompleteText) {
+      confirmCompleteText.textContent =
+        "Вы уверены что хотите завершить сделку? деньги перейдут другой стороне.";
+    }
+    confirmCompleteModal.classList.add("open");
+    const closeModal = () => {
+      confirmCompleteModal.classList.remove("open");
+    };
+    const handleSubmit = async () => {
+      confirmCompleteSubmit.disabled = true;
+      try {
+        const unlock =
+          typeof window.requestPinUnlock === "function"
+            ? await window.requestPinUnlock()
+            : true;
+        if (!unlock) {
+          confirmCompleteSubmit.disabled = false;
+          return;
+        }
+        await dealAction("confirm-seller", deal.id);
+        closeModal();
+      } finally {
+        confirmCompleteSubmit.disabled = false;
+      }
+    };
+    confirmCompleteSubmit.onclick = handleSubmit;
+    confirmCompleteCancel && (confirmCompleteCancel.onclick = closeModal);
+    confirmCompleteClose && (confirmCompleteClose.onclick = closeModal);
   };
 
   const stopDealAutoRefresh = () => {

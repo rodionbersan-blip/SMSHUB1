@@ -188,6 +188,25 @@
           </div>
         </div>
       </div>
+      <div class="modal" id="confirmCompleteModal">
+        <div class="modal-card glass">
+          <div class="modal-header">
+            <div class="modal-title">Завершение сделки</div>
+            <button id="confirmCompleteClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div class="modal-body">
+            <div id="confirmCompleteText" class="deal-alert">
+              Вы уверены что хотите завершить сделку? деньги перейдут другой стороне.
+            </div>
+          </div>
+          <div class="modal-actions">
+            <div class="modal-actions-row">
+              <button id="confirmCompleteSubmit" class="btn primary">Подтверждаю</button>
+              <button id="confirmCompleteCancel" class="btn">Отмена</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="modal" id="chatModal">
         <div class="modal-card">
@@ -583,6 +602,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay119"></script>
+    <script src="/app/app.js?v=pay120"></script>
   </body>
 </html>
