@@ -612,6 +612,8 @@
     const savedHash = loadPinHash();
     let biometricEnabled = loadBioFlag();
     let autoBioTried = false;
+    let biometricInFlight = false;
+    let biometricResetTimer = null;
 
     const setHint = (text = "") => {
       if (pinHint) pinHint.textContent = text;
@@ -629,8 +631,24 @@
         setHint("Face ID недоступен");
         return;
       }
+      if (biometricInFlight) {
+        return;
+      }
+      biometricInFlight = true;
+      if (biometricResetTimer) {
+        window.clearTimeout(biometricResetTimer);
+      }
+      biometricResetTimer = window.setTimeout(() => {
+        biometricInFlight = false;
+        biometricResetTimer = null;
+      }, 4000);
       const runAuth = () => {
         biometric.authenticate({ reason: "Вход в BC Cash" }, (result) => {
+          biometricInFlight = false;
+          if (biometricResetTimer) {
+            window.clearTimeout(biometricResetTimer);
+            biometricResetTimer = null;
+          }
           if (result) {
             if (enroll) {
               saveBioFlag(true);
@@ -647,6 +665,11 @@
       const runFlow = () => {
         if (!biometric.isAccessGranted) {
           biometric.requestAccess({ reason: "Вход в BC Cash" }, (granted) => {
+            biometricInFlight = false;
+            if (biometricResetTimer) {
+              window.clearTimeout(biometricResetTimer);
+              biometricResetTimer = null;
+            }
             if (!granted) {
               setHint("Face ID не разрешен");
               return;
@@ -2949,6 +2972,56 @@
     removeSystemNotice(active.key);
     await loadDeals();
   });
+
+  const bindPressFeedback = () => {
+    const pressClass = "is-pressed";
+    const addPress = (btn) => {
+      if (!btn || btn.classList.contains(pressClass)) return;
+      btn.classList.add(pressClass);
+      window.setTimeout(() => {
+        btn.classList.remove(pressClass);
+      }, 160);
+    };
+    const clearPress = (btn) => {
+      btn?.classList?.remove?.(pressClass);
+    };
+    document.addEventListener(
+      "touchstart",
+      (event) => {
+        const btn = event.target.closest(".back-btn");
+        if (!btn) return;
+        addPress(btn);
+      },
+      { passive: true }
+    );
+    document.addEventListener("touchend", (event) => {
+      const btn = event.target.closest(".back-btn");
+      if (!btn) return;
+      clearPress(btn);
+    });
+    document.addEventListener("touchcancel", (event) => {
+      const btn = event.target.closest(".back-btn");
+      if (!btn) return;
+      clearPress(btn);
+    });
+    document.addEventListener("mousedown", (event) => {
+      const btn = event.target.closest(".back-btn");
+      if (!btn) return;
+      addPress(btn);
+    });
+    document.addEventListener("mouseup", (event) => {
+      const btn = event.target.closest(".back-btn");
+      if (!btn) return;
+      clearPress(btn);
+    });
+    document.addEventListener("mouseleave", (event) => {
+      const btn = event.target.closest(".back-btn");
+      if (!btn) return;
+      clearPress(btn);
+    });
+  };
+
+  bindPressFeedback();
 
   dealModalClose?.addEventListener("click", () => {
     dealModal.classList.remove("open");

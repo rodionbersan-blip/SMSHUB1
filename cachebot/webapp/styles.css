@@ -725,6 +725,12 @@ body.modal-open #app {
   background: rgba(0, 0, 0, 1);
 }
 
+.deal-pagination .btn.back-btn.is-pressed {
+  transform: scale(0.94);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 1);
+}
+
 .deal-pagination .btn.back-btn::after {
   content: "";
   position: absolute;
@@ -738,6 +744,11 @@ body.modal-open #app {
 }
 
 .deal-pagination .btn.back-btn:active::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.deal-pagination .btn.back-btn.is-pressed::after {
   opacity: 1;
   transform: scale(1);
 }
@@ -1177,6 +1188,12 @@ body.modal-open #app {
   background: rgba(0, 0, 0, 1);
 }
 
+.reviews-pagination .btn.back-btn.is-pressed {
+  transform: scale(0.94);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 1);
+}
+
 .reviews-pagination .btn.back-btn::after {
   content: "";
   position: absolute;
@@ -1190,6 +1207,11 @@ body.modal-open #app {
 }
 
 .reviews-pagination .btn.back-btn:active::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.reviews-pagination .btn.back-btn.is-pressed::after {
   opacity: 1;
   transform: scale(1);
 }
