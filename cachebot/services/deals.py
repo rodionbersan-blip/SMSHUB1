@@ -106,6 +106,7 @@ class DealService:
                 public_id=self._next_public_id_locked(),
                 is_p2p=True,
                 advert_id=advert_id,
+                balance_reserved=True,
             )
             deal.dispute_available_at = None
             deal.dispute_notified = False
@@ -139,7 +140,6 @@ class DealService:
             current = self._balances.get(seller_id, Decimal("0"))
             if current < base_usdt:
                 raise ValueError("Недостаточно баланса")
-            self._balances[seller_id] = current - base_usdt
             now = datetime.now(timezone.utc)
             expires_at = now + self._offer_window
             deal = Deal(
@@ -161,6 +161,7 @@ class DealService:
                 is_p2p=True,
                 advert_id=advert_id,
                 atm_bank=atm_bank,
+                balance_reserved=False,
             )
             deal.dispute_available_at = None
             deal.dispute_notified = False
@@ -181,6 +182,12 @@ class DealService:
             now = datetime.now(timezone.utc)
             if deal.offer_expires_at and deal.offer_expires_at <= now:
                 raise ValueError("Предложение истекло")
+            current = self._balances.get(deal.seller_id, Decimal("0"))
+            base_usdt = deal.usd_amount / deal.rate
+            if current < base_usdt:
+                raise ValueError("Недостаточно баланса")
+            self._balances[deal.seller_id] = current - base_usdt
+            deal.balance_reserved = True
             deal.status = DealStatus.PAID
             deal.offer_expires_at = None
             deal.expires_at = now
@@ -208,8 +215,9 @@ class DealService:
             if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
                 raise PermissionError("Нет доступа")
             base_usdt = deal.usd_amount / deal.rate
-            if base_usdt > 0:
+            if deal.balance_reserved and base_usdt > 0:
                 self._credit_balance_locked(deal.seller_id, base_usdt)
+                deal.balance_reserved = False
             deal.status = DealStatus.EXPIRED if expired else DealStatus.CANCELED
             deal.offer_expires_at = None
             deal.invoice_id = None
@@ -347,8 +355,9 @@ class DealService:
                 if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
                     raise PermissionError("Not allowed to cancel")
                 base_usdt = deal.usd_amount / deal.rate
-                if base_usdt > 0:
+                if deal.balance_reserved and base_usdt > 0:
                     self._credit_balance_locked(deal.seller_id, base_usdt)
+                    deal.balance_reserved = False
                 deal.status = DealStatus.CANCELED
                 deal.offer_expires_at = None
                 deal.invoice_id = None
@@ -367,10 +376,11 @@ class DealService:
             if is_seller and was_paid:
                 refund_amount = max(Decimal("0"), deal.usdt_amount - deal.fee_amount)
                 self._credit_balance_locked(actor_id, refund_amount)
-            if deal.is_p2p and not was_paid:
+            if deal.is_p2p and not was_paid and deal.balance_reserved:
                 base_usdt = deal.usd_amount / deal.rate
                 if base_usdt > 0:
                     self._credit_balance_locked(deal.seller_id, base_usdt)
+                deal.balance_reserved = False
             deal.status = DealStatus.CANCELED
             if not was_paid:
                 deal.buyer_id = None
@@ -392,8 +402,9 @@ class DealService:
                 if not expires_at or expires_at > now:
                     continue
                 base_usdt = deal.usd_amount / deal.rate
-                if base_usdt > 0:
+                if deal.balance_reserved and base_usdt > 0:
                     self._credit_balance_locked(deal.seller_id, base_usdt)
+                    deal.balance_reserved = False
                 deal.status = DealStatus.EXPIRED
                 deal.offer_expires_at = None
                 deal.invoice_id = None
@@ -494,7 +505,7 @@ class DealService:
             for deal in self._deals.values():
                 if deal.seller_id != user_id or not deal.is_p2p:
                     continue
-                if deal.status in {
+                if deal.balance_reserved and deal.status in {
                     DealStatus.PENDING,
                     DealStatus.RESERVED,
                     DealStatus.PAID,

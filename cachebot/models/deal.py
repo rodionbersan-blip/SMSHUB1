@@ -59,6 +59,7 @@ class Deal:
     dispute_opened_at: datetime | None = None
     is_p2p: bool = False
     advert_id: str | None = None
+    balance_reserved: bool = False
 
     @property
     def hashtag(self) -> str:
@@ -102,6 +103,7 @@ class Deal:
             else None,
             "is_p2p": self.is_p2p,
             "advert_id": self.advert_id,
+            "balance_reserved": self.balance_reserved,
         }
 
     @classmethod
@@ -149,6 +151,7 @@ class Deal:
             ),
             is_p2p=bool(data.get("is_p2p")),
             advert_id=data.get("advert_id"),
+            balance_reserved=bool(data.get("balance_reserved", True)),
         )
 
 
