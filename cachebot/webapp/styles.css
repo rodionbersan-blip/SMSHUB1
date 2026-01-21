@@ -1945,7 +1945,18 @@ body.pin-lock .app {
 }
 
 .pin-key-back {
-  font-size: 18px;
+  font-size: 0;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pin-back-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+  color: #ffffff;
 }
 
 .pin-key-bio {

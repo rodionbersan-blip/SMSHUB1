@@ -528,7 +528,25 @@
           <button class="pin-key" data-digit="0">
             <span class="pin-key-num">0</span>
           </button>
-          <button class="pin-key pin-key-back" data-action="back">⌫</button>
+          <button class="pin-key pin-key-back" data-action="back" aria-label="Удалить">
+            <svg class="pin-back-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+              <path
+                d="M28 16L12 32l16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="6"
+              />
+              <path
+                d="M16 32h36"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-width="6"
+              />
+            </svg>
+          </button>
         </div>
         <div id="pinActions" class="pin-actions">
           <button id="pinBiometric" class="btn pill">Face ID</button>
@@ -565,6 +583,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay106"></script>
+    <script src="/app/app.js?v=pay107"></script>
   </body>
 </html>
