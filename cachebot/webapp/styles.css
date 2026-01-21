@@ -1914,6 +1914,7 @@ body.pin-lock .app {
   margin: 0 auto;
   min-height: 100dvh;
   align-content: center;
+  position: relative;
 }
 
 :root[data-theme="light"] .pin-card {
@@ -2379,4 +2380,25 @@ body.pin-lock .app {
     opacity: 1;
     transform: translateY(0);
   }
+}
+.pin-back-btn {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: calc(16px + env(safe-area-inset-left, 0px));
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.pin-back-btn svg {
+  width: 22px;
+  height: 22px;
+  display: block;
 }

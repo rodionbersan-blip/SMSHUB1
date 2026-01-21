@@ -44,6 +44,7 @@
   const pinActions = document.getElementById("pinActions");
   const pinBiometric = document.getElementById("pinBiometric");
   const pinSkipBiometric = document.getElementById("pinSkipBiometric");
+  const pinBackBtn = document.getElementById("pinBackBtn");
   const sellModal = document.getElementById("sellModal");
   const sellModalClose = document.getElementById("sellModalClose");
   const sellForm = document.getElementById("sellForm");
@@ -620,6 +621,7 @@
     let biometricInFlight = false;
     let biometricResetTimer = null;
     let externalUnlockResolver = null;
+    let allowPinDismiss = false;
 
     const setHint = (text = "") => {
       if (pinHint) pinHint.textContent = text;
@@ -755,6 +757,7 @@
       }
       return new Promise((resolve) => {
         externalUnlockResolver = resolve;
+        allowPinDismiss = true;
         setMode("unlock");
         showPinOverlay();
         const biometricAvailable =
@@ -768,6 +771,18 @@
     };
 
     window.requestPinUnlock = requestPinUnlock;
+
+    if (pinBackBtn) {
+      pinBackBtn.addEventListener("click", () => {
+        if (!allowPinDismiss) return;
+        hidePinOverlay();
+        if (externalUnlockResolver) {
+          externalUnlockResolver(false);
+          externalUnlockResolver = null;
+        }
+        allowPinDismiss = false;
+      });
+    }
 
     const handleComplete = async () => {
       if (buffer.length < 4) return;

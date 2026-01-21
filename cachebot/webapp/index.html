@@ -469,6 +469,25 @@
 
     <div id="pinOverlay" class="pin-overlay show" aria-live="polite">
       <div class="pin-card glass">
+        <button id="pinBackBtn" class="pin-back-btn" aria-label="Назад">
+          <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <path
+              d="M30 14L12 32l18 18"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="8"
+            />
+            <path
+              d="M16 32h36"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-width="8"
+            />
+          </svg>
+        </button>
         <div id="pinTitle" class="pin-title">Введите PIN</div>
         <div id="pinDots" class="pin-dots"></div>
         <div id="pinHint" class="pin-hint"></div>
@@ -602,6 +621,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay121"></script>
+    <script src="/app/app.js?v=pay122"></script>
   </body>
 </html>
