@@ -757,7 +757,7 @@
         return;
       }
       if (action === "bio") {
-        triggerBiometric();
+        triggerBiometric({ enroll: true, unlockAfter: true });
         return;
       }
       if (!digit) return;
