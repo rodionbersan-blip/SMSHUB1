@@ -1141,7 +1141,7 @@
       const prevDisabled = safePage <= 0;
       const nextDisabled = safePage >= totalPages - 1;
       dealsPagination.innerHTML = `
-        <button class="btn" ${prevDisabled ? "disabled" : ""} data-page="prev">Назад</button>
+        <button class="btn back-btn" ${prevDisabled ? "disabled" : ""} data-page="prev">Назад</button>
         <div class="page-info">Стр. ${safePage + 1} / ${totalPages}</div>
         <button class="btn" ${nextDisabled ? "disabled" : ""} data-page="next">Вперёд</button>
       `;
@@ -2764,7 +2764,7 @@
       const prevDisabled = safePage <= 0;
       const nextDisabled = safePage >= totalPages - 1;
       reviewsPagination.innerHTML = `
-        <button class="btn" ${prevDisabled ? "disabled" : ""} data-page="prev">Назад</button>
+        <button class="btn back-btn" ${prevDisabled ? "disabled" : ""} data-page="prev">Назад</button>
         <div class="page-info">Стр. ${safePage + 1} / ${totalPages}</div>
         <button class="btn" ${nextDisabled ? "disabled" : ""} data-page="next">Вперёд</button>
       `;

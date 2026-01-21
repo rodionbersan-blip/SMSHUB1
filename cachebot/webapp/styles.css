@@ -681,9 +681,38 @@ body.modal-open #app {
   font-weight: 600;
 }
 
+.deal-pagination .btn.back-btn {
+  min-width: 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deal-pagination .btn.back-btn::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-left: 5px solid #ffffff;
+  border-bottom: 5px solid #ffffff;
+  border-radius: 4px;
+  transform: rotate(45deg);
+}
+
 .deal-pagination .btn:hover {
   background: rgba(77, 163, 255, 0.2);
   color: var(--accent);
+}
+
+.deal-pagination .btn.back-btn:hover {
+  background: rgba(0, 0, 0, 0.92);
+  color: #ffffff;
 }
 
 .p2p-toolbar,
@@ -1077,9 +1106,38 @@ body.modal-open #app {
   font-weight: 600;
 }
 
+.reviews-pagination .btn.back-btn {
+  min-width: 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reviews-pagination .btn.back-btn::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-left: 5px solid #ffffff;
+  border-bottom: 5px solid #ffffff;
+  border-radius: 4px;
+  transform: rotate(45deg);
+}
+
 .reviews-pagination .btn:hover {
   background: rgba(77, 163, 255, 0.2);
   color: var(--accent);
+}
+
+.reviews-pagination .btn.back-btn:hover {
+  background: rgba(0, 0, 0, 0.92);
+  color: #ffffff;
 }
 
 .support-card {
