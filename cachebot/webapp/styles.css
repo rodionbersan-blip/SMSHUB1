@@ -1315,6 +1315,32 @@ body.modal-open #app {
   backdrop-filter: blur(12px);
 }
 
+#disputeOpenModal {
+  will-change: backdrop-filter;
+  transform: translateZ(0);
+}
+
+#disputeOpenModal.modal {
+  background: rgba(12, 12, 16, 0.45);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+:root[data-theme="light"] #disputeOpenModal.modal {
+  background: rgba(120, 130, 150, 0.28);
+}
+
+#disputeOpenModal .modal-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.25);
+}
+
+:root[data-theme="light"] #disputeOpenModal .modal-card {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(15, 17, 21, 0.14);
+  box-shadow: 0 18px 36px rgba(15, 17, 21, 0.16);
+}
+
 .modal-card {
   width: min(560px, 100%);
   max-height: calc(100dvh - 80px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
