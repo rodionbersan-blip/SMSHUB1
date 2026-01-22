@@ -78,6 +78,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/disputes/{dispute_id}/assign", _api_dispute_assign)
     app.router.add_post("/api/disputes/{dispute_id}/resolve", _api_dispute_resolve)
     app.router.add_post("/api/disputes/{dispute_id}/evidence", _api_dispute_evidence_upload)
+    app.router.add_post("/api/disputes/{dispute_id}/message", _api_dispute_message)
     app.router.add_get("/api/dispute-files/{dispute_id}/{filename}", _api_dispute_file)
     app.router.add_get("/api/admin/summary", _api_admin_summary)
     app.router.add_get("/api/admin/settings", _api_admin_settings)
@@ -1436,6 +1437,29 @@ async def _api_dispute_evidence_upload(request: web.Request) -> web.Response:
         dispute_id,
         EvidenceItem(kind=kind, file_id=f"web:{dispute_id}/{filename}", author_id=user_id),
     )
+    return web.json_response({"ok": True})
+
+
+async def _api_dispute_message(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    dispute_id = request.match_info["dispute_id"]
+    dispute = await deps.dispute_service.dispute_by_id(dispute_id)
+    if not dispute:
+        raise web.HTTPNotFound(text="Спор не найден")
+    deal = await deps.deal_service.get_deal(dispute.deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    if user_id not in {deal.seller_id, deal.buyer_id} and not await _has_dispute_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    text = (body.get("text") or "").strip()
+    if not text:
+        raise web.HTTPBadRequest(text="Пустое сообщение")
+    await deps.dispute_service.append_message(dispute_id, user_id, text)
     return web.json_response({"ok": True})
 
 

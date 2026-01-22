@@ -1481,7 +1481,10 @@ body.modal-open #app {
 
 #disputeOpenModal .deal-proof-field select.input,
 #disputeOpenModal .deal-proof-field textarea.input,
-#disputeOpenModal .deal-proof-field input.input {
+#disputeOpenModal .deal-proof-field input.input,
+#disputeEvidenceModal .deal-proof-field select.input,
+#disputeEvidenceModal .deal-proof-field textarea.input,
+#disputeEvidenceModal .deal-proof-field input.input {
   border-color: rgba(77, 163, 255, 0.5);
   background: rgba(77, 163, 255, 0.08);
   color: var(--text);
@@ -1491,7 +1494,10 @@ body.modal-open #app {
 
 #disputeOpenModal .deal-proof-field select.input:focus,
 #disputeOpenModal .deal-proof-field textarea.input:focus,
-#disputeOpenModal .deal-proof-field input.input:focus {
+#disputeOpenModal .deal-proof-field input.input:focus,
+#disputeEvidenceModal .deal-proof-field select.input:focus,
+#disputeEvidenceModal .deal-proof-field textarea.input:focus,
+#disputeEvidenceModal .deal-proof-field input.input:focus {
   outline: none;
   border-color: rgba(77, 163, 255, 0.9);
   box-shadow:
@@ -1501,7 +1507,10 @@ body.modal-open #app {
 
 :root[data-theme="light"] #disputeOpenModal .deal-proof-field select.input,
 :root[data-theme="light"] #disputeOpenModal .deal-proof-field textarea.input,
-:root[data-theme="light"] #disputeOpenModal .deal-proof-field input.input {
+:root[data-theme="light"] #disputeOpenModal .deal-proof-field input.input,
+:root[data-theme="light"] #disputeEvidenceModal .deal-proof-field select.input,
+:root[data-theme="light"] #disputeEvidenceModal .deal-proof-field textarea.input,
+:root[data-theme="light"] #disputeEvidenceModal .deal-proof-field input.input {
   background: rgba(77, 163, 255, 0.16);
   border-color: rgba(77, 163, 255, 0.55);
   color: #111827;

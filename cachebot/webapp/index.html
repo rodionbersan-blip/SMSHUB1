@@ -307,6 +307,34 @@
         </div>
       </div>
 
+      <div class="modal proof-modal" id="disputeEvidenceModal">
+        <div class="modal-card glass">
+          <div class="modal-header">
+            <div class="modal-title">Доказательства</div>
+            <button id="disputeEvidenceClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div class="modal-body">
+            <div class="deal-proof-title">
+              Прикрепите видео с Банка. Скрины не рассматриваются.
+            </div>
+            <div id="disputeEvidenceName" class="dispute-video-name">Видео не выбрано.</div>
+            <label class="deal-proof-field">
+              Комментарий
+              <textarea
+                id="disputeEvidenceComment"
+                class="input"
+                rows="3"
+                placeholder="Опишите ситуацию (необязательно)"
+              ></textarea>
+            </label>
+            <div class="deal-proof-actions">
+              <button id="disputeEvidencePick" class="btn pill">Выбрать видео</button>
+              <button id="disputeEvidenceSend" class="btn primary" disabled>Добавить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="modal" id="p2pModal">
         <div class="modal-card">
           <div class="modal-header">
@@ -673,6 +701,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay124"></script>
+    <script src="/app/app.js?v=pay125"></script>
   </body>
 </html>

@@ -141,6 +141,12 @@
   const disputeReason = document.getElementById("disputeReason");
   const disputeReasonCustomField = document.getElementById("disputeReasonCustomField");
   const disputeReasonCustom = document.getElementById("disputeReasonCustom");
+  const disputeEvidenceModal = document.getElementById("disputeEvidenceModal");
+  const disputeEvidenceClose = document.getElementById("disputeEvidenceClose");
+  const disputeEvidencePick = document.getElementById("disputeEvidencePick");
+  const disputeEvidenceSend = document.getElementById("disputeEvidenceSend");
+  const disputeEvidenceName = document.getElementById("disputeEvidenceName");
+  const disputeEvidenceComment = document.getElementById("disputeEvidenceComment");
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsCount = document.getElementById("quickDealsCount");
@@ -235,6 +241,11 @@
     buyerProofDealId: null,
     disputeOpenDealId: null,
     disputeOpenDraft: null,
+    disputeEvidenceId: null,
+    disputeEvidenceDraft: null,
+    activeDisputeId: null,
+    disputeSnapshot: null,
+    disputeRefreshTimer: null,
     completedNotified: {},
     bootstrapDone: false,
     initRetryTimer: null,
@@ -2038,6 +2049,7 @@
     if (!payload?.ok) return;
     const dispute = payload.dispute;
     const canManage = !!dispute.can_manage;
+    state.activeDisputeId = dispute.id;
     p2pModalTitle.textContent = `Спор по сделке #${dispute.deal.public_id}`;
     const seller =
       dispute.seller?.display_name || dispute.seller?.full_name || dispute.seller?.username || "—";
@@ -2048,6 +2060,7 @@
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>${seller}</div>
       <div class="deal-detail-row"><span>Мерчант:</span>${buyer}</div>
+      <div class="deal-detail-row"><span>Открыл:</span>${openerName}</div>
       <div class="deal-detail-row"><span>Причина:</span>${dispute.reason}</div>
       <div class="deal-detail-row"><span>Комментарий:</span>${commentText}</div>
       <div class="deal-detail-row"><span>Открыт:</span>${formatDate(dispute.opened_at)}</div>
@@ -2151,6 +2164,15 @@
       p2pModalActions.appendChild(resolve);
     }
     p2pModal.classList.add("open");
+    const snapshot = JSON.stringify({
+      evidence: dispute.evidence.length,
+      messages: dispute.messages?.length || 0,
+      assigned: dispute.assigned_to || null,
+      reason: dispute.reason,
+      comment: dispute.comment,
+    });
+    state.disputeSnapshot = snapshot;
+    startDisputeAutoRefresh(dispute.id);
   };
 
   const renderDealModal = (deal) => {
@@ -2631,35 +2653,84 @@
   };
 
   const uploadDisputeEvidence = async (disputeId) => {
+    openDisputeEvidenceModal(disputeId);
+  };
+
+  const resetDisputeEvidenceModal = () => {
+    if (disputeEvidenceName) {
+      disputeEvidenceName.textContent = "Видео не выбрано.";
+    }
+    if (disputeEvidenceComment) {
+      disputeEvidenceComment.value = "";
+    }
+    if (disputeEvidenceSend) {
+      disputeEvidenceSend.disabled = true;
+    }
+    state.disputeEvidenceDraft = null;
+  };
+
+  const openDisputeEvidenceModal = (disputeId) => {
+    if (!disputeEvidenceModal) return;
+    state.disputeEvidenceId = disputeId;
+    resetDisputeEvidenceModal();
+    disputeEvidenceModal.classList.add("open");
+  };
+
+  const closeDisputeEvidenceModal = () => {
+    disputeEvidenceModal?.classList.remove("open");
+    state.disputeEvidenceId = null;
+  };
+
+  const submitDisputeEvidence = async (disputeId) => {
     if (!state.initData) {
       showNotice("initData не найден. Откройте WebApp из Telegram.");
       return;
     }
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*,video/*,application/pdf";
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      const form = new FormData();
-      form.append("file", file);
-      try {
-        const res = await fetch(`/api/disputes/${disputeId}/evidence`, {
-          method: "POST",
-          headers: { "X-Telegram-Init-Data": state.initData },
-          body: form,
-        });
-        if (!res.ok) {
-          const text = await res.text();
-          showNotice(text || "Не удалось отправить доказательство");
-          return;
+    const draft = state.disputeEvidenceDraft;
+    if (!draft?.file) {
+      showNotice("Прикрепите видео с Банка");
+      return;
+    }
+    if (disputeEvidenceName) {
+      disputeEvidenceName.textContent = "Загружается...";
+    }
+    const form = new FormData();
+    form.append("file", draft.file);
+    try {
+      const res = await fetch(`/api/disputes/${disputeId}/evidence`, {
+        method: "POST",
+        headers: { "X-Telegram-Init-Data": state.initData },
+        body: form,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        if (disputeEvidenceName) {
+          disputeEvidenceName.textContent = "Ошибка загрузки.";
         }
-        showNotice("Доказательства отправлены");
-      } catch {
-        showNotice("Ошибка загрузки");
+        showNotice(text || "Не удалось отправить доказательство");
+        return;
       }
-    };
-    input.click();
+      const note = (disputeEvidenceComment?.value || "").trim();
+      if (note) {
+        await fetchJson(`/api/disputes/${disputeId}/message`, {
+          method: "POST",
+          body: JSON.stringify({ text: note }),
+        });
+      }
+      if (disputeEvidenceName) {
+        disputeEvidenceName.textContent = "Загружено.";
+      }
+      showNotice("Доказательства отправлены");
+      closeDisputeEvidenceModal();
+      if (state.activeDisputeId === disputeId) {
+        await openDispute(disputeId);
+      }
+    } catch (err) {
+      if (disputeEvidenceName) {
+        disputeEvidenceName.textContent = "Ошибка загрузки.";
+      }
+      showNotice(`Ошибка: ${err.message}`);
+    }
   };
 
   const isChatAtBottom = () => {
@@ -3341,6 +3412,8 @@
 
   p2pModalClose?.addEventListener("click", () => {
     p2pModal.classList.remove("open");
+    stopDisputeAutoRefresh();
+    state.activeDisputeId = null;
   });
 
   userModalClose?.addEventListener("click", () => {
@@ -3444,6 +3517,35 @@
     videoModal?.classList.remove("open");
   });
 
+  const stopDisputeAutoRefresh = () => {
+    if (state.disputeRefreshTimer) {
+      clearInterval(state.disputeRefreshTimer);
+      state.disputeRefreshTimer = null;
+    }
+  };
+
+  const startDisputeAutoRefresh = (disputeId) => {
+    stopDisputeAutoRefresh();
+    state.disputeRefreshTimer = setInterval(async () => {
+      if (!p2pModal?.classList.contains("open")) return;
+      if (state.activeDisputeId !== disputeId) return;
+      const payload = await fetchJson(`/api/disputes/${disputeId}`);
+      if (!payload?.ok) return;
+      const dispute = payload.dispute;
+      const snapshot = JSON.stringify({
+        evidence: dispute.evidence.length,
+        messages: dispute.messages?.length || 0,
+        assigned: dispute.assigned_to || null,
+        reason: dispute.reason,
+        comment: dispute.comment,
+      });
+      if (snapshot !== state.disputeSnapshot) {
+        state.disputeSnapshot = snapshot;
+        await openDispute(disputeId);
+      }
+    }, 2500);
+  };
+
   buyerProofClose?.addEventListener("click", () => {
     closeBuyerProofModal();
   });
@@ -3483,6 +3585,52 @@
     } else {
       disputeReasonCustomField.classList.add("is-hidden");
     }
+  });
+
+  disputeEvidenceClose?.addEventListener("click", () => {
+    closeDisputeEvidenceModal();
+  });
+
+  disputeEvidencePick?.addEventListener("click", () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "video/*";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      input.remove();
+      if (!file) return;
+      const name = (file.name || "").toLowerCase();
+      const isVideo =
+        (file.type && file.type.startsWith("video/")) ||
+        name.endsWith(".mp4") ||
+        name.endsWith(".mov") ||
+        name.endsWith(".m4v") ||
+        name.endsWith(".webm") ||
+        name.endsWith(".avi") ||
+        name.endsWith(".mkv") ||
+        name.endsWith(".3gp");
+      if (!isVideo) {
+        showNotice("Нужен видеофайл");
+        return;
+      }
+      state.disputeEvidenceDraft = { file, name: file.name || "Видео" };
+      if (disputeEvidenceName) {
+        disputeEvidenceName.textContent = `Выбрано: ${state.disputeEvidenceDraft.name}`;
+      }
+      if (disputeEvidenceSend) {
+        disputeEvidenceSend.disabled = false;
+      }
+      showNotice("Видео выбрано");
+    };
+    input.style.display = "none";
+    document.body.appendChild(input);
+    input.click();
+  });
+
+  disputeEvidenceSend?.addEventListener("click", () => {
+    const disputeId = state.disputeEvidenceId;
+    if (!disputeId) return;
+    submitDisputeEvidence(disputeId);
   });
 
   disputeVideoPick?.addEventListener("click", () => {
