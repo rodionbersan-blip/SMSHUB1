@@ -1854,6 +1854,29 @@ body.modal-open #app {
   box-shadow: 0 20px 44px rgba(15, 17, 21, 0.14);
 }
 
+:root[data-theme="light"] #commentModal .modal-card.glass {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(15, 17, 21, 0.18);
+  box-shadow: 0 20px 46px rgba(15, 17, 21, 0.22);
+}
+
+:root[data-theme="light"] #commentModal .modal-title,
+:root[data-theme="light"] #commentModal .deal-proof-title {
+  color: #0f1115;
+}
+
+:root[data-theme="light"] #commentModal .btn.ghost {
+  background: rgba(77, 163, 255, 0.2);
+  border: 1px solid rgba(77, 163, 255, 0.45);
+  color: #1b2b4a;
+}
+
+:root[data-theme="light"] #commentModal .btn.ghost:hover {
+  background: rgba(77, 163, 255, 0.3);
+  border-color: rgba(77, 163, 255, 0.6);
+  color: #0f1115;
+}
+
 .profile-quick {
   display: grid;
   grid-template-columns: auto 1fr;
