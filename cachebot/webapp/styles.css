@@ -1714,6 +1714,10 @@ body.modal-open #app {
   padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px) + 36px);
 }
 
+#chatModal {
+  z-index: 95;
+}
+
 #chatModal .chat-list {
   flex: 1 1 auto;
   max-height: none;
