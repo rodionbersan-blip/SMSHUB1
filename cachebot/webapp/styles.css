@@ -1750,6 +1750,10 @@ body.modal-open #app {
   z-index: 95;
 }
 
+#commentModal {
+  z-index: 96;
+}
+
 #chatModal .chat-list {
   flex: 1 1 auto;
   max-height: none;
