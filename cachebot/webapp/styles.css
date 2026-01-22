@@ -1339,6 +1339,24 @@ body.modal-open #app {
   white-space: pre-line;
 }
 
+:root[data-theme="light"] #confirmCompleteModal .deal-alert {
+  color: #1b2b4a;
+  background: rgba(77, 163, 255, 0.2);
+  border-color: rgba(77, 163, 255, 0.45);
+}
+
+:root[data-theme="light"] #confirmCompleteModal .btn.ghost {
+  color: #1b2b4a;
+  background: rgba(15, 17, 21, 0.06);
+  border: 1px solid rgba(15, 17, 21, 0.14);
+}
+
+:root[data-theme="light"] #confirmCompleteModal .modal-actions .btn:not(.primary) {
+  color: #1b2b4a;
+  background: rgba(15, 17, 21, 0.08);
+  border: 1px solid rgba(15, 17, 21, 0.16);
+}
+
 .deal-proof {
   margin-top: 12px;
   padding: 12px;
