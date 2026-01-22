@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import json
 import logging
+import shutil
 import time
 from datetime import datetime, timezone
 from contextlib import suppress
@@ -892,7 +893,9 @@ async def _api_deal_chat_list(request: web.Request) -> web.Response:
     if not deal:
         raise web.HTTPNotFound(text="Сделка не найдена")
     if user_id not in {deal.seller_id, deal.buyer_id} and user_id not in deps.config.admin_ids:
-        raise web.HTTPForbidden(text="Нет доступа")
+        dispute = await deps.dispute_service.dispute_for_deal(deal_id)
+        if not dispute or not await _has_dispute_access(user_id, deps):
+            raise web.HTTPForbidden(text="Нет доступа")
     include_all = user_id in deps.config.admin_ids
     messages = await deps.chat_service.list_messages_for_user(
         deal_id, user_id, include_all=include_all
@@ -1397,6 +1400,14 @@ async def _api_dispute_resolve(request: web.Request) -> web.Response:
     await deps.dispute_service.resolve_dispute(
         dispute_id, resolved_by=user_id, seller_amount=str(seller_amount), buyer_amount=str(buyer_amount)
     )
+    with suppress(Exception):
+        await deps.chat_service.purge_chat(deal.id)
+    with suppress(Exception):
+        chat_dir = _chat_dir(deps) / deal.id
+        shutil.rmtree(chat_dir, ignore_errors=True)
+    with suppress(Exception):
+        evidence_dir = _dispute_dir(deps) / dispute_id
+        shutil.rmtree(evidence_dir, ignore_errors=True)
     return web.json_response({"ok": True})
 
 

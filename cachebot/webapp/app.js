@@ -2097,6 +2097,13 @@
       p2pModalBody.appendChild(evidenceList);
     }
     p2pModalActions.innerHTML = "";
+    if (dispute.deal) {
+      const chatBtn = document.createElement("button");
+      chatBtn.className = "btn";
+      chatBtn.textContent = "Чат сделки";
+      chatBtn.addEventListener("click", () => openDealChat(dispute.deal));
+      p2pModalActions.appendChild(chatBtn);
+    }
     if (canManage && !dispute.assigned_to) {
       const take = document.createElement("button");
       take.className = "btn primary";
