@@ -2033,7 +2033,7 @@ body.modal-open #app {
 
 .dispute-resolve-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 10px;
   align-items: center;
 }
@@ -2041,6 +2041,23 @@ body.modal-open #app {
 .dispute-resolve-row .btn {
   min-width: 72px;
   height: 40px;
+}
+
+.dispute-resolve-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(77, 163, 255, 0.12);
+  border: 1px solid rgba(77, 163, 255, 0.35);
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .dispute-resolve-name {
+  color: #0f1115;
+  background: rgba(77, 163, 255, 0.18);
+  border-color: rgba(77, 163, 255, 0.4);
 }
 
 .deal-chat-btn {

@@ -2273,6 +2273,9 @@
       const sellerInput = document.createElement("input");
       sellerInput.className = "p2p-offer-input";
       sellerInput.placeholder = "USDT продавцу";
+      const sellerName = document.createElement("div");
+      sellerName.className = "dispute-resolve-name";
+      sellerName.textContent = seller || "Продавец";
       const sellerMax = document.createElement("button");
       sellerMax.className = "btn pill";
       sellerMax.textContent = "Макс";
@@ -2283,12 +2286,16 @@
       });
       sellerRow.appendChild(sellerInput);
       sellerRow.appendChild(sellerMax);
+      sellerRow.appendChild(sellerName);
 
       const buyerRow = document.createElement("div");
       buyerRow.className = "dispute-resolve-row";
       const buyerInput = document.createElement("input");
       buyerInput.className = "p2p-offer-input";
       buyerInput.placeholder = "USDT мерчанту";
+      const buyerName = document.createElement("div");
+      buyerName.className = "dispute-resolve-name";
+      buyerName.textContent = buyer || "Мерчант";
       const buyerMax = document.createElement("button");
       buyerMax.className = "btn pill";
       buyerMax.textContent = "Макс";
@@ -2299,6 +2306,7 @@
       });
       buyerRow.appendChild(buyerInput);
       buyerRow.appendChild(buyerMax);
+      buyerRow.appendChild(buyerName);
 
       const resolve = document.createElement("button");
       resolve.className = "btn";
