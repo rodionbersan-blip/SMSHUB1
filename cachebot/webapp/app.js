@@ -1382,7 +1382,7 @@
     deals.forEach((deal) => {
       if (isFinalStatus(deal.status)) return;
       if (!deal.chat_last_at) return;
-      if (deal.chat_last_sender_id && deal.chat_last_sender_id === state.userId) return;
+      if (deal.chat_last_sender_id && isSelfSender(deal.chat_last_sender_id)) return;
       const lastSeen = chatSeen[deal.id];
       if (!lastSeen) {
         chatSeen[deal.id] = deal.chat_last_at;
@@ -1437,9 +1437,14 @@
     return Number.isNaN(ms) ? null : ms;
   };
 
+  const isSelfSender = (senderId) => {
+    if (state.userId === null || state.userId === undefined) return false;
+    return Number(senderId) === Number(state.userId);
+  };
+
   const isChatUnread = (deal) => {
     if (!deal?.chat_last_at) return false;
-    if (deal.chat_last_sender_id && deal.chat_last_sender_id === state.userId) {
+    if (deal.chat_last_sender_id && isSelfSender(deal.chat_last_sender_id)) {
       return false;
     }
     const unread = state.chatUnreadCounts?.[deal.id] || 0;
@@ -2595,7 +2600,7 @@
     chatList.innerHTML = "";
     (messages || []).forEach((msg) => {
       const item = document.createElement("div");
-      item.className = `chat-message ${msg.sender_id === state.userId ? "self" : ""}`.trim();
+      item.className = `chat-message ${isSelfSender(msg.sender_id) ? "self" : ""}`.trim();
       if (msg.system) {
         const label = document.createElement("div");
         label.className = "chat-system-label";
