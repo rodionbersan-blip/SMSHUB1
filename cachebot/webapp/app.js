@@ -2153,7 +2153,11 @@
       <div class="deal-detail-row"><span>Открыл:</span>${openerName}</div>
       <div class="deal-detail-row"><span>Причина:</span>${dispute.reason}</div>
       <div class="deal-detail-row"><span>Открыт:</span>${formatDate(dispute.opened_at)}</div>
-      <div class="deal-detail-row"><span>Сумма:</span>${formatAmount(dispute.deal.usdt_amount)} USDT</div>
+      <div class="deal-detail-row"><span>Сумма:</span>${formatAmount(dispute.deal.usdt_amount)} USDT${
+        canManage && dispute.deal?.rate
+          ? ` • 1 USDT = ${formatAmount(dispute.deal.rate, 2)} RUB`
+          : ""
+      }</div>
     `;
     if (dispute.evidence.length) {
       const evidenceList = document.createElement("div");
