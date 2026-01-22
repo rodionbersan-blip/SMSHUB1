@@ -734,34 +734,16 @@ async def _api_deal_open_dispute(request: web.Request) -> web.Response:
         file_name=None,
         system=True,
     )
+    other_id = None
+    if deal.seller_id and deal.buyer_id:
+        other_id = deal.buyer_id if user_id == deal.seller_id else deal.seller_id
     with suppress(Exception):
-        reason_keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="Не получил нал",
-                        callback_data=f"dispute:reason:{deal.id}:no_cash",
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="Получил не всю сумму",
-                        callback_data=f"dispute:reason:{deal.id}:partial",
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="Другая причина",
-                        callback_data=f"dispute:reason:{deal.id}:other",
-                    )
-                ],
-            ]
-        )
-        await request.app["bot"].send_message(
-            user_id,
-            "Спор открыт. Выберите причину и прикрепите доказательства.",
-            reply_markup=reason_keyboard,
-        )
+        if other_id:
+            await request.app["bot"].send_message(
+                other_id,
+                f"Спор по сделке #{deal.public_id} открыт.\n"
+                "Если хотите внести уточнение, перейдите к сделке.",
+            )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
