@@ -2143,6 +2143,9 @@
         comments.push({ author: msg.author_name || msg.author_id || "—", text: msg.text });
       }
     });
+    const baseUsdtAmount = dispute.deal?.rate
+      ? Number(dispute.deal.usd_amount || 0) / Number(dispute.deal.rate || 1)
+      : Number(dispute.deal.usdt_amount || 0);
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>
         <span class="dispute-party">
@@ -2159,7 +2162,7 @@
       <div class="deal-detail-row"><span>Открыл:</span>${openerName}</div>
       <div class="deal-detail-row"><span>Причина:</span>${dispute.reason}</div>
       <div class="deal-detail-row"><span>Открыт:</span>${formatDate(dispute.opened_at)}</div>
-      <div class="deal-detail-row"><span>Сумма:</span>${formatAmount(dispute.deal.usdt_amount)} USDT${
+      <div class="deal-detail-row"><span>Сумма:</span>${formatAmount(baseUsdtAmount, 3)} USDT${
         canManage && dispute.deal?.rate
           ? ` • 1 USDT = ${formatAmount(dispute.deal.rate, 2)} RUB`
           : ""
