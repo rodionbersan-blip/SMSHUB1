@@ -616,6 +616,7 @@ body.modal-open #app {
   border-radius: 999px;
   background: rgba(77, 163, 255, 0.15);
   color: var(--accent);
+  white-space: nowrap;
 }
 
 .deal-status.status-ok {

@@ -1964,7 +1964,7 @@
       row.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">Спор #${item.id.slice(0, 6)} • Сделка #${item.public_id}</div>
-          <div class="deal-status">${item.assigned_to ? "В работе" : "Новый"}</div>
+          <div class="deal-status">${item.assigned_to ? "В&nbsp;работе" : "Новый"}</div>
         </div>
         <div class="deal-row">Причина: ${item.reason || "—"}</div>
         <div class="deal-row">Открыт: ${formatDate(item.opened_at)}</div>
