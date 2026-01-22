@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_app(bot, deps: AppDeps) -> web.Application:
-    app = web.Application()
+    app = web.Application(client_max_size=50 * 1024 * 1024)
     app["bot"] = bot
     app["deps"] = deps
     app.router.add_post(deps.config.webhook_path, _crypto_pay_handler)
