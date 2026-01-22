@@ -1406,12 +1406,13 @@
       const lastSeen = chatSeen[deal.id];
       if (!lastSeen) {
         chatSeen[deal.id] = deal.chat_last_at;
+        chatUnreadCounts[deal.id] = (chatUnreadCounts[deal.id] || 0) + 1;
         return;
       }
       if (deal.chat_last_at !== lastSeen) {
         chatUnreadCounts[deal.id] = (chatUnreadCounts[deal.id] || 0) + 1;
         chatSeen[deal.id] = deal.chat_last_at;
-        if (deal.chat_last_sender_id === 0) {
+        if (chatModal?.classList.contains("open") && state.activeChatDealId === deal.id) {
           try {
             tg?.HapticFeedback?.notificationOccurred("success");
           } catch {
