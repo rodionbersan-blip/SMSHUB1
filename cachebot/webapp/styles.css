@@ -1748,6 +1748,18 @@ body.modal-open #app {
   width: 100%;
 }
 
+.dispute-resolve-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.dispute-resolve-row .btn {
+  min-width: 72px;
+  height: 40px;
+}
+
 .deal-chat-btn {
   border-radius: 999px;
   border: 1px solid rgba(77, 163, 255, 0.45);

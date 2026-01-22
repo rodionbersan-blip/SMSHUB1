@@ -2068,24 +2068,51 @@
         const res = await fetchJson(`/api/disputes/${dispute.id}/assign`, { method: "POST", body: "{}" });
         if (res?.ok) {
           await loadDisputes();
-          p2pModal.classList.remove("open");
+          await openDispute(dispute.id);
         }
       });
       p2pModalActions.appendChild(take);
     }
-    if (canManage) {
+    if (canManage && dispute.assigned_to) {
+      const total = Number(dispute.deal.usdt_amount || 0);
+      const sellerRow = document.createElement("div");
+      sellerRow.className = "dispute-resolve-row";
       const sellerInput = document.createElement("input");
       sellerInput.className = "p2p-offer-input";
       sellerInput.placeholder = "USDT продавцу";
+      const sellerMax = document.createElement("button");
+      sellerMax.className = "btn pill";
+      sellerMax.textContent = "Макс";
+      sellerMax.addEventListener("click", () => {
+        const other = Number((buyerInput.value || "").replace(",", ".")) || 0;
+        const value = Math.max(0, total - other);
+        sellerInput.value = formatAmount(value, 3);
+      });
+      sellerRow.appendChild(sellerInput);
+      sellerRow.appendChild(sellerMax);
+
+      const buyerRow = document.createElement("div");
+      buyerRow.className = "dispute-resolve-row";
       const buyerInput = document.createElement("input");
       buyerInput.className = "p2p-offer-input";
       buyerInput.placeholder = "USDT мерчанту";
+      const buyerMax = document.createElement("button");
+      buyerMax.className = "btn pill";
+      buyerMax.textContent = "Макс";
+      buyerMax.addEventListener("click", () => {
+        const other = Number((sellerInput.value || "").replace(",", ".")) || 0;
+        const value = Math.max(0, total - other);
+        buyerInput.value = formatAmount(value, 3);
+      });
+      buyerRow.appendChild(buyerInput);
+      buyerRow.appendChild(buyerMax);
+
       const resolve = document.createElement("button");
       resolve.className = "btn";
       resolve.textContent = "Закрыть спор";
       resolve.addEventListener("click", async () => {
-        const sellerAmount = Number(sellerInput.value || 0);
-        const buyerAmount = Number(buyerInput.value || 0);
+        const sellerAmount = Number((sellerInput.value || "").replace(",", ".")) || 0;
+        const buyerAmount = Number((buyerInput.value || "").replace(",", ".")) || 0;
         const res = await fetchJson(`/api/disputes/${dispute.id}/resolve`, {
           method: "POST",
           body: JSON.stringify({ seller_amount: sellerAmount, buyer_amount: buyerAmount }),
@@ -2095,8 +2122,8 @@
           await loadDisputes();
         }
       });
-      p2pModalActions.appendChild(sellerInput);
-      p2pModalActions.appendChild(buyerInput);
+      p2pModalActions.appendChild(sellerRow);
+      p2pModalActions.appendChild(buyerRow);
       p2pModalActions.appendChild(resolve);
     }
     p2pModal.classList.add("open");
