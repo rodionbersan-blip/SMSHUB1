@@ -1296,8 +1296,22 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
         raise web.HTTPNotFound(text="Сделка не найдена")
     seller = await deps.user_service.profile_of(deal.seller_id)
     buyer = await deps.user_service.profile_of(deal.buyer_id) if deal.buyer_id else None
+    opener = await deps.user_service.profile_of(dispute.opened_by) if dispute.opened_by else None
     include_private = _is_admin(user_id, deps)
     can_manage = await _has_dispute_access(user_id, deps)
+    def _display_name(profile, fallback: int | str | None = None) -> str:
+        if not profile:
+            return str(fallback or "—")
+        return (
+            profile.display_name
+            or profile.full_name
+            or profile.username
+            or str(getattr(profile, "user_id", fallback or "—"))
+        )
+    author_ids = {item.author_id for item in dispute.evidence if item.author_id}
+    author_profiles = {}
+    for author_id in author_ids:
+        author_profiles[author_id] = await deps.user_service.profile_of(author_id)
     evidence = []
     for item in dispute.evidence:
         file_url = await _file_url(request, item.file_id)
@@ -1306,6 +1320,7 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
                 "kind": item.kind,
                 "file_id": item.file_id,
                 "author_id": item.author_id,
+                "author_name": _display_name(author_profiles.get(item.author_id), item.author_id),
                 "url": file_url,
             }
         )
@@ -1316,6 +1331,7 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
         "opened_by": dispute.opened_by,
         "reason": dispute.reason,
         "comment": dispute.comment,
+        "opened_by_name": _display_name(opener, dispute.opened_by),
         "assigned_to": dispute.assigned_to,
         "can_manage": can_manage,
         "messages": [

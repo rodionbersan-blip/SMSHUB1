@@ -1794,6 +1794,25 @@ body.modal-open #app {
   background: transparent;
 }
 
+.p2p-evidence {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.p2p-evidence .evidence-btn {
+  width: 100%;
+  justify-content: center;
+  background: rgba(77, 163, 255, 0.12);
+  border: 1px solid rgba(77, 163, 255, 0.45);
+  color: var(--accent);
+}
+
+.p2p-evidence .evidence-btn:hover {
+  background: rgba(77, 163, 255, 0.24);
+  color: #ffffff;
+}
+
 .modal-note {
   margin-top: 12px;
   font-size: 12px;

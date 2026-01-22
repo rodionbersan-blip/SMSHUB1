@@ -2040,11 +2040,13 @@
       dispute.seller?.display_name || dispute.seller?.full_name || dispute.seller?.username || "—";
     const buyer =
       dispute.buyer?.display_name || dispute.buyer?.full_name || dispute.buyer?.username || "—";
+    const openerName = dispute.opened_by_name || "—";
+    const commentText = dispute.comment ? ` ${dispute.comment} (от ${openerName})` : " —";
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>${seller}</div>
       <div class="deal-detail-row"><span>Мерчант:</span>${buyer}</div>
       <div class="deal-detail-row"><span>Причина:</span>${dispute.reason}</div>
-      <div class="deal-detail-row"><span>Комментарий:</span>${dispute.comment || "—"}</div>
+      <div class="deal-detail-row"><span>Комментарий:</span>${commentText}</div>
       <div class="deal-detail-row"><span>Открыт:</span>${formatDate(dispute.opened_at)}</div>
       <div class="deal-detail-row"><span>Сумма:</span>${formatAmount(dispute.deal.usdt_amount)} USDT</div>
       <div class="deal-detail-row"><span>Доказательства:</span>${dispute.evidence.length}</div>
@@ -2053,12 +2055,20 @@
       const evidenceList = document.createElement("div");
       evidenceList.className = "p2p-evidence";
       dispute.evidence.forEach((item, index) => {
-        const link = document.createElement("a");
-        link.href = item.url || "#";
-        link.textContent = `${index + 1}. ${item.kind}`;
-        link.target = "_blank";
-        link.rel = "noopener";
-        evidenceList.appendChild(link);
+        const btn = document.createElement("button");
+        btn.className = "btn evidence-btn";
+        const author = item.author_name || "—";
+        const label = item.kind === "video" ? "Видео" : item.kind === "photo" ? "Фото" : "Файл";
+        btn.textContent = `${label} от ${author}`;
+        btn.addEventListener("click", () => {
+          if (!item.url) return;
+          if (tg?.openLink) {
+            tg.openLink(item.url);
+          } else {
+            window.open(item.url, "_blank", "noopener");
+          }
+        });
+        evidenceList.appendChild(btn);
       });
       p2pModalBody.appendChild(evidenceList);
     }
