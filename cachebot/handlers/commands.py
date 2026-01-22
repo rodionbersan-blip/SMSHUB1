@@ -3463,7 +3463,7 @@ async def balance_withdraw_amount(message: Message, state: FSMContext) -> None:
     try:
         await deps.crypto_pay.transfer(user_id=user.id, amount=amount, currency="USDT")
     except Exception as exc:
-        await deps.deal_service.deposit_balance(user.id, total)
+        await deps.deal_service.deposit_balance(user.id, total, kind="refund", record_event=False)
         await message.answer(f"Перевод не выполнен: {exc}")
         return
     await state.clear()

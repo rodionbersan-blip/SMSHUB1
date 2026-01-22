@@ -519,6 +519,15 @@ body.modal-open #app {
   gap: 12px;
 }
 
+.profile-balance-row.history-row {
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+
+#balanceHistoryOpen {
+  min-width: 180px;
+}
+
 .profile-title {
   font-size: 13px;
   color: var(--muted);
@@ -1752,6 +1761,80 @@ body.modal-open #app {
 
 #commentModal {
   z-index: 96;
+}
+
+#balanceHistoryModal.modal {
+  padding: 0;
+}
+
+#balanceHistoryModal .modal-card {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(20px + env(safe-area-inset-top, 0px))
+    calc(16px + env(safe-area-inset-right, 0px))
+    calc(20px + env(safe-area-inset-bottom, 0px))
+    calc(16px + env(safe-area-inset-left, 0px));
+}
+
+.balance-history-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: grid;
+  gap: 12px;
+  padding: 8px 2px;
+}
+
+.balance-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: var(--card-contrast);
+  border: 1px solid var(--card-contrast-border);
+}
+
+.balance-item.pos {
+  border-color: rgba(46, 204, 113, 0.35);
+  background: rgba(46, 204, 113, 0.1);
+}
+
+.balance-item.neg {
+  border-color: rgba(231, 76, 60, 0.35);
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.balance-info {
+  display: grid;
+  gap: 4px;
+}
+
+.balance-title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.balance-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.balance-amount {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.balance-item.pos .balance-amount {
+  color: #2ecc71;
+}
+
+.balance-item.neg .balance-amount {
+  color: #e5533d;
 }
 
 #chatModal .chat-list {

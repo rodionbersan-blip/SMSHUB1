@@ -43,6 +43,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/users/{user_id}", _api_public_profile)
     app.router.add_get("/api/avatar/{user_id}", _api_avatar)
     app.router.add_get("/api/balance", _api_balance)
+    app.router.add_get("/api/balance/history", _api_balance_history)
     app.router.add_post("/api/balance/topup", _api_balance_topup)
     app.router.add_post("/api/balance/withdraw", _api_balance_withdraw)
     app.router.add_get("/api/my-deals", _api_my_deals)
@@ -134,7 +135,7 @@ async def _crypto_pay_handler(request: web.Request) -> web.Response:
         if not handled:
             topup = await deps.topup_service.pop_paid(str(invoice_id))
             if topup:
-                await deps.deal_service.deposit_balance(topup.user_id, topup.amount)
+                await deps.deal_service.deposit_balance(topup.user_id, topup.amount, kind="topup")
                 amount_str = f"{topup.amount.quantize(Decimal('0.01')):f}"
                 await bot.send_message(
                     topup.user_id,
@@ -365,6 +366,23 @@ async def _api_balance(request: web.Request) -> web.Response:
     )
 
 
+async def _api_balance_history(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    items = await deps.deal_service.balance_history(user_id)
+    payload = [
+        {
+            "id": item.id,
+            "amount": str(item.amount),
+            "kind": item.kind,
+            "created_at": item.created_at.isoformat(),
+            "meta": item.meta or {},
+        }
+        for item in items
+    ]
+    return web.json_response({"ok": True, "items": payload})
+
+
 async def _api_balance_topup(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
@@ -428,7 +446,7 @@ async def _api_balance_withdraw(request: web.Request) -> web.Response:
     try:
         await deps.crypto_pay.transfer(user_id=user_id, amount=amount, currency="USDT")
     except Exception as exc:
-        await deps.deal_service.deposit_balance(user_id, total)
+        await deps.deal_service.deposit_balance(user_id, total, kind="refund", record_event=False)
         raise web.HTTPBadRequest(text=f"Перевод не выполнен: {exc}")
     return web.json_response(
         {

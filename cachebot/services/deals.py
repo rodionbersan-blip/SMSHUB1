@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 from uuid import uuid4
 
 from cachebot.models.deal import Deal, DealStatus, QrStage
+from cachebot.models.balance_event import BalanceEvent
 from cachebot.services.rate_provider import RateProvider
 from cachebot.storage import StateRepository
 
@@ -27,6 +28,7 @@ class DealService:
         snapshot = repository.snapshot()
         self._deals: Dict[str, Deal] = {deal.id: deal for deal in snapshot.deals}
         self._balances: Dict[int, Decimal] = snapshot.balances.copy()
+        self._balance_events: List[BalanceEvent] = list(getattr(snapshot, "balance_events", []))
         self._payment_window = timedelta(minutes=payment_window_minutes)
         self._offer_window = timedelta(
             minutes=offer_window_minutes if offer_window_minutes is not None else payment_window_minutes
@@ -473,8 +475,20 @@ class DealService:
                 raise ValueError("Сумма превышает объем сделки")
             if seller_amount > 0:
                 self._credit_balance_locked(deal.seller_id, seller_amount)
+                self._record_event_locked(
+                    deal.seller_id,
+                    seller_amount,
+                    "dispute",
+                    {"deal_id": deal.id, "public_id": deal.public_id},
+                )
             if deal.buyer_id and buyer_amount > 0:
                 self._credit_balance_locked(deal.buyer_id, buyer_amount)
+                self._record_event_locked(
+                    deal.buyer_id,
+                    buyer_amount,
+                    "dispute",
+                    {"deal_id": deal.id, "public_id": deal.public_id},
+                )
             deal.status = DealStatus.COMPLETED
             deal.buyer_cash_confirmed = True
             deal.seller_cash_confirmed = True
@@ -526,6 +540,12 @@ class DealService:
             deal.status = DealStatus.COMPLETED
             if deal.buyer_id:
                 self._credit_balance_locked(deal.buyer_id, deal.usdt_amount)
+                self._record_event_locked(
+                    deal.buyer_id,
+                    deal.usdt_amount,
+                    "deal",
+                    {"deal_id": deal.id, "public_id": deal.public_id},
+                )
             deal.payout_completed = True
             return True
         return False
@@ -681,14 +701,25 @@ class DealService:
             if current < amount:
                 raise ValueError("Недостаточно средств")
             self._balances[user_id] = current - amount
+            self._record_event_locked(user_id, -amount, "withdraw", {})
             await self._persist()
             return self._balances[user_id]
 
-    async def deposit_balance(self, user_id: int, amount: Decimal) -> Decimal:
+    async def deposit_balance(
+        self,
+        user_id: int,
+        amount: Decimal,
+        *,
+        kind: str = "topup",
+        meta: dict | None = None,
+        record_event: bool = True,
+    ) -> Decimal:
         if amount <= 0:
             raise ValueError("Сумма должна быть больше нуля")
         async with self._lock:
             self._credit_balance_locked(user_id, amount)
+            if record_event:
+                self._record_event_locked(user_id, amount, kind, meta or {})
             await self._persist()
             return self._balances[user_id]
 
@@ -706,7 +737,32 @@ class DealService:
             list(self._deals.values()),
             self._balances,
             deal_sequence=self._deal_seq,
+            balance_events=self._balance_events,
         )
+
+    def _record_event_locked(
+        self,
+        user_id: int,
+        amount: Decimal,
+        kind: str,
+        meta: dict,
+    ) -> None:
+        self._balance_events.append(
+            BalanceEvent(
+                id=str(uuid4()),
+                user_id=user_id,
+                amount=amount,
+                kind=kind,
+                created_at=datetime.now(timezone.utc),
+                meta=meta,
+            )
+        )
+
+    async def balance_history(self, user_id: int) -> List[BalanceEvent]:
+        async with self._lock:
+            items = [event for event in self._balance_events if event.user_id == user_id]
+        items.sort(key=lambda ev: ev.created_at, reverse=True)
+        return items
 
     def _is_admin(self, actor_id: int) -> bool:
         return actor_id in self._admin_ids

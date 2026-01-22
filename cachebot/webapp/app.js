@@ -54,6 +54,10 @@
   const topupClose = document.getElementById("topupClose");
   const topupForm = document.getElementById("topupForm");
   const topupAmount = document.getElementById("topupAmount");
+  const balanceHistoryOpen = document.getElementById("balanceHistoryOpen");
+  const balanceHistoryModal = document.getElementById("balanceHistoryModal");
+  const balanceHistoryClose = document.getElementById("balanceHistoryClose");
+  const balanceHistoryList = document.getElementById("balanceHistoryList");
   const withdrawModal = document.getElementById("withdrawModal");
   const withdrawClose = document.getElementById("withdrawClose");
   const withdrawForm = document.getElementById("withdrawForm");
@@ -4157,6 +4161,45 @@
 
   withdrawClose?.addEventListener("click", () => {
     withdrawModal?.classList.remove("open");
+  });
+
+  balanceHistoryOpen?.addEventListener("click", async () => {
+    if (!balanceHistoryModal || !balanceHistoryList) return;
+    const payload = await fetchJson("/api/balance/history");
+    if (!payload?.ok) return;
+    const items = payload.items || [];
+    balanceHistoryList.innerHTML = "";
+    if (!items.length) {
+      balanceHistoryList.innerHTML = "<div class=\"deal-empty\">Нет операций.</div>";
+    } else {
+      items.forEach((item) => {
+        const amount = Number(item.amount || 0);
+        const isPositive = amount > 0;
+        const row = document.createElement("div");
+        row.className = `balance-item ${isPositive ? "pos" : "neg"}`;
+        let title = "Операция";
+        if (item.kind === "topup") title = "Пополнение";
+        if (item.kind === "withdraw") title = "Вывод";
+        if (item.kind === "deal" || item.kind === "dispute") {
+          const dealId = item.meta?.public_id ? `#${item.meta.public_id}` : "";
+          title = isPositive ? `Получены средства по сделке ${dealId}` : `Списание по сделке ${dealId}`;
+        }
+        const date = item.created_at ? formatDate(item.created_at) : "";
+        row.innerHTML = `
+          <div class="balance-info">
+            <div class="balance-title">${title}</div>
+            <div class="balance-date">${date}</div>
+          </div>
+          <div class="balance-amount">${isPositive ? "+" : ""}${formatAmount(amount, 3)} USDT</div>
+        `;
+        balanceHistoryList.appendChild(row);
+      });
+    }
+    balanceHistoryModal.classList.add("open");
+  });
+
+  balanceHistoryClose?.addEventListener("click", () => {
+    balanceHistoryModal?.classList.remove("open");
   });
 
   withdrawForm?.addEventListener("submit", async (event) => {

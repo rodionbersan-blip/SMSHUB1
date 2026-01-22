@@ -72,6 +72,9 @@
               <button id="profileWithdraw" class="btn pill">Вывести</button>
               <button id="topupOpen" class="btn pill">Пополнить</button>
             </div>
+            <div class="profile-balance-row history-row">
+              <button id="balanceHistoryOpen" class="btn pill">История баланса</button>
+            </div>
             <div class="profile-muted">Доступно для вывода</div>
             <div id="profileBalanceReserved" class="profile-muted">В резерве: — USDT</div>
           </div>
@@ -498,6 +501,16 @@
             </label>
             <button type="submit" class="btn primary">Вывести</button>
           </form>
+        </div>
+      </div>
+
+      <div class="modal" id="balanceHistoryModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">История баланса</div>
+            <button id="balanceHistoryClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div id="balanceHistoryList" class="balance-history-list"></div>
         </div>
       </div>
 

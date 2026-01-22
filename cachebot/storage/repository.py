@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from cachebot.models.advert import Advert
+from cachebot.models.balance_event import BalanceEvent
 from cachebot.models.chat import ChatMessage
 from cachebot.models.deal import Deal
 from cachebot.models.dispute import Dispute
@@ -42,6 +43,7 @@ class RateSettings:
 class StorageState:
     deals: List[Deal]
     balances: Dict[int, Decimal]
+    balance_events: List[BalanceEvent]
     settings: Optional[RateSettings]
     user_roles: Dict[int, str]
     applications: List[MerchantApplication]
@@ -74,13 +76,18 @@ class StateRepository:
             self._write_locked()
 
     async def persist_deals_and_balances(
-        self, deals: List[Deal], balances: Dict[int, Decimal], deal_sequence: int | None = None
+        self,
+        deals: List[Deal],
+        balances: Dict[int, Decimal],
+        deal_sequence: int | None = None,
+        balance_events: List[BalanceEvent] | None = None,
     ) -> None:
         async with self._lock:
             sequence = self._state.deal_sequence if deal_sequence is None else deal_sequence
             self._state = StorageState(
                 deals=deals,
                 balances=balances,
+                balance_events=balance_events or self._state.balance_events,
                 settings=self._state.settings,
                 user_roles=self._state.user_roles,
                 applications=self._state.applications,
@@ -103,6 +110,7 @@ class StateRepository:
             self._state = StorageState(
                 deals=self._state.deals,
                 balances=self._state.balances,
+                balance_events=self._state.balance_events,
                 settings=settings,
                 user_roles=self._state.user_roles,
                 applications=self._state.applications,
@@ -132,6 +140,7 @@ class StateRepository:
             self._state = StorageState(
                 deals=self._state.deals,
                 balances=self._state.balances,
+                balance_events=self._state.balance_events,
                 settings=self._state.settings,
                 user_roles=roles,
                 applications=applications,
@@ -154,6 +163,7 @@ class StateRepository:
             self._state = StorageState(
                 deals=self._state.deals,
                 balances=self._state.balances,
+                balance_events=self._state.balance_events,
                 settings=self._state.settings,
                 user_roles=self._state.user_roles,
                 applications=self._state.applications,
@@ -176,6 +186,7 @@ class StateRepository:
             self._state = StorageState(
                 deals=self._state.deals,
                 balances=self._state.balances,
+                balance_events=self._state.balance_events,
                 settings=self._state.settings,
                 user_roles=self._state.user_roles,
                 applications=self._state.applications,
@@ -203,6 +214,7 @@ class StateRepository:
             self._state = StorageState(
                 deals=self._state.deals,
                 balances=self._state.balances,
+                balance_events=self._state.balance_events,
                 settings=self._state.settings,
                 user_roles=self._state.user_roles,
                 applications=self._state.applications,
@@ -225,6 +237,7 @@ class StateRepository:
             self._state = StorageState(
                 deals=self._state.deals,
                 balances=self._state.balances,
+                balance_events=self._state.balance_events,
                 settings=self._state.settings,
                 user_roles=self._state.user_roles,
                 applications=self._state.applications,
@@ -247,6 +260,7 @@ class StateRepository:
             self._state = StorageState(
                 deals=self._state.deals,
                 balances=self._state.balances,
+                balance_events=self._state.balance_events,
                 settings=self._state.settings,
                 user_roles=self._state.user_roles,
                 applications=self._state.applications,
@@ -268,6 +282,7 @@ class StateRepository:
         payload = {
             "deals": [deal.to_dict() for deal in self._state.deals],
             "balances": {str(uid): str(amount) for uid, amount in self._state.balances.items()},
+            "balance_events": [event.to_dict() for event in self._state.balance_events],
             "settings": self._state.settings.to_dict() if self._state.settings else None,
             "user_roles": {str(uid): role for uid, role in self._state.user_roles.items()},
             "applications": [app.to_dict() for app in self._state.applications],
@@ -299,6 +314,7 @@ class StateRepository:
             return StorageState(
                 deals=[],
                 balances={},
+                balance_events=[],
                 settings=None,
                 user_roles={},
                 applications=[],
@@ -319,6 +335,9 @@ class StateRepository:
         balances = {
             int(uid): Decimal(amount) for uid, amount in (raw.get("balances") or {}).items()
         }
+        balance_events = [
+            BalanceEvent.from_dict(item) for item in (raw.get("balance_events") or [])
+        ]
         settings = None
         if raw.get("settings"):
             settings = RateSettings.from_dict(raw["settings"])
@@ -349,6 +368,7 @@ class StateRepository:
         return StorageState(
             deals=deals,
             balances=balances,
+            balance_events=balance_events,
             settings=settings,
             user_roles=roles,
             applications=applications,
