@@ -900,13 +900,33 @@ async def _api_deal_chat_list(request: web.Request) -> web.Response:
     messages = await deps.chat_service.list_messages_for_user(
         deal_id, user_id, include_all=include_all
     )
-    payload = [
-        {
-            **msg.to_dict(),
-            "file_url": _chat_file_url(request, msg) if msg.file_path else None,
-        }
-        for msg in messages
-    ]
+    admin_ids = set(deps.config.admin_ids or [])
+    admin_profiles: dict[int, dict[str, Any] | None] = {}
+    for msg in messages:
+        if msg.sender_id in admin_ids and msg.sender_id not in admin_profiles:
+            profile = await deps.user_service.profile_of(msg.sender_id)
+            admin_profiles[msg.sender_id] = _profile_payload(
+                profile, request=request, include_private=True
+            )
+    payload = []
+    for msg in messages:
+        label = None
+        if msg.sender_id in admin_ids and not msg.system:
+            profile = admin_profiles.get(msg.sender_id) or {}
+            name = (
+                profile.get("display_name")
+                or profile.get("full_name")
+                or profile.get("username")
+                or msg.sender_id
+            )
+            label = f"Модератор {name}"
+        payload.append(
+            {
+                **msg.to_dict(),
+                "sender_label": label,
+                "file_url": _chat_file_url(request, msg) if msg.file_path else None,
+            }
+        )
     return web.json_response({"ok": True, "messages": payload})
 
 
@@ -933,7 +953,13 @@ async def _api_deal_chat_send(request: web.Request) -> web.Response:
         file_path=None,
         file_name=None,
     )
-    payload = {**msg.to_dict(), "file_url": None}
+    sender_label = None
+    if user_id in set(deps.config.admin_ids or []):
+        profile = await deps.user_service.profile_of(user_id)
+        data = _profile_payload(profile, request=request, include_private=True) or {}
+        name = data.get("display_name") or data.get("full_name") or data.get("username") or user_id
+        sender_label = f"Модератор {name}"
+    payload = {**msg.to_dict(), "file_url": None, "sender_label": sender_label}
     return web.json_response({"ok": True, "message": payload})
 
 
@@ -972,9 +998,16 @@ async def _api_deal_chat_send_file(request: web.Request) -> web.Response:
         file_path=str(file_path),
         file_name=filename,
     )
+    sender_label = None
+    if user_id in set(deps.config.admin_ids or []):
+        profile = await deps.user_service.profile_of(user_id)
+        data = _profile_payload(profile, request=request, include_private=True) or {}
+        name = data.get("display_name") or data.get("full_name") or data.get("username") or user_id
+        sender_label = f"Модератор {name}"
     payload = {
         **msg.to_dict(),
         "file_url": _chat_file_url(request, msg),
+        "sender_label": sender_label,
     }
     return web.json_response({"ok": True, "message": payload})
 

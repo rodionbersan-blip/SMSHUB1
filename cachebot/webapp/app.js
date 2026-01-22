@@ -2795,6 +2795,11 @@
         label.className = "chat-system-label";
         label.textContent = "BC Cash";
         item.appendChild(label);
+      } else if (msg.sender_label) {
+        const label = document.createElement("div");
+        label.className = "chat-system-label";
+        label.textContent = msg.sender_label;
+        item.appendChild(label);
       }
       const fileName = (msg.file_name || "").toLowerCase();
       const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileName);
