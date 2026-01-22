@@ -3390,7 +3390,17 @@
     input.onchange = () => {
       const file = input.files?.[0];
       if (!file) return;
-      if (!file.type || !file.type.startsWith("video/")) {
+      const name = (file.name || "").toLowerCase();
+      const isVideo =
+        (file.type && file.type.startsWith("video/")) ||
+        name.endsWith(".mp4") ||
+        name.endsWith(".mov") ||
+        name.endsWith(".m4v") ||
+        name.endsWith(".webm") ||
+        name.endsWith(".avi") ||
+        name.endsWith(".mkv") ||
+        name.endsWith(".3gp");
+      if (!isVideo) {
         showNotice("Нужен видеофайл");
         return;
       }
@@ -3401,6 +3411,7 @@
       if (disputeOpenSend) {
         disputeOpenSend.disabled = false;
       }
+      showNotice("Видео выбрано");
     };
     input.click();
   });
