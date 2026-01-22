@@ -2238,11 +2238,13 @@
     if (actions.decline_offer) {
       addAction(topRow, "Отменить", () => dealAction("decline", deal.id), false, "status-bad");
     }
-    if (actions.seller_ready) {
-      addAction(topRow, "Готов отправить", () => dealAction("seller-ready", deal.id), false, "status-ok");
-    }
-    if (actions.buyer_ready) {
-      addAction(topRow, "Готов сканировать", () => dealAction("buyer-ready", deal.id), false, "status-ok");
+    if (deal.status !== "dispute") {
+      if (actions.seller_ready) {
+        addAction(topRow, "Готов отправить", () => dealAction("seller-ready", deal.id), false, "status-ok");
+      }
+      if (actions.buyer_ready) {
+        addAction(topRow, "Готов сканировать", () => dealAction("buyer-ready", deal.id), false, "status-ok");
+      }
     }
     if (actions.confirm_seller && deal.qr_stage === "ready") {
       addAction(topRow, "Получил нал", () => openConfirmComplete(deal), true);
