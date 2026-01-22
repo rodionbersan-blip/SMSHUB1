@@ -2266,6 +2266,7 @@ async def _deal_payload(
         "buyer_id": deal.buyer_id,
         "role": role,
         "cash_rub": str(deal.usd_amount),
+        "usd_amount": str(deal.usd_amount),
         "usdt_amount": str(deal.usdt_amount),
         "rate": str(deal.rate),
         "created_at": deal.created_at.isoformat(),
