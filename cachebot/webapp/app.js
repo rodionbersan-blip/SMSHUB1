@@ -2931,7 +2931,7 @@
       }`.trim();
       if (msg.system) {
         const label = document.createElement("div");
-        label.className = "chat-system-label";
+        label.className = "chat-system-label chat-bc-label";
         label.textContent = "BC Cash";
         item.appendChild(label);
       } else if (msg.sender_label) {
@@ -2942,7 +2942,7 @@
       }
       const fileName = (msg.file_name || "").toLowerCase();
       const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileName);
-      if (msg.file_url) {
+      if (msg.file_url && !msg.system) {
         const label = document.createElement("div");
         label.className = "chat-file-label";
         label.textContent = isImage ? "📎 Фото" : "📎 Файл";
@@ -2971,18 +2971,10 @@
           item.appendChild(link);
         }
       }
-      if (msg.system) {
-        const stamp = document.createElement("span");
-        stamp.className = "chat-system-time";
-        stamp.textContent = formatTime(msg.created_at);
-        const last = item.lastElementChild;
-        if (last) last.appendChild(stamp);
-      } else {
-        const meta = document.createElement("div");
-        meta.className = "chat-meta";
-        meta.textContent = formatDate(msg.created_at);
-        item.appendChild(meta);
-      }
+      const meta = document.createElement("div");
+      meta.className = "chat-meta";
+      meta.textContent = formatDate(msg.created_at);
+      item.appendChild(meta);
       chatList.appendChild(item);
     });
     if (keepPosition && !wasAtBottom) {

@@ -1561,7 +1561,7 @@ body.modal-open #app {
   gap: 4px;
   max-width: 78%;
   padding: 10px 12px;
-  border-radius: 16px;
+  border-radius: 22px;
   background: var(--card-contrast);
   border: 1px solid var(--card-contrast-border);
   color: var(--text);
@@ -1656,45 +1656,17 @@ body.modal-open #app {
   letter-spacing: 0.04em;
 }
 
+.chat-bc-label {
+  color: #4da3ff;
+}
+
 .chat-mod-label {
   color: #ff4d4f;
 }
 
 .chat-message.system {
-  align-self: center;
-  text-align: center;
-  background: transparent;
-  border: none;
-  padding: 0;
-}
-
-.chat-message.system .chat-system-label {
-  display: none;
-}
-
-.chat-message.system > div {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(77, 163, 255, 0.16);
-  border: 1px solid rgba(77, 163, 255, 0.3);
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 12px;
-  gap: 6px;
-}
-
-.chat-system-time {
-  margin-left: 8px;
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.chat-message.system .chat-message-meta {
-  display: none;
+  align-self: flex-start;
+  text-align: left;
 }
 
 .image-modal {
