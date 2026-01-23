@@ -1114,6 +1114,12 @@
     return dt.toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" });
   };
 
+  const formatTime = (iso) => {
+    if (!iso) return "—";
+    const dt = new Date(iso);
+    return dt.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+  };
+
   const formatReviewDate = (iso) => {
     if (!iso) return "—";
     const dt = new Date(iso);
@@ -2964,10 +2970,18 @@
           item.appendChild(link);
         }
       }
-      const meta = document.createElement("div");
-      meta.className = "chat-meta";
-      meta.textContent = formatDate(msg.created_at);
-      item.appendChild(meta);
+      if (msg.system) {
+        const stamp = document.createElement("span");
+        stamp.className = "chat-system-time";
+        stamp.textContent = formatTime(msg.created_at);
+        const last = item.lastElementChild;
+        if (last) last.appendChild(stamp);
+      } else {
+        const meta = document.createElement("div");
+        meta.className = "chat-meta";
+        meta.textContent = formatDate(msg.created_at);
+        item.appendChild(meta);
+      }
       chatList.appendChild(item);
     });
     if (keepPosition && !wasAtBottom) {
