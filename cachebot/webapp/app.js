@@ -2537,7 +2537,8 @@
     if (!deal) return;
     let snapshot = "";
     try {
-      snapshot = JSON.stringify(deal);
+      const { chat_last_at, chat_last_sender_id, ...rest } = deal;
+      snapshot = JSON.stringify(rest);
     } catch {
       snapshot = `${deal.id || ""}:${deal.status || ""}:${deal.qr_stage || ""}`;
     }
