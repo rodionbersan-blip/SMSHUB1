@@ -1813,6 +1813,9 @@ body.modal-open #app {
   display: grid;
   gap: 12px;
   padding: 8px 2px;
+  align-content: start;
+  align-items: start;
+  grid-auto-rows: max-content;
 }
 
 .balance-item {
