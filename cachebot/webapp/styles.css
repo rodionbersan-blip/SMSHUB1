@@ -566,6 +566,14 @@ body.modal-open #app {
   filter: none;
 }
 
+:root[data-theme="light"] .tab.active .nav-icon img {
+  filter: brightness(0) invert(1);
+}
+
+:root[data-theme="dark"] .tab.active .nav-icon img {
+  filter: brightness(0) invert(1);
+}
+
 .tab {
   background: transparent;
   border: none;
