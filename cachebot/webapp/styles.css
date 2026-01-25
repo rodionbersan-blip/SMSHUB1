@@ -978,7 +978,8 @@ body.modal-open #app {
   color: #ffffff;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.65);
   box-shadow:
-    0 8px 14px rgba(34, 197, 94, 0.22),
+    0 0 8px rgba(34, 197, 94, 0.22),
+    0 8px 14px rgba(34, 197, 94, 0.14),
     inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
@@ -989,7 +990,8 @@ body.modal-open #app {
   color: #ffffff;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.65);
   box-shadow:
-    0 8px 14px rgba(239, 68, 68, 0.22),
+    0 0 8px rgba(239, 68, 68, 0.22),
+    0 8px 14px rgba(239, 68, 68, 0.14),
     inset 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 
@@ -1000,7 +1002,8 @@ body.modal-open #app {
   border: 1px solid rgba(0, 0, 0, 0.25);
   text-shadow: none;
   box-shadow:
-    0 10px 16px rgba(16, 185, 129, 0.2),
+    0 0 8px rgba(16, 185, 129, 0.2),
+    0 10px 16px rgba(16, 185, 129, 0.12),
     inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
@@ -1011,7 +1014,8 @@ body.modal-open #app {
   border: 1px solid rgba(0, 0, 0, 0.25);
   text-shadow: none;
   box-shadow:
-    0 10px 16px rgba(239, 68, 68, 0.2),
+    0 0 8px rgba(239, 68, 68, 0.2),
+    0 10px 16px rgba(239, 68, 68, 0.12),
     inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
