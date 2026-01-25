@@ -1325,7 +1325,7 @@
         <div class="page-info">Стр. ${safePage + 1} / ${totalPages}</div>
         ${showFirst ? `<button class="btn jump-btn" data-page="first">В начало</button>` : ""}
         ${showLast ? `<button class="btn jump-btn" data-page="last">В конец</button>` : ""}
-        <button class="btn" ${nextDisabled ? "disabled" : ""} data-page="next">Вперёд</button>
+        <button class="btn next-btn" ${nextDisabled ? "disabled" : ""} data-page="next">Вперёд</button>
       `;
       const prevBtn = dealsPagination.querySelector("[data-page=\"prev\"]");
       const nextBtn = dealsPagination.querySelector("[data-page=\"next\"]");
