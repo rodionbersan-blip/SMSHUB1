@@ -1144,11 +1144,12 @@ body.modal-open #app {
 }
 
 .tab[data-view="disputes"] {
-  margin-left: auto;
+  flex-basis: 100%;
+  margin-left: 0;
 }
 
 .tab[data-view="admin"] {
-  margin-left: auto;
+  margin-left: 12px;
 }
 
 .p2p-actions {
