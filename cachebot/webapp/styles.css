@@ -607,7 +607,7 @@ body.modal-open #app {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: -28px;
+  margin-top: -34px;
 }
 
 .profile-balance-row.history-row {
@@ -624,11 +624,11 @@ body.modal-open #app {
 }
 
 #profileBalance {
-  margin-top: 14px;
+  margin-top: 18px;
 }
 
 .profile-card .profile-title + .profile-value {
-  margin-top: 6px;
+  margin-top: 10px;
 }
 
 .profile-title {
