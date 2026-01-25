@@ -797,6 +797,25 @@ body.modal-open #app {
     inset 0 -1px 0 rgba(255, 255, 255, 0.7);
 }
 
+@media (hover: none) {
+  .deal-item:hover {
+    transform: none;
+    border-color: rgba(255, 167, 66, 0.22);
+    border-left-color: rgba(255, 167, 66, 0.7);
+    box-shadow:
+      0 12px 24px rgba(0, 0, 0, 0.28),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  :root[data-theme="light"] .deal-item:hover {
+    border-color: rgba(255, 167, 66, 0.24);
+    border-left-color: rgba(255, 167, 66, 0.55);
+    box-shadow:
+      0 12px 24px rgba(16, 24, 36, 0.12),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+  }
+}
+
 .deal-header {
   display: flex;
   align-items: center;
