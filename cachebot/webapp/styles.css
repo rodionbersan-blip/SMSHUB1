@@ -85,6 +85,27 @@ h2 {
   font-size: 21px;
 }
 
+.profile-title-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-title-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-title-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 #app {
   max-width: 960px;
   margin: 0 auto;
@@ -469,6 +490,11 @@ body.modal-open #app {
 #profileGo {
   height: 40px;
   padding: 0 18px;
+}
+
+#profileGo .btn-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .btn.pill:hover {
