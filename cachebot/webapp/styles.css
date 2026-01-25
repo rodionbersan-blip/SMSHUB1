@@ -614,7 +614,7 @@ body.modal-open #app {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
-  margin-top: 4px;
+  margin-top: -2px;
 }
 
 #balanceHistoryOpen {
