@@ -847,6 +847,16 @@ body.modal-open #app {
   color: #e5533d;
 }
 
+#view-p2p .deal-status.status-bad {
+  background: rgba(255, 167, 66, 0.22);
+  color: #ff9a2f;
+}
+
+:root[data-theme="light"] #view-p2p .deal-status.status-bad {
+  background: rgba(255, 167, 66, 0.28);
+  color: #d46d1a;
+}
+
 .deal-row {
   font-size: 13px;
   color: var(--muted);
