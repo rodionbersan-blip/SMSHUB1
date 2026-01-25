@@ -610,6 +610,10 @@ body.modal-open #app {
   margin-top: -24px;
 }
 
+.profile-balance-row:not(.history-row) {
+  margin-bottom: -6px;
+}
+
 .profile-balance-row.history-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
