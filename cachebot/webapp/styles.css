@@ -571,7 +571,7 @@ body.modal-open #app {
 }
 
 :root[data-theme="dark"] .tab.active .nav-icon img {
-  filter: brightness(0) invert(1) !important;
+  filter: brightness(0) invert(0) !important;
 }
 
 .tab {
