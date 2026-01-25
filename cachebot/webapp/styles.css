@@ -607,14 +607,14 @@ body.modal-open #app {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-top: -42px;
+  margin-top: 0;
 }
 
 .profile-balance-row.history-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
-  margin-top: -12px;
+  margin-top: 6px;
 }
 
 #balanceHistoryOpen {
@@ -624,15 +624,14 @@ body.modal-open #app {
 }
 
 #profileBalance {
-  margin-top: 28px;
+  margin-top: 16px;
 }
 
 .profile-card .profile-title + .profile-value {
-  margin-top: 18px;
+  margin-top: 8px;
 }
-
 .profile-balance-row .btn {
-  margin-top: -10px;
+  margin-top: 2px;
 }
 
 .profile-title {
