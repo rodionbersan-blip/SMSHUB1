@@ -1140,7 +1140,11 @@ body.modal-open #app {
 }
 
 .p2p-toolbar {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+}
+
+.tab[data-view="disputes"] {
+  margin-left: auto;
 }
 
 .p2p-actions {
