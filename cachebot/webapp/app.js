@@ -1318,13 +1318,19 @@
     if (dealsPagination) {
       const prevDisabled = safePage <= 0;
       const nextDisabled = safePage >= totalPages - 1;
+      const showFirst = safePage >= totalPages - 1;
+      const showLast = safePage < totalPages - 1;
       dealsPagination.innerHTML = `
         <button class="btn back-btn" ${prevDisabled ? "disabled" : ""} data-page="prev">Назад</button>
         <div class="page-info">Стр. ${safePage + 1} / ${totalPages}</div>
+        ${showFirst ? `<button class="btn jump-btn" data-page="first">В начало</button>` : ""}
+        ${showLast ? `<button class="btn jump-btn" data-page="last">В конец</button>` : ""}
         <button class="btn" ${nextDisabled ? "disabled" : ""} data-page="next">Вперёд</button>
       `;
       const prevBtn = dealsPagination.querySelector("[data-page=\"prev\"]");
       const nextBtn = dealsPagination.querySelector("[data-page=\"next\"]");
+      const firstBtn = dealsPagination.querySelector("[data-page=\"first\"]");
+      const lastBtn = dealsPagination.querySelector("[data-page=\"last\"]");
       prevBtn?.addEventListener("click", () => {
         if (state.dealsPage > 0) {
           state.dealsPage -= 1;
@@ -1334,6 +1340,18 @@
       nextBtn?.addEventListener("click", () => {
         if (state.dealsPage < totalPages - 1) {
           state.dealsPage += 1;
+          renderDealsPage();
+        }
+      });
+      firstBtn?.addEventListener("click", () => {
+        if (state.dealsPage !== 0) {
+          state.dealsPage = 0;
+          renderDealsPage();
+        }
+      });
+      lastBtn?.addEventListener("click", () => {
+        if (state.dealsPage !== totalPages - 1) {
+          state.dealsPage = totalPages - 1;
           renderDealsPage();
         }
       });
