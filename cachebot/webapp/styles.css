@@ -3145,16 +3145,26 @@ body.pin-lock .app {
   gap: 12px;
   padding: 10px 12px;
   border-radius: 16px;
-  border: 1px solid var(--card-contrast-border);
-  background: var(--card-contrast);
+  border: 1px solid rgba(77, 163, 255, 0.4);
+  background: rgba(77, 163, 255, 0.12);
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
   position: relative;
 }
 
 .quick-deal-item:hover {
-  border-color: rgba(77, 163, 255, 0.4);
-  background: rgba(77, 163, 255, 0.12);
+  border-color: rgba(77, 163, 255, 0.5);
+  background: rgba(77, 163, 255, 0.16);
+}
+
+:root[data-theme="light"] .quick-deal-item {
+  border-color: rgba(77, 163, 255, 0.35);
+  background: rgba(77, 163, 255, 0.1);
+}
+
+:root[data-theme="light"] .quick-deal-item:hover {
+  border-color: rgba(77, 163, 255, 0.45);
+  background: rgba(77, 163, 255, 0.14);
 }
 
 .quick-deal-info {
