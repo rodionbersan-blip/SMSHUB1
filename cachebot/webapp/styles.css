@@ -606,15 +606,15 @@ body.modal-open #app {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
-  margin-top: -14px;
+  gap: 4px;
+  margin-top: -24px;
 }
 
 .profile-balance-row.history-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
-  margin-top: 2px;
+  margin-top: -2px;
 }
 
 #balanceHistoryOpen {
