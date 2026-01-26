@@ -225,6 +225,16 @@
   const moderationBlockBtn = document.getElementById("moderationBlockBtn");
   const moderationBanBtn = document.getElementById("moderationBanBtn");
   const moderationUserStatus = document.getElementById("moderationUserStatus");
+  const moderationActionModal = document.getElementById("moderationActionModal");
+  const moderationActionTitle = document.getElementById("moderationActionTitle");
+  const moderationActionReason = document.getElementById("moderationActionReason");
+  const moderationActionDuration = document.getElementById("moderationActionDuration");
+  const moderationActionCustomRow = document.getElementById("moderationActionCustomRow");
+  const moderationActionCustom = document.getElementById("moderationActionCustom");
+  const moderationActionHint = document.getElementById("moderationActionHint");
+  const moderationActionSubmit = document.getElementById("moderationActionSubmit");
+  const moderationActionCancel = document.getElementById("moderationActionCancel");
+  const moderationActionClose = document.getElementById("moderationActionClose");
   const adminTab = document.getElementById("adminTab");
   const adminRate = document.getElementById("adminRate");
   const adminFee = document.getElementById("adminFee");
@@ -295,6 +305,7 @@
     canManageDisputes: false,
     moderationUser: null,
     profileModeration: null,
+    moderationAction: null,
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -2351,6 +2362,64 @@
       if (button) {
         button.classList.remove("is-loading");
       }
+    }
+  };
+
+  const openModerationActionModal = (action) => {
+    if (!moderationActionModal || !moderationActionReason || !moderationActionDuration) return;
+    state.moderationAction = action;
+    moderationActionReason.value = "";
+    moderationActionDuration.value = "week";
+    moderationActionCustom.value = "";
+    moderationActionCustomRow?.classList.add("is-hidden");
+    if (moderationActionTitle) {
+      moderationActionTitle.textContent =
+        action === "ban" ? "Блокировка профиля" : "Отключение сделок";
+    }
+    if (moderationActionHint) {
+      moderationActionHint.textContent = "Причина обязательна.";
+    }
+    moderationActionModal.classList.add("open");
+  };
+
+  const closeModerationActionModal = () => {
+    moderationActionModal?.classList.remove("open");
+  };
+
+  const submitModerationAction = async () => {
+    const userId = state.moderationUser?.user_id;
+    const action = state.moderationAction;
+    if (!userId || !action) return;
+    const reason = (moderationActionReason?.value || "").trim();
+    if (!reason) {
+      if (moderationActionHint) moderationActionHint.textContent = "Укажите причину.";
+      return;
+    }
+    let durationMinutes = null;
+    const preset = moderationActionDuration?.value || "week";
+    if (preset === "week") durationMinutes = 7 * 24 * 60;
+    if (preset === "month") durationMinutes = 30 * 24 * 60;
+    if (preset === "custom") {
+      const days = Number(moderationActionCustom?.value || 0);
+      if (!days || days <= 0) {
+        if (moderationActionHint) moderationActionHint.textContent = "Введите срок в днях.";
+        return;
+      }
+      durationMinutes = Math.round(days * 24 * 60);
+    }
+    if (preset === "forever") durationMinutes = null;
+    if (moderationActionHint) moderationActionHint.textContent = "";
+    moderationActionSubmit?.classList.add("is-loading");
+    try {
+      const payload = await fetchJson(`/api/admin/users/${userId}/moderation`, {
+        method: "POST",
+        body: JSON.stringify({ action, reason, duration_minutes: durationMinutes }),
+      });
+      if (!payload?.ok) return;
+      renderModerationUser(payload.user);
+      closeModerationActionModal();
+    } finally {
+      moderationActionSubmit?.classList.remove("is-loading");
     }
   };
 
@@ -4440,12 +4509,27 @@
   moderationWarnBtn?.addEventListener("click", () => applyModerationAction("warn", moderationWarnBtn));
   moderationBlockBtn?.addEventListener("click", () => {
     const blocked = state.moderationUser?.moderation?.deals_blocked;
-    applyModerationAction(blocked ? "unblock_deals" : "block_deals", moderationBlockBtn);
+    if (blocked) {
+      applyModerationAction("unblock_deals", moderationBlockBtn);
+    } else {
+      openModerationActionModal("block_deals");
+    }
   });
   moderationBanBtn?.addEventListener("click", () => {
     const banned = state.moderationUser?.moderation?.banned;
-    applyModerationAction(banned ? "unban" : "ban", moderationBanBtn);
+    if (banned) {
+      applyModerationAction("unban", moderationBanBtn);
+    } else {
+      openModerationActionModal("ban");
+    }
   });
+  moderationActionDuration?.addEventListener("change", () => {
+    const showCustom = moderationActionDuration.value === "custom";
+    moderationActionCustomRow?.classList.toggle("is-hidden", !showCustom);
+  });
+  moderationActionSubmit?.addEventListener("click", submitModerationAction);
+  moderationActionCancel?.addEventListener("click", closeModerationActionModal);
+  moderationActionClose?.addEventListener("click", closeModerationActionModal);
 
   reviewsOpen?.addEventListener("click", async () => {
     state.reviewsTargetUserId = null;

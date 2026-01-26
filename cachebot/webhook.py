@@ -6,7 +6,7 @@ import json
 import logging
 import shutil
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from contextlib import suppress
 from pathlib import Path
 from typing import Any
@@ -1815,7 +1815,7 @@ async def _api_admin_user_search(request: web.Request) -> web.Response:
 
 async def _api_admin_user_moderation(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
-    _, user_id = await _require_user(request)
+    user, user_id = await _require_user(request)
     if not await _has_moderation_access(user_id, deps):
         raise web.HTTPForbidden(text="Нет доступа")
     target_id = int(request.match_info["user_id"])
@@ -1829,18 +1829,51 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
     except Exception:
         raise web.HTTPBadRequest(text="Invalid JSON")
     action = str(body.get("action") or "").strip().lower()
+    reason = str(body.get("reason") or "").strip()
+    duration_minutes = body.get("duration_minutes")
+    minutes = None
+    until = None
+    if duration_minutes is not None:
+        try:
+            minutes = int(duration_minutes)
+            if minutes > 0:
+                until = datetime.now(timezone.utc) + timedelta(minutes=minutes)
+        except (TypeError, ValueError):
+            raise web.HTTPBadRequest(text="Некорректный срок")
+    if action in {"ban", "block_deals"} and not reason:
+        raise web.HTTPBadRequest(text="Нужно указать причину")
     if action == "warn":
         moderation = await deps.user_service.add_warning(target_id)
     elif action == "ban":
-        moderation = await deps.user_service.set_banned(target_id, True)
+        moderation = await deps.user_service.set_banned(target_id, True, until=until)
     elif action == "unban":
         moderation = await deps.user_service.set_banned(target_id, False)
     elif action == "block_deals":
-        moderation = await deps.user_service.set_deal_blocked(target_id, True)
+        moderation = await deps.user_service.set_deal_blocked(target_id, True, until=until)
     elif action == "unblock_deals":
         moderation = await deps.user_service.set_deal_blocked(target_id, False)
     else:
         raise web.HTTPBadRequest(text="Некорректное действие")
+        if action in {"ban", "block_deals"}:
+            bot = request.app.get("bot")
+            if bot:
+                handle = user.get("username")
+                moderator_name = f"@{handle}" if handle else (
+                    user.get("first_name") or user.get("last_name") or str(user_id)
+                )
+                duration_text = _format_duration(minutes) if until else "навсегда"
+                if action == "ban":
+                    action_line = "заблокировал профиль"
+                else:
+                    action_line = "ограничил сделки"
+                message = (
+                    f"Модератор {moderator_name} {action_line}.\n"
+                    f"Причина: {reason}\n"
+                    f"Срок: {duration_text}\n\n"
+                    "Если хотите оспорить, обратитесь в поддержку приложения."
+                )
+                with suppress(Exception):
+                    await bot.send_message(target_id, message)
     role = await deps.user_service.role_of(profile.user_id)
     role_label = await _role_label(profile.user_id, deps)
     merchant_since = await deps.user_service.merchant_since_of(profile.user_id)
@@ -2306,6 +2339,18 @@ async def _role_label(user_id: int, deps: AppDeps) -> str:
     if await deps.user_service.is_moderator(user_id):
         return "Модератор"
     return "Пользователь"
+
+
+def _format_duration(minutes: int | None) -> str:
+    if not minutes or minutes <= 0:
+        return "навсегда"
+    if minutes < 60:
+        return f"{minutes} мин"
+    hours = minutes / 60
+    if hours < 24:
+        return f"{round(hours)} ч"
+    days = hours / 24
+    return f"{round(days)} дн."
 
 
 async def _merchant_stats(deps: AppDeps, user_id: int) -> dict[str, int]:

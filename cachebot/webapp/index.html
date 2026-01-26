@@ -80,7 +80,7 @@
           <div class="profile-avatar-large" id="profileAvatarLarge">BC</div>
           <div>
             <div id="profileDisplayName" class="profile-value">—</div>
-            <div id="profileStatus" class="profile-status">Статус: —</div>
+            <div id="profileStatus" class="profile-status is-hidden">Статус: —</div>
           </div>
           <button id="profileEditOpen" class="btn ghost">Изменить</button>
         </div>
@@ -524,7 +524,7 @@
           <div>
             <div id="profileQuickName" class="profile-value">—</div>
             <div id="profileQuickUsername" class="profile-muted">—</div>
-            <div id="profileQuickStatus" class="profile-status">Статус: —</div>
+            <div id="profileQuickStatus" class="profile-status is-hidden">Статус: —</div>
           </div>
         </div>
         <div class="modal-body profile-quick-balance">
@@ -547,6 +547,36 @@
             </span>
             Перейти в профиль
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="moderationActionModal">
+      <div class="modal-card glass moderation-modal">
+        <div class="modal-header">
+          <div class="modal-title" id="moderationActionTitle">Модерация</div>
+          <button id="moderationActionClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body moderation-form">
+          <label>Причина
+            <textarea id="moderationActionReason" rows="3" placeholder="Опишите причину"></textarea>
+          </label>
+          <label>Срок ограничения
+            <select id="moderationActionDuration">
+              <option value="week">Неделя</option>
+              <option value="month">Месяц</option>
+              <option value="forever">Навсегда</option>
+              <option value="custom">Ввести вручную</option>
+            </select>
+          </label>
+          <label id="moderationActionCustomRow" class="is-hidden">Срок (дней)
+            <input id="moderationActionCustom" type="number" min="1" max="3650" placeholder="Например: 14" />
+          </label>
+          <div class="admin-hint" id="moderationActionHint">Причина обязательна.</div>
+        </div>
+        <div class="modal-actions">
+          <button id="moderationActionSubmit" class="btn primary">Применить</button>
+          <button id="moderationActionCancel" class="btn">Отмена</button>
         </div>
       </div>
     </div>

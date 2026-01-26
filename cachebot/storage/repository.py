@@ -61,6 +61,8 @@ class StorageState:
     user_warnings: Dict[int, int]
     user_bans: List[int]
     user_deal_blocks: List[int]
+    user_ban_until: Dict[int, str]
+    user_deal_block_until: Dict[int, str]
 
 
 class StateRepository:
@@ -108,6 +110,8 @@ class StateRepository:
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
                 user_deal_blocks=self._state.user_deal_blocks,
+                user_ban_until=self._state.user_ban_until,
+                user_deal_block_until=self._state.user_deal_block_until,
             )
             self._write_locked()
 
@@ -134,6 +138,8 @@ class StateRepository:
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
                 user_deal_blocks=self._state.user_deal_blocks,
+                user_ban_until=self._state.user_ban_until,
+                user_deal_block_until=self._state.user_deal_block_until,
             )
             self._write_locked()
 
@@ -147,6 +153,8 @@ class StateRepository:
         user_warnings: Dict[int, int],
         user_bans: List[int],
         user_deal_blocks: List[int],
+        user_ban_until: Dict[int, str],
+        user_deal_block_until: Dict[int, str],
     ) -> None:
         async with self._lock:
             self._state = StorageState(
@@ -170,6 +178,8 @@ class StateRepository:
                 user_warnings=user_warnings,
                 user_bans=user_bans,
                 user_deal_blocks=user_deal_blocks,
+                user_ban_until=user_ban_until,
+                user_deal_block_until=user_deal_block_until,
             )
             self._write_locked()
 
@@ -196,6 +206,8 @@ class StateRepository:
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
                 user_deal_blocks=self._state.user_deal_blocks,
+                user_ban_until=self._state.user_ban_until,
+                user_deal_block_until=self._state.user_deal_block_until,
             )
             self._write_locked()
 
@@ -222,6 +234,8 @@ class StateRepository:
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
                 user_deal_blocks=self._state.user_deal_blocks,
+                user_ban_until=self._state.user_ban_until,
+                user_deal_block_until=self._state.user_deal_block_until,
             )
             self._write_locked()
 
@@ -253,6 +267,8 @@ class StateRepository:
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
                 user_deal_blocks=self._state.user_deal_blocks,
+                user_ban_until=self._state.user_ban_until,
+                user_deal_block_until=self._state.user_deal_block_until,
             )
             self._write_locked()
 
@@ -279,6 +295,8 @@ class StateRepository:
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
                 user_deal_blocks=self._state.user_deal_blocks,
+                user_ban_until=self._state.user_ban_until,
+                user_deal_block_until=self._state.user_deal_block_until,
             )
             self._write_locked()
 
@@ -305,6 +323,8 @@ class StateRepository:
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
                 user_deal_blocks=self._state.user_deal_blocks,
+                user_ban_until=self._state.user_ban_until,
+                user_deal_block_until=self._state.user_deal_block_until,
             )
             self._write_locked()
 
@@ -337,6 +357,12 @@ class StateRepository:
             "user_warnings": {str(uid): count for uid, count in self._state.user_warnings.items()},
             "user_bans": list(self._state.user_bans),
             "user_deal_blocks": list(self._state.user_deal_blocks),
+            "user_ban_until": {
+                str(uid): value for uid, value in self._state.user_ban_until.items()
+            },
+            "user_deal_block_until": {
+                str(uid): value for uid, value in self._state.user_deal_block_until.items()
+            },
         }
         tmp = self._path.with_suffix(".tmp")
         tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -365,6 +391,8 @@ class StateRepository:
                 user_warnings={},
                 user_bans=[],
                 user_deal_blocks=[],
+                user_ban_until={},
+                user_deal_block_until={},
             )
         raw = json.loads(self._path.read_text(encoding="utf-8"))
         deals = [Deal.from_dict(item) for item in raw.get("deals", [])]
@@ -406,6 +434,12 @@ class StateRepository:
         }
         user_bans = [int(uid) for uid in (raw.get("user_bans") or [])]
         user_deal_blocks = [int(uid) for uid in (raw.get("user_deal_blocks") or [])]
+        user_ban_until = {
+            int(uid): value for uid, value in (raw.get("user_ban_until") or {}).items()
+        }
+        user_deal_block_until = {
+            int(uid): value for uid, value in (raw.get("user_deal_block_until") or {}).items()
+        }
         return StorageState(
             deals=deals,
             balances=balances,
@@ -427,4 +461,6 @@ class StateRepository:
             user_warnings=user_warnings,
             user_bans=user_bans,
             user_deal_blocks=user_deal_blocks,
+            user_ban_until=user_ban_until,
+            user_deal_block_until=user_deal_block_until,
         )

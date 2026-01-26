@@ -1866,8 +1866,8 @@ body.modal-open #app {
 }
 
 .moderation-user-handle {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text);
 }
 
@@ -2051,6 +2051,54 @@ body.modal-open #app {
   gap: 8px;
   align-items: center;
   font-size: 12px;
+}
+
+#moderationActionModal .modal-card {
+  max-width: 520px;
+}
+
+#moderationActionModal .moderation-form {
+  display: grid;
+  gap: 12px;
+}
+
+#moderationActionModal label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#moderationActionModal textarea,
+#moderationActionModal input,
+#moderationActionModal select {
+  border: 1px solid rgba(120, 180, 255, 0.18);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(18, 22, 30, 0.55);
+  color: #e9eef7;
+  font-size: 14px;
+}
+
+#moderationActionModal textarea:focus,
+#moderationActionModal input:focus,
+#moderationActionModal select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(77, 163, 255, 0.2);
+}
+
+:root[data-theme="light"] #moderationActionModal textarea,
+:root[data-theme="light"] #moderationActionModal input,
+:root[data-theme="light"] #moderationActionModal select {
+  background: rgba(255, 255, 255, 0.75);
+  color: #1a2433;
+  border-color: rgba(20, 28, 38, 0.12);
+}
+
+:root[data-theme="light"] #moderationActionModal textarea:focus,
+:root[data-theme="light"] #moderationActionModal input:focus,
+:root[data-theme="light"] #moderationActionModal select:focus {
+  box-shadow: 0 0 0 2px rgba(60, 130, 225, 0.2);
 }
 
 .profile-actions {
