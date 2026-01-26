@@ -88,6 +88,11 @@ body.pin-lock #app {
   visibility: hidden;
 }
 
+body.pin-lock .pin-overlay,
+body.pin-lock .pin-card {
+  visibility: visible;
+}
+
 h1,
 h2,
 h3,

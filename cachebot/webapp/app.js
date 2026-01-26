@@ -694,6 +694,7 @@
     let biometricResetTimer = null;
     let externalUnlockResolver = null;
     let allowPinDismiss = false;
+    let lastPinPressAt = 0;
 
     const setHint = (text = "") => {
       if (pinHint) pinHint.textContent = text;
@@ -887,8 +888,7 @@
       }
     };
 
-    pinKeypad.addEventListener("click", async (event) => {
-      const btn = event.target.closest(".pin-key");
+    const handlePinPress = async (btn) => {
       if (!btn || mode === "biometric") return;
       const digit = btn.dataset.digit;
       const action = btn.dataset.action;
@@ -908,6 +908,19 @@
       if (buffer.length === 4) {
         await handleComplete();
       }
+    };
+
+    pinKeypad.addEventListener("pointerdown", (event) => {
+      const btn = event.target.closest(".pin-key");
+      if (!btn) return;
+      lastPinPressAt = Date.now();
+      handlePinPress(btn);
+    });
+
+    pinKeypad.addEventListener("click", (event) => {
+      if (Date.now() - lastPinPressAt < 400) return;
+      const btn = event.target.closest(".pin-key");
+      handlePinPress(btn);
     });
 
     pinBiometric?.addEventListener("click", () => {
