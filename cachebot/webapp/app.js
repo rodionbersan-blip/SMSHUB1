@@ -3326,6 +3326,15 @@
         log(
           `Готово. Пользователь: ${user.display_name || user.full_name || user.first_name || user.id}`
         );
+      } else {
+        state.bootstrapDone = false;
+        if (!state.bootstrapRetry) {
+          state.bootstrapRetry = window.setTimeout(() => {
+            state.bootstrapRetry = null;
+            bootstrapApp();
+          }, 800);
+        }
+        return;
       }
       await loadSummary();
       await loadProfile();
