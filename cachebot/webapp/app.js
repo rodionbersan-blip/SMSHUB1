@@ -2251,6 +2251,9 @@
       <span>Успешные: ${stats.success_percent ?? 0}%</span>
       <span>Отзывы: ${stats.reviews_count ?? 0}</span>
     `;
+    if (moderationWarnBtn) {
+      moderationWarnBtn.textContent = `Предупреждение (${warnings}/3)`;
+    }
     const statusParts = [`Предупреждений: ${warnings}/3`];
     if (dealsBlocked) statusParts.push("Сделки запрещены");
     if (banned) statusParts.push("БАН");
@@ -2286,15 +2289,28 @@
     renderModerationUser(payload.user);
   };
 
-  const applyModerationAction = async (action) => {
+  const applyModerationAction = async (action, button) => {
     const userId = state.moderationUser?.user_id;
     if (!userId) return;
-    const payload = await fetchJson(`/api/admin/users/${userId}/moderation`, {
-      method: "POST",
-      body: JSON.stringify({ action }),
-    });
-    if (!payload?.ok) return;
-    renderModerationUser(payload.user);
+    if (button) {
+      button.classList.add("is-loading");
+    }
+    try {
+      const payload = await fetchJson(`/api/admin/users/${userId}/moderation`, {
+        method: "POST",
+        body: JSON.stringify({ action }),
+      });
+      if (!payload?.ok) return;
+      renderModerationUser(payload.user);
+      if (button) {
+        button.classList.add("is-applied");
+        window.setTimeout(() => button.classList.remove("is-applied"), 700);
+      }
+    } finally {
+      if (button) {
+        button.classList.remove("is-loading");
+      }
+    }
   };
 
   const loadAdmin = async () => {
@@ -4380,14 +4396,14 @@
       runModerationSearch();
     }
   });
-  moderationWarnBtn?.addEventListener("click", () => applyModerationAction("warn"));
+  moderationWarnBtn?.addEventListener("click", () => applyModerationAction("warn", moderationWarnBtn));
   moderationBlockBtn?.addEventListener("click", () => {
     const blocked = state.moderationUser?.moderation?.deals_blocked;
-    applyModerationAction(blocked ? "unblock_deals" : "block_deals");
+    applyModerationAction(blocked ? "unblock_deals" : "block_deals", moderationBlockBtn);
   });
   moderationBanBtn?.addEventListener("click", () => {
     const banned = state.moderationUser?.moderation?.banned;
-    applyModerationAction(banned ? "unban" : "ban");
+    applyModerationAction(banned ? "unban" : "ban", moderationBanBtn);
   });
 
   reviewsOpen?.addEventListener("click", async () => {
