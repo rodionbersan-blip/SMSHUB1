@@ -59,6 +59,8 @@ body {
 :root[data-theme="light"] html,
 :root[data-theme="light"] body {
   background: #f5f7fb;
+  background-attachment: fixed;
+  min-height: 100dvh;
 }
 
 
