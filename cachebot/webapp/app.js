@@ -3905,13 +3905,57 @@
   p2pVolumeMax?.addEventListener("click", async () => {
     if (state.balance !== null) {
       p2pVolume.value = formatAmount(state.balance, 3);
+      updateP2PLimitsState();
       return;
     }
     const balancePayload = await fetchJson("/api/balance");
     if (balancePayload?.ok) {
       p2pVolume.value = formatAmount(balancePayload.balance, 3);
+      updateP2PLimitsState();
     }
   });
+
+  const computeMaxLimit = () => {
+    const volume = Number(p2pVolume?.value);
+    const price = Number(p2pPrice?.value);
+    if (!Number.isFinite(volume) || volume <= 0 || !Number.isFinite(price) || price <= 0) {
+      return null;
+    }
+    return volume * price;
+  };
+
+  const clampLimitsToMax = (maxLimit) => {
+    if (!p2pLimits?.value) return;
+    const [minStr, maxStr] = p2pLimits.value.split("-");
+    if (!minStr || !maxStr) return;
+    const min = Number(minStr);
+    const max = Number(maxStr);
+    if (!Number.isFinite(max)) return;
+    const capped = Math.floor(maxLimit);
+    if (max > capped) {
+      const safeMax = Number.isFinite(min) && min > capped ? min : capped;
+      p2pLimits.value = `${minStr}-${formatAmount(safeMax, 0)}`;
+    }
+  };
+
+  const updateP2PLimitsState = () => {
+    if (!p2pLimits) return;
+    const maxLimit = computeMaxLimit();
+    const enabled = maxLimit !== null;
+    p2pLimits.disabled = !enabled;
+    p2pLimits.placeholder = enabled ? "1000-10000" : "Введите объем и цену";
+    if (enabled) {
+      clampLimitsToMax(maxLimit);
+    }
+  };
+
+  p2pVolume?.addEventListener("input", updateP2PLimitsState);
+  p2pPrice?.addEventListener("input", updateP2PLimitsState);
+  p2pLimits?.addEventListener("blur", () => {
+    const maxLimit = computeMaxLimit();
+    if (maxLimit !== null) clampLimitsToMax(maxLimit);
+  });
+  updateP2PLimitsState();
 
   p2pTradingToggle?.addEventListener("click", async () => {
     const payload = await fetchJson("/api/p2p/summary");
@@ -3951,7 +3995,13 @@
     event.preventDefault();
     const [minStr, maxStr] = (p2pLimits.value || "").split("-");
     const min = Number(minStr);
-    const max = Number(maxStr);
+    let max = Number(maxStr);
+    const maxLimit = computeMaxLimit();
+    if (maxLimit !== null && Number.isFinite(max) && max > maxLimit) {
+      const capped = Math.floor(maxLimit);
+      max = Number.isFinite(min) && min > capped ? min : capped;
+      p2pLimits.value = `${minStr}-${formatAmount(max, 0)}`;
+    }
     if (!min || !max || min > max) {
       log("Лимиты должны быть в формате 1000-10000", "warn");
       return;
