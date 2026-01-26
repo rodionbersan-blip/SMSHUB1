@@ -2068,11 +2068,12 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
             or hmac.compare_digest(received_hash, raw_sorted_plain)
         ):
             logger.warning(
-                "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s",
+                "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s raw_prefix=%s",
                 received_hash[:12],
                 expected_hash[:12],
                 legacy_hash[:12],
                 ",".join(sorted(data.keys())),
+                init_data[:32],
             )
             return None
     try:
@@ -2099,6 +2100,12 @@ async def _require_user(request: web.Request) -> tuple[dict[str, Any], int]:
         except Exception:
             user = None
     if not user or "id" not in user:
+        logger.warning(
+            "initData auth failed: header=%s query=%s ua=%s",
+            bool(request.headers.get("X-Telegram-Init-Data")),
+            bool(request.query.get("initData")),
+            request.headers.get("User-Agent"),
+        )
         raise web.HTTPUnauthorized(text="Invalid initData")
     full_name = " ".join(
         part for part in [user.get("first_name"), user.get("last_name")] if part
