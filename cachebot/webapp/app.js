@@ -1194,35 +1194,14 @@
     return "Статус";
   };
 
-  const initDataCacheKey = "initDataCache";
   const refreshInitData = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const initFromUrl = urlParams.get("initData");
     const fresh = tg?.initData || initFromUrl || "";
     if (fresh) {
       state.initData = fresh;
-      try {
-        window.sessionStorage.setItem(
-          initDataCacheKey,
-          JSON.stringify({ value: fresh, ts: Date.now() })
-        );
-      } catch {
-        // ignore
-      }
       updateInitDebug();
       return true;
-    }
-    try {
-      const raw = window.sessionStorage.getItem(initDataCacheKey);
-      if (!raw) return Boolean(state.initData);
-      const cached = JSON.parse(raw);
-      if (cached?.value && Date.now() - (cached.ts || 0) < 10 * 60 * 1000) {
-        state.initData = cached.value;
-        updateInitDebug();
-        return true;
-      }
-    } catch {
-      // ignore
     }
     updateInitDebug();
     return Boolean(state.initData);
@@ -1246,11 +1225,6 @@
       if (!res.ok) {
         const text = await res.text();
         if (retry && /initdata|invalid/i.test(text)) {
-          try {
-            window.sessionStorage.removeItem(initDataCacheKey);
-          } catch {
-            // ignore
-          }
           state.initData = "";
           refreshInitData();
           return fetchMe(false);
@@ -1292,11 +1266,6 @@
       if (!res.ok) {
         const text = await res.text();
         if (retry && /initdata|invalid/i.test(text)) {
-          try {
-            window.sessionStorage.removeItem(initDataCacheKey);
-          } catch {
-            // ignore
-          }
           state.initData = "";
           refreshInitData();
           return fetchJson(path, options, false);
