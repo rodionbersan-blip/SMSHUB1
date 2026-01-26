@@ -729,6 +729,10 @@ body.modal-open #app {
   border-color: rgba(20, 28, 38, 0.16);
 }
 
+:root[data-theme="light"] #view-admin {
+  padding-bottom: 32px;
+}
+
 .view {
   display: none;
 }
