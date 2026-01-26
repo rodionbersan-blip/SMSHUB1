@@ -3924,11 +3924,23 @@
   const scrollP2PTermsIntoView = () => {
     if (!p2pTerms) return;
     setTimeout(() => {
+      const card = p2pTerms.closest(".modal-card");
+      if (card) {
+        const cardTop = card.getBoundingClientRect().top;
+        const targetTop = p2pTerms.getBoundingClientRect().top;
+        const offset = targetTop - cardTop - 24;
+        card.scrollTo({
+          top: Math.max(0, card.scrollTop + offset),
+          behavior: "smooth",
+        });
+        return;
+      }
       p2pTerms.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 220);
+    }, 240);
   };
 
   p2pTerms?.addEventListener("focus", scrollP2PTermsIntoView);
+  p2pTerms?.addEventListener("click", scrollP2PTermsIntoView);
 
   const computeMaxLimit = () => {
     const volume = Number(p2pVolume?.value);
