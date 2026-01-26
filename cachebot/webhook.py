@@ -1856,33 +1856,55 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Некорректное действие")
     notice_sent = False
     notice_error: str | None = None
-    if action in {"ban", "block_deals", "warn"}:
+    if action in {"ban", "block_deals", "warn", "unban", "unblock_deals"}:
         bot = request.app.get("bot")
         if not bot:
             notice_error = "bot_not_configured"
             logger.warning("Moderation notice not sent: bot not configured")
         else:
-            handle = user.get("username")
-            moderator_name = f"@{handle}" if handle else (
-                user.get("first_name") or user.get("last_name") or str(user_id)
+            moderator_profile = await deps.user_service.profile_of(user_id)
+            moderator_name = (
+                (moderator_profile.display_name if moderator_profile else None)
+                or (moderator_profile.full_name if moderator_profile else None)
+                or (moderator_profile.username if moderator_profile else None)
+                or (user.get("first_name") or user.get("last_name") or str(user_id))
             )
+            moderator_line = f"Модератор: <b>{moderator_name}</b>"
             duration_text = _format_duration(minutes) if until else "навсегда"
+            duration_line = f"на {duration_text}" if until else "навсегда"
             if action == "ban":
-                action_line = "заблокировал профиль"
-                details = f"Срок: {duration_text}\n"
+                header = f"Ваш профиль заблокирован {duration_line}!"
+                reason_line = f"Причина: {reason}"
+                message = (
+                    f"{header}\n{moderator_line}\n{reason_line}\n"
+                    "Если хотите оспорить, пишите в поддержку."
+                )
             elif action == "block_deals":
-                action_line = "ограничил сделки"
-                details = f"Срок: {duration_text}\n"
+                header = f"Ваши сделки ограничены {duration_line}!"
+                reason_line = f"Причина: {reason}"
+                message = (
+                    f"{header}\n{moderator_line}\n{reason_line}\n"
+                    "Если хотите оспорить, пишите в поддержку."
+                )
+            elif action == "warn":
+                header = "Вам вынесено предупреждение!"
+                reason_line = f"Причина: {reason}"
+                message = (
+                    f"{header}\n{moderator_line}\n{reason_line}\n"
+                    "Если хотите оспорить, пишите в поддержку."
+                )
+            elif action == "unban":
+                message = (
+                    "Ваш профиль разблокирован.\n"
+                    f"{moderator_line}\n"
+                    "Если есть вопросы, пишите в поддержку."
+                )
             else:
-                action_line = "вынес предупреждение"
-                warnings_total = moderation.get("warnings") if isinstance(moderation, dict) else None
-                details = f"Предупреждений: {warnings_total}/3\n" if warnings_total is not None else ""
-            message = (
-                f"Модератор {moderator_name} {action_line}.\n"
-                f"Причина: {reason}\n"
-                f"{details}\n"
-                "Если хотите оспорить, обратитесь в поддержку приложения."
-            )
+                message = (
+                    "Ограничение сделок снято.\n"
+                    f"{moderator_line}\n"
+                    "Если есть вопросы, пишите в поддержку."
+                )
             try:
                 await bot.send_message(target_id, message)
                 notice_sent = True

@@ -1865,6 +1865,7 @@
         renderReviews(reviews, "all");
         reviewsModal.classList.add("open");
         window.setTimeout(updateReviewsIndicator, 0);
+        window.setTimeout(updateReviewsIndicator, 320);
       };
     }
   };
@@ -2378,12 +2379,19 @@
     moderationActionCustom.value = "";
     moderationActionCustomRow?.classList.add("is-hidden");
     if (moderationActionTitle) {
-      moderationActionTitle.textContent =
-        action === "ban" ? "Блокировка профиля" : "Отключение сделок";
+      if (action === "warn") {
+        moderationActionTitle.textContent = "Предупреждение";
+      } else {
+        moderationActionTitle.textContent =
+          action === "ban" ? "Блокировка профиля" : "Отключение сделок";
+      }
     }
     if (moderationActionHint) {
       moderationActionHint.textContent = "Причина обязательна.";
     }
+    moderationActionDuration
+      ?.closest(".form-row")
+      ?.classList.toggle("is-hidden", action === "warn");
     moderationActionModal.classList.add("open");
   };
 
@@ -2401,18 +2409,20 @@
       return;
     }
     let durationMinutes = null;
-    const preset = moderationActionDuration?.value || "week";
-    if (preset === "week") durationMinutes = 7 * 24 * 60;
-    if (preset === "month") durationMinutes = 30 * 24 * 60;
-    if (preset === "custom") {
-      const days = Number(moderationActionCustom?.value || 0);
-      if (!days || days <= 0) {
-        if (moderationActionHint) moderationActionHint.textContent = "Введите срок в днях.";
-        return;
+    if (action !== "warn") {
+      const preset = moderationActionDuration?.value || "week";
+      if (preset === "week") durationMinutes = 7 * 24 * 60;
+      if (preset === "month") durationMinutes = 30 * 24 * 60;
+      if (preset === "custom") {
+        const days = Number(moderationActionCustom?.value || 0);
+        if (!days || days <= 0) {
+          if (moderationActionHint) moderationActionHint.textContent = "Введите срок в днях.";
+          return;
+        }
+        durationMinutes = Math.round(days * 24 * 60);
       }
-      durationMinutes = Math.round(days * 24 * 60);
+      if (preset === "forever") durationMinutes = null;
     }
-    if (preset === "forever") durationMinutes = null;
     if (moderationActionHint) moderationActionHint.textContent = "";
     moderationActionSubmit?.classList.add("is-loading");
     try {
@@ -3684,12 +3694,10 @@
     const activeBtn = reviewsTabs.querySelector(".tab-btn.active");
     const indicator = reviewsTabs.querySelector(".tab-indicator");
     if (!activeBtn || !indicator) return;
-    const containerRect = reviewsTabs.getBoundingClientRect();
-    const buttonRect = activeBtn.getBoundingClientRect();
     const styles = window.getComputedStyle(reviewsTabs);
     const padLeft = parseFloat(styles.paddingLeft) || 0;
-    const offset = buttonRect.left - containerRect.left - padLeft;
-    indicator.style.width = `${buttonRect.width}px`;
+    const offset = activeBtn.offsetLeft - padLeft;
+    indicator.style.width = `${activeBtn.offsetWidth}px`;
     indicator.style.transform = `translateX(${offset}px)`;
   };
 
@@ -4523,7 +4531,7 @@
       openUserProfile(targetId);
     }
   });
-  moderationWarnBtn?.addEventListener("click", () => applyModerationAction("warn", moderationWarnBtn));
+  moderationWarnBtn?.addEventListener("click", () => openModerationActionModal("warn"));
   moderationBlockBtn?.addEventListener("click", () => {
     const blocked = state.moderationUser?.moderation?.deals_blocked;
     if (blocked) {
@@ -4555,6 +4563,7 @@
     renderReviews(reviews, "all");
     reviewsModal.classList.add("open");
     window.setTimeout(updateReviewsIndicator, 0);
+    window.setTimeout(updateReviewsIndicator, 320);
   });
 
   reviewsClose?.addEventListener("click", () => {
