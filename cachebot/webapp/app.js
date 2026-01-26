@@ -74,6 +74,7 @@
   const profileModalAvatar = document.getElementById("profileModalAvatar");
   const profileQuickName = document.getElementById("profileQuickName");
   const profileQuickUsername = document.getElementById("profileQuickUsername");
+  const profileQuickStatus = document.getElementById("profileQuickStatus");
   const profileQuickBalance = document.getElementById("profileQuickBalance");
   const profileQuickReserved = document.getElementById("profileQuickReserved");
   const profileModalTopup = document.getElementById("profileModalTopup");
@@ -93,6 +94,7 @@
   const profileName = document.getElementById("profileName");
   const profileUsername = document.getElementById("profileUsername");
   const profileRegistered = document.getElementById("profileRegistered");
+  const profileStatus = document.getElementById("profileStatus");
   const profileRole = document.getElementById("profileRole");
   const profileRoleCard = document.getElementById("profileRoleCard");
   const profileMerchantSince = document.getElementById("profileMerchantSince");
@@ -291,6 +293,7 @@
     reviewsTargetUserId: null,
     canManageDisputes: false,
     moderationUser: null,
+    profileModeration: null,
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -1356,6 +1359,19 @@
         : "";
     }
     const stats = data?.stats || {};
+    state.profileModeration = data?.moderation || null;
+    if (profileStatus) {
+      const moderation = state.profileModeration || {};
+      const banned = !!moderation.banned;
+      const dealsBlocked = !!moderation.deals_blocked;
+      const warnings = moderation.warnings ?? 0;
+      const statusParts = [
+        banned ? "Аккаунт заблокирован" : "Аккаунт активен",
+        dealsBlocked ? "Сделки запрещены" : "Сделки разрешены",
+        `Предупреждений: ${warnings}/3`,
+      ];
+      profileStatus.textContent = statusParts.join(" • ");
+    }
     state.profileStats = {
       total_deals: stats.total_deals ?? 0,
       success_percent: stats.success_percent ?? 0,
@@ -2272,6 +2288,14 @@
       moderationBanBtn.textContent = banned ? "Разблокировать" : "Заблокировать";
       moderationBanBtn.classList.toggle("success", banned);
       moderationBanBtn.classList.toggle("danger", !banned);
+    }
+    const canManage = payload?.can_manage !== false;
+    [moderationWarnBtn, moderationBlockBtn, moderationBanBtn].forEach((btn) => {
+      if (!btn) return;
+      btn.disabled = !canManage;
+    });
+    if (!canManage && moderationUserStatus) {
+      moderationUserStatus.textContent = `${moderationUserStatus.textContent} • Недоступно для модерации`;
     }
     moderationUserCard.classList.remove("is-hidden");
     if (moderationUserStatus) {
@@ -4500,6 +4524,18 @@
     if (profileQuickReserved) {
       const reserved = Number(state.balanceReserved ?? 0);
       profileQuickReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
+    }
+    if (profileQuickStatus) {
+      const moderation = state.profileModeration || {};
+      const banned = !!moderation.banned;
+      const dealsBlocked = !!moderation.deals_blocked;
+      const warnings = moderation.warnings ?? 0;
+      const statusParts = [
+        banned ? "Аккаунт заблокирован" : "Аккаунт активен",
+        dealsBlocked ? "Сделки запрещены" : "Сделки разрешены",
+        `Предупреждений: ${warnings}/3`,
+      ];
+      profileQuickStatus.textContent = statusParts.join(" • ");
     }
     profileModal.classList.add("open");
   });

@@ -251,12 +251,14 @@ async def _api_profile(request: web.Request) -> web.Response:
     success_percent = round((success_deals / total_deals) * 100) if total_deals else 0
     fail_percent = round((failed_deals / total_deals) * 100) if total_deals else 0
     reviews = await deps.review_service.list_for_user(user_id)
+    moderation = await deps.user_service.moderation_status(user_id)
     include_private = _is_admin(user_id, deps)
     payload = {
         "user": user,
         "profile": _profile_payload(profile, request=request, include_private=include_private),
         "role": role.value if role else None,
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
+        "moderation": moderation,
         "stats": {
             "total_deals": total_deals,
             "success_percent": success_percent,
@@ -1797,12 +1799,14 @@ async def _api_admin_user_search(request: web.Request) -> web.Response:
     merchant_since = await deps.user_service.merchant_since_of(profile.user_id)
     stats = await _user_stats(deps, profile.user_id)
     moderation = await deps.user_service.moderation_status(profile.user_id)
+    can_manage = await _can_manage_target(user_id, profile.user_id, deps)
     payload = {
         "profile": _profile_payload(profile, request=request, include_private=True),
         "role": role.value if role else None,
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
         "stats": stats,
         "moderation": moderation,
+        "can_manage": can_manage,
     }
     return web.json_response({"ok": True, "user": payload})
 
@@ -1813,6 +1817,8 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
     if not await _has_moderation_access(user_id, deps):
         raise web.HTTPForbidden(text="Нет доступа")
     target_id = int(request.match_info["user_id"])
+    if not await _can_manage_target(user_id, target_id, deps):
+        raise web.HTTPForbidden(text="Недостаточно прав для управления этим пользователем")
     profile = await deps.user_service.profile_of(target_id)
     if not profile:
         raise web.HTTPNotFound(text="Пользователь не найден")
@@ -1842,6 +1848,7 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
         "stats": stats,
         "moderation": moderation,
+        "can_manage": True,
     }
     return web.json_response({"ok": True, "user": payload})
 
@@ -2040,6 +2047,16 @@ async def _has_moderation_access(user_id: int, deps: AppDeps) -> bool:
     if user_id in deps.config.admin_ids:
         return True
     return await deps.user_service.is_moderator(user_id)
+
+
+async def _can_manage_target(requester_id: int, target_id: int, deps: AppDeps) -> bool:
+    if requester_id in deps.config.admin_ids:
+        return True
+    if target_id in deps.config.admin_ids:
+        return False
+    if await deps.user_service.is_moderator(target_id):
+        return False
+    return True
 
 
 async def _ensure_trade_allowed(deps: AppDeps, user_id: int) -> None:
