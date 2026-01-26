@@ -671,10 +671,12 @@
   const showPinOverlay = () => {
     pinOverlay?.classList.add("show");
     document.body.classList.add("pin-lock");
+    document.documentElement.style.backgroundColor = "#0b0714";
   };
   const hidePinOverlay = () => {
     pinOverlay?.classList.remove("show");
     document.body.classList.remove("pin-lock");
+    document.documentElement.style.backgroundColor = "";
   };
 
   const initPinGate = () => {
