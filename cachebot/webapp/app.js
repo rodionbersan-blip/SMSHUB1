@@ -3286,6 +3286,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const initFromUrl = urlParams.get("initData");
       state.initData = tg.initData || initFromUrl || "";
+      refreshInitData();
       const theme = detectTheme();
       applyTheme(theme);
       updateThemeToggle(theme);
@@ -3299,10 +3300,11 @@
     const parsedUser = !unsafeUser ? parseInitDataUser(state.initData) : null;
     const fallbackUser = unsafeUser || parsedUser;
     if (fallbackUser) {
-      setAuthState(null);
+      setAuthState(fallbackUser);
     }
     const bootstrapApp = async () => {
-      if (state.bootstrapDone || !state.initData) return;
+      if (state.bootstrapDone) return;
+      if (!state.initData && !refreshInitData()) return;
       state.bootstrapDone = true;
       const user = await fetchMe();
       if (user) {
