@@ -1873,21 +1873,21 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
             duration_text = _format_duration(minutes) if until else "навсегда"
             duration_line = f"на {duration_text}" if until else "навсегда"
             if action == "ban":
-                header = f"Ваш профиль заблокирован {duration_line}!"
+                header = f"🚫 Ваш профиль заблокирован {duration_line}!"
                 reason_line = f"Причина: {reason}"
                 message = (
                     f"{header}\n{moderator_line}\n{reason_line}\n"
                     "Если хотите оспорить, пишите в поддержку."
                 )
             elif action == "block_deals":
-                header = f"Ваши сделки ограничены {duration_line}!"
+                header = f"⛔ Ваши сделки ограничены {duration_line}!"
                 reason_line = f"Причина: {reason}"
                 message = (
                     f"{header}\n{moderator_line}\n{reason_line}\n"
                     "Если хотите оспорить, пишите в поддержку."
                 )
             elif action == "warn":
-                header = "Вам вынесено предупреждение!"
+                header = "⚠️ Вам вынесено предупреждение!"
                 reason_line = f"Причина: {reason}"
                 message = (
                     f"{header}\n{moderator_line}\n{reason_line}\n"
