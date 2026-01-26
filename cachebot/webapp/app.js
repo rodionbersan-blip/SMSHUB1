@@ -2494,13 +2494,14 @@
       container.appendChild(btn);
       return btn;
     };
-    if (actions.accept_offer) {
+    const isCompleted = deal.status === "completed";
+    if (!isCompleted && actions.accept_offer) {
       addAction(topRow, "Принять", () => dealAction("accept", deal.id), true);
     }
-    if (actions.decline_offer) {
+    if (!isCompleted && actions.decline_offer) {
       addAction(topRow, "Отменить", () => dealAction("decline", deal.id), false, "status-bad");
     }
-    if (deal.status !== "dispute") {
+    if (!isCompleted && deal.status !== "dispute") {
       if (actions.seller_ready) {
         addAction(topRow, "Готов отправить", () => dealAction("seller-ready", deal.id), false, "status-ok");
       }
@@ -2508,23 +2509,34 @@
         addAction(topRow, "Готов сканировать", () => dealAction("buyer-ready", deal.id), false, "status-ok");
       }
     }
-    if (actions.confirm_seller && deal.qr_stage === "ready") {
+    if (!isCompleted && actions.confirm_seller && deal.qr_stage === "ready") {
       addAction(topRow, "Получил нал", () => openConfirmComplete(deal), true);
     }
     if (
+      !isCompleted &&
       deal.status === "paid" &&
       deal.role === "seller" &&
       ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)
     ) {
       addAction(topRow, "Прикрепить QR", () => uploadQrForDeal(deal.id), true);
     }
-    if (actions.confirm_buyer && deal.qr_stage === "ready" && !deal.buyer_cash_confirmed) {
+    if (!isCompleted && actions.confirm_buyer && deal.qr_stage === "ready" && !deal.buyer_cash_confirmed) {
       addAction(topRow, "Успешно снял", () => openBuyerProofModal(deal.id), true);
-    } else if (deal.role === "buyer" && deal.buyer_cash_confirmed && deal.status === "paid") {
+    } else if (
+      !isCompleted &&
+      deal.role === "buyer" &&
+      deal.buyer_cash_confirmed &&
+      deal.status === "paid"
+    ) {
       const doneBtn = addAction(topRow, "Снятие подтверждено", () => {}, false, "status-ok");
       doneBtn.disabled = true;
     }
-    if (deal.buyer_id && deal.seller_id && ["reserved", "paid", "dispute"].includes(deal.status)) {
+    if (
+      !isCompleted &&
+      deal.buyer_id &&
+      deal.seller_id &&
+      ["reserved", "paid", "dispute"].includes(deal.status)
+    ) {
       const hasUnread = isChatUnread(deal);
       addAction(topRow, "Открыть чат", () => openDealChat(deal), false, "", {
         badge: hasUnread,
@@ -2532,7 +2544,7 @@
         className: "deal-chat-btn",
       });
     }
-    if (deal.status === "dispute" && deal.dispute_id) {
+    if (!isCompleted && deal.status === "dispute" && deal.dispute_id) {
       addAction(
         topRow,
         "Добавить доказательства",
@@ -2540,7 +2552,7 @@
         true
       );
     }
-    if (deal.dispute_available_at && deal.status === "paid") {
+    if (!isCompleted && deal.dispute_available_at && deal.status === "paid") {
       addAction(
         bottomRow,
         "⚠️ Открыть спор",
@@ -2559,7 +2571,7 @@
         "status-bad"
       );
     }
-    if (actions.cancel) {
+    if (!isCompleted && actions.cancel) {
       addAction(
         bottomRow,
         "Отменить сделку",
@@ -2573,8 +2585,16 @@
         bottomRow,
         "Оценить сделку",
         () => openReviewForDeal(deal),
-        true
+        true,
+        "",
+        { className: "review-btn" }
       );
+    }
+    if (isCompleted) {
+      topRow.remove();
+      if (!bottomRow.childElementCount) {
+        bottomRow.remove();
+      }
     }
     if (!bottomRow.childElementCount) {
       bottomRow.remove();

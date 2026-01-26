@@ -523,6 +523,20 @@ body.modal-open #app {
   color: #e5533d;
 }
 
+.btn.review-btn {
+  background: linear-gradient(135deg, rgba(255, 167, 66, 0.96), rgba(244, 114, 46, 0.9));
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.6);
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .btn.review-btn {
+  background: linear-gradient(135deg, rgba(255, 167, 66, 0.94), rgba(244, 114, 46, 0.88));
+  border-color: rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+}
+
 .tabs {
   display: flex;
   align-items: center;
