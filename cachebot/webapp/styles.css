@@ -2001,10 +2001,13 @@ body.modal-open #app {
     calc(16px + env(safe-area-inset-left, 0px));
   z-index: 50;
   touch-action: pan-y;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .modal.open {
   display: flex;
+  opacity: 1;
 }
 
 .proof-modal {
@@ -2124,6 +2127,14 @@ body.modal-open #app {
   border-radius: 26px;
   padding: 20px;
   box-shadow: var(--shadow);
+  transform: translateY(12px) scale(0.98);
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.modal.open .modal-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 .deal-alert {
