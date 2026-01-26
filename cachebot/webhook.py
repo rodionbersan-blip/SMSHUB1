@@ -1090,7 +1090,7 @@ async def _api_p2p_public_ads(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Invalid side")
     ads = await deps.advert_service.list_public_ads(
         AdvertSide(side),
-        exclude_user_id=user_id,
+        exclude_user_id=None,
     )
     payload = []
     for ad in ads:
@@ -2214,6 +2214,7 @@ async def _ad_payload(
     return {
         "id": ad.id,
         "public_id": ad.public_id,
+        "owner_id": ad.owner_id,
         "side": ad.side.value,
         "price_rub": str(ad.price_rub),
         "total_usdt": str(ad.total_usdt),

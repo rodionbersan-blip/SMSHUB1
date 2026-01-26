@@ -1736,6 +1736,8 @@
     const sideLabel = ad.side === "sell" ? "Продажа" : "Покупка";
     const limit = `₽${formatAmount(ad.min_rub, 0)}-₽${formatAmount(ad.max_rub, 0)}`;
     const price = `${formatAmount(ad.price_rub, 0)}р`;
+    const ownerId = ad.owner_id ?? ad.ownerId ?? ad.owner?.user_id;
+    const isOwner = ownerId && state.userId && Number(ownerId) === Number(state.userId);
     if (type === "public") {
       item.innerHTML = `
         <div class="deal-header">
@@ -1744,8 +1746,18 @@
         </div>
         <div class="deal-row">Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</div>
         <div class="deal-row">Лимиты: ${limit}</div>
+        ${isOwner ? '<div class="deal-row p2p-owner-row"><span class="p2p-owner-badge">Это ваше объявление</span><button class="btn pill p2p-edit-btn">Редактировать</button></div>' : ""}
       `;
-      item.addEventListener("click", () => openP2PAd(ad.id));
+      if (isOwner) {
+        const editBtn = item.querySelector(".p2p-edit-btn");
+        editBtn?.addEventListener("click", (event) => {
+          event.stopPropagation();
+          openMyAd(ad.id, ad);
+        });
+        item.addEventListener("click", () => openMyAd(ad.id, ad));
+      } else {
+        item.addEventListener("click", () => openP2PAd(ad.id));
+      }
     } else {
       const status = ad.active ? "Активно" : "Не активно";
       const statusClass = ad.active ? "status-ok" : "status-bad";
@@ -1991,8 +2003,11 @@
     }
   };
 
-  const openMyAd = async (adId) => {
-    const ad = state.myAds.find((item) => item.id === adId);
+  const openMyAd = async (adId, fallbackAd = null) => {
+    const ad =
+      state.myAds.find((item) => item.id === adId) ||
+      fallbackAd ||
+      state.p2pAds.find((item) => item.id === adId);
     if (!ad) return;
     p2pModalTitle.textContent = `Объявление #${ad.public_id}`;
     p2pModalBody.innerHTML = `
