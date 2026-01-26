@@ -196,7 +196,13 @@
             <div id="moderationSearchHint" class="admin-hint"></div>
           </div>
           <div id="moderationUserCard" class="admin-card moderation-user is-hidden">
-            <div class="profile-title" id="moderationUserTitle">Пользователь</div>
+            <div class="moderation-user-head">
+              <div class="profile-title" id="moderationUserTitle">Пользователь</div>
+              <div class="moderation-user-line">
+                <span id="moderationUserHandle" class="moderation-user-handle">—</span>
+                <span id="moderationUserStatus" class="moderation-status">Статус: —</span>
+              </div>
+            </div>
             <div class="moderation-user-meta" id="moderationUserMeta"></div>
             <div class="moderation-user-stats" id="moderationUserStats"></div>
             <div class="moderation-user-actions">
@@ -204,7 +210,6 @@
               <button id="moderationBlockBtn" class="btn">Запретить сделки</button>
               <button id="moderationBanBtn" class="btn danger">Заблокировать</button>
             </div>
-            <div id="moderationUserStatus" class="admin-hint"></div>
           </div>
         </div>
       </section>

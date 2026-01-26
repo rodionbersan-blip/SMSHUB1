@@ -218,6 +218,7 @@
   const moderationSearchHint = document.getElementById("moderationSearchHint");
   const moderationUserCard = document.getElementById("moderationUserCard");
   const moderationUserTitle = document.getElementById("moderationUserTitle");
+  const moderationUserHandle = document.getElementById("moderationUserHandle");
   const moderationUserMeta = document.getElementById("moderationUserMeta");
   const moderationUserStats = document.getElementById("moderationUserStats");
   const moderationWarnBtn = document.getElementById("moderationWarnBtn");
@@ -2257,10 +2258,14 @@
     const display = profile?.display_name || profile?.full_name || profile?.username || "Пользователь";
     const username = profile?.username ? `@${profile.username}` : "—";
     moderationUserTitle.textContent = display;
+    if (moderationUserHandle) {
+      moderationUserHandle.textContent = username;
+      moderationUserHandle.style.display = username && username !== "—" ? "" : "none";
+    }
+    const roleLabel = payload?.role_label || "Пользователь";
     moderationUserMeta.innerHTML = `
       <span>ID: ${profile?.user_id || "—"}</span>
-      <span>${username}</span>
-      <span>Роль: ${payload?.role || "—"}</span>
+      <span>Роль: ${roleLabel}</span>
     `;
     moderationUserStats.innerHTML = `
       <span>Сделок: ${stats.total_deals ?? 0}</span>

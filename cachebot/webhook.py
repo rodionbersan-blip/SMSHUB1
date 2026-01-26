@@ -1800,9 +1800,11 @@ async def _api_admin_user_search(request: web.Request) -> web.Response:
     stats = await _user_stats(deps, profile.user_id)
     moderation = await deps.user_service.moderation_status(profile.user_id)
     can_manage = await _can_manage_target(user_id, profile.user_id, deps)
+    role_label = await _role_label(profile.user_id, deps)
     payload = {
         "profile": _profile_payload(profile, request=request, include_private=True),
         "role": role.value if role else None,
+        "role_label": role_label,
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
         "stats": stats,
         "moderation": moderation,
@@ -1840,11 +1842,13 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
     else:
         raise web.HTTPBadRequest(text="Некорректное действие")
     role = await deps.user_service.role_of(profile.user_id)
+    role_label = await _role_label(profile.user_id, deps)
     merchant_since = await deps.user_service.merchant_since_of(profile.user_id)
     stats = await _user_stats(deps, profile.user_id)
     payload = {
         "profile": _profile_payload(profile, request=request, include_private=True),
         "role": role.value if role else None,
+        "role_label": role_label,
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
         "stats": stats,
         "moderation": moderation,
@@ -2294,6 +2298,14 @@ async def _user_stats(deps: AppDeps, user_id: int) -> dict[str, int]:
         "fail_percent": round((failed / total) * 100) if total else 0,
         "reviews_count": len(reviews),
     }
+
+
+async def _role_label(user_id: int, deps: AppDeps) -> str:
+    if user_id in deps.config.admin_ids:
+        return "Админ"
+    if await deps.user_service.is_moderator(user_id):
+        return "Модератор"
+    return "Пользователь"
 
 
 async def _merchant_stats(deps: AppDeps, user_id: int) -> dict[str, int]:
