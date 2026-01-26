@@ -3021,6 +3021,7 @@ body.modal-open #app {
   justify-content: stretch;
   pointer-events: none;
   padding: 0;
+  background-color: #0b0714;
   background:
     radial-gradient(900px 700px at 20% 10%, rgba(78, 66, 160, 0.35), transparent 60%),
     radial-gradient(800px 600px at 85% 15%, rgba(42, 120, 210, 0.18), transparent 55%),
@@ -3051,6 +3052,17 @@ body.pin-lock .app {
 
 .pin-overlay {
   overscroll-behavior: none;
+}
+
+.pin-overlay::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: max(env(safe-area-inset-bottom, 0px), 8px);
+  background: #0b0714;
+  pointer-events: none;
 }
 
 .pin-card {
