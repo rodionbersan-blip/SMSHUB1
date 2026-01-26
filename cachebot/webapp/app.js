@@ -1205,7 +1205,8 @@
   };
 
   const fetchMe = async (retry = true) => {
-    if (!state.initData && !refreshInitData()) {
+    refreshInitData();
+    if (!state.initData) {
       log("initData не найден. Откройте WebApp из Telegram.", "error");
       return null;
     }
@@ -1219,6 +1220,12 @@
       if (!res.ok) {
         const text = await res.text();
         if (retry && /initdata|invalid/i.test(text)) {
+          try {
+            window.sessionStorage.removeItem(initDataCacheKey);
+          } catch {
+            // ignore
+          }
+          state.initData = "";
           refreshInitData();
           return fetchMe(false);
         }
@@ -1233,7 +1240,8 @@
   };
 
   const fetchJson = async (path, options = {}, retry = true) => {
-    if (!state.initData && !refreshInitData()) {
+    refreshInitData();
+    if (!state.initData) {
       log("initData не найден. Откройте WebApp из Telegram.", "error");
       return null;
     }
@@ -1250,6 +1258,12 @@
       if (!res.ok) {
         const text = await res.text();
         if (retry && /initdata|invalid/i.test(text)) {
+          try {
+            window.sessionStorage.removeItem(initDataCacheKey);
+          } catch {
+            // ignore
+          }
+          state.initData = "";
           refreshInitData();
           return fetchJson(path, options, false);
         }
