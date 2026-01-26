@@ -64,6 +64,7 @@
   const withdrawAmount = document.getElementById("withdrawAmount");
   const userBadge = document.getElementById("userBadge");
   const profileNameTop = document.getElementById("profileNameTop");
+  const initDebug = document.getElementById("initDebug");
   const profileAvatar = document.getElementById("profileAvatar");
   const profileAvatarLarge = document.getElementById("profileAvatarLarge");
   const profileDisplayName = document.getElementById("profileDisplayName");
@@ -228,6 +229,8 @@
   const state = {
     user: null,
     initData: "",
+    lastInitError: "",
+    bootstrapRetry: null,
     balance: null,
     balanceReserved: 0,
     p2pMode: "buy",
@@ -1082,6 +1085,24 @@
     if (profileNameTop) profileNameTop.textContent = display;
     setAvatarNode(profileAvatar, display, user?.avatar_url);
     setAvatarNode(profileAvatarLarge, display, user?.avatar_url);
+    updateInitDebug();
+  };
+
+  const updateInitDebug = () => {
+    if (!initDebug) return;
+    const hasTg = Boolean(tg);
+    const hasInit = Boolean(state.initData);
+    const hasUser = Boolean(state.user?.user_id || state.user?.id);
+    const parts = [
+      `TG:${hasTg ? "ok" : "нет"}`,
+      `init:${hasInit ? "ok" : "нет"}`,
+      `user:${hasUser ? "ok" : "нет"}`,
+    ];
+    if (state.lastInitError) {
+      parts.push(`err:${state.lastInitError}`);
+    }
+    initDebug.textContent = parts.join(" ");
+    initDebug.classList.toggle("show", !hasTg || !hasInit || !hasUser);
   };
 
   const formatAmount = (value, digits = 3) => {
@@ -1188,6 +1209,7 @@
       } catch {
         // ignore
       }
+      updateInitDebug();
       return true;
     }
     try {
@@ -1196,11 +1218,13 @@
       const cached = JSON.parse(raw);
       if (cached?.value && Date.now() - (cached.ts || 0) < 10 * 60 * 1000) {
         state.initData = cached.value;
+        updateInitDebug();
         return true;
       }
     } catch {
       // ignore
     }
+    updateInitDebug();
     return Boolean(state.initData);
   };
 
@@ -1208,6 +1232,8 @@
     refreshInitData();
     if (!state.initData) {
       log("initData не найден. Откройте WebApp из Telegram.", "error");
+      state.lastInitError = "no-init";
+      updateInitDebug();
       return null;
     }
     try {
@@ -1229,12 +1255,18 @@
           refreshInitData();
           return fetchMe(false);
         }
+        state.lastInitError = text || `HTTP ${res.status}`;
+        updateInitDebug();
         throw new Error(text || `HTTP ${res.status}`);
       }
       const payload = await res.json();
+      state.lastInitError = "";
+      updateInitDebug();
       return payload.user || null;
     } catch (err) {
       log(`Ошибка авторизации: ${err.message}`, "error");
+      state.lastInitError = err.message || "fetch-me";
+      updateInitDebug();
       return null;
     }
   };
@@ -1243,6 +1275,8 @@
     refreshInitData();
     if (!state.initData) {
       log("initData не найден. Откройте WebApp из Telegram.", "error");
+      state.lastInitError = "no-init";
+      updateInitDebug();
       return null;
     }
     try {
@@ -1267,11 +1301,17 @@
           refreshInitData();
           return fetchJson(path, options, false);
         }
+        state.lastInitError = text || `HTTP ${res.status}`;
+        updateInitDebug();
         throw new Error(text || `HTTP ${res.status}`);
       }
+      state.lastInitError = "";
+      updateInitDebug();
       return await res.json();
     } catch (err) {
       log(`Ошибка API ${path}: ${err.message}`, "error");
+      state.lastInitError = err.message || "api";
+      updateInitDebug();
       return null;
     }
   };
@@ -3304,11 +3344,13 @@
       const theme = detectTheme();
       applyTheme(theme);
       updateThemeToggle(theme);
+      updateInitDebug();
     } else {
       const theme = detectTheme();
       applyTheme(theme);
       updateThemeToggle(theme);
       log("WebApp API не найден. Проверьте запуск через Telegram.", "warn");
+      updateInitDebug();
     }
     const unsafeUser = tg?.initDataUnsafe?.user;
     const parsedUser = !unsafeUser ? parseInitDataUser(state.initData) : null;

@@ -105,6 +105,28 @@ h2 {
   display: block;
 }
 
+.init-debug {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(229, 83, 61, 0.85);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  display: none;
+}
+
+.init-debug.show {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
 #app {
   max-width: 960px;
   margin: 0 auto;
