@@ -1871,7 +1871,7 @@
     if (!ad) return;
     const owner = ad.owner || {};
     const ownerName = owner.display_name || owner.full_name || "—";
-    const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id || "";
+    const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id ?? "";
     const isOwner = ownerId && state.userId && Number(ownerId) === Number(state.userId);
     p2pModalTitle.textContent = `Объявление #${ad.public_id}`;
     p2pModalBody.innerHTML = `
