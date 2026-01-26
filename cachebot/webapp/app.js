@@ -1173,8 +1173,39 @@
     return "Статус";
   };
 
-  const fetchMe = async () => {
-    if (!state.initData) {
+  const initDataCacheKey = "initDataCache";
+  const refreshInitData = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initFromUrl = urlParams.get("initData");
+    const fresh = tg?.initData || initFromUrl || "";
+    if (fresh) {
+      state.initData = fresh;
+      try {
+        window.sessionStorage.setItem(
+          initDataCacheKey,
+          JSON.stringify({ value: fresh, ts: Date.now() })
+        );
+      } catch {
+        // ignore
+      }
+      return true;
+    }
+    try {
+      const raw = window.sessionStorage.getItem(initDataCacheKey);
+      if (!raw) return Boolean(state.initData);
+      const cached = JSON.parse(raw);
+      if (cached?.value && Date.now() - (cached.ts || 0) < 10 * 60 * 1000) {
+        state.initData = cached.value;
+        return true;
+      }
+    } catch {
+      // ignore
+    }
+    return Boolean(state.initData);
+  };
+
+  const fetchMe = async (retry = true) => {
+    if (!state.initData && !refreshInitData()) {
       log("initData не найден. Откройте WebApp из Telegram.", "error");
       return null;
     }
@@ -1187,6 +1218,10 @@
       });
       if (!res.ok) {
         const text = await res.text();
+        if (retry && /initdata|invalid/i.test(text)) {
+          refreshInitData();
+          return fetchMe(false);
+        }
         throw new Error(text || `HTTP ${res.status}`);
       }
       const payload = await res.json();
@@ -1197,8 +1232,8 @@
     }
   };
 
-  const fetchJson = async (path, options = {}) => {
-    if (!state.initData) {
+  const fetchJson = async (path, options = {}, retry = true) => {
+    if (!state.initData && !refreshInitData()) {
       log("initData не найден. Откройте WebApp из Telegram.", "error");
       return null;
     }
@@ -1214,6 +1249,10 @@
       });
       if (!res.ok) {
         const text = await res.text();
+        if (retry && /initdata|invalid/i.test(text)) {
+          refreshInitData();
+          return fetchJson(path, options, false);
+        }
         throw new Error(text || `HTTP ${res.status}`);
       }
       return await res.json();
