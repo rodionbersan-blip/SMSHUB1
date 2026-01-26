@@ -3056,12 +3056,18 @@ body.pin-lock {
   overflow: hidden;
   touch-action: none;
   overscroll-behavior: none;
+  background: #0b0714;
 }
 
 body.pin-lock,
 body.pin-lock #app,
 body.pin-lock .app {
   background: transparent;
+}
+
+html,
+body.pin-lock {
+  background: #0b0714;
 }
 
 .pin-overlay {
@@ -3074,7 +3080,7 @@ body.pin-lock .app {
   left: 0;
   right: 0;
   bottom: 0;
-  height: max(env(safe-area-inset-bottom, 0px), 8px);
+  height: max(env(safe-area-inset-bottom, 0px), 28px);
   background: #0b0714;
   pointer-events: none;
 }
