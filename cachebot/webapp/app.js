@@ -2009,8 +2009,11 @@
       if (ad.banks?.includes(bankInput.value)) {
         input.checked = true;
       }
+      const text = document.createElement("span");
+      text.className = "p2p-bank-label";
+      text.textContent = bankLabel(bankInput.value);
       label.appendChild(input);
-      label.appendChild(document.createTextNode(bankLabel(bankInput.value)));
+      label.appendChild(text);
       banksContainer.appendChild(label);
     });
   };
@@ -2025,8 +2028,11 @@
       const input = document.createElement("input");
       input.type = "checkbox";
       input.value = bank.key;
+      const text = document.createElement("span");
+      text.className = "p2p-bank-label";
+      text.textContent = bankLabel(bank.label || bank.key);
       label.appendChild(input);
-      label.appendChild(document.createTextNode(bankLabel(bank.label || bank.key)));
+      label.appendChild(text);
       p2pBanks.appendChild(label);
     });
   };
@@ -3914,6 +3920,15 @@
       updateP2PLimitsState();
     }
   });
+
+  const scrollP2PTermsIntoView = () => {
+    if (!p2pTerms) return;
+    setTimeout(() => {
+      p2pTerms.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 220);
+  };
+
+  p2pTerms?.addEventListener("focus", scrollP2PTermsIntoView);
 
   const computeMaxLimit = () => {
     const volume = Number(p2pVolume?.value);

@@ -1412,8 +1412,11 @@ body.modal-open #app {
 
 .p2p-banks {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+  align-items: stretch;
+  grid-auto-flow: row;
+  grid-auto-rows: minmax(56px, auto);
 }
 
 .p2p-bank {
@@ -1427,12 +1430,61 @@ body.modal-open #app {
   font-size: 13px;
   color: var(--text);
   transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  min-height: 56px;
+  position: relative;
+  width: 100%;
+  justify-self: stretch;
 }
 
 .p2p-bank:hover {
   border-color: rgba(120, 190, 255, 0.35);
   background: rgba(18, 22, 30, 0.5);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.22);
+}
+
+.p2p-bank input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.p2p-bank-label {
+  position: relative;
+  padding-left: 30px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+}
+
+.p2p-bank-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 2px solid rgba(120, 180, 255, 0.28);
+  background: rgba(255, 255, 255, 0.02);
+  transform: translateY(-50%);
+}
+
+.p2p-bank input:checked + .p2p-bank-label::before {
+  background: rgba(255, 167, 66, 0.25);
+  border-color: rgba(255, 167, 66, 0.9);
+}
+
+.p2p-bank input:checked + .p2p-bank-label::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  width: 7px;
+  height: 4px;
+  border-left: 2px solid #ff9a2f;
+  border-bottom: 2px solid #ff9a2f;
+  transform: translateY(-60%) rotate(-45deg);
 }
 
 :root[data-theme="light"] .p2p-bank {
@@ -1444,6 +1496,15 @@ body.modal-open #app {
 :root[data-theme="light"] .p2p-bank:hover {
   border-color: rgba(77, 163, 255, 0.35);
   background: rgba(248, 250, 255, 0.75);
+}
+
+:root[data-theme="light"] .p2p-bank-label::before {
+  border-color: rgba(20, 28, 38, 0.25);
+  background: rgba(15, 17, 21, 0.05);
+}
+
+.p2p-banks .p2p-bank:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .p2p-offer-input {
@@ -1922,6 +1983,22 @@ body.modal-open #app {
   background: rgba(130, 140, 160, 0.2);
 }
 
+#dealModal.modal,
+#chatModal.modal,
+#confirmCompleteModal.modal,
+#buyerProofModal.modal {
+  background: rgba(12, 12, 16, 0.3);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+:root[data-theme="light"] #dealModal.modal,
+:root[data-theme="light"] #chatModal.modal,
+:root[data-theme="light"] #confirmCompleteModal.modal,
+:root[data-theme="light"] #buyerProofModal.modal {
+  background: rgba(130, 140, 160, 0.22);
+}
+
 #p2pCreateModal .modal-card {
   background: rgba(18, 22, 30, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1936,6 +2013,28 @@ body.modal-open #app {
   background: rgba(255, 255, 255, 0.72);
   border-color: rgba(20, 28, 38, 0.14);
   box-shadow: 0 18px 36px rgba(15, 17, 21, 0.16);
+}
+
+#dealModal .modal-card,
+#chatModal .modal-card,
+#confirmCompleteModal .modal-card,
+#buyerProofModal .modal-card {
+  background: rgba(18, 22, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+:root[data-theme="light"] #dealModal .modal-card,
+:root[data-theme="light"] #chatModal .modal-card,
+:root[data-theme="light"] #confirmCompleteModal .modal-card,
+:root[data-theme="light"] #buyerProofModal .modal-card {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(20, 28, 38, 0.14);
+  box-shadow: 0 18px 34px rgba(15, 17, 21, 0.15);
 }
 
 #disputeOpenModal .modal-card {
