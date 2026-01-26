@@ -3209,16 +3209,7 @@
     const parsedUser = !unsafeUser ? parseInitDataUser(state.initData) : null;
     const fallbackUser = unsafeUser || parsedUser;
     if (fallbackUser) {
-      const fullName = [fallbackUser.first_name, fallbackUser.last_name]
-        .filter(Boolean)
-        .join(" ");
-      setAuthState({
-        display_name: null,
-        full_name: fullName || null,
-        first_name: fallbackUser.first_name,
-        username: fallbackUser.username,
-        avatar_url: fallbackUser.photo_url,
-      });
+      setAuthState(null);
     }
     const bootstrapApp = async () => {
       if (state.bootstrapDone || !state.initData) return;
