@@ -4061,13 +4061,7 @@
   p2pTerms?.addEventListener("focus", scrollP2PCreateToBottom);
   p2pTerms?.addEventListener("click", scrollP2PCreateToBottom);
 
-  const p2pCreateInputs = p2pCreateModal?.querySelectorAll?.(
-    "input, textarea, select"
-  );
-  p2pCreateInputs?.forEach((input) => {
-    input.addEventListener("focus", scrollP2PCreateToBottom);
-    input.addEventListener("blur", resetP2PCreateCardHeight);
-  });
+  p2pTerms?.addEventListener("blur", resetP2PCreateCardHeight);
 
   if (window.visualViewport) {
     window.visualViewport.addEventListener("resize", () => {
