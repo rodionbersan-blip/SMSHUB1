@@ -727,13 +727,20 @@ body.modal-open #app {
   filter: brightness(0) invert(0) !important;
 }
 
-:root[data-theme="dark"] .tab[data-view="disputes"] .nav-icon img,
-:root[data-theme="dark"] .tab[data-view="disputes"].active .nav-icon img {
+:root[data-theme="dark"] .tab[data-view="disputes"] .nav-icon img {
   filter: brightness(0) invert(1) !important;
 }
 
+:root[data-theme="dark"] .tab[data-view="disputes"].active .nav-icon img {
+  filter: brightness(0) invert(0) !important;
+}
+
 :root[data-theme="light"] .tab[data-view="disputes"] .nav-icon img {
-  filter: brightness(0) invert(0);
+  filter: brightness(0) invert(0) !important;
+}
+
+:root[data-theme="light"] .tab[data-view="disputes"].active .nav-icon img {
+  filter: brightness(0) invert(1) !important;
 }
 
 .tab {
