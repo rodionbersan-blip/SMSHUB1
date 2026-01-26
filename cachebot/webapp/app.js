@@ -1253,9 +1253,18 @@
     return raw ? raw.slice("tgWebAppData=".length) : "";
   };
 
+  const decodeInitData = (raw) => {
+    if (!raw) return "";
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  };
+
   const refreshInitData = () => {
-    const initFromUrl = getRawInitDataFromUrl();
-    const initFromHash = getRawInitDataFromHash();
+    const initFromUrl = decodeInitData(getRawInitDataFromUrl());
+    const initFromHash = decodeInitData(getRawInitDataFromHash());
     const fresh = tg?.initData || initFromHash || initFromUrl || "";
     if (fresh) {
       state.initData = fresh;
@@ -3586,8 +3595,8 @@
       if (isMobile) {
         tg.expand();
       }
-      const initFromUrl = getRawInitDataFromUrl();
-      const initFromHash = getRawInitDataFromHash();
+      const initFromUrl = decodeInitData(getRawInitDataFromUrl());
+      const initFromHash = decodeInitData(getRawInitDataFromHash());
       state.initData = tg.initData || initFromHash || initFromUrl || "";
       refreshInitData();
       const theme = detectTheme();
@@ -3664,8 +3673,8 @@
           state.initRetryTimer = null;
           return;
         }
-        const initFromUrl = getRawInitDataFromUrl();
-        const initFromHash = getRawInitDataFromHash();
+        const initFromUrl = decodeInitData(getRawInitDataFromUrl());
+        const initFromHash = decodeInitData(getRawInitDataFromHash());
         state.initData = tg.initData || initFromHash || initFromUrl || "";
         if (state.initData) {
           await bootstrapApp();
