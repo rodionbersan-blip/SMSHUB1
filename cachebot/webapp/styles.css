@@ -1058,6 +1058,13 @@ body.modal-open #app {
   margin-top: 4px;
 }
 
+.deal-row-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .deal-row-meta {
   display: flex;
   align-items: center;
@@ -1080,7 +1087,7 @@ body.modal-open #app {
 }
 
 .p2p-owner-badge {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: #ff9a2f;
   white-space: nowrap;

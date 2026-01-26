@@ -1745,19 +1745,12 @@
           <div class="deal-status">${sideLabel}</div>
         </div>
         <div class="deal-row">Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</div>
-        <div class="deal-row">Лимиты: ${limit}</div>
-        ${isOwner ? '<div class="deal-row p2p-owner-row"><span class="p2p-owner-badge">Это ваше объявление</span><button class="btn pill p2p-edit-btn">Редактировать</button></div>' : ""}
+        <div class="deal-row deal-row-split">
+          <span>Лимиты: ${limit}</span>
+          ${isOwner ? '<span class="p2p-owner-badge">Это ваше объявление</span>' : ""}
+        </div>
       `;
-      if (isOwner) {
-        const editBtn = item.querySelector(".p2p-edit-btn");
-        editBtn?.addEventListener("click", (event) => {
-          event.stopPropagation();
-          openMyAd(ad.id, ad);
-        });
-        item.addEventListener("click", () => openMyAd(ad.id, ad));
-      } else {
-        item.addEventListener("click", () => openP2PAd(ad.id));
-      }
+      item.addEventListener("click", () => openP2PAd(ad.id));
     } else {
       const status = ad.active ? "Активно" : "Не активно";
       const statusClass = ad.active ? "status-ok" : "status-bad";
@@ -1865,7 +1858,8 @@
     if (!ad) return;
     const owner = ad.owner || {};
     const ownerName = owner.display_name || owner.full_name || "—";
-    const ownerId = owner.user_id || "";
+    const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id || "";
+    const isOwner = ownerId && state.userId && Number(ownerId) === Number(state.userId);
     p2pModalTitle.textContent = `Объявление #${ad.public_id}`;
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row">
@@ -1882,6 +1876,15 @@
       <div class="deal-detail-row"><span>Условия сделки:</span>${ad.terms || "—"}</div>
     `;
     p2pModalActions.innerHTML = "";
+    if (isOwner) {
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn primary";
+      editBtn.textContent = "Редактировать";
+      editBtn.addEventListener("click", () => openMyAd(ad.id, ad));
+      p2pModalActions.appendChild(editBtn);
+      p2pModal.classList.add("open");
+      return;
+    }
     const input = document.createElement("input");
     input.type = "number";
     input.placeholder = "Сумма в RUB";
