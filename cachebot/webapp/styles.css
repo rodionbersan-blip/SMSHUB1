@@ -578,6 +578,11 @@ body.modal-open #app {
   color: #ff6b6b;
 }
 
+.btn.success {
+  border: 1px solid rgba(46, 204, 113, 0.45);
+  color: #57d987;
+}
+
 .btn.warning:hover,
 .btn.danger:hover {
   color: #ffffff;
@@ -1857,6 +1862,11 @@ body.modal-open #app {
   color: #ff8a8a;
 }
 
+.moderation-user-actions .btn.success {
+  border-color: rgba(46, 204, 113, 0.45);
+  color: #71e3a0;
+}
+
 .moderation-user-actions .btn.is-loading {
   opacity: 0.6;
   pointer-events: none;
@@ -1885,6 +1895,16 @@ body.modal-open #app {
   color: var(--muted);
 }
 
+.moderation-status {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(18, 22, 30, 0.55);
+  border: 1px solid rgba(120, 180, 255, 0.18);
+  font-size: 12px;
+  color: #e9eef7;
+}
+
 :root[data-theme="light"] .moderation-tabs .btn.pill.active {
   background: rgba(60, 130, 225, 0.22);
   color: #1a2433;
@@ -1905,6 +1925,17 @@ body.modal-open #app {
 :root[data-theme="light"] .moderation-user-actions .btn.danger {
   border-color: rgba(236, 96, 96, 0.55);
   color: #e25a5a;
+}
+
+:root[data-theme="light"] .moderation-user-actions .btn.success {
+  border-color: rgba(70, 190, 120, 0.6);
+  color: #2f9a60;
+}
+
+:root[data-theme="light"] .moderation-status {
+  background: rgba(255, 255, 255, 0.75);
+  color: #1a2433;
+  border-color: rgba(20, 28, 38, 0.12);
 }
 
 .admin-card {

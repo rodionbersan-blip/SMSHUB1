@@ -2254,17 +2254,29 @@
     if (moderationWarnBtn) {
       moderationWarnBtn.textContent = `Предупреждение (${warnings}/3)`;
     }
-    const statusParts = [`Предупреждений: ${warnings}/3`];
-    if (dealsBlocked) statusParts.push("Сделки запрещены");
-    if (banned) statusParts.push("БАН");
+    const statusParts = [];
+    if (banned) {
+      statusParts.push("Пользователь заблокирован");
+    } else {
+      statusParts.push("Пользователь разблокирован");
+    }
+    if (dealsBlocked) {
+      statusParts.push("Сделки запрещены");
+    }
+    statusParts.push(`Предупреждений: ${warnings}/3`);
     moderationUserStatus.textContent = statusParts.join(" • ");
     if (moderationBlockBtn) {
       moderationBlockBtn.textContent = dealsBlocked ? "Разрешить сделки" : "Запретить сделки";
     }
     if (moderationBanBtn) {
       moderationBanBtn.textContent = banned ? "Разблокировать" : "Заблокировать";
+      moderationBanBtn.classList.toggle("success", banned);
+      moderationBanBtn.classList.toggle("danger", !banned);
     }
     moderationUserCard.classList.remove("is-hidden");
+    if (moderationUserStatus) {
+      moderationUserStatus.classList.add("moderation-status");
+    }
     state.moderationUser = {
       user_id: profile?.user_id,
       moderation: { warnings, deals_blocked: dealsBlocked, banned },
