@@ -3485,12 +3485,15 @@
   });
 
   systemNoticeSkip?.addEventListener("click", () => {
-    const active = state.systemNoticeActive;
-    if (active?.key) {
-      removeSystemNotice(active.key);
-    } else {
-      hideSystemNotice();
+    state.systemNoticeActive = null;
+    if (typeof pendingReviewRating !== "undefined") {
+      pendingReviewRating = null;
     }
+    systemNoticeLike?.classList.remove("active");
+    systemNoticeDislike?.classList.remove("active");
+    if (systemNoticeComment) systemNoticeComment.value = "";
+    systemNoticeRateForm?.classList.remove("show");
+    hideSystemNotice();
   });
 
   const setReviewRating = (value) => {
