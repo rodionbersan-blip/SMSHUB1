@@ -260,6 +260,7 @@ class UserService:
             else:
                 self._banned.discard(user_id)
                 self._ban_until.pop(user_id, None)
+                self._warnings.pop(user_id, None)
             await self._persist()
             return {
                 "warnings": int(self._warnings.get(user_id, 0)),
