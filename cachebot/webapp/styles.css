@@ -2241,7 +2241,7 @@ body.modal-open #app {
 
 .modal.open .modal-card {
   opacity: 1;
-  animation: modalZoomIn 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: modalZoomIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @keyframes modalZoomIn {
