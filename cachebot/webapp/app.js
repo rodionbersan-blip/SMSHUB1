@@ -976,8 +976,25 @@
     }
   };
 
+  let bodyScrollY = 0;
   const updateModalLock = () => {
-    document.body.classList.toggle("modal-open", Boolean(document.querySelector(".modal.open")));
+    const hasModal = Boolean(document.querySelector(".modal.open"));
+    document.body.classList.toggle("modal-open", hasModal);
+    if (hasModal) {
+      bodyScrollY = window.scrollY || 0;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${bodyScrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      window.scrollTo(0, bodyScrollY);
+    }
   };
 
   const observeModals = () => {
