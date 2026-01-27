@@ -1967,15 +1967,15 @@ body.modal-open #app {
 
 
 :root[data-theme="dark"] #moderationBlockBtn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #dfe7f5;
+  background: rgba(224, 75, 75, 0.65) !important;
+  border: none !important;
+  color: #ffffff !important;
 }
 
 :root[data-theme="light"] #moderationBlockBtn {
-  background: rgba(47, 127, 220, 0.18);
-  border: 1px solid rgba(47, 127, 220, 0.3);
-  color: #1b3a66;
+  background: rgba(224, 75, 75, 0.65) !important;
+  border: none !important;
+  color: #ffffff !important;
 }
 
 .moderation-user-meta {
@@ -2020,7 +2020,7 @@ body.modal-open #app {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .moderation-user-actions .btn.warning {
