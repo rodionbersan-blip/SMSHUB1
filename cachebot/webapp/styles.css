@@ -2059,7 +2059,8 @@ body.modal-open .tabs {
 .theme-switching #moderationWarnBtn,
 .theme-switching #moderationBlockBtn,
 .theme-switching #moderationBanBtn,
-.theme-switching #moderationAdsBtn {
+.theme-switching #moderationAdsBtn,
+.theme-switching #moderationUserTgBtn {
   transition: none !important;
 }
 
