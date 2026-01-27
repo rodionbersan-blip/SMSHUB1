@@ -2427,7 +2427,7 @@
     if (!moderationActionModal || !moderationActionReason || !moderationActionDuration) return;
     state.moderationAction = action;
     moderationActionReason.value = "";
-    moderationActionDuration.value = "week";
+    moderationActionDuration.value = "";
     moderationActionCustom.value = "";
     moderationActionCustomRow?.classList.add("is-hidden");
     if (moderationActionTitle) {
@@ -2532,7 +2532,11 @@
     }
     let durationMinutes = null;
     if (action !== "warn") {
-      const preset = moderationActionDuration?.value || "week";
+      const preset = moderationActionDuration?.value || "";
+      if (!preset) {
+        if (moderationActionHint) moderationActionHint.textContent = "Выберите срок.";
+        return;
+      }
       if (preset === "week") durationMinutes = 7 * 24 * 60;
       if (preset === "month") durationMinutes = 30 * 24 * 60;
       if (preset === "custom") {
