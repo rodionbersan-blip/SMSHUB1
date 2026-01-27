@@ -2424,6 +2424,8 @@ async def _role_label(user_id: int, deps: AppDeps) -> str:
         return "Админ"
     if await deps.user_service.is_moderator(user_id):
         return "Модератор"
+    if await deps.user_service.has_merchant_access(user_id):
+        return "Мерчант"
     return "Пользователь"
 
 
