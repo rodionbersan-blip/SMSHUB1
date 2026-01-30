@@ -2222,6 +2222,26 @@ body.modal-open #app {
 #moderationSearchBtn {
   flex: 0 0 auto;
   white-space: nowrap;
+  max-width: 100%;
+  padding: 8px 12px;
+}
+
+.admin-row {
+  flex-wrap: nowrap;
+}
+
+.admin-card .admin-row {
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .admin-row {
+    flex-wrap: wrap;
+  }
+
+  #moderationSearchBtn {
+    width: 100%;
+  }
 }
 
 .admin-list {
