@@ -686,9 +686,23 @@ body.modal-open #app {
   justify-content: center;
 }
 
+.nav-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: currentColor;
+}
+
 
 .tab[data-view="deals"] .nav-icon,
 .tab[data-view="deals"].active .nav-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.tab[data-view="admin"] .nav-icon,
+.tab[data-view="admin"].active .nav-icon {
   width: 18px;
   height: 18px;
   flex: 0 0 18px;
@@ -768,19 +782,19 @@ body.modal-open #app {
 }
 
 :root[data-theme="dark"] .tab[data-view="disputes"] .nav-icon {
-  filter: brightness(0) invert(1);
+  color: #fff;
 }
 
 :root[data-theme="dark"] .tab[data-view="disputes"].active .nav-icon {
-  filter: brightness(0) invert(0);
+  color: #0f1b2e;
 }
 
 :root[data-theme="light"] .tab[data-view="disputes"] .nav-icon {
-  filter: brightness(0) invert(0);
+  color: #0f1b2e;
 }
 
 :root[data-theme="light"] .tab[data-view="disputes"].active .nav-icon {
-  filter: brightness(0) invert(1);
+  color: #fff;
 }
 
 
