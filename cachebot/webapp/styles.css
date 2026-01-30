@@ -1899,6 +1899,7 @@ body.modal-open #app {
   background: transparent;
   border: none;
   padding: 0;
+  margin-bottom: 14px;
 }
 
 .search-toggle {
@@ -1936,16 +1937,16 @@ body.modal-open #app {
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transform: scaleY(0.98);
+  transform: scaleY(0.96);
   transform-origin: top;
-  transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease;
+  transition: max-height 0.5s ease, opacity 0.35s ease, transform 0.35s ease;
 }
 
 .search-panel.open {
   max-height: 520px;
   opacity: 1;
   transform: scaleY(1);
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .moderation-search.open .search-toggle {
@@ -1955,6 +1956,7 @@ body.modal-open #app {
 .search-panel {
   background: transparent;
   border: none;
+  border-radius: 24px;
   padding: 14px 0 0;
 }
 .moderation-deals-list {
