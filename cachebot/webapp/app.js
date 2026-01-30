@@ -2464,8 +2464,11 @@
       renderModerationDeals([]);
       return;
     }
-    if (moderationDealSearchHint) moderationDealSearchHint.textContent = "";
-    renderModerationDeals(payload.deals || []);
+    const deals = payload.deals || [];
+    if (moderationDealSearchHint) {
+      moderationDealSearchHint.textContent = deals.length > 1 ? `Сделок: ${deals.length}` : "";
+    }
+    renderModerationDeals(deals);
   };
 
   const resetModerationUserSearch = () => {
