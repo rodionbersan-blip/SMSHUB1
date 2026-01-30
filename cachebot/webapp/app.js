@@ -4724,11 +4724,15 @@
       moderationSearchToggles.forEach((btn) => {
         const panelId = btn.getAttribute("data-target");
         const panel = panelId ? document.getElementById(panelId) : null;
+        const shell = btn.closest(".moderation-search");
         const willOpen = btn === toggle ? !panel?.classList.contains("open") : false;
         btn.classList.toggle("active", willOpen);
         if (panel) {
           panel.classList.toggle("open", willOpen);
           panel.classList.toggle("is-collapsed", !willOpen);
+        }
+        if (shell) {
+          shell.classList.toggle("open", willOpen);
         }
       });
     });
