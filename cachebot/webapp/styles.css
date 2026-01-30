@@ -1886,12 +1886,67 @@ body.modal-open #app {
 }
 
 .moderation-search input {
-  border-radius: 16px;
+  border-radius: 18px;
 }
 
 .moderation-user {
   border-radius: 18px;
   margin-top: 14px;
+}
+
+.moderation-search {
+  border-radius: 22px;
+}
+
+.search-toggle {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  background: rgba(77, 163, 255, 0.12);
+  color: var(--accent);
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.search-toggle:hover {
+  background: rgba(77, 163, 255, 0.2);
+}
+
+.search-toggle .toggle-plus {
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.25s ease;
+}
+
+.search-toggle.active .toggle-plus {
+  transform: rotate(45deg);
+}
+
+.search-panel {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: scaleY(0.98);
+  transform-origin: top;
+  transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease;
+}
+
+.search-panel.open {
+  max-height: 420px;
+  opacity: 1;
+  transform: scaleY(1);
+  margin-top: 10px;
+}
+
+.moderation-deals-list {
+  margin-top: 8px;
 }
 
 .moderation-user-head {

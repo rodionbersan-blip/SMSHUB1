@@ -216,6 +216,11 @@
   const moderationSearchInput = document.getElementById("moderationSearchInput");
   const moderationSearchBtn = document.getElementById("moderationSearchBtn");
   const moderationSearchHint = document.getElementById("moderationSearchHint");
+  const moderationDealSearchInput = document.getElementById("moderationDealSearchInput");
+  const moderationDealSearchBtn = document.getElementById("moderationDealSearchBtn");
+  const moderationDealSearchHint = document.getElementById("moderationDealSearchHint");
+  const moderationDealsResults = document.getElementById("moderationDealsResults");
+  const moderationSearchToggles = document.querySelectorAll(".search-toggle");
   const moderationUserCard = document.getElementById("moderationUserCard");
   const moderationUserTitle = document.getElementById("moderationUserTitle");
   const moderationUserHandle = document.getElementById("moderationUserHandle");
@@ -2409,6 +2414,51 @@
     }
     if (moderationSearchHint) moderationSearchHint.textContent = "";
     renderModerationUser(payload.user);
+  };
+
+  const renderModerationDeals = (deals = []) => {
+    if (!moderationDealsResults) return;
+    moderationDealsResults.innerHTML = "";
+    if (!deals.length) {
+      moderationDealsResults.innerHTML = "<div class=\"deal-empty\">Сделок не найдено.</div>";
+      return;
+    }
+    deals.forEach((deal) => {
+      const item = document.createElement("div");
+      item.className = "deal-item";
+      const dealLabel = deal.public_id ? `#${deal.public_id}` : `#${deal.id || "—"}`;
+      const amount = deal.usdt_amount ? `${formatAmount(deal.usdt_amount)} USDT` : "—";
+      item.innerHTML = `
+        <div class="deal-header">
+          <div class="deal-id">Сделка ${dealLabel}</div>
+          <div class="deal-status">${statusLabel(deal) || "—"}</div>
+        </div>
+        <div class="deal-row">${amount}</div>
+        <div class="deal-row">${deal.created_at ? formatDate(deal.created_at) : ""}</div>
+      `;
+      if (deal.id) {
+        item.addEventListener("click", () => openDealModal(deal.id));
+      }
+      moderationDealsResults.appendChild(item);
+    });
+  };
+
+  const runModerationDealSearch = async () => {
+    if (!moderationDealSearchInput) return;
+    const query = moderationDealSearchInput.value.trim();
+    if (!query) {
+      if (moderationDealSearchHint) moderationDealSearchHint.textContent = "Введите ник, @username или #сделки.";
+      return;
+    }
+    if (moderationDealSearchHint) moderationDealSearchHint.textContent = "Поиск...";
+    const payload = await fetchJson(`/api/admin/deals/search?query=${encodeURIComponent(query)}`);
+    if (!payload?.ok) {
+      if (moderationDealSearchHint) moderationDealSearchHint.textContent = "Сделки не найдены.";
+      renderModerationDeals([]);
+      return;
+    }
+    if (moderationDealSearchHint) moderationDealSearchHint.textContent = "";
+    renderModerationDeals(payload.deals || []);
   };
 
   const applyModerationAction = async (action, button) => {
@@ -4660,6 +4710,28 @@
       event.preventDefault();
       runModerationSearch();
     }
+  });
+  moderationDealSearchBtn?.addEventListener("click", runModerationDealSearch);
+  moderationDealSearchInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      runModerationDealSearch();
+    }
+  });
+  moderationSearchToggles?.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const targetId = toggle.getAttribute("data-target");
+      moderationSearchToggles.forEach((btn) => {
+        const panelId = btn.getAttribute("data-target");
+        const panel = panelId ? document.getElementById(panelId) : null;
+        const willOpen = btn === toggle ? !panel?.classList.contains("open") : false;
+        btn.classList.toggle("active", willOpen);
+        if (panel) {
+          panel.classList.toggle("open", willOpen);
+          panel.classList.toggle("is-collapsed", !willOpen);
+        }
+      });
+    });
   });
   moderationUserTitle?.addEventListener("click", (event) => {
     if (event.target !== moderationUserTitle) return;

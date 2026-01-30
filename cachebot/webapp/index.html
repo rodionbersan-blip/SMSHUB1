@@ -191,12 +191,32 @@
         </div>
         <div id="moderationUsersPanel" class="moderation-panel is-hidden">
           <div class="admin-card moderation-search">
-            <div class="profile-title">Поиск пользователя</div>
-            <div class="admin-row">
-              <input id="moderationSearchInput" placeholder="@username или ID" />
-              <button id="moderationSearchBtn" class="btn">Найти</button>
+            <button class="search-toggle" data-target="moderationUserSearchPanel">
+              <span>Поиск пользователей</span>
+              <span class="toggle-plus" aria-hidden="true">+</span>
+            </button>
+            <div id="moderationUserSearchPanel" class="search-panel is-collapsed">
+              <div class="admin-row">
+                <input id="moderationSearchInput" placeholder="@username или ID" />
+                <button id="moderationSearchBtn" class="btn">Найти</button>
+              </div>
+              <div id="moderationSearchHint" class="admin-hint"></div>
             </div>
-            <div id="moderationSearchHint" class="admin-hint"></div>
+          </div>
+
+          <div class="admin-card moderation-search">
+            <button class="search-toggle" data-target="moderationDealSearchPanel">
+              <span>Поиск сделок</span>
+              <span class="toggle-plus" aria-hidden="true">+</span>
+            </button>
+            <div id="moderationDealSearchPanel" class="search-panel is-collapsed">
+              <div class="admin-row">
+                <input id="moderationDealSearchInput" placeholder="@username, ник или #сделки" />
+                <button id="moderationDealSearchBtn" class="btn">Найти</button>
+              </div>
+              <div id="moderationDealSearchHint" class="admin-hint"></div>
+              <div id="moderationDealsResults" class="deal-list moderation-deals-list"></div>
+            </div>
           </div>
           <div id="moderationUserCard" class="admin-card moderation-user is-hidden">
             <div class="moderation-user-head">
