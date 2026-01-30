@@ -726,7 +726,7 @@
     document.documentElement.style.backgroundColor = "";
   };
 
-  const PIN_GATE_DISABLED = true;
+  const PIN_GATE_DISABLED = false;
 
   const initPinGate = () => {
     if (PIN_GATE_DISABLED) {
