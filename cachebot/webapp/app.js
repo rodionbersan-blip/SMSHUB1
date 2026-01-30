@@ -726,7 +726,14 @@
     document.documentElement.style.backgroundColor = "";
   };
 
+  const PIN_GATE_DISABLED = true;
+
   const initPinGate = () => {
+    if (PIN_GATE_DISABLED) {
+      window.requestPinUnlock = async () => true;
+      hidePinOverlay();
+      return Promise.resolve(true);
+    }
     if (!pinOverlay || !pinKeypad || !pinTitle) return Promise.resolve(true);
     let mode = "unlock";
     let buffer = "";
