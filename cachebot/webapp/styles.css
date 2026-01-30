@@ -1886,7 +1886,7 @@ body.modal-open #app {
 }
 
 .moderation-search input {
-  border-radius: 18px;
+  border-radius: 22px;
 }
 
 .moderation-user {
@@ -1937,20 +1937,21 @@ body.modal-open #app {
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transform: scaleY(0.96);
+  transform: scaleY(0.9);
   transform-origin: top;
   padding-top: 0;
   margin-top: 0;
   transition:
-    max-height 0.55s ease-in-out,
-    opacity 0.35s ease-in-out,
-    transform 0.35s ease-in-out,
-    padding 0.35s ease-in-out,
-    margin 0.35s ease-in-out;
+    max-height 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s ease,
+    transform 0.45s ease,
+    padding 0.45s ease,
+    margin 0.45s ease;
+  will-change: max-height, opacity, transform, padding, margin;
 }
 
 .search-panel.open {
-  max-height: 560px;
+  max-height: 720px;
   opacity: 1;
   transform: scaleY(1);
   margin-top: 12px;
@@ -1964,7 +1965,7 @@ body.modal-open #app {
 .search-panel {
   background: transparent;
   border: none;
-  border-radius: 32px;
+  border-radius: 40px;
 }
 .moderation-deals-list {
   margin-top: 8px;
