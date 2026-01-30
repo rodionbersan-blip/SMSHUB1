@@ -1951,11 +1951,12 @@ body.modal-open #app {
 }
 
 .search-panel.open {
-  max-height: 720px;
+  max-height: 760px;
   opacity: 1;
   transform: scaleY(1);
   margin-top: 12px;
   padding-top: 14px;
+  padding-bottom: 12px;
 }
 
 .moderation-search.open .search-toggle {
@@ -1969,6 +1970,9 @@ body.modal-open #app {
 }
 .moderation-deals-list {
   margin-top: 8px;
+  max-height: 360px;
+  overflow: auto;
+  padding-bottom: 8px;
 }
 
 .moderation-user-head {
