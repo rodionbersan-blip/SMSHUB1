@@ -686,22 +686,11 @@ body.modal-open #app {
   justify-content: center;
 }
 
-.icon-mask {
-  width: 100%;
-  height: 100%;
-  display: inline-block;
-  background-color: currentColor;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  -webkit-mask-size: contain;
-}
-
-.disputes-icon {
-  mask-image: url("/app/assets/disputes-icon-gavel-solid.png?v=1");
-  -webkit-mask-image: url("/app/assets/disputes-icon-gavel-solid.png?v=1");
+.disputes-icon-bg {
+  background-image: url("/app/assets/disputes-icon-gavel-solid.png?v=2");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
 .tab[data-view="deals"] .nav-icon,
@@ -774,20 +763,20 @@ body.modal-open #app {
   opacity: 1;
 }
 
-:root[data-theme="dark"] .tab[data-view="disputes"] .icon-mask {
-  background-color: #fff;
+:root[data-theme="dark"] .tab[data-view="disputes"] .nav-icon {
+  filter: brightness(0) invert(1);
 }
 
-:root[data-theme="dark"] .tab[data-view="disputes"].active .icon-mask {
-  background-color: #0f1b2e;
+:root[data-theme="dark"] .tab[data-view="disputes"].active .nav-icon {
+  filter: brightness(0) invert(0);
 }
 
-:root[data-theme="light"] .tab[data-view="disputes"] .icon-mask {
-  background-color: #0f1b2e;
+:root[data-theme="light"] .tab[data-view="disputes"] .nav-icon {
+  filter: brightness(0) invert(0);
 }
 
-:root[data-theme="light"] .tab[data-view="disputes"].active .icon-mask {
-  background-color: #fff;
+:root[data-theme="light"] .tab[data-view="disputes"].active .nav-icon {
+  filter: brightness(0) invert(1);
 }
 
 
