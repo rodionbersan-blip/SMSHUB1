@@ -220,6 +220,7 @@
   const moderationUserTitle = document.getElementById("moderationUserTitle");
   const moderationUserHandle = document.getElementById("moderationUserHandle");
   const moderationUserTgBtn = document.getElementById("moderationUserTgBtn");
+  const moderationUserClose = document.getElementById("moderationUserClose");
   const moderationUserMeta = document.getElementById("moderationUserMeta");
   const moderationUserStats = document.getElementById("moderationUserStats");
   const moderationWarnBtn = document.getElementById("moderationWarnBtn");
@@ -2385,6 +2386,13 @@
     state.moderationAdsCounts = ads;
   };
 
+  const hideModerationUserCard = () => {
+    moderationUserCard?.classList.add("is-hidden");
+    if (moderationUserTitle) moderationUserTitle.dataset.userId = "";
+    if (moderationUserHandle) moderationUserHandle.dataset.userId = "";
+    state.moderationUser = null;
+  };
+
   const runModerationSearch = async () => {
     if (!moderationSearchInput) return;
     const query = moderationSearchInput.value.trim();
@@ -2396,7 +2404,7 @@
     const payload = await fetchJson(`/api/admin/users/search?query=${encodeURIComponent(query)}`);
     if (!payload?.ok) {
       if (moderationSearchHint) moderationSearchHint.textContent = "Пользователь не найден.";
-      moderationUserCard?.classList.add("is-hidden");
+      hideModerationUserCard();
       return;
     }
     if (moderationSearchHint) moderationSearchHint.textContent = "";
@@ -4645,6 +4653,7 @@
 
   moderationDisputesBtn?.addEventListener("click", () => setModerationTab("disputes"));
   moderationUsersBtn?.addEventListener("click", () => setModerationTab("users"));
+  moderationUserClose?.addEventListener("click", hideModerationUserCard);
   moderationSearchBtn?.addEventListener("click", runModerationSearch);
   moderationSearchInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {

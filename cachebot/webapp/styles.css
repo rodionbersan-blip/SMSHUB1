@@ -686,6 +686,13 @@ body.modal-open #app {
   justify-content: center;
 }
 
+.tab[data-view="deals"] .nav-icon,
+.tab[data-view="deals"].active .nav-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
 .tab[data-view="support"] .nav-icon {
   width: 18px;
   height: 18px;
@@ -736,11 +743,6 @@ body.modal-open #app {
   opacity: 1;
 }
 
-:root[data-theme="light"] .tab[data-view="disputes"].active .nav-icon img {
-  filter: brightness(0) invert(0) !important;
-  opacity: 1;
-}
-
 :root[data-theme="light"] .tab.active .nav-icon img {
   filter: brightness(0) invert(1) !important;
 }
@@ -750,11 +752,6 @@ body.modal-open #app {
 }
 
 :root[data-theme="dark"] .tab[data-view="disputes"] .nav-icon img {
-  filter: brightness(0) invert(1) !important;
-  opacity: 1;
-}
-
-:root[data-theme="dark"] .tab[data-view="disputes"].active .nav-icon img {
   filter: brightness(0) invert(1) !important;
   opacity: 1;
 }
@@ -1860,6 +1857,19 @@ body.modal-open #app {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.moderation-user-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.moderation-user-titlebar .btn.small {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 999px;
 }
 
 .moderation-user .profile-title {
