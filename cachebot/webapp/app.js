@@ -2468,6 +2468,18 @@
     renderModerationDeals(payload.deals || []);
   };
 
+  const resetModerationUserSearch = () => {
+    if (moderationSearchInput) moderationSearchInput.value = "";
+    if (moderationSearchHint) moderationSearchHint.textContent = "";
+    hideModerationUserCard();
+  };
+
+  const resetModerationDealSearch = () => {
+    if (moderationDealSearchInput) moderationDealSearchInput.value = "";
+    if (moderationDealSearchHint) moderationDealSearchHint.textContent = "";
+    if (moderationDealsResults) moderationDealsResults.innerHTML = "";
+  };
+
   const applyModerationAction = async (action, button) => {
     const userId = state.moderationUser?.user_id;
     if (!userId) return;
@@ -4740,6 +4752,10 @@
         }
         if (shell) {
           shell.classList.toggle("open", willOpen);
+        }
+        if (!willOpen) {
+          if (panelId === "moderationUserSearchPanel") resetModerationUserSearch();
+          if (panelId === "moderationDealSearchPanel") resetModerationDealSearch();
         }
       });
     });
