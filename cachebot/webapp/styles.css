@@ -686,12 +686,6 @@ body.modal-open #app {
   justify-content: center;
 }
 
-.disputes-icon-bg {
-  background-image: url("/app/assets/disputes-icon-gavel-solid.png?v=2");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-}
 
 .tab[data-view="deals"] .nav-icon,
 .tab[data-view="deals"].active .nav-icon {
@@ -750,6 +744,11 @@ body.modal-open #app {
   opacity: 1;
 }
 
+:root[data-theme="light"] .tab[data-view="disputes"].active .nav-icon img {
+  filter: brightness(0) invert(1) !important;
+  opacity: 1;
+}
+
 :root[data-theme="light"] .tab.active .nav-icon img {
   filter: brightness(0) invert(1) !important;
 }
@@ -760,6 +759,11 @@ body.modal-open #app {
 
 :root[data-theme="dark"] .tab[data-view="disputes"] .nav-icon img {
   filter: brightness(0) invert(1) !important;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .tab[data-view="disputes"].active .nav-icon img {
+  filter: brightness(0) invert(0) !important;
   opacity: 1;
 }
 
