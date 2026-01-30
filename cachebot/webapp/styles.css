@@ -1939,14 +1939,22 @@ body.modal-open #app {
   opacity: 0;
   transform: scaleY(0.96);
   transform-origin: top;
-  transition: max-height 0.5s ease-in-out, opacity 0.35s ease-in-out, transform 0.35s ease-in-out;
+  padding-top: 0;
+  margin-top: 0;
+  transition:
+    max-height 0.55s ease-in-out,
+    opacity 0.35s ease-in-out,
+    transform 0.35s ease-in-out,
+    padding 0.35s ease-in-out,
+    margin 0.35s ease-in-out;
 }
 
 .search-panel.open {
-  max-height: 520px;
+  max-height: 560px;
   opacity: 1;
   transform: scaleY(1);
   margin-top: 12px;
+  padding-top: 14px;
 }
 
 .moderation-search.open .search-toggle {
@@ -1957,7 +1965,6 @@ body.modal-open #app {
   background: transparent;
   border: none;
   border-radius: 32px;
-  padding: 14px 0 0;
 }
 .moderation-deals-list {
   margin-top: 8px;
@@ -2296,6 +2303,25 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] #moderationSearchBtn:hover {
+  color: var(--accent);
+  background: rgba(77, 163, 255, 0.18);
+}
+
+#moderationDealSearchPanel .admin-row {
+  flex-wrap: wrap;
+}
+
+#moderationDealSearchPanel input {
+  width: 100%;
+}
+
+#moderationDealSearchBtn {
+  width: min(220px, 100%);
+  margin: 8px auto 0;
+  display: block;
+}
+
+:root[data-theme="light"] #moderationDealSearchBtn:hover {
   color: var(--accent);
   background: rgba(77, 163, 255, 0.18);
 }
