@@ -2409,7 +2409,7 @@
     if (!moderationSearchInput) return;
     const query = moderationSearchInput.value.trim();
     if (!query) {
-      if (moderationSearchHint) moderationSearchHint.textContent = "Введите @username или ID.";
+      if (moderationSearchHint) moderationSearchHint.textContent = "Введите @username | Name.";
       return;
     }
     if (moderationSearchHint) moderationSearchHint.textContent = "Поиск...";
@@ -2454,7 +2454,7 @@
     if (!moderationDealSearchInput) return;
     const query = moderationDealSearchInput.value.trim();
     if (!query) {
-      if (moderationDealSearchHint) moderationDealSearchHint.textContent = "Введите ник, @username или #сделки.";
+      if (moderationDealSearchHint) moderationDealSearchHint.textContent = "Введите @username | Name | #…";
       return;
     }
     if (moderationDealSearchHint) moderationDealSearchHint.textContent = "Поиск...";

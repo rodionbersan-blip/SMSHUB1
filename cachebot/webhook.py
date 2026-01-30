@@ -1830,11 +1830,13 @@ async def _api_admin_deals_search(request: web.Request) -> web.Response:
     normalized = query.strip()
     if normalized.startswith("#"):
         normalized = normalized[1:]
+    normalized = normalized.lstrip("0")
 
     deals = []
     public_id = None
     if normalized.lower().startswith("c") and normalized[1:].isdigit():
-        public_id = normalized.upper()
+        digits = normalized[1:].lstrip("0")
+        public_id = f"C{digits.zfill(5)}" if digits else "C00000"
     elif normalized.isdigit():
         public_id = f"C{normalized.zfill(5)}"
 

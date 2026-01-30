@@ -197,10 +197,31 @@
             </button>
             <div id="moderationUserSearchPanel" class="search-panel is-collapsed">
               <div class="admin-row">
-                <input id="moderationSearchInput" placeholder="@username или ID" />
+                <input id="moderationSearchInput" placeholder="@username | Name" />
                 <button id="moderationSearchBtn" class="btn">Найти</button>
               </div>
               <div id="moderationSearchHint" class="admin-hint"></div>
+              <div id="moderationUserCard" class="admin-card moderation-user is-hidden">
+                <div class="moderation-user-head">
+                  <div class="moderation-user-titlebar">
+                    <div class="profile-title" id="moderationUserTitle">Пользователь</div>
+                    <button id="moderationUserClose" class="btn ghost small" type="button">Закрыть</button>
+                  </div>
+                  <div class="moderation-user-line">
+                    <span id="moderationUserHandle" class="moderation-user-handle">—</span>
+                    <button id="moderationUserTgBtn" class="btn ghost icon-btn" type="button">TG</button>
+                    <span id="moderationUserStatus" class="moderation-status">Статус: —</span>
+                  </div>
+                </div>
+                <div class="moderation-user-meta" id="moderationUserMeta"></div>
+                <div class="moderation-user-stats" id="moderationUserStats"></div>
+                <div class="moderation-user-actions">
+                  <button id="moderationWarnBtn" class="btn warning">Предупреждение</button>
+                  <button id="moderationBlockBtn" class="btn">Запретить сделки</button>
+                  <button id="moderationBanBtn" class="btn danger">Заблокировать</button>
+                  <button id="moderationAdsBtn" class="btn ghost">Объявления</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -211,32 +232,11 @@
             </button>
             <div id="moderationDealSearchPanel" class="search-panel is-collapsed">
               <div class="admin-row">
-                <input id="moderationDealSearchInput" placeholder="@username, ник или #сделки" />
+                <input id="moderationDealSearchInput" placeholder="@username | Name | #…" />
                 <button id="moderationDealSearchBtn" class="btn">Найти</button>
               </div>
               <div id="moderationDealSearchHint" class="admin-hint"></div>
               <div id="moderationDealsResults" class="deal-list moderation-deals-list"></div>
-            </div>
-          </div>
-          <div id="moderationUserCard" class="admin-card moderation-user is-hidden">
-            <div class="moderation-user-head">
-              <div class="moderation-user-titlebar">
-                <div class="profile-title" id="moderationUserTitle">Пользователь</div>
-                <button id="moderationUserClose" class="btn ghost small" type="button">Закрыть</button>
-              </div>
-              <div class="moderation-user-line">
-                <span id="moderationUserHandle" class="moderation-user-handle">—</span>
-                <button id="moderationUserTgBtn" class="btn ghost icon-btn" type="button">TG</button>
-                <span id="moderationUserStatus" class="moderation-status">Статус: —</span>
-              </div>
-            </div>
-            <div class="moderation-user-meta" id="moderationUserMeta"></div>
-            <div class="moderation-user-stats" id="moderationUserStats"></div>
-            <div class="moderation-user-actions">
-              <button id="moderationWarnBtn" class="btn warning">Предупреждение</button>
-              <button id="moderationBlockBtn" class="btn">Запретить сделки</button>
-              <button id="moderationBanBtn" class="btn danger">Заблокировать</button>
-              <button id="moderationAdsBtn" class="btn ghost">Объявления</button>
             </div>
           </div>
         </div>

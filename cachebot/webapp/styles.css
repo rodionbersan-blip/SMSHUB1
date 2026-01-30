@@ -2309,17 +2309,16 @@ body.modal-open #app {
 }
 
 #moderationDealSearchPanel .admin-row {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 #moderationDealSearchPanel input {
-  width: 100%;
+  width: auto;
 }
 
 #moderationDealSearchBtn {
-  width: min(220px, 100%);
-  margin: 8px auto 0;
-  display: block;
+  width: auto;
+  margin: 0;
 }
 
 :root[data-theme="light"] #moderationDealSearchBtn:hover {
