@@ -178,6 +178,21 @@ class UserService:
                     return profile
         return None
 
+    async def search_user_ids(self, query: str) -> List[int]:
+        needle = (query or "").strip().lower()
+        if not needle:
+            return []
+        async with self._lock:
+            profiles = list(self._profiles.values())
+        matched: List[int] = []
+        for profile in profiles:
+            username = (profile.username or "").lower()
+            display = (profile.display_name or "").lower()
+            full = (profile.full_name or "").lower()
+            if needle in username or needle in display or needle in full:
+                matched.append(profile.user_id)
+        return matched
+
     async def is_moderator(self, user_id: int) -> bool:
         async with self._lock:
             return user_id in self._moderators

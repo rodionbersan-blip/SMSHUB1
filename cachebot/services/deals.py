@@ -248,9 +248,21 @@ class DealService:
                 reverse=True,
             )
 
+    async def list_all_deals(self) -> List[Deal]:
+        async with self._lock:
+            return sorted(self._deals.values(), key=lambda deal: deal.created_at, reverse=True)
+
     async def get_deal(self, deal_id: str) -> Deal | None:
         async with self._lock:
             return self._deals.get(deal_id)
+
+    async def get_deal_by_public_id(self, public_id: str) -> Deal | None:
+        needle = public_id.upper()
+        async with self._lock:
+            for deal in self._deals.values():
+                if deal.public_id and deal.public_id.upper() == needle:
+                    return deal
+        return None
 
     async def get_deal_by_token(self, token: str) -> Deal | None:
         async with self._lock:

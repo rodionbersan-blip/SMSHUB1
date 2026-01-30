@@ -93,6 +93,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
     app.router.add_post("/api/admin/merchants/{user_id}/revoke", _api_admin_merchant_revoke)
     app.router.add_get("/api/admin/users/search", _api_admin_user_search)
+    app.router.add_get("/api/admin/deals/search", _api_admin_deals_search)
     app.router.add_post("/api/admin/users/{user_id}/moderation", _api_admin_user_moderation)
     app.router.add_get("/api/reviews", _api_reviews_list)
     app.router.add_post("/api/reviews", _api_reviews_add)
@@ -1817,6 +1818,57 @@ async def _api_admin_user_search(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "user": payload})
 
 
+async def _api_admin_deals_search(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not await _has_moderation_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    query = (request.query.get("query") or "").strip()
+    if not query:
+        raise web.HTTPBadRequest(text="Нужно указать запрос")
+
+    normalized = query.strip()
+    if normalized.startswith("#"):
+        normalized = normalized[1:]
+
+    deals = []
+    public_id = None
+    if normalized.lower().startswith("c") and normalized[1:].isdigit():
+        public_id = normalized.upper()
+    elif normalized.isdigit():
+        public_id = f"C{normalized.zfill(5)}"
+
+    if public_id:
+        deal = await deps.deal_service.get_deal_by_public_id(public_id)
+        if not deal and len(normalized) >= 8:
+            deal = await deps.deal_service.get_deal(normalized)
+        if deal:
+            deals = [deal]
+
+    if not deals:
+        search_query = query.lstrip("@")
+        user_ids = await deps.user_service.search_user_ids(search_query)
+        if query.isdigit():
+            user_ids.append(int(query))
+        seen = set()
+        for uid in user_ids:
+            if uid in seen:
+                continue
+            seen.add(uid)
+            deals.extend(await deps.deal_service.list_user_deals(uid))
+
+    if not deals:
+        return web.json_response({"ok": False, "deals": []})
+
+    unique = {}
+    for deal in deals:
+        unique[deal.id] = deal
+    sorted_deals = sorted(unique.values(), key=lambda d: d.created_at, reverse=True)
+
+    payload = [_admin_deal_payload(deal) for deal in sorted_deals]
+    return web.json_response({"ok": True, "deals": payload})
+
+
 async def _api_admin_user_moderation(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     user, user_id = await _require_user(request)
@@ -2582,6 +2634,19 @@ async def _deal_payload(
     if with_actions:
         payload["actions"] = _deal_actions(deal, user_id)
     return payload
+
+
+def _admin_deal_payload(deal) -> dict[str, Any]:
+    return {
+        "id": deal.id,
+        "public_id": deal.public_id,
+        "status": deal.status.value,
+        "usdt_amount": str(deal.usdt_amount),
+        "rate": str(deal.rate),
+        "created_at": deal.created_at.isoformat(),
+        "seller_id": deal.seller_id,
+        "buyer_id": deal.buyer_id,
+    }
 
 
 def _deal_actions(deal, user_id: int) -> dict[str, bool]:
