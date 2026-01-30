@@ -2226,6 +2226,11 @@ body.modal-open #app {
   padding: 8px 12px;
 }
 
+:root[data-theme="light"] #moderationSearchBtn:hover {
+  color: var(--accent);
+  background: rgba(77, 163, 255, 0.18);
+}
+
 .admin-row {
   flex-wrap: nowrap;
 }
