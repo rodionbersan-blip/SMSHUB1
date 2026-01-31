@@ -10,7 +10,7 @@ from datetime import datetime, timezone, timedelta
 from contextlib import suppress
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qsl
+from urllib.parse import parse_qsl, unquote
 from decimal import Decimal, InvalidOperation, ROUND_UP
 
 from aiohttp import web
@@ -2179,12 +2179,53 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
         return {}
 
 
+def _normalize_init_data(init_data: str) -> list[str]:
+    if not init_data:
+        return []
+    candidates = [init_data]
+    # If initData is passed as a full query param or double-encoded, unpack it.
+    try:
+        parts = dict(parse_qsl(init_data, keep_blank_values=True))
+    except Exception:
+        parts = {}
+    for key in ("tgWebAppData", "initData"):
+        raw = parts.get(key)
+        if raw:
+            candidates.append(raw)
+            with suppress(Exception):
+                candidates.append(unquote(raw))
+    if init_data.startswith(("tgWebAppData=", "initData=")):
+        _, _, value = init_data.partition("=")
+        if value:
+            candidates.append(value)
+            with suppress(Exception):
+                candidates.append(unquote(value))
+    if "%3D" in init_data or "%26" in init_data:
+        with suppress(Exception):
+            candidates.append(unquote(init_data))
+        with suppress(Exception):
+            candidates.append(unquote(unquote(init_data)))
+    # Deduplicate while preserving order.
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for item in candidates:
+        if item and item not in seen:
+            ordered.append(item)
+            seen.add(item)
+    return ordered
+
+
 async def _require_user(request: web.Request) -> tuple[dict[str, Any], int]:
     deps: AppDeps = request.app["deps"]
     init_data = request.headers.get("X-Telegram-Init-Data") or request.query.get("initData")
     if not init_data:
         raise web.HTTPUnauthorized(text="Missing initData")
     user = _validate_init_data(init_data, deps.config.telegram_bot_token)
+    if not user:
+        for candidate in _normalize_init_data(init_data):
+            user = _validate_init_data(candidate, deps.config.telegram_bot_token)
+            if user:
+                break
     if not user and deps.config.allow_unsafe_initdata:
         try:
             pairs = parse_qsl(init_data, keep_blank_values=True)
