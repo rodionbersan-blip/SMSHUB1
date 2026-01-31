@@ -1922,18 +1922,24 @@ body.modal-open #app {
 
 .admin-accordion {
   border-radius: 22px;
-  padding: 10px;
-  gap: 10px;
+  padding: 8px;
+  gap: 8px;
 }
 
 .admin-accordion:not(.open) {
   gap: 0;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 .admin-accordion.open .search-toggle {
   transform: scale(1.01);
+}
+
+.admin-accordion .search-toggle {
+  padding: 12px 18px;
+  font-size: 15px;
+  gap: 10px;
 }
 
 .search-toggle {
@@ -1985,6 +1991,10 @@ body.modal-open #app {
 }
 
 .search-panel > * {
+  overflow: hidden;
+}
+
+.search-panel > .search-panel-inner {
   overflow: hidden;
 }
 

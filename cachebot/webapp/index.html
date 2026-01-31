@@ -254,16 +254,18 @@
               <span class="toggle-plus" aria-hidden="true">+</span>
             </button>
             <div id="adminRatesPanel" class="search-panel is-collapsed">
-              <label>Курс USDT/RUB
-                <input id="adminRate" type="number" step="0.01" />
-              </label>
-              <label>Комиссия пополнения (%)
-                <input id="adminFee" type="number" step="0.01" />
-              </label>
-              <label>Комиссия на вывод (%)
-                <input id="adminWithdrawFee" type="number" step="0.01" />
-              </label>
-              <button id="adminSaveRates" class="btn primary">Сохранить</button>
+              <div class="search-panel-inner">
+                <label>Курс USDT/RUB
+                  <input id="adminRate" type="number" step="0.01" />
+                </label>
+                <label>Комиссия пополнения (%)
+                  <input id="adminFee" type="number" step="0.01" />
+                </label>
+                <label>Комиссия на вывод (%)
+                  <input id="adminWithdrawFee" type="number" step="0.01" />
+                </label>
+                <button id="adminSaveRates" class="btn primary">Сохранить</button>
+              </div>
             </div>
           </div>
           <div class="admin-card admin-accordion">
@@ -272,11 +274,13 @@
               <span class="toggle-plus" aria-hidden="true">+</span>
             </button>
             <div id="adminModeratorsPanel" class="search-panel is-collapsed">
-              <div class="admin-row">
-                <input id="adminModeratorUsername" placeholder="@username" />
-                <button id="adminAddModerator" class="btn">Добавить</button>
+              <div class="search-panel-inner">
+                <div class="admin-row">
+                  <input id="adminModeratorUsername" placeholder="@username" />
+                  <button id="adminAddModerator" class="btn">Добавить</button>
+                </div>
+                <div id="adminModerators" class="admin-list"></div>
               </div>
-              <div id="adminModerators" class="admin-list"></div>
             </div>
           </div>
           <div class="admin-card admin-accordion">
@@ -285,7 +289,9 @@
               <span class="toggle-plus" aria-hidden="true">+</span>
             </button>
             <div id="adminMerchantsPanel" class="search-panel is-collapsed">
-              <div id="adminMerchants" class="admin-list"></div>
+              <div class="search-panel-inner">
+                <div id="adminMerchants" class="admin-list"></div>
+              </div>
             </div>
           </div>
         </div>
