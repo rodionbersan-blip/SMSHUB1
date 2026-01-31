@@ -1884,7 +1884,7 @@ body.modal-open #app {
 
 .moderation-tabs .btn.pill.active {
   background: #f2f6ff;
-  color: #1a2433;
+  color: #000000;
   box-shadow: 0 0 14px rgba(120, 180, 255, 0.25);
 }
 
