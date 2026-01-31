@@ -285,6 +285,7 @@
   const adminAddMerchant = document.getElementById("adminAddMerchant");
   const adminAdminUsername = document.getElementById("adminAdminUsername");
   const adminAddAdmin = document.getElementById("adminAddAdmin");
+  const adminAdminsCard = document.getElementById("adminAdminsCard");
   const adminMerchants = document.getElementById("adminMerchants");
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
   const supportNewBtn = document.getElementById("supportNewBtn");
@@ -2879,8 +2880,8 @@
       adminFee.value = settings.fee_percent;
       adminWithdrawFee.value = settings.withdraw_fee_percent;
     }
-    if (adminAddAdmin) {
-      adminAddAdmin.closest(".admin-card")?.classList.toggle("is-hidden", !summary.can_manage_admins);
+    if (adminAdminsCard) {
+      adminAdminsCard.classList.toggle("is-hidden", !summary.can_manage_admins);
     }
     const mods = await fetchJson("/api/admin/moderators");
     if (mods?.ok) {

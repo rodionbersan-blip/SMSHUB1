@@ -10,7 +10,7 @@
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="expires" content="0" />
     <title>BC Cash</title>
-    <link rel="stylesheet" href="/app/styles.css?v=pay96" />
+    <link rel="stylesheet" href="/app/styles.css?v=pay97" />
   </head>
   <body class="pin-lock">
     <div id="app">
@@ -305,13 +305,20 @@
               </div>
             </div>
           </div>
-          <div class="admin-card">
-            <div class="profile-title">Назначить Администратора</div>
-            <div class="admin-row">
-              <input id="adminAdminUsername" placeholder="@username" />
-            </div>
-            <div class="admin-actions-row">
-              <button id="adminAddAdmin" class="btn pill admin-gradient-btn">Назначить Администратора</button>
+          <div class="admin-card admin-accordion" id="adminAdminsCard">
+            <button class="search-toggle admin-toggle" data-target="adminAdminsPanel">
+              <span>Назначить Администратора</span>
+              <span class="toggle-plus" aria-hidden="true">+</span>
+            </button>
+            <div id="adminAdminsPanel" class="search-panel is-collapsed">
+              <div class="search-panel-inner">
+                <div class="admin-row">
+                  <input id="adminAdminUsername" placeholder="@username" />
+                </div>
+                <div class="admin-actions-row">
+                  <button id="adminAddAdmin" class="btn pill admin-gradient-btn">Назначить Администратора</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1054,6 +1061,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay146"></script>
+    <script src="/app/app.js?v=pay147"></script>
   </body>
 </html>
