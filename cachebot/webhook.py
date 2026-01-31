@@ -2243,8 +2243,9 @@ async def _require_user(request: web.Request) -> tuple[dict[str, Any], int]:
             pairs = parse_qsl(init_data, keep_blank_values=True)
             data = dict(pairs)
             user_raw = data.get("user")
+            auth_date = data.get("auth_date")
             user = json.loads(user_raw) if user_raw else {}
-            if user:
+            if user and auth_date and str(auth_date).isdigit():
                 logger.warning("Unsafe initData accepted for user_id=%s", user.get("id"))
         except Exception:
             user = None
