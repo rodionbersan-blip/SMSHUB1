@@ -18,11 +18,11 @@ class SupportTicket:
     target_name: str | None
     status: str
     assigned_to: int | None
+    created_at: str
+    updated_at: str
     last_message_at: str | None = None
     last_message_author_id: int | None = None
     last_message_author_role: str | None = None
-    created_at: str
-    updated_at: str
 
 
 @dataclass(slots=True)
