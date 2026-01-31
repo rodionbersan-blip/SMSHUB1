@@ -2367,6 +2367,21 @@ body.modal-open #app {
   color: var(--muted);
 }
 
+#adminRatesPanel {
+  gap: 10px;
+}
+
+.admin-gradient-btn {
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75), rgba(86, 62, 180, 0.75));
+  color: #ffffff;
+  border: none;
+  margin-top: 8px;
+}
+
+.admin-gradient-btn:hover {
+  background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
+}
+
 :root[data-theme="light"] .admin-pill {
   background: rgba(40, 60, 100, 0.08);
   color: #1a2433;
