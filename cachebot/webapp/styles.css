@@ -2459,14 +2459,14 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .admin-person-btn {
-  background: rgba(40, 60, 100, 0.08);
-  border-color: rgba(20, 28, 38, 0.2);
-  color: #1a2433;
+  background: rgba(255, 170, 70, 0.14);
+  border-color: rgba(255, 150, 60, 0.35);
+  color: #2b1a05;
 }
 
 :root[data-theme="light"] .admin-avatar {
-  background: rgba(40, 60, 100, 0.12);
-  color: #1a2433;
+  background: rgba(255, 170, 70, 0.18);
+  color: #2b1a05;
 }
 
 .admin-pill {
@@ -3689,7 +3689,14 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .modal-card.glass {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(255, 160, 70, 0.22);
   box-shadow: 0 20px 44px rgba(15, 17, 21, 0.14);
+}
+
+:root[data-theme="light"] #adminModeratorModal .modal-card.glass,
+:root[data-theme="light"] #adminMerchantModal .modal-card.glass {
+  border-color: rgba(255, 160, 70, 0.38);
 }
 
 :root[data-theme="light"] #commentModal .modal-card.glass {
