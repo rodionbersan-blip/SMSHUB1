@@ -284,6 +284,7 @@
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
   const supportNewBtn = document.getElementById("supportNewBtn");
   const supportList = document.getElementById("supportList");
+  const supportEmpty = document.getElementById("supportEmpty");
   const supportNewModal = document.getElementById("supportNewModal");
   const supportNewClose = document.getElementById("supportNewClose");
   const supportReasonType = document.getElementById("supportReasonType");
@@ -2317,8 +2318,8 @@
     if (!payload?.ok || !supportList) return;
     const tickets = payload.tickets || [];
     supportList.innerHTML = "";
+    supportEmpty?.classList.toggle("is-hidden", tickets.length > 0);
     if (!tickets.length) {
-      supportList.innerHTML = "<div class=\"deal-empty\">Активных чатов нет.</div>";
       return;
     }
     tickets.forEach((ticket) => {

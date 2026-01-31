@@ -2887,6 +2887,11 @@ body.modal-open #app {
   color: var(--muted);
 }
 
+.support-new-btn {
+  margin-top: 12px;
+  width: 100%;
+}
+
 #supportList .deal-item {
   cursor: pointer;
 }
