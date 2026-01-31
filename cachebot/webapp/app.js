@@ -4888,7 +4888,7 @@
   });
 
   adminSaveRates?.addEventListener("click", async () => {
-    await fetchJson("/api/admin/settings", {
+    const payload = await fetchJson("/api/admin/settings", {
       method: "POST",
       body: JSON.stringify({
         usd_rate: adminRate.value,
@@ -4896,7 +4896,14 @@
         withdraw_fee_percent: adminWithdrawFee.value,
       }),
     });
-    await loadAdmin();
+    if (payload?.ok) {
+      showNotice("✅ Сохранено");
+      adminSaveRates.classList.add("admin-save-success");
+      window.setTimeout(() => adminSaveRates.classList.remove("admin-save-success"), 1200);
+      await loadAdmin();
+    } else {
+      showNotice("Ошибка сохранения", "error");
+    }
   });
 
   adminAddModerator?.addEventListener("click", async () => {

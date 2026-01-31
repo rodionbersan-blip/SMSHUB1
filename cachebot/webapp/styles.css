@@ -2438,6 +2438,23 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
 }
 
+#adminSaveRates {
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75), rgba(86, 62, 180, 0.75));
+  color: #ffffff;
+}
+
+#adminSaveRates:hover {
+  background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
+}
+
+#adminSaveRates:active {
+  transform: scale(0.99);
+}
+
+.admin-save-success {
+  background: linear-gradient(135deg, rgba(70, 200, 120, 0.85), rgba(40, 160, 90, 0.85)) !important;
+}
+
 :root[data-theme="light"] .admin-pill {
   background: rgba(40, 60, 100, 0.08);
   color: #1a2433;
