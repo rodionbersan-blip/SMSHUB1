@@ -5151,8 +5151,16 @@
   adminActionsClose?.addEventListener("click", closeAdminActions);
   adminModeratorModalClose?.addEventListener("click", closeModeratorProfile);
   adminMerchantModalClose?.addEventListener("click", closeMerchantProfile);
-  supportNewBtn?.addEventListener("click", () => supportNewModal?.classList.add("open"));
-  supportNewClose?.addEventListener("click", () => supportNewModal?.classList.remove("open"));
+  supportNewBtn?.addEventListener("click", () => {
+    setSupportReason("");
+    supportNewModal?.classList.add("open");
+  });
+  supportNewClose?.addEventListener("click", () => {
+    supportNewModal?.classList.remove("open");
+    setSupportReason("");
+    supportTargetName.value = "";
+    supportReason.value = "";
+  });
   supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
   const setSupportReason = (value) => {
     if (supportReasonType) supportReasonType.value = value;

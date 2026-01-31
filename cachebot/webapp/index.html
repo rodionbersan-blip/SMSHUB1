@@ -708,7 +708,8 @@
           <button id="supportNewClose" class="btn ghost">Закрыть</button>
         </div>
         <div class="modal-body">
-          <label>Причина обращения
+          <div class="support-reason-group">
+            <div class="field-label">Причина обращения</div>
             <input id="supportReasonType" type="hidden" value="" />
             <div class="support-reason-pills">
               <button type="button" class="btn pill support-reason-btn" data-value="">Не выбрано</button>
@@ -716,7 +717,7 @@
               <button type="button" class="btn pill support-reason-btn" data-value="user">Жалоба на пользователя</button>
               <button type="button" class="btn pill support-reason-btn" data-value="other">Другая причина</button>
             </div>
-          </label>
+          </div>
           <label id="supportTargetRow" class="is-hidden">Имя модератора/пользователя
             <input id="supportTargetName" type="text" placeholder="Например: Bastard" />
           </label>
@@ -1036,6 +1037,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay134"></script>
+    <script src="/app/app.js?v=pay135"></script>
   </body>
 </html>

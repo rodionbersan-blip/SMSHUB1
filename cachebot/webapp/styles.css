@@ -2917,6 +2917,18 @@ body.modal-open #app {
   margin-top: 6px;
 }
 
+.support-reason-group {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.support-reason-group .field-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .support-reason-btn {
   background: rgba(120, 180, 255, 0.16);
   color: var(--text);
