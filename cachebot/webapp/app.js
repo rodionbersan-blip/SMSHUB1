@@ -2454,9 +2454,6 @@
       const row = document.createElement("div");
       const isSelf = Number(msg.author_id) === Number(state.userId);
       row.className = `chat-message ${isSelf ? "self" : ""}`.trim();
-      if (isModerator) {
-        row.classList.add("mod");
-      }
       const label = document.createElement("div");
       if (isModerator) {
         label.className = "chat-system-label chat-mod-label";
