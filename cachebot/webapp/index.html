@@ -658,6 +658,27 @@
       </div>
     </div>
 
+    <div class="modal" id="adminModeratorModal">
+      <div class="modal-card glass moderation-modal">
+        <div class="modal-header">
+          <div class="modal-title" id="adminModeratorModalTitle">Профиль модератора</div>
+          <button id="adminModeratorModalClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body">
+          <div class="moderation-user-head">
+            <div class="moderation-user-line">
+              <div class="admin-avatar" id="adminModeratorAvatar"></div>
+              <div class="profile-title" id="adminModeratorName">—</div>
+              <span class="moderation-status" id="adminModeratorMeta">—</span>
+            </div>
+          </div>
+          <div class="admin-list" id="adminModeratorDisputes"></div>
+          <div class="admin-list" id="adminModeratorActions"></div>
+          <button id="adminModeratorRemove" class="btn pill admin-pill ghost">Исключить</button>
+        </div>
+      </div>
+    </div>
+
       <div class="modal" id="profileEditModal">
         <div class="modal-card">
           <div class="modal-header">

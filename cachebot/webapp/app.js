@@ -262,6 +262,15 @@
   const adminActionsModal = document.getElementById("adminActionsModal");
   const adminActionsClose = document.getElementById("adminActionsClose");
   const adminActionsList = document.getElementById("adminActionsList");
+  const adminModeratorModal = document.getElementById("adminModeratorModal");
+  const adminModeratorModalClose = document.getElementById("adminModeratorModalClose");
+  const adminModeratorModalTitle = document.getElementById("adminModeratorModalTitle");
+  const adminModeratorAvatar = document.getElementById("adminModeratorAvatar");
+  const adminModeratorName = document.getElementById("adminModeratorName");
+  const adminModeratorMeta = document.getElementById("adminModeratorMeta");
+  const adminModeratorDisputes = document.getElementById("adminModeratorDisputes");
+  const adminModeratorActions = document.getElementById("adminModeratorActions");
+  const adminModeratorRemove = document.getElementById("adminModeratorRemove");
   const adminMerchants = document.getElementById("adminMerchants");
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
   const systemPanel = document.getElementById("systemPanel");
@@ -2677,26 +2686,25 @@
           mod.profile?.display_name || mod.profile?.full_name || mod.profile?.username || mod.user_id;
         const row = document.createElement("div");
         row.className = "admin-item";
-        const pill = document.createElement("button");
-        pill.className = "btn pill admin-pill";
-        pill.type = "button";
-        pill.textContent = name;
-        const info = document.createElement("div");
-        info.className = "admin-pill-info is-hidden";
-        info.textContent = `ID: ${mod.user_id} • Решено: ${mod.resolved}`;
-        pill.addEventListener("click", () => {
-          info.classList.toggle("is-hidden");
-        });
         const btn = document.createElement("button");
-        btn.className = "btn pill admin-pill ghost";
-        btn.textContent = "Исключить";
-        btn.addEventListener("click", async () => {
-          await fetchJson(`/api/admin/moderators/${mod.user_id}`, { method: "DELETE" });
-          await loadAdmin();
-        });
-        row.appendChild(pill);
+        btn.className = "admin-person-btn";
+        btn.type = "button";
+        const avatar = document.createElement("span");
+        avatar.className = "admin-avatar";
+        if (mod.profile?.avatar_url) {
+          avatar.innerHTML = `<img src="${mod.profile.avatar_url}" alt="" />`;
+        } else {
+          const initials =
+            String(name).replace(/[^A-Za-zА-Яа-я0-9]/g, "").slice(0, 2).toUpperCase() || "BC";
+          avatar.textContent = initials;
+        }
+        const text = document.createElement("div");
+        text.className = "admin-person-text";
+        text.innerHTML = `<div class="name">${name}</div><div class="meta">Решено: ${mod.resolved}</div>`;
+        btn.appendChild(avatar);
+        btn.appendChild(text);
+        btn.addEventListener("click", () => openModeratorProfile(mod.user_id));
         row.appendChild(btn);
-        row.appendChild(info);
         adminModerators.appendChild(row);
       });
     }
@@ -2716,15 +2724,22 @@
           merchant.user_id;
         const stats = merchant.stats || {};
         const pill = document.createElement("button");
-        pill.className = "btn pill admin-pill";
+        pill.className = "admin-person-btn";
         pill.type = "button";
-        pill.textContent = name;
-        const info = document.createElement("div");
-        info.className = "admin-pill-info is-hidden";
-        info.textContent = `ID: ${merchant.user_id} • ${stats.completed || 0}/${stats.total || 0}`;
-        pill.addEventListener("click", () => {
-          info.classList.toggle("is-hidden");
-        });
+        const avatar = document.createElement("span");
+        avatar.className = "admin-avatar";
+        if (merchant.profile?.avatar_url) {
+          avatar.innerHTML = `<img src="${merchant.profile.avatar_url}" alt="" />`;
+        } else {
+          const initials =
+            String(name).replace(/[^A-Za-zА-Яа-я0-9]/g, "").slice(0, 2).toUpperCase() || "BC";
+          avatar.textContent = initials;
+        }
+        const text = document.createElement("div");
+        text.className = "admin-person-text";
+        text.innerHTML = `<div class="name">${name}</div><div class="meta">${stats.completed || 0}/${stats.total || 0}</div>`;
+        pill.appendChild(avatar);
+        pill.appendChild(text);
         const btn = document.createElement("button");
         btn.className = "btn pill admin-pill ghost";
         btn.textContent = "Исключить";
@@ -2737,7 +2752,6 @@
         });
         row.appendChild(pill);
         row.appendChild(btn);
-        row.appendChild(info);
         adminMerchants.appendChild(row);
       });
     }
@@ -2771,6 +2785,73 @@
   };
 
   const closeAdminActions = () => adminActionsModal?.classList.remove("open");
+
+  const openModeratorProfile = async (moderatorId) => {
+    if (!adminModeratorModal) return;
+    adminModeratorDisputes.innerHTML = "";
+    adminModeratorActions.innerHTML = "";
+    const payload = await fetchJson(`/api/admin/moderators/${moderatorId}`);
+    if (!payload?.ok) return;
+    const profile = payload.profile || {};
+    const name =
+      profile.display_name || profile.full_name || profile.username || moderatorId;
+    if (adminModeratorModalTitle) {
+      adminModeratorModalTitle.textContent = `Модератор: ${name}`;
+    }
+    if (adminModeratorName) adminModeratorName.textContent = name;
+    if (adminModeratorMeta) {
+      adminModeratorMeta.textContent = `ID: ${moderatorId} • Решено: ${payload.resolved || 0}`;
+    }
+    if (adminModeratorAvatar) {
+      if (profile.avatar_url) {
+        adminModeratorAvatar.innerHTML = `<img src="${profile.avatar_url}" alt="" />`;
+      } else {
+        const initials =
+          String(name).replace(/[^A-Za-zА-Яа-я0-9]/g, "").slice(0, 2).toUpperCase() || "BC";
+        adminModeratorAvatar.textContent = initials;
+      }
+    }
+    if (payload.open_disputes?.length) {
+      const head = document.createElement("div");
+      head.className = "admin-pill-info";
+      head.textContent = `Открытые споры: ${payload.open_disputes.length}`;
+      adminModeratorDisputes.appendChild(head);
+      payload.open_disputes.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "admin-item";
+        row.innerHTML = `<span>Спор #${item.dispute_id} • ${item.deal}</span><span>${item.created_at}</span>`;
+        adminModeratorDisputes.appendChild(row);
+      });
+    }
+    if (payload.actions?.length) {
+      const head = document.createElement("div");
+      head.className = "admin-pill-info";
+      head.textContent = "Недавние действия:";
+      adminModeratorActions.appendChild(head);
+      payload.actions.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "admin-item";
+        row.innerHTML = `<span>${item.title}</span><span>${item.when}</span>`;
+        if (item.reason) {
+          const reason = document.createElement("div");
+          reason.className = "admin-pill-info";
+          reason.textContent = `Причина: ${item.reason}`;
+          row.appendChild(reason);
+        }
+        adminModeratorActions.appendChild(row);
+      });
+    }
+    if (adminModeratorRemove) {
+      adminModeratorRemove.onclick = async () => {
+        await fetchJson(`/api/admin/moderators/${moderatorId}`, { method: "DELETE" });
+        adminModeratorModal.classList.remove("open");
+        await loadAdmin();
+      };
+    }
+    adminModeratorModal.classList.add("open");
+  };
+
+  const closeModeratorProfile = () => adminModeratorModal?.classList.remove("open");
 
   const openDispute = async (disputeId) => {
     const payload = await fetchJson(`/api/disputes/${disputeId}`);
@@ -4879,6 +4960,7 @@
   moderationActionClose?.addEventListener("click", closeModerationActionModal);
   adminActionsBtn?.addEventListener("click", openAdminActions);
   adminActionsClose?.addEventListener("click", closeAdminActions);
+  adminModeratorModalClose?.addEventListener("click", closeModeratorProfile);
 
   reviewsOpen?.addEventListener("click", async () => {
     state.reviewsTargetUserId = null;
