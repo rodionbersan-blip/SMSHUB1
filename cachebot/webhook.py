@@ -92,6 +92,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/admin/users/{user_id}/ads", _api_admin_user_ads)
     app.router.add_post("/api/admin/users/{user_id}/ads/{ad_id}/toggle", _api_admin_user_ads_toggle)
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
+    app.router.add_post("/api/admin/merchants", _api_admin_merchant_add)
     app.router.add_get("/api/admin/merchants/{user_id}", _api_admin_merchant_detail)
     app.router.add_post("/api/admin/merchants/{user_id}/revoke", _api_admin_merchant_revoke)
     app.router.add_get("/api/admin/users/search", _api_admin_user_search)
@@ -1837,6 +1838,30 @@ async def _api_admin_merchants(request: web.Request) -> web.Response:
             }
         )
     return web.json_response({"ok": True, "merchants": payload})
+
+
+async def _api_admin_merchant_add(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not _is_admin(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    raw = str(body.get("username") or "").strip()
+    if not raw:
+        raise web.HTTPBadRequest(text="Укажите username")
+    username = raw[1:] if raw.startswith("@") else raw
+    if not username:
+        raise web.HTTPBadRequest(text="Укажите username")
+    target = await deps.user_service.find_by_username(username)
+    if not target:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    from cachebot.models.user import UserRole
+
+    await deps.user_service.set_role(target.user_id, UserRole.BUYER)
+    return web.json_response({"ok": True})
 
 
 async def _api_admin_merchant_revoke(request: web.Request) -> web.Response:

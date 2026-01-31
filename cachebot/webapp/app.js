@@ -280,6 +280,8 @@
   const adminMerchantStats = document.getElementById("adminMerchantStats");
   const adminMerchantDeals = document.getElementById("adminMerchantDeals");
   const adminMerchantRemove = document.getElementById("adminMerchantRemove");
+  const adminMerchantUsername = document.getElementById("adminMerchantUsername");
+  const adminAddMerchant = document.getElementById("adminAddMerchant");
   const adminMerchants = document.getElementById("adminMerchants");
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
   const supportNewBtn = document.getElementById("supportNewBtn");
@@ -5126,6 +5128,20 @@
       body: JSON.stringify({ username }),
     });
     adminModeratorUsername.value = "";
+    await loadAdmin();
+  });
+
+  adminAddMerchant?.addEventListener("click", async () => {
+    const username = adminMerchantUsername.value.trim();
+    if (!username) {
+      log("Укажи username", "warn");
+      return;
+    }
+    await fetchJson("/api/admin/merchants", {
+      method: "POST",
+      body: JSON.stringify({ username }),
+    });
+    adminMerchantUsername.value = "";
     await loadAdmin();
   });
 
