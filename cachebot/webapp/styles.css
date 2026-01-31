@@ -2949,6 +2949,12 @@ body.modal-open #app {
 
 #supportList .deal-item {
   cursor: pointer;
+  position: relative;
+}
+
+#supportList .deal-item .btn-badge {
+  top: 12px;
+  right: 12px;
 }
 
 #supportChatList {

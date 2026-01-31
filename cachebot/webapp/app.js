@@ -338,6 +338,7 @@
     chatLastSeenAt: {},
     chatInitDone: false,
     supportLastSeen: {},
+    supportPollAt: 0,
     pendingRead: {},
     systemNotifications: [],
     dealStatusMap: {},
@@ -2364,13 +2365,14 @@
     }
   };
 
-  const loadSupport = async () => {
-    const payload = await fetchJson("/api/support/tickets");
-    if (!payload?.ok || !supportList) return;
+  const applySupportPayload = (payload) => {
+    if (!payload?.ok) return;
     const tickets = payload.tickets || [];
-    supportList.innerHTML = "";
-    supportEmpty?.classList.toggle("is-hidden", tickets.length > 0);
     let hasUnread = false;
+    if (supportList) {
+      supportList.innerHTML = "";
+      supportEmpty?.classList.toggle("is-hidden", tickets.length > 0);
+    }
     if (!tickets.length) {
       setSupportBadge(false);
       return;
@@ -2385,6 +2387,7 @@
         !isSelfSender(lastMessageAuthorId) &&
         lastSeen !== lastMessageAt;
       if (isUnread) hasUnread = true;
+      if (!supportList) return;
       const row = document.createElement("div");
       row.className = "deal-item";
       const who = payload.can_manage ? ticket.user_name : "Поддержка";
@@ -2413,8 +2416,45 @@
         <div class="deal-row">${reasonLabel}</div>
         <div class="deal-row">${ticket.subject || ""} ${assignedLabel}</div>
       `;
+      if (isUnread) {
+        row.classList.add("has-badge");
+        const badge = document.createElement("span");
+        badge.className = "btn-badge";
+        badge.textContent = "1";
+        row.appendChild(badge);
+      }
       row.addEventListener("click", () => openSupportChat(ticket.id, payload.can_manage));
       supportList.appendChild(row);
+    });
+    setSupportBadge(hasUnread);
+  };
+
+  const loadSupport = async () => {
+    const payload = await fetchJson("/api/support/tickets");
+    if (!payload?.ok) return;
+    applySupportPayload(payload);
+  };
+
+  const refreshSupportBadge = async () => {
+    const payload = await fetchJson("/api/support/tickets");
+    if (!payload?.ok) return;
+    const supportView = document.getElementById("view-support");
+    if (supportView?.classList.contains("active")) {
+      applySupportPayload(payload);
+      return;
+    }
+    const tickets = payload.tickets || [];
+    let hasUnread = false;
+    tickets.forEach((ticket) => {
+      const lastMessageAt = ticket.last_message_at || ticket.updated_at || "";
+      const lastMessageAuthorId = ticket.last_message_author_id;
+      const lastSeen = state.supportLastSeen?.[ticket.id];
+      const isUnread =
+        lastMessageAt &&
+        lastMessageAuthorId &&
+        !isSelfSender(lastMessageAuthorId) &&
+        lastSeen !== lastMessageAt;
+      if (isUnread) hasUnread = true;
     });
     setSupportBadge(hasUnread);
   };
@@ -4181,6 +4221,10 @@
       try {
         await loadDeals();
         await loadBalance();
+        if (Date.now() - (state.supportPollAt || 0) > 3000) {
+          state.supportPollAt = Date.now();
+          await refreshSupportBadge();
+        }
         if (state.activeDealId && dealModal?.classList.contains("open")) {
           const payload = await fetchJson(`/api/deals/${state.activeDealId}`);
           if (payload?.ok) {
