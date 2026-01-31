@@ -2237,11 +2237,19 @@ async def _require_user(request: web.Request) -> tuple[dict[str, Any], int]:
         except Exception:
             user = None
     if not user or "id" not in user:
+        init_len = len(init_data or "")
+        has_hash = "hash=" in init_data
+        has_user = "user=" in init_data
+        tail = (init_data or "")[-48:]
         logger.warning(
-            "initData auth failed: header=%s query=%s ua=%s",
+            "initData auth failed: header=%s query=%s ua=%s len=%s hash=%s user=%s tail=%s",
             bool(request.headers.get("X-Telegram-Init-Data")),
             bool(request.query.get("initData")),
             request.headers.get("User-Agent"),
+            init_len,
+            has_hash,
+            has_user,
+            tail,
         )
         raise web.HTTPUnauthorized(text="Invalid initData")
     full_name = " ".join(
