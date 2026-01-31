@@ -133,22 +133,56 @@ h2 {
 
 .profile-admin-badge {
   margin-top: 6px;
-  padding: 6px 10px;
-  border-radius: 12px;
+  padding: 6px 0;
   font-size: 12px;
   font-weight: 700;
-  color: #b8860b;
-  border: 1px solid rgba(184, 134, 11, 0.6);
-  background: rgba(184, 134, 11, 0.12);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #8a6a10, #f2d37a 45%, #fff1b8 55%, #c8951b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  position: relative;
 }
 
 :root[data-theme="light"] .profile-admin-badge {
-  color: #a06a00;
-  border-color: rgba(160, 106, 0, 0.6);
-  background: rgba(255, 204, 102, 0.22);
+  background: linear-gradient(90deg, #8a6a10, #f2c86d 45%, #fff3c4 55%, #c08010);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.profile-admin-badge::before,
+.profile-admin-badge::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f2d37a 30%, #f9f2c0 50%, #c8951b 70%, transparent);
+  opacity: 0.9;
+}
+
+.profile-admin-badge::before {
+  top: -4px;
+}
+
+.profile-admin-badge::after {
+  bottom: -4px;
+}
+
+.admin-admin-btn {
+  background: linear-gradient(135deg, rgba(168, 120, 20, 0.95), rgba(255, 205, 120, 0.9));
+  color: #201406;
+  border: 1px solid rgba(255, 215, 140, 0.45);
+  box-shadow:
+    0 10px 22px rgba(168, 120, 20, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.admin-admin-btn:hover {
+  background: linear-gradient(135deg, rgba(190, 140, 30, 0.98), rgba(255, 220, 140, 0.94));
 }
 
 :root[data-theme="light"] .profile-status {
