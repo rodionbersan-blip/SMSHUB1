@@ -2172,6 +2172,9 @@ async def _api_support_tickets(request: web.Request) -> web.Response:
                 "target_name": ticket.target_name,
                 "status": ticket.status,
                 "assigned_to": ticket.assigned_to,
+                "last_message_at": ticket.last_message_at,
+                "last_message_author_id": ticket.last_message_author_id,
+                "last_message_author_role": ticket.last_message_author_role,
                 "created_at": ticket.created_at,
                 "updated_at": ticket.updated_at,
             }

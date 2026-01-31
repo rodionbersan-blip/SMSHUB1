@@ -302,6 +302,7 @@
   const supportChatInput = document.getElementById("supportChatInput");
   const supportAssignBtn = document.getElementById("supportAssignBtn");
   const supportCloseBtn = document.getElementById("supportCloseBtn");
+  const supportNavBtn = document.querySelector('.nav-btn[data-view="support"]');
   const systemPanel = document.getElementById("systemPanel");
   const reviewsOpen = document.getElementById("reviewsOpen");
   const reviewsModal = document.getElementById("reviewsModal");
@@ -330,6 +331,7 @@
     chatUnreadCounts: {},
     chatLastSeenAt: {},
     chatInitDone: false,
+    supportLastSeen: {},
     pendingRead: {},
     systemNotifications: [],
     dealStatusMap: {},
@@ -371,6 +373,7 @@
   const chatReadStorageKey = "dealChatLastRead";
   const chatUnreadStorageKey = "dealChatUnreadCounts";
   const chatSeenStorageKey = "dealChatLastSeenAt";
+  const supportSeenStorageKey = "supportChatLastSeenAt";
   const pendingReadStorageKey = "dealPendingRead";
   const systemNoticeStorageKey = "systemNotifications";
   const dealStatusStorageKey = "dealStatusMap";
@@ -450,6 +453,42 @@
   };
   state.chatUnreadCounts = loadChatUnreadCounts();
   state.chatLastSeenAt = loadChatSeen();
+
+  const loadSupportSeen = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(supportSeenStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const persistSupportSeen = () => {
+    try {
+      window.localStorage.setItem(
+        supportSeenStorageKey,
+        JSON.stringify(state.supportLastSeen || {})
+      );
+    } catch {}
+  };
+
+  const setSupportBadge = (hasUnread) => {
+    if (!supportNavBtn) return;
+    const existing = supportNavBtn.querySelector(".btn-badge");
+    if (hasUnread) {
+      if (!existing) {
+        const badge = document.createElement("span");
+        badge.className = "btn-badge dot";
+        supportNavBtn.classList.add("has-badge");
+        supportNavBtn.appendChild(badge);
+      }
+    } else {
+      existing?.remove();
+      supportNavBtn.classList.remove("has-badge");
+    }
+  };
+
+  state.supportLastSeen = loadSupportSeen();
   const loadPendingRead = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(pendingReadStorageKey) || "{}");
@@ -2320,10 +2359,21 @@
     const tickets = payload.tickets || [];
     supportList.innerHTML = "";
     supportEmpty?.classList.toggle("is-hidden", tickets.length > 0);
+    let hasUnread = false;
     if (!tickets.length) {
+      setSupportBadge(false);
       return;
     }
     tickets.forEach((ticket) => {
+      const lastMessageAt = ticket.last_message_at || ticket.updated_at || "";
+      const lastMessageAuthorId = ticket.last_message_author_id;
+      const lastSeen = state.supportLastSeen?.[ticket.id];
+      const isUnread =
+        lastMessageAt &&
+        lastMessageAuthorId &&
+        !isSelfSender(lastMessageAuthorId) &&
+        lastSeen !== lastMessageAt;
+      if (isUnread) hasUnread = true;
       const row = document.createElement("div");
       row.className = "deal-item";
       const who = payload.can_manage ? ticket.user_name : "Поддержка";
@@ -2355,6 +2405,7 @@
       row.addEventListener("click", () => openSupportChat(ticket.id, payload.can_manage));
       supportList.appendChild(row);
     });
+    setSupportBadge(hasUnread);
   };
 
   const openSupportChat = async (ticketId, canManage) => {
@@ -2375,6 +2426,15 @@
       row.textContent = msg.text;
       supportChatList.appendChild(row);
     });
+    if (Array.isArray(payload.messages) && payload.messages.length) {
+      const lastMsg = payload.messages[payload.messages.length - 1];
+      if (lastMsg?.created_at) {
+        state.supportLastSeen = state.supportLastSeen || {};
+        state.supportLastSeen[ticketId] = lastMsg.created_at;
+        persistSupportSeen();
+      }
+    }
+    setSupportBadge(false);
     const assignedTo = payload.ticket?.assigned_to;
     const canAssign = canManage && (!assignedTo || Number(assignedTo) === Number(state.userId));
     supportAssignBtn.style.display = canAssign && !assignedTo ? "" : "none";
@@ -3849,11 +3909,35 @@
     const prevScrollTop = chatList.scrollTop;
     const prevScrollHeight = chatList.scrollHeight;
     chatList.innerHTML = "";
+    if (!messages || !messages.length) {
+      const systemItem = document.createElement("div");
+      systemItem.className = "chat-message system";
+      const label = document.createElement("div");
+      label.className = "chat-system-label chat-bc-label";
+      label.textContent = "BC Cash";
+      const text = document.createElement("div");
+      text.textContent = "Ждем подключения модератора.\nЕсть что добавить? Пишите в чат.";
+      systemItem.appendChild(label);
+      systemItem.appendChild(text);
+      chatList.appendChild(systemItem);
+    }
+    let moderatorNoticeShown = false;
     (messages || []).forEach((msg) => {
+      const isModerator = Boolean(msg.sender_label);
+      if (isModerator && !moderatorNoticeShown) {
+        const notice = document.createElement("div");
+        notice.className = "chat-join-notice";
+        notice.textContent = `Модератор ${msg.sender_label} подключился к чату`;
+        chatList.appendChild(notice);
+        moderatorNoticeShown = true;
+      }
       const item = document.createElement("div");
       item.className = `chat-message ${isSelfSender(msg.sender_id) ? "self" : ""} ${
         msg.system ? "system" : ""
       }`.trim();
+      if (isModerator) {
+        item.classList.add("mod");
+      }
       if (msg.system) {
         const label = document.createElement("div");
         label.className = "chat-system-label chat-bc-label";

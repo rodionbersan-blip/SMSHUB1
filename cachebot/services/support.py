@@ -58,6 +58,9 @@ class SupportService:
                     target_name TEXT,
                     status TEXT NOT NULL,
                     assigned_to INTEGER,
+                    last_message_at TEXT,
+                    last_message_author_id INTEGER,
+                    last_message_author_role TEXT,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 )
@@ -83,6 +86,18 @@ class SupportService:
                 conn.execute("ALTER TABLE support_tickets ADD COLUMN target_name TEXT")
             except sqlite3.OperationalError:
                 pass
+            try:
+                conn.execute("ALTER TABLE support_tickets ADD COLUMN last_message_at TEXT")
+            except sqlite3.OperationalError:
+                pass
+            try:
+                conn.execute("ALTER TABLE support_tickets ADD COLUMN last_message_author_id INTEGER")
+            except sqlite3.OperationalError:
+                pass
+            try:
+                conn.execute("ALTER TABLE support_tickets ADD COLUMN last_message_author_role TEXT")
+            except sqlite3.OperationalError:
+                pass
             conn.commit()
         finally:
             conn.close()
@@ -104,9 +119,10 @@ class SupportService:
                         """
                         INSERT INTO support_tickets (
                           user_id, subject, moderator_name, complaint_type, target_name,
-                          status, assigned_to, created_at, updated_at
+                          status, assigned_to, last_message_at, last_message_author_id, last_message_author_role,
+                          created_at, updated_at
                         )
-                        VALUES (?, ?, ?, ?, ?, 'open', NULL, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, 'open', NULL, NULL, NULL, NULL, ?, ?)
                         """,
                         (user_id, subject, moderator_name, complaint_type, target_name, now, now),
                     )
@@ -178,6 +194,14 @@ class SupportService:
                     conn.execute(
                         "UPDATE support_tickets SET updated_at = ? WHERE id = ?",
                         (now, ticket_id),
+                    )
+                    conn.execute(
+                        """
+                        UPDATE support_tickets
+                        SET last_message_at = ?, last_message_author_id = ?, last_message_author_role = ?
+                        WHERE id = ?
+                        """,
+                        (now, author_id, author_role, ticket_id),
                     )
                     conn.commit()
                     row = conn.execute("SELECT * FROM support_messages WHERE id = ?", (cur.lastrowid,)).fetchone()

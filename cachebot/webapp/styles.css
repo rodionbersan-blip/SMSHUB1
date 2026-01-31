@@ -3327,6 +3327,21 @@ body.modal-open #app {
   border-color: rgba(77, 163, 255, 0.3);
 }
 
+.chat-message.mod {
+  border-color: rgba(255, 77, 79, 0.55);
+  background: rgba(255, 77, 79, 0.08);
+  color: #ff4d4f;
+}
+
+.chat-join-notice {
+  align-self: center;
+  text-align: center;
+  color: #ff4d4f;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
 .chat-meta {
   font-size: 11px;
   color: var(--muted);
