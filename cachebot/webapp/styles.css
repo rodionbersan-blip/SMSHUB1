@@ -1888,6 +1888,10 @@ body.modal-open #app {
   box-shadow: 0 0 14px rgba(120, 180, 255, 0.25);
 }
 
+:root[data-theme="dark"] .moderation-tabs .btn.pill.active {
+  color: #000000;
+}
+
 .moderation-panel {
   display: block;
 }
