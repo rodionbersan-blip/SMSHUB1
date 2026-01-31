@@ -5281,7 +5281,8 @@
       }),
     });
     if (!payload?.ok) {
-      showNotice("Не удалось создать чат. Откройте мини-апп из Telegram и попробуйте еще раз.");
+      const reason = state.lastInitError || "Неизвестная ошибка";
+      showNotice(`Не удалось создать чат: ${reason}`);
       return;
     }
     supportReason.value = "";
