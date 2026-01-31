@@ -18,7 +18,7 @@ class MerchantRecord:
 
 
 class UserService:
-    def __init__(self, repository: StateRepository) -> None:
+    def __init__(self, repository: StateRepository, admin_ids: set[int] | None = None) -> None:
         self._repository = repository
         snapshot = repository.snapshot()
         self._roles: Dict[int, str] = snapshot.user_roles.copy()
@@ -28,6 +28,9 @@ class UserService:
             uid: datetime.fromisoformat(value) for uid, value in snapshot.merchant_since.items()
         }
         self._moderators = set(snapshot.moderators)
+        self._admins = set(getattr(snapshot, "admins", []))
+        if admin_ids:
+            self._admins.update(admin_ids)
         self._warnings: Dict[int, int] = getattr(snapshot, "user_warnings", {}).copy()
         self._banned = set(getattr(snapshot, "user_bans", []))
         self._deal_blocks = set(getattr(snapshot, "user_deal_blocks", []))
@@ -212,6 +215,18 @@ class UserService:
         async with self._lock:
             return sorted(self._moderators)
 
+    def is_admin_cached(self, user_id: int) -> bool:
+        return user_id in self._admins
+
+    async def list_admins(self) -> List[int]:
+        async with self._lock:
+            return sorted(self._admins)
+
+    async def add_admin(self, user_id: int) -> None:
+        async with self._lock:
+            self._admins.add(user_id)
+            await self._persist()
+
     async def list_merchants(self) -> List[MerchantRecord]:
         async with self._lock:
             records = [
@@ -342,6 +357,7 @@ class UserService:
             profiles=self._profiles.copy(),
             merchant_since={uid: value.isoformat() for uid, value in self._merchant_since.items()},
             moderators=sorted(self._moderators),
+            admins=sorted(self._admins),
             user_warnings=self._warnings.copy(),
             user_bans=sorted(self._banned),
             user_deal_blocks=sorted(self._deal_blocks),

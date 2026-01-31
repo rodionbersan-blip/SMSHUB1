@@ -131,6 +131,26 @@ h2 {
   background: rgba(68, 20, 20, 0.35);
 }
 
+.profile-admin-badge {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b8860b;
+  border: 1px solid rgba(184, 134, 11, 0.6);
+  background: rgba(184, 134, 11, 0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+:root[data-theme="light"] .profile-admin-badge {
+  color: #a06a00;
+  border-color: rgba(160, 106, 0, 0.6);
+  background: rgba(255, 204, 102, 0.22);
+}
+
 :root[data-theme="light"] .profile-status {
   background: rgba(255, 255, 255, 0.75);
   color: #1a2433;

@@ -783,6 +783,9 @@ class DealService:
     def _is_admin(self, actor_id: int) -> bool:
         return actor_id in self._admin_ids
 
+    def add_admin_id(self, user_id: int) -> None:
+        self._admin_ids.add(user_id)
+
     def _next_public_id_locked(self) -> str:
         self._deal_seq += 1
         return f"C{self._deal_seq:05d}"

@@ -95,6 +95,7 @@
   const profileUsername = document.getElementById("profileUsername");
   const profileRegistered = document.getElementById("profileRegistered");
   const profileStatus = document.getElementById("profileStatus");
+  const profileAdminBadge = document.getElementById("profileAdminBadge");
   const profileRole = document.getElementById("profileRole");
   const profileRoleCard = document.getElementById("profileRoleCard");
   const profileMerchantSince = document.getElementById("profileMerchantSince");
@@ -282,6 +283,8 @@
   const adminMerchantRemove = document.getElementById("adminMerchantRemove");
   const adminMerchantUsername = document.getElementById("adminMerchantUsername");
   const adminAddMerchant = document.getElementById("adminAddMerchant");
+  const adminAdminUsername = document.getElementById("adminAdminUsername");
+  const adminAddAdmin = document.getElementById("adminAddAdmin");
   const adminMerchants = document.getElementById("adminMerchants");
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
   const supportNewBtn = document.getElementById("supportNewBtn");
@@ -1493,6 +1496,9 @@
     profileRegistered.textContent = profile?.registered_at
       ? `Регистрация: ${formatDate(profile.registered_at)}`
       : "Регистрация: —";
+    if (profileAdminBadge) {
+      profileAdminBadge.classList.toggle("is-hidden", !data?.is_admin);
+    }
     const isMerchant = data?.role === "buyer";
     if (profileRoleCard) {
       profileRoleCard.style.display = isMerchant ? "" : "none";
@@ -1973,6 +1979,7 @@
     const stats = data.stats || {};
     const display = profile.display_name || "Без имени";
     const registered = profile.registered_at ? formatDate(profile.registered_at) : "—";
+    const adminBadge = data.is_admin ? '<div class="profile-admin-badge">Администратор</div>' : "";
     userModalTitle.textContent = "Профиль";
     userModalBody.innerHTML = `
       <div class="profile-hero">
@@ -1980,6 +1987,7 @@
         <div>
           <div class="profile-value">${display}</div>
           <div class="profile-muted">Регистрация: ${registered}</div>
+          ${adminBadge}
         </div>
       </div>
       <div class="profile-card">
@@ -5142,6 +5150,20 @@
       body: JSON.stringify({ username }),
     });
     adminMerchantUsername.value = "";
+    await loadAdmin();
+  });
+
+  adminAddAdmin?.addEventListener("click", async () => {
+    const username = adminAdminUsername.value.trim();
+    if (!username) {
+      log("Укажи username", "warn");
+      return;
+    }
+    await fetchJson("/api/admin/admins", {
+      method: "POST",
+      body: JSON.stringify({ username }),
+    });
+    adminAdminUsername.value = "";
     await loadAdmin();
   });
 

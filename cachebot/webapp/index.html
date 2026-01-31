@@ -10,7 +10,7 @@
     <meta http-equiv="pragma" content="no-cache" />
     <meta http-equiv="expires" content="0" />
     <title>BC Cash</title>
-    <link rel="stylesheet" href="/app/styles.css?v=pay92" />
+    <link rel="stylesheet" href="/app/styles.css?v=pay93" />
   </head>
   <body class="pin-lock">
     <div id="app">
@@ -84,6 +84,7 @@
           <div>
             <div id="profileDisplayName" class="profile-value">—</div>
             <div id="profileStatus" class="profile-status is-hidden">Статус: —</div>
+            <div id="profileAdminBadge" class="profile-admin-badge is-hidden">Администратор</div>
           </div>
           <button id="profileEditOpen" class="btn ghost">Изменить</button>
         </div>
@@ -302,6 +303,15 @@
                 </div>
                 <div id="adminMerchants" class="admin-list"></div>
               </div>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="profile-title">Назначить Администратора</div>
+            <div class="admin-row">
+              <input id="adminAdminUsername" placeholder="@username" />
+            </div>
+            <div class="admin-actions-row">
+              <button id="adminAddAdmin" class="btn pill admin-pill">Назначить Администратора</button>
             </div>
           </div>
         </div>
@@ -1044,6 +1054,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay144"></script>
+    <script src="/app/app.js?v=pay145"></script>
   </body>
 </html>

@@ -89,6 +89,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/admin/moderators/{user_id}", _api_admin_moderator_detail)
     app.router.add_post("/api/admin/moderators", _api_admin_add_moderator)
     app.router.add_delete("/api/admin/moderators/{user_id}", _api_admin_remove_moderator)
+    app.router.add_post("/api/admin/admins", _api_admin_add_admin)
     app.router.add_get("/api/admin/users/{user_id}/ads", _api_admin_user_ads)
     app.router.add_post("/api/admin/users/{user_id}/ads/{ad_id}/toggle", _api_admin_user_ads_toggle)
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
@@ -270,6 +271,7 @@ async def _api_profile(request: web.Request) -> web.Response:
         "user": user,
         "profile": _profile_payload(profile, request=request, include_private=include_private),
         "role": role.value if role else None,
+        "is_admin": _is_admin(user_id, deps),
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
         "moderation": moderation,
         "stats": {
@@ -304,6 +306,7 @@ async def _api_public_profile(request: web.Request) -> web.Response:
     payload = {
         "profile": _profile_payload(profile, request=request, include_private=False),
         "role": role.value if role else None,
+        "is_admin": _is_admin(target_id, deps),
         "merchant_since": merchant_since.isoformat() if merchant_since else None,
         "stats": {
             "total_deals": total_deals,
@@ -1820,6 +1823,30 @@ async def _api_admin_remove_moderator(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def _api_admin_add_admin(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not _is_admin(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    raw = str(body.get("username") or "").strip()
+    if not raw:
+        raise web.HTTPBadRequest(text="Укажите username")
+    username = raw[1:] if raw.startswith("@") else raw
+    if not username:
+        raise web.HTTPBadRequest(text="Укажите username")
+    profile = await deps.user_service.profile_by_username(username)
+    if not profile:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    await deps.user_service.add_admin(profile.user_id)
+    deps.config.admin_ids.add(profile.user_id)
+    deps.deal_service.add_admin_id(profile.user_id)
+    return web.json_response({"ok": True, "user_id": profile.user_id})
+
+
 async def _api_admin_merchants(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
@@ -1855,7 +1882,7 @@ async def _api_admin_merchant_add(request: web.Request) -> web.Response:
     username = raw[1:] if raw.startswith("@") else raw
     if not username:
         raise web.HTTPBadRequest(text="Укажите username")
-    target = await deps.user_service.find_by_username(username)
+    target = await deps.user_service.profile_by_username(username)
     if not target:
         raise web.HTTPNotFound(text="Пользователь не найден")
     from cachebot.models.user import UserRole
@@ -2868,7 +2895,7 @@ def _parse_optional_decimal(value) -> Decimal | None:
 
 
 def _is_admin(user_id: int, deps: AppDeps) -> bool:
-    return user_id in deps.config.admin_ids
+    return user_id in deps.config.admin_ids or deps.user_service.is_admin_cached(user_id)
 
 
 async def _user_stats(deps: AppDeps, user_id: int) -> dict[str, int]:

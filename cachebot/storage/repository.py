@@ -57,6 +57,7 @@ class StorageState:
     advert_sequence: int
     merchant_since: Dict[int, str]
     p2p_trading_enabled: Dict[int, bool]
+    admins: List[int]
     moderators: List[int]
     user_warnings: Dict[int, int]
     user_bans: List[int]
@@ -107,6 +108,7 @@ class StateRepository:
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
+                admins=self._state.admins,
                 moderators=self._state.moderators,
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
@@ -136,6 +138,7 @@ class StateRepository:
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
+                admins=self._state.admins,
                 moderators=self._state.moderators,
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
@@ -153,6 +156,7 @@ class StateRepository:
         profiles: Dict[int, UserProfile],
         merchant_since: Dict[int, str],
         moderators: List[int],
+        admins: List[int],
         user_warnings: Dict[int, int],
         user_bans: List[int],
         user_deal_blocks: List[int],
@@ -177,6 +181,7 @@ class StateRepository:
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
+                admins=admins,
                 moderators=moderators,
                 user_warnings=user_warnings,
                 user_bans=user_bans,
@@ -206,6 +211,7 @@ class StateRepository:
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
+                admins=self._state.admins,
                 moderators=self._state.moderators,
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
@@ -235,6 +241,7 @@ class StateRepository:
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
+                admins=self._state.admins,
                 moderators=self._state.moderators,
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
@@ -264,6 +271,7 @@ class StateRepository:
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
+                admins=self._state.admins,
                 moderators=self._state.moderators,
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
@@ -298,6 +306,7 @@ class StateRepository:
                 advert_sequence=advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=p2p_trading_enabled,
+                admins=self._state.admins,
                 moderators=self._state.moderators,
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
@@ -327,6 +336,7 @@ class StateRepository:
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
+                admins=self._state.admins,
                 moderators=self._state.moderators,
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
@@ -356,6 +366,7 @@ class StateRepository:
                 advert_sequence=self._state.advert_sequence,
                 merchant_since=self._state.merchant_since,
                 p2p_trading_enabled=self._state.p2p_trading_enabled,
+                admins=self._state.admins,
                 moderators=self._state.moderators,
                 user_warnings=self._state.user_warnings,
                 user_bans=self._state.user_bans,
@@ -391,6 +402,7 @@ class StateRepository:
             "p2p_trading_enabled": {
                 str(uid): enabled for uid, enabled in self._state.p2p_trading_enabled.items()
             },
+            "admins": list(self._state.admins),
             "moderators": list(self._state.moderators),
             "user_warnings": {str(uid): count for uid, count in self._state.user_warnings.items()},
             "user_bans": list(self._state.user_bans),
@@ -426,6 +438,7 @@ class StateRepository:
                 advert_sequence=0,
                 merchant_since={},
                 p2p_trading_enabled={},
+                admins=[],
                 moderators=[],
                 user_warnings={},
                 user_bans=[],
@@ -468,6 +481,7 @@ class StateRepository:
         p2p_trading_enabled = {
             int(uid): bool(value) for uid, value in (raw.get("p2p_trading_enabled") or {}).items()
         }
+        admins = [int(uid) for uid in (raw.get("admins") or [])]
         moderators = [int(uid) for uid in (raw.get("moderators") or [])]
         user_warnings = {
             int(uid): int(count) for uid, count in (raw.get("user_warnings") or {}).items()
@@ -498,6 +512,7 @@ class StateRepository:
             advert_sequence=int(raw.get("advert_sequence") or 0),
             merchant_since=merchant_since,
             p2p_trading_enabled=p2p_trading_enabled,
+            admins=admins,
             moderators=moderators,
             user_warnings=user_warnings,
             user_bans=user_bans,

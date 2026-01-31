@@ -42,7 +42,11 @@ async def run_bot() -> None:
     config.withdraw_fee_percent = await rate_provider.withdraw_fee_percent()
     crypto_pay = CryptoPayClient(config.crypto_pay_token)
     kb_client = KBClient(config.kb_api_url, config.kb_api_token)
-    user_service = UserService(repository)
+    user_service = UserService(repository, admin_ids=config.admin_ids)
+    try:
+        config.admin_ids = set(await user_service.list_admins())
+    except Exception:
+        pass
     review_service = ReviewService(repository)
     dispute_service = DisputeService(repository)
     advert_service = AdvertService(repository)
