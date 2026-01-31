@@ -2494,23 +2494,23 @@ body.modal-open #app {
 }
 
 .admin-gradient-btn {
-  background: linear-gradient(135deg, rgba(255, 170, 70, 0.92), rgba(220, 120, 40, 0.92));
+  background: linear-gradient(135deg, rgba(255, 176, 88, 0.92), rgba(240, 136, 50, 0.92));
   color: #ffffff;
   border: none;
   margin-top: 8px;
 }
 
 .admin-gradient-btn:hover {
-  background: linear-gradient(135deg, rgba(255, 186, 96, 0.98), rgba(232, 132, 52, 0.95));
+  background: linear-gradient(135deg, rgba(255, 195, 120, 0.98), rgba(245, 150, 70, 0.95));
 }
 
 #adminSaveRates {
-  background: linear-gradient(135deg, rgba(255, 170, 70, 0.92), rgba(220, 120, 40, 0.92));
+  background: linear-gradient(135deg, rgba(255, 176, 88, 0.92), rgba(240, 136, 50, 0.92));
   color: #ffffff;
 }
 
 #adminSaveRates:hover {
-  background: linear-gradient(135deg, rgba(255, 186, 96, 0.98), rgba(232, 132, 52, 0.95));
+  background: linear-gradient(135deg, rgba(255, 195, 120, 0.98), rgba(245, 150, 70, 0.95));
 }
 
 #adminSaveRates:active {
