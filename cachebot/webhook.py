@@ -2265,11 +2265,35 @@ async def _api_support_ticket_detail(request: web.Request) -> web.Response:
     if not can_manage and ticket.user_id != user_id:
         raise web.HTTPForbidden(text="Нет доступа")
     messages = await deps.support_service.list_messages(ticket_id)
+    author_profiles = {}
+    for msg in messages:
+        author_id = msg.author_id
+        if not author_id or author_id in author_profiles:
+            continue
+        author_profiles[author_id] = await deps.user_service.profile_of(author_id)
     payload_messages = [
         {
             "id": msg.id,
             "author_id": msg.author_id,
             "author_role": msg.author_role,
+            "author_name": (
+                (
+                    author_profiles.get(msg.author_id).display_name
+                    if author_profiles.get(msg.author_id)
+                    else None
+                )
+                or (
+                    author_profiles.get(msg.author_id).full_name
+                    if author_profiles.get(msg.author_id)
+                    else None
+                )
+                or (
+                    author_profiles.get(msg.author_id).username
+                    if author_profiles.get(msg.author_id)
+                    else None
+                )
+                or (f"ID {msg.author_id}" if msg.author_id else "")
+            ),
             "text": msg.text,
             "created_at": msg.created_at,
         }

@@ -2424,17 +2424,52 @@
     const payload = await fetchJson(`/api/support/tickets/${ticketId}`);
     if (!payload?.ok) return;
     supportChatList.innerHTML = "";
+    const hintRow = document.createElement("div");
+    hintRow.className = "chat-message system";
+    const hintLabel = document.createElement("div");
+    hintLabel.className = "chat-system-label chat-bc-label";
+    hintLabel.textContent = "BC Cash";
+    const hintText = document.createElement("div");
+    hintText.textContent = "Ждем подключения модератора.\nЕсть что добавить? Пишите в чат.";
+    hintRow.appendChild(hintLabel);
+    hintRow.appendChild(hintText);
+    supportChatList.appendChild(hintRow);
     const title =
       payload.user?.display_name ||
       payload.user?.full_name ||
       payload.user?.username ||
       `Чат #${ticketId}`;
     if (supportChatTitle) supportChatTitle.textContent = title;
+    let moderatorNoticeShown = false;
     (payload.messages || []).forEach((msg) => {
+      const isModerator = msg.author_role === "moderator";
+      if (isModerator && !moderatorNoticeShown) {
+        const notice = document.createElement("div");
+        notice.className = "chat-join-notice";
+        const modName = msg.author_name || msg.author_id || "";
+        notice.textContent = `Модератор ${modName} подключился к чату`;
+        supportChatList.appendChild(notice);
+        moderatorNoticeShown = true;
+      }
       const row = document.createElement("div");
-      row.className = "chat-message";
-      row.classList.add(msg.author_role === "moderator" ? "me" : "other");
-      row.textContent = msg.text;
+      const isSelf = Number(msg.author_id) === Number(state.userId);
+      row.className = `chat-message ${isSelf ? "self" : ""}`.trim();
+      if (isModerator) {
+        row.classList.add("mod");
+      }
+      const label = document.createElement("div");
+      if (isModerator) {
+        label.className = "chat-system-label chat-mod-label";
+        label.textContent = `Модератор ${msg.author_name || msg.author_id || ""}`;
+        row.appendChild(label);
+      } else if (msg.author_name) {
+        label.className = "chat-system-label";
+        label.textContent = msg.author_name;
+        row.appendChild(label);
+      }
+      const text = document.createElement("div");
+      text.textContent = msg.text;
+      row.appendChild(text);
       supportChatList.appendChild(row);
     });
     if (Array.isArray(payload.messages) && payload.messages.length) {
