@@ -271,6 +271,15 @@
   const adminModeratorDisputes = document.getElementById("adminModeratorDisputes");
   const adminModeratorActions = document.getElementById("adminModeratorActions");
   const adminModeratorRemove = document.getElementById("adminModeratorRemove");
+  const adminMerchantModal = document.getElementById("adminMerchantModal");
+  const adminMerchantModalClose = document.getElementById("adminMerchantModalClose");
+  const adminMerchantModalTitle = document.getElementById("adminMerchantModalTitle");
+  const adminMerchantAvatar = document.getElementById("adminMerchantAvatar");
+  const adminMerchantName = document.getElementById("adminMerchantName");
+  const adminMerchantMeta = document.getElementById("adminMerchantMeta");
+  const adminMerchantStats = document.getElementById("adminMerchantStats");
+  const adminMerchantDeals = document.getElementById("adminMerchantDeals");
+  const adminMerchantRemove = document.getElementById("adminMerchantRemove");
   const adminMerchants = document.getElementById("adminMerchants");
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
   const systemPanel = document.getElementById("systemPanel");
@@ -2740,18 +2749,8 @@
         text.innerHTML = `<div class="name">${name}</div><div class="meta">${stats.completed || 0}/${stats.total || 0}</div>`;
         pill.appendChild(avatar);
         pill.appendChild(text);
-        const btn = document.createElement("button");
-        btn.className = "btn pill admin-pill ghost";
-        btn.textContent = "Исключить";
-        btn.addEventListener("click", async () => {
-          await fetchJson(`/api/admin/merchants/${merchant.user_id}/revoke`, {
-            method: "POST",
-            body: "{}",
-          });
-          await loadAdmin();
-        });
+        pill.addEventListener("click", () => openMerchantProfile(merchant.user_id));
         row.appendChild(pill);
-        row.appendChild(btn);
         adminMerchants.appendChild(row);
       });
     }
@@ -2852,6 +2851,66 @@
   };
 
   const closeModeratorProfile = () => adminModeratorModal?.classList.remove("open");
+
+  const openMerchantProfile = async (merchantId) => {
+    if (!adminMerchantModal) return;
+    adminMerchantStats.innerHTML = "";
+    adminMerchantDeals.innerHTML = "";
+    const payload = await fetchJson(`/api/admin/merchants/${merchantId}`);
+    if (!payload?.ok) return;
+    const profile = payload.profile || {};
+    const name = profile.display_name || profile.full_name || profile.username || merchantId;
+    if (adminMerchantModalTitle) {
+      adminMerchantModalTitle.textContent = `Мерчант: ${name}`;
+    }
+    if (adminMerchantName) adminMerchantName.textContent = name;
+    if (adminMerchantMeta) {
+      adminMerchantMeta.textContent = `ID: ${merchantId} • ${payload.stats?.completed || 0}/${payload.stats?.total || 0}`;
+    }
+    if (adminMerchantAvatar) {
+      if (profile.avatar_url) {
+        adminMerchantAvatar.innerHTML = `<img src="${profile.avatar_url}" alt="" />`;
+      } else {
+        const initials =
+          String(name).replace(/[^A-Za-zА-Яа-я0-9]/g, "").slice(0, 2).toUpperCase() || "BC";
+        adminMerchantAvatar.textContent = initials;
+      }
+    }
+    if (payload.stats) {
+      const row = document.createElement("div");
+      row.className = "admin-item";
+      row.innerHTML = `
+        <span>Сделки: ${payload.stats.total || 0}</span>
+        <span>Успешные: ${payload.stats.completed || 0}</span>
+      `;
+      adminMerchantStats.appendChild(row);
+    }
+    if (payload.deals?.length) {
+      const head = document.createElement("div");
+      head.className = "admin-pill-info";
+      head.textContent = `Последние сделки: ${payload.deals.length}`;
+      adminMerchantDeals.appendChild(head);
+      payload.deals.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "admin-item";
+        row.innerHTML = `<span>Сделка #${item.public_id}</span><span>${item.status}</span>`;
+        adminMerchantDeals.appendChild(row);
+      });
+    }
+    if (adminMerchantRemove) {
+      adminMerchantRemove.onclick = async () => {
+        await fetchJson(`/api/admin/merchants/${merchantId}/revoke`, {
+          method: "POST",
+          body: "{}",
+        });
+        adminMerchantModal.classList.remove("open");
+        await loadAdmin();
+      };
+    }
+    adminMerchantModal.classList.add("open");
+  };
+
+  const closeMerchantProfile = () => adminMerchantModal?.classList.remove("open");
 
   const openDispute = async (disputeId) => {
     const payload = await fetchJson(`/api/disputes/${disputeId}`);
@@ -4961,6 +5020,7 @@
   adminActionsBtn?.addEventListener("click", openAdminActions);
   adminActionsClose?.addEventListener("click", closeAdminActions);
   adminModeratorModalClose?.addEventListener("click", closeModeratorProfile);
+  adminMerchantModalClose?.addEventListener("click", closeMerchantProfile);
 
   reviewsOpen?.addEventListener("click", async () => {
     state.reviewsTargetUserId = null;

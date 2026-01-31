@@ -92,6 +92,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/admin/users/{user_id}/ads", _api_admin_user_ads)
     app.router.add_post("/api/admin/users/{user_id}/ads/{ad_id}/toggle", _api_admin_user_ads_toggle)
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
+    app.router.add_get("/api/admin/merchants/{user_id}", _api_admin_merchant_detail)
     app.router.add_post("/api/admin/merchants/{user_id}/revoke", _api_admin_merchant_revoke)
     app.router.add_get("/api/admin/users/search", _api_admin_user_search)
     app.router.add_get("/api/admin/deals/search", _api_admin_deals_search)
@@ -1842,6 +1843,34 @@ async def _api_admin_merchant_revoke(request: web.Request) -> web.Response:
 
     await deps.user_service.set_role(target, UserRole.SELLER, revoke_merchant=True)
     return web.json_response({"ok": True})
+
+
+async def _api_admin_merchant_detail(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not _is_admin(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    target_id = int(request.match_info["user_id"])
+    profile = await deps.user_service.profile_of(target_id)
+    if not profile:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    stats = await _merchant_stats(deps, target_id)
+    deals = await deps.deal_service.list_user_deals(target_id)
+    deals_payload = [
+        {
+            "public_id": deal.public_id or deal.id,
+            "status": deal.status.value if hasattr(deal.status, "value") else str(deal.status),
+        }
+        for deal in deals[:20]
+    ]
+    return web.json_response(
+        {
+            "ok": True,
+            "profile": _profile_payload(profile, request=request, include_private=True),
+            "stats": stats,
+            "deals": deals_payload,
+        }
+    )
 
 
 async def _api_admin_user_search(request: web.Request) -> web.Response:
