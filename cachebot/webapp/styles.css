@@ -2986,6 +2986,34 @@ body.modal-open #app {
   opacity: 1;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .modal {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(12, 12, 16, 0.55);
+  }
+
+  #p2pCreateModal.modal,
+  #dealModal.modal,
+  #chatModal.modal,
+  #confirmCompleteModal.modal,
+  #buyerProofModal.modal,
+  #p2pModal.modal {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(12, 12, 16, 0.32);
+  }
+
+  :root[data-theme="light"] #p2pCreateModal.modal,
+  :root[data-theme="light"] #dealModal.modal,
+  :root[data-theme="light"] #chatModal.modal,
+  :root[data-theme="light"] #confirmCompleteModal.modal,
+  :root[data-theme="light"] #buyerProofModal.modal,
+  :root[data-theme="light"] #p2pModal.modal {
+    background: rgba(130, 140, 160, 0.26);
+  }
+}
+
 .proof-modal {
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
