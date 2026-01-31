@@ -1673,7 +1673,8 @@ async def _api_admin_summary(request: web.Request) -> web.Response:
     _, user_id = await _require_user(request)
     if not _is_admin(user_id, deps):
         return web.json_response({"ok": True, "can_access": False})
-    return web.json_response({"ok": True, "can_access": True})
+    can_manage_admins = user_id in (deps.config.admin_ids or set())
+    return web.json_response({"ok": True, "can_access": True, "can_manage_admins": can_manage_admins})
 
 
 async def _api_admin_settings(request: web.Request) -> web.Response:

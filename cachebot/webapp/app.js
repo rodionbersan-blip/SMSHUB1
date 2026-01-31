@@ -2879,6 +2879,9 @@
       adminFee.value = settings.fee_percent;
       adminWithdrawFee.value = settings.withdraw_fee_percent;
     }
+    if (adminAddAdmin) {
+      adminAddAdmin.closest(".admin-card")?.classList.toggle("is-hidden", !summary.can_manage_admins);
+    }
     const mods = await fetchJson("/api/admin/moderators");
     if (mods?.ok) {
       adminModerators.innerHTML = "";
@@ -5159,10 +5162,13 @@
       log("Укажи username", "warn");
       return;
     }
-    await fetchJson("/api/admin/admins", {
+    const payload = await fetchJson("/api/admin/admins", {
       method: "POST",
       body: JSON.stringify({ username }),
     });
+    if (payload?.ok) {
+      showNotice("Администратор добавлен");
+    }
     adminAdminUsername.value = "";
     await loadAdmin();
   });
