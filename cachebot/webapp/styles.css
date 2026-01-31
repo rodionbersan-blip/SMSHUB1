@@ -2343,6 +2343,19 @@ body.modal-open #app {
   flex-wrap: wrap;
 }
 
+#adminModeratorsPanel .admin-row {
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+#adminModeratorsPanel .admin-row input {
+  flex: 1 1 100%;
+}
+
+#adminAddModerator {
+  flex: 1 1 100%;
+}
+
 .admin-list {
   display: grid;
   gap: 10px;
@@ -2362,6 +2375,8 @@ body.modal-open #app {
   background: rgba(120, 180, 255, 0.16);
   border: 1px solid rgba(120, 180, 255, 0.25);
   color: var(--text);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-person-btn .name {
@@ -2534,6 +2549,10 @@ body.modal-open #app {
 @media (max-width: 640px) {
   .admin-row {
     flex-wrap: nowrap;
+  }
+
+  #adminModeratorsPanel .admin-row {
+    flex-wrap: wrap;
   }
 }
 
