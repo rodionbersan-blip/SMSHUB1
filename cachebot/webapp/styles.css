@@ -678,6 +678,15 @@ body.modal-open #app {
   min-width: 0;
 }
 
+.nav-btn.has-badge {
+  position: relative;
+}
+
+.nav-btn .btn-badge {
+  top: -2px;
+  right: -2px;
+}
+
 .nav-icon {
   width: 16px;
   height: 16px;
