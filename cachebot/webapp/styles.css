@@ -165,11 +165,11 @@ h2 {
 }
 
 .profile-admin-badge::before {
-  top: -4px;
+  top: -2px;
 }
 
 .profile-admin-badge::after {
-  bottom: -4px;
+  bottom: -2px;
 }
 
 .admin-admin-btn {
