@@ -1913,7 +1913,7 @@ body.modal-open #app {
   width: 100%;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(255, 165, 51, 0.65), rgba(255, 128, 0, 0.65));
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75), rgba(86, 62, 180, 0.75));
   color: #ffffff;
   padding: 16px 22px;
   display: inline-flex;
@@ -1927,7 +1927,7 @@ body.modal-open #app {
 }
 
 .search-toggle:hover {
-  background: linear-gradient(135deg, rgba(255, 175, 70, 0.75), rgba(255, 140, 20, 0.75));
+  background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
 }
 
 .search-toggle .toggle-plus {
