@@ -5182,7 +5182,7 @@
       showNotice("Укажите причину обращения.");
       return;
     }
-    await fetchJson("/api/support/tickets", {
+    const payload = await fetchJson("/api/support/tickets", {
       method: "POST",
       body: JSON.stringify({
         subject,
@@ -5190,6 +5190,10 @@
         target_name: supportTargetName.value.trim(),
       }),
     });
+    if (!payload?.ok) {
+      showNotice("Не удалось создать чат. Откройте мини-апп из Telegram и попробуйте еще раз.");
+      return;
+    }
     supportReason.value = "";
     supportTargetName.value = "";
     setSupportReason("");
