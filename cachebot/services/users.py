@@ -39,6 +39,7 @@ class UserService:
             int(uid): datetime.fromisoformat(value)
             for uid, value in (getattr(snapshot, "user_deal_block_until", {}) or {}).items()
         }
+        self._admin_actions: List[dict] = list(getattr(snapshot, "admin_actions", []))
         self._lock = asyncio.Lock()
         now = datetime.now(timezone.utc)
         for uid, role in self._roles.items():
@@ -322,6 +323,17 @@ class UserService:
     async def merchant_since_of(self, user_id: int) -> datetime | None:
         async with self._lock:
             return self._merchant_since.get(user_id)
+
+    async def log_admin_action(self, action: dict) -> None:
+        async with self._lock:
+            self._admin_actions.append(action)
+            if len(self._admin_actions) > 200:
+                self._admin_actions = self._admin_actions[-200:]
+            await self._repository.persist_admin_actions(list(self._admin_actions))
+
+    async def list_admin_actions(self) -> List[dict]:
+        async with self._lock:
+            return list(self._admin_actions)
 
     async def _persist(self) -> None:
         await self._repository.persist_user_data(

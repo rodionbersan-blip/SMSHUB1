@@ -95,6 +95,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/admin/users/search", _api_admin_user_search)
     app.router.add_get("/api/admin/deals/search", _api_admin_deals_search)
     app.router.add_post("/api/admin/users/{user_id}/moderation", _api_admin_user_moderation)
+    app.router.add_get("/api/admin/actions", _api_admin_actions)
     app.router.add_get("/api/reviews", _api_reviews_list)
     app.router.add_post("/api/reviews", _api_reviews_add)
     app.router.add_get("/api/summary", _api_summary)
@@ -1913,6 +1914,29 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
         moderation = await deps.user_service.set_deal_blocked(target_id, False)
     else:
         raise web.HTTPBadRequest(text="Некорректное действие")
+    try:
+        moderator_profile = await deps.user_service.profile_of(user_id)
+        moderator_name = (
+            (moderator_profile.display_name if moderator_profile else None)
+            or (moderator_profile.full_name if moderator_profile else None)
+            or (moderator_profile.username if moderator_profile else None)
+            or (user.get("first_name") or user.get("last_name") or str(user_id))
+        )
+        target_name = profile.display_name or profile.full_name or profile.username or str(target_id)
+        await deps.user_service.log_admin_action(
+            {
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "moderator_id": user_id,
+                "moderator_name": moderator_name,
+                "target_id": target_id,
+                "target_name": target_name,
+                "action": action,
+                "reason": reason,
+                "duration_minutes": minutes,
+            }
+        )
+    except Exception:
+        logger.exception("Failed to log admin action")
     notice_sent = False
     notice_error: str | None = None
     if action in {"ban", "block_deals", "warn", "unban", "unblock_deals"}:
@@ -1984,6 +2008,45 @@ async def _api_admin_user_moderation(request: web.Request) -> web.Response:
     return web.json_response(
         {"ok": True, "user": payload, "notice": {"sent": notice_sent, "error": notice_error}}
     )
+
+
+async def _api_admin_actions(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not await _has_moderation_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    actions = await deps.user_service.list_admin_actions()
+    items = list(actions)[-50:][::-1]
+    output = []
+    for item in items:
+        when = item.get("ts") or ""
+        try:
+            dt = datetime.fromisoformat(when.replace("Z", "+00:00"))
+            when = dt.strftime("%d.%m.%Y, %H:%M")
+        except Exception:
+            when = item.get("ts") or "—"
+        action = item.get("action")
+        moderator = item.get("moderator_name") or str(item.get("moderator_id") or "—")
+        target = item.get("target_name") or str(item.get("target_id") or "—")
+        title = f"{moderator} → {target}"
+        if action == "ban":
+            title = f"{moderator} заблокировал {target}"
+        elif action == "unban":
+            title = f"{moderator} разблокировал {target}"
+        elif action == "warn":
+            title = f"{moderator} предупредил {target}"
+        elif action == "block_deals":
+            title = f"{moderator} отключил сделки {target}"
+        elif action == "unblock_deals":
+            title = f"{moderator} включил сделки {target}"
+        output.append(
+            {
+                "title": title,
+                "when": when,
+                "reason": item.get("reason") or "",
+            }
+        )
+    return web.json_response({"ok": True, "actions": output})
 
 
 async def _api_reviews_list(request: web.Request) -> web.Response:

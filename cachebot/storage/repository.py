@@ -63,6 +63,7 @@ class StorageState:
     user_deal_blocks: List[int]
     user_ban_until: Dict[int, str]
     user_deal_block_until: Dict[int, str]
+    admin_actions: List[dict]
 
 
 class StateRepository:
@@ -112,6 +113,7 @@ class StateRepository:
                 user_deal_blocks=self._state.user_deal_blocks,
                 user_ban_until=self._state.user_ban_until,
                 user_deal_block_until=self._state.user_deal_block_until,
+                admin_actions=self._state.admin_actions,
             )
             self._write_locked()
 
@@ -140,6 +142,7 @@ class StateRepository:
                 user_deal_blocks=self._state.user_deal_blocks,
                 user_ban_until=self._state.user_ban_until,
                 user_deal_block_until=self._state.user_deal_block_until,
+                admin_actions=self._state.admin_actions,
             )
             self._write_locked()
 
@@ -180,6 +183,36 @@ class StateRepository:
                 user_deal_blocks=user_deal_blocks,
                 user_ban_until=user_ban_until,
                 user_deal_block_until=user_deal_block_until,
+                admin_actions=self._state.admin_actions,
+            )
+            self._write_locked()
+
+    async def persist_admin_actions(self, actions: List[dict]) -> None:
+        async with self._lock:
+            self._state = StorageState(
+                deals=self._state.deals,
+                balances=self._state.balances,
+                balance_events=self._state.balance_events,
+                settings=self._state.settings,
+                user_roles=self._state.user_roles,
+                applications=self._state.applications,
+                profiles=self._state.profiles,
+                reviews=self._state.reviews,
+                disputes=self._state.disputes,
+                adverts=self._state.adverts,
+                topups=self._state.topups,
+                chats=self._state.chats,
+                deal_sequence=self._state.deal_sequence,
+                advert_sequence=self._state.advert_sequence,
+                merchant_since=self._state.merchant_since,
+                p2p_trading_enabled=self._state.p2p_trading_enabled,
+                moderators=self._state.moderators,
+                user_warnings=self._state.user_warnings,
+                user_bans=self._state.user_bans,
+                user_deal_blocks=self._state.user_deal_blocks,
+                user_ban_until=self._state.user_ban_until,
+                user_deal_block_until=self._state.user_deal_block_until,
+                admin_actions=actions,
             )
             self._write_locked()
 
@@ -208,6 +241,7 @@ class StateRepository:
                 user_deal_blocks=self._state.user_deal_blocks,
                 user_ban_until=self._state.user_ban_until,
                 user_deal_block_until=self._state.user_deal_block_until,
+                admin_actions=self._state.admin_actions,
             )
             self._write_locked()
 
@@ -236,6 +270,7 @@ class StateRepository:
                 user_deal_blocks=self._state.user_deal_blocks,
                 user_ban_until=self._state.user_ban_until,
                 user_deal_block_until=self._state.user_deal_block_until,
+                admin_actions=self._state.admin_actions,
             )
             self._write_locked()
 
@@ -269,6 +304,7 @@ class StateRepository:
                 user_deal_blocks=self._state.user_deal_blocks,
                 user_ban_until=self._state.user_ban_until,
                 user_deal_block_until=self._state.user_deal_block_until,
+                admin_actions=self._state.admin_actions,
             )
             self._write_locked()
 
@@ -297,6 +333,7 @@ class StateRepository:
                 user_deal_blocks=self._state.user_deal_blocks,
                 user_ban_until=self._state.user_ban_until,
                 user_deal_block_until=self._state.user_deal_block_until,
+                admin_actions=self._state.admin_actions,
             )
             self._write_locked()
 
@@ -325,6 +362,7 @@ class StateRepository:
                 user_deal_blocks=self._state.user_deal_blocks,
                 user_ban_until=self._state.user_ban_until,
                 user_deal_block_until=self._state.user_deal_block_until,
+                admin_actions=self._state.admin_actions,
             )
             self._write_locked()
 
@@ -363,6 +401,7 @@ class StateRepository:
             "user_deal_block_until": {
                 str(uid): value for uid, value in self._state.user_deal_block_until.items()
             },
+            "admin_actions": list(self._state.admin_actions),
         }
         tmp = self._path.with_suffix(".tmp")
         tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -393,6 +432,7 @@ class StateRepository:
                 user_deal_blocks=[],
                 user_ban_until={},
                 user_deal_block_until={},
+                admin_actions=[],
             )
         raw = json.loads(self._path.read_text(encoding="utf-8"))
         deals = [Deal.from_dict(item) for item in raw.get("deals", [])]
@@ -440,6 +480,7 @@ class StateRepository:
         user_deal_block_until = {
             int(uid): value for uid, value in (raw.get("user_deal_block_until") or {}).items()
         }
+        admin_actions = list(raw.get("admin_actions") or [])
         return StorageState(
             deals=deals,
             balances=balances,
@@ -463,4 +504,5 @@ class StateRepository:
             user_deal_blocks=user_deal_blocks,
             user_ban_until=user_ban_until,
             user_deal_block_until=user_deal_block_until,
+            admin_actions=admin_actions,
         )

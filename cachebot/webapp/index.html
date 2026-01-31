@@ -270,7 +270,7 @@
           </div>
           <div class="admin-card admin-accordion">
             <button class="search-toggle admin-toggle" data-target="adminModeratorsPanel">
-              <span>Управление модераторами</span>
+              <span id="adminModeratorsTitle">Управление модераторами</span>
               <span class="toggle-plus" aria-hidden="true">+</span>
             </button>
             <div id="adminModeratorsPanel" class="search-panel is-collapsed">
@@ -279,13 +279,16 @@
                   <input id="adminModeratorUsername" placeholder="@username" />
                   <button id="adminAddModerator" class="btn">Добавить</button>
                 </div>
+                <div id="adminModeratorsActions" class="admin-actions-row">
+                  <button id="adminActionsBtn" class="btn pill admin-pill">Последние действия</button>
+                </div>
                 <div id="adminModerators" class="admin-list"></div>
               </div>
             </div>
           </div>
           <div class="admin-card admin-accordion">
             <button class="search-toggle admin-toggle" data-target="adminMerchantsPanel">
-              <span>Управление мерчантами</span>
+              <span id="adminMerchantsTitle">Управление мерчантами</span>
               <span class="toggle-plus" aria-hidden="true">+</span>
             </button>
             <div id="adminMerchantsPanel" class="search-panel is-collapsed">
@@ -639,6 +642,18 @@
         </div>
         <div class="modal-body">
           <div id="moderationAdsList" class="deal-list moderation-ads-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="adminActionsModal">
+      <div class="modal-card glass moderation-modal">
+        <div class="modal-header">
+          <div class="modal-title">Последние действия</div>
+          <button id="adminActionsClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body">
+          <div id="adminActionsList" class="admin-list"></div>
         </div>
       </div>
     </div>
