@@ -286,8 +286,10 @@
   const supportList = document.getElementById("supportList");
   const supportNewModal = document.getElementById("supportNewModal");
   const supportNewClose = document.getElementById("supportNewClose");
+  const supportReasonType = document.getElementById("supportReasonType");
+  const supportTargetRow = document.getElementById("supportTargetRow");
+  const supportTargetName = document.getElementById("supportTargetName");
   const supportReason = document.getElementById("supportReason");
-  const supportModeratorName = document.getElementById("supportModeratorName");
   const supportCreateBtn = document.getElementById("supportCreateBtn");
   const supportChatModal = document.getElementById("supportChatModal");
   const supportChatClose = document.getElementById("supportChatClose");
@@ -2322,18 +2324,30 @@
       const row = document.createElement("div");
       row.className = "deal-item";
       const who = payload.can_manage ? ticket.user_name : "Поддержка";
+      const reasonParts = [];
+      if (ticket.complaint_type === "moderator") reasonParts.push("Жалоба на модератора");
+      if (ticket.complaint_type === "user") reasonParts.push("Жалоба на пользователя");
+      if (ticket.complaint_type === "other") reasonParts.push("Другая причина");
+      if (!ticket.complaint_type) reasonParts.push("Обращение");
+      if (ticket.target_name) reasonParts.push(ticket.target_name);
+      const reasonLabel = reasonParts.join(" • ");
       const status =
         ticket.status === "in_progress"
           ? "В работе"
           : ticket.status === "open"
           ? "Новый"
           : "Закрыт";
+      const assignedLabel =
+        payload.can_manage && ticket.assigned_to && Number(ticket.assigned_to) === Number(state.userId)
+          ? "<span class=\"support-assigned\">Закреплен за мной</span>"
+          : "";
       row.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">${who}</div>
           <div class="deal-status">${status}</div>
         </div>
-        <div class="deal-row">${ticket.subject}</div>
+        <div class="deal-row">${reasonLabel}</div>
+        <div class="deal-row">${ticket.subject || ""} ${assignedLabel}</div>
       `;
       row.addEventListener("click", () => openSupportChat(ticket.id, payload.can_manage));
       supportList.appendChild(row);
@@ -2358,11 +2372,27 @@
       row.textContent = msg.text;
       supportChatList.appendChild(row);
     });
-    supportAssignBtn.style.display = canManage ? "" : "none";
-    supportCloseBtn.style.display = canManage ? "" : "none";
+    const assignedTo = payload.ticket?.assigned_to;
+    const canAssign = canManage && (!assignedTo || Number(assignedTo) === Number(state.userId));
+    supportAssignBtn.style.display = canAssign && !assignedTo ? "" : "none";
+    const createdAt = payload.ticket?.created_at || "";
+    let allowClose = true;
+    if (canManage && payload.ticket?.user_id && Number(payload.ticket.user_id) !== Number(state.userId)) {
+      try {
+        const created = new Date(createdAt);
+        allowClose = Date.now() - created.getTime() >= 24 * 60 * 60 * 1000;
+      } catch {
+        allowClose = false;
+      }
+    }
+    supportCloseBtn.style.display = allowClose ? "" : "none";
+    if (canManage && assignedTo && Number(assignedTo) !== Number(state.userId)) {
+      supportAssignBtn.style.display = "none";
+    }
     supportAssignBtn.onclick = async () => {
       await fetchJson(`/api/support/tickets/${ticketId}/assign`, { method: "POST", body: "{}" });
       await loadSupport();
+      supportAssignBtn.style.display = "none";
     };
     supportCloseBtn.onclick = async () => {
       await fetchJson(`/api/support/tickets/${ticketId}/close`, { method: "POST", body: "{}" });
@@ -5123,6 +5153,11 @@
   supportNewBtn?.addEventListener("click", () => supportNewModal?.classList.add("open"));
   supportNewClose?.addEventListener("click", () => supportNewModal?.classList.remove("open"));
   supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
+  supportReasonType?.addEventListener("change", () => {
+    const value = supportReasonType.value;
+    const needsTarget = value === "moderator" || value === "user";
+    supportTargetRow?.classList.toggle("is-hidden", !needsTarget);
+  });
   supportCreateBtn?.addEventListener("click", async () => {
     const subject = supportReason.value.trim();
     if (!subject) {
@@ -5133,11 +5168,14 @@
       method: "POST",
       body: JSON.stringify({
         subject,
-        moderator_name: supportModeratorName.value.trim(),
+        complaint_type: supportReasonType.value || null,
+        target_name: supportTargetName.value.trim(),
       }),
     });
     supportReason.value = "";
-    supportModeratorName.value = "";
+    supportTargetName.value = "";
+    supportReasonType.value = "";
+    supportTargetRow?.classList.add("is-hidden");
     supportNewModal.classList.remove("open");
     await loadSupport();
   });

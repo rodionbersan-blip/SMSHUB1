@@ -2168,6 +2168,8 @@ async def _api_support_tickets(request: web.Request) -> web.Response:
                 "user_name": name,
                 "subject": ticket.subject,
                 "moderator_name": ticket.moderator_name,
+                "complaint_type": ticket.complaint_type,
+                "target_name": ticket.target_name,
                 "status": ticket.status,
                 "assigned_to": ticket.assigned_to,
                 "created_at": ticket.created_at,
@@ -2186,9 +2188,13 @@ async def _api_support_create_ticket(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Invalid JSON")
     subject = str(body.get("subject") or "").strip()
     moderator_name = str(body.get("moderator_name") or "").strip() or None
+    complaint_type = str(body.get("complaint_type") or "").strip() or None
+    target_name = str(body.get("target_name") or "").strip() or None
     if not subject:
         raise web.HTTPBadRequest(text="Нужно указать причину")
-    ticket = await deps.support_service.create_ticket(user_id, subject, moderator_name)
+    ticket = await deps.support_service.create_ticket(
+        user_id, subject, moderator_name, complaint_type, target_name
+    )
     return web.json_response({"ok": True, "ticket_id": ticket.id})
 
 
@@ -2222,6 +2228,8 @@ async def _api_support_ticket_detail(request: web.Request) -> web.Response:
                 "user_id": ticket.user_id,
                 "subject": ticket.subject,
                 "moderator_name": ticket.moderator_name,
+                "complaint_type": ticket.complaint_type,
+                "target_name": ticket.target_name,
                 "status": ticket.status,
                 "assigned_to": ticket.assigned_to,
                 "created_at": ticket.created_at,
@@ -2277,8 +2285,15 @@ async def _api_support_ticket_close(request: web.Request) -> web.Response:
     if not ticket:
         raise web.HTTPNotFound(text="Чат не найден")
     can_manage = await _has_moderation_access(user_id, deps)
-    if not can_manage and ticket.user_id != user_id:
-        raise web.HTTPForbidden(text="Нет доступа")
+    if ticket.user_id != user_id:
+        if not can_manage:
+            raise web.HTTPForbidden(text="Нет доступа")
+        try:
+            created = datetime.fromisoformat(ticket.created_at.replace("Z", "+00:00"))
+        except Exception:
+            created = datetime.now(timezone.utc)
+        if datetime.now(timezone.utc) - created < timedelta(hours=24):
+            raise web.HTTPForbidden(text="Можно закрыть через 24 часа")
     await deps.support_service.close(ticket_id)
     return web.json_response({"ok": True})
 

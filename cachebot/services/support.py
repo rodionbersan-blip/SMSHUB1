@@ -14,6 +14,8 @@ class SupportTicket:
     user_id: int
     subject: str
     moderator_name: str | None
+    complaint_type: str | None
+    target_name: str | None
     status: str
     assigned_to: int | None
     created_at: str
@@ -52,6 +54,8 @@ class SupportService:
                     user_id INTEGER NOT NULL,
                     subject TEXT NOT NULL,
                     moderator_name TEXT,
+                    complaint_type TEXT,
+                    target_name TEXT,
                     status TEXT NOT NULL,
                     assigned_to INTEGER,
                     created_at TEXT NOT NULL,
@@ -71,11 +75,26 @@ class SupportService:
                 )
                 """
             )
+            try:
+                conn.execute("ALTER TABLE support_tickets ADD COLUMN complaint_type TEXT")
+            except sqlite3.OperationalError:
+                pass
+            try:
+                conn.execute("ALTER TABLE support_tickets ADD COLUMN target_name TEXT")
+            except sqlite3.OperationalError:
+                pass
             conn.commit()
         finally:
             conn.close()
 
-    async def create_ticket(self, user_id: int, subject: str, moderator_name: str | None) -> SupportTicket:
+    async def create_ticket(
+        self,
+        user_id: int,
+        subject: str,
+        moderator_name: str | None,
+        complaint_type: str | None,
+        target_name: str | None,
+    ) -> SupportTicket:
         async with self._lock:
             now = datetime.now(timezone.utc).isoformat()
             def _run() -> SupportTicket:
@@ -83,10 +102,13 @@ class SupportService:
                 try:
                     cur = conn.execute(
                         """
-                        INSERT INTO support_tickets (user_id, subject, moderator_name, status, assigned_to, created_at, updated_at)
-                        VALUES (?, ?, ?, 'open', NULL, ?, ?)
+                        INSERT INTO support_tickets (
+                          user_id, subject, moderator_name, complaint_type, target_name,
+                          status, assigned_to, created_at, updated_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, 'open', NULL, ?, ?)
                         """,
-                        (user_id, subject, moderator_name, now, now),
+                        (user_id, subject, moderator_name, complaint_type, target_name, now, now),
                     )
                     ticket_id = cur.lastrowid
                     conn.commit()
