@@ -1920,6 +1920,22 @@ body.modal-open #app {
   padding-bottom: 8px;
 }
 
+.admin-accordion {
+  border-radius: 22px;
+  padding: 10px;
+  gap: 10px;
+}
+
+.admin-accordion:not(.open) {
+  gap: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.admin-accordion.open .search-toggle {
+  transform: scale(1.01);
+}
+
 .search-toggle {
   width: 100%;
   border: none;

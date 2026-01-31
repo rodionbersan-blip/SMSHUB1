@@ -248,30 +248,45 @@
           <span class="badge">Управление</span>
         </div>
         <div class="admin-grid">
-          <div class="admin-card">
-            <div class="profile-title">Управление ценой</div>
-            <label>Курс USDT/RUB
-              <input id="adminRate" type="number" step="0.01" />
-            </label>
-            <label>Комиссия пополнения (%)
-              <input id="adminFee" type="number" step="0.01" />
-            </label>
-            <label>Комиссия на вывод (%)
-              <input id="adminWithdrawFee" type="number" step="0.01" />
-            </label>
-            <button id="adminSaveRates" class="btn primary">Сохранить</button>
-          </div>
-          <div class="admin-card">
-            <div class="profile-title">Модераторы</div>
-            <div class="admin-row">
-              <input id="adminModeratorUsername" placeholder="@username" />
-              <button id="adminAddModerator" class="btn">Добавить</button>
+          <div class="admin-card admin-accordion">
+            <button class="search-toggle admin-toggle" data-target="adminRatesPanel">
+              <span>Управление ценой</span>
+              <span class="toggle-plus" aria-hidden="true">+</span>
+            </button>
+            <div id="adminRatesPanel" class="search-panel is-collapsed">
+              <label>Курс USDT/RUB
+                <input id="adminRate" type="number" step="0.01" />
+              </label>
+              <label>Комиссия пополнения (%)
+                <input id="adminFee" type="number" step="0.01" />
+              </label>
+              <label>Комиссия на вывод (%)
+                <input id="adminWithdrawFee" type="number" step="0.01" />
+              </label>
+              <button id="adminSaveRates" class="btn primary">Сохранить</button>
             </div>
-            <div id="adminModerators" class="admin-list"></div>
           </div>
-          <div class="admin-card">
-            <div class="profile-title">Мерчанты</div>
-            <div id="adminMerchants" class="admin-list"></div>
+          <div class="admin-card admin-accordion">
+            <button class="search-toggle admin-toggle" data-target="adminModeratorsPanel">
+              <span>Управление модераторами</span>
+              <span class="toggle-plus" aria-hidden="true">+</span>
+            </button>
+            <div id="adminModeratorsPanel" class="search-panel is-collapsed">
+              <div class="admin-row">
+                <input id="adminModeratorUsername" placeholder="@username" />
+                <button id="adminAddModerator" class="btn">Добавить</button>
+              </div>
+              <div id="adminModerators" class="admin-list"></div>
+            </div>
+          </div>
+          <div class="admin-card admin-accordion">
+            <button class="search-toggle admin-toggle" data-target="adminMerchantsPanel">
+              <span>Управление мерчантами</span>
+              <span class="toggle-plus" aria-hidden="true">+</span>
+            </button>
+            <div id="adminMerchantsPanel" class="search-panel is-collapsed">
+              <div id="adminMerchants" class="admin-list"></div>
+            </div>
           </div>
         </div>
       </section>

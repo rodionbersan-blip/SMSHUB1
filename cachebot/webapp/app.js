@@ -221,6 +221,7 @@
   const moderationDealSearchHint = document.getElementById("moderationDealSearchHint");
   const moderationDealsResults = document.getElementById("moderationDealsResults");
   const moderationSearchToggles = document.querySelectorAll(".search-toggle");
+  const adminToggles = document.querySelectorAll(".admin-toggle");
   const moderationUserCard = document.getElementById("moderationUserCard");
   const moderationUserTitle = document.getElementById("moderationUserTitle");
   const moderationUserHandle = document.getElementById("moderationUserHandle");
@@ -4752,6 +4753,31 @@
           if (panelId === "moderationDealSearchPanel") resetModerationDealSearch();
         }
       });
+    });
+  });
+
+  adminToggles?.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const panelId = toggle.dataset.target;
+      if (!panelId) return;
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      const shell = toggle.closest(".admin-accordion");
+      const nextOpen = !panel.classList.contains("open");
+      adminToggles.forEach((btn) => {
+        const otherId = btn.dataset.target;
+        if (!otherId) return;
+        const otherPanel = document.getElementById(otherId);
+        const otherShell = btn.closest(".admin-accordion");
+        btn.classList.remove("active");
+        otherPanel?.classList.remove("open");
+        otherShell?.classList.remove("open");
+      });
+      if (nextOpen) {
+        toggle.classList.add("active");
+        panel.classList.add("open");
+        shell?.classList.add("open");
+      }
     });
   });
   moderationUserTitle?.addEventListener("click", (event) => {
