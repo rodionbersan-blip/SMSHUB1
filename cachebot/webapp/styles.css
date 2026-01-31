@@ -2887,6 +2887,10 @@ body.modal-open #app {
   color: var(--muted);
 }
 
+.support-card #supportList {
+  margin-top: 8px;
+}
+
 .support-new-btn {
   margin-top: 12px;
   width: 100%;
