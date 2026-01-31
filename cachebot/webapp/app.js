@@ -292,6 +292,7 @@
   const supportTargetRow = document.getElementById("supportTargetRow");
   const supportTargetName = document.getElementById("supportTargetName");
   const supportReason = document.getElementById("supportReason");
+  const supportReasonRow = document.getElementById("supportReasonRow");
   const supportCreateBtn = document.getElementById("supportCreateBtn");
   const supportChatModal = document.getElementById("supportChatModal");
   const supportChatClose = document.getElementById("supportChatClose");
@@ -5167,27 +5168,31 @@
     if (supportReasonType) supportReasonType.value = value;
     const needsTarget = value === "moderator" || value === "user";
     supportTargetRow?.classList.toggle("is-hidden", !needsTarget);
+    supportReasonRow?.classList.toggle("is-hidden", value !== "other");
     supportReasonButtons?.forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.value === value);
     });
   };
 
-  supportReasonButtons?.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      setSupportReason(btn.dataset.value || "");
-    });
+  supportReasonType?.addEventListener("change", () => {
+    setSupportReason(supportReasonType.value || "");
   });
   supportCreateBtn?.addEventListener("click", async () => {
-    const subject = supportReason.value.trim();
-    if (!subject) {
-      showNotice("Укажите причину обращения.");
+    const reasonValue = supportReasonType?.value || "";
+    if (!reasonValue) {
+      showNotice("Выберите причину обращения.");
+      return;
+    }
+    const subject = reasonValue === "other" ? supportReason.value.trim() : "Обращение";
+    if (reasonValue === "other" && !subject) {
+      showNotice("Опишите проблему.");
       return;
     }
     const payload = await fetchJson("/api/support/tickets", {
       method: "POST",
       body: JSON.stringify({
         subject,
-        complaint_type: supportReasonType.value || null,
+        complaint_type: reasonValue || null,
         target_name: supportTargetName.value.trim(),
       }),
     });

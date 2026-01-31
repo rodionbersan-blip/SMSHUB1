@@ -708,20 +708,18 @@
           <button id="supportNewClose" class="btn ghost">Закрыть</button>
         </div>
         <div class="modal-body">
-          <div class="support-reason-group">
-            <div class="field-label">Причина обращения</div>
-            <input id="supportReasonType" type="hidden" value="" />
-            <div class="support-reason-pills">
-              <button type="button" class="btn pill support-reason-btn" data-value="">Не выбрано</button>
-              <button type="button" class="btn pill support-reason-btn" data-value="moderator">Жалоба на модератора</button>
-              <button type="button" class="btn pill support-reason-btn" data-value="user">Жалоба на пользователя</button>
-              <button type="button" class="btn pill support-reason-btn" data-value="other">Другая причина</button>
-            </div>
-          </div>
+          <label class="support-reason-group">Причина обращения
+            <select id="supportReasonType">
+              <option value="">Не выбрано</option>
+              <option value="moderator">Жалоба на модератора</option>
+              <option value="user">Жалоба на пользователя</option>
+              <option value="other">Другая причина</option>
+            </select>
+          </label>
           <label id="supportTargetRow" class="is-hidden">Имя модератора/пользователя
             <input id="supportTargetName" type="text" placeholder="Например: Bastard" />
           </label>
-          <label>Описание
+          <label id="supportReasonRow" class="is-hidden">Описание
             <textarea id="supportReason" rows="3" placeholder="Опишите проблему"></textarea>
           </label>
           <button id="supportCreateBtn" class="btn primary">Создать чат</button>
@@ -1037,6 +1035,6 @@
         } catch (e) {}
       })();
     </script>
-    <script src="/app/app.js?v=pay137"></script>
+    <script src="/app/app.js?v=pay138"></script>
   </body>
 </html>
