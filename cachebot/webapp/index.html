@@ -709,10 +709,19 @@
         </div>
         <div class="modal-body">
           <label>Причина обращения
-            <textarea id="supportReason" rows="3" placeholder="Опишите проблему"></textarea>
+            <input id="supportReasonType" type="hidden" value="" />
+            <div class="support-reason-pills">
+              <button type="button" class="btn pill support-reason-btn" data-value="">Не выбрано</button>
+              <button type="button" class="btn pill support-reason-btn" data-value="moderator">Жалоба на модератора</button>
+              <button type="button" class="btn pill support-reason-btn" data-value="user">Жалоба на пользователя</button>
+              <button type="button" class="btn pill support-reason-btn" data-value="other">Другая причина</button>
+            </div>
           </label>
-          <label>Имя модератора (если оспариваете блокировку)
-            <input id="supportModeratorName" type="text" placeholder="Например: Bastard" />
+          <label id="supportTargetRow" class="is-hidden">Имя модератора/пользователя
+            <input id="supportTargetName" type="text" placeholder="Например: Bastard" />
+          </label>
+          <label>Описание
+            <textarea id="supportReason" rows="3" placeholder="Опишите проблему"></textarea>
           </label>
           <button id="supportCreateBtn" class="btn primary">Создать чат</button>
         </div>

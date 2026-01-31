@@ -2910,6 +2910,35 @@ body.modal-open #app {
   font-weight: 600;
 }
 
+.support-reason-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.support-reason-btn {
+  background: rgba(120, 180, 255, 0.16);
+  color: var(--text);
+  border: 1px solid rgba(120, 180, 255, 0.25);
+}
+
+.support-reason-btn.active {
+  background: rgba(120, 180, 255, 0.35);
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .support-reason-btn {
+  background: rgba(40, 60, 100, 0.08);
+  color: #1a2433;
+  border-color: rgba(20, 28, 38, 0.2);
+}
+
+:root[data-theme="light"] .support-reason-btn.active {
+  background: #1f2937;
+  color: #ffffff;
+}
+
 .p2p-edit-grid {
   display: grid;
   gap: 8px;

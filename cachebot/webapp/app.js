@@ -287,6 +287,7 @@
   const supportNewModal = document.getElementById("supportNewModal");
   const supportNewClose = document.getElementById("supportNewClose");
   const supportReasonType = document.getElementById("supportReasonType");
+  const supportReasonButtons = document.querySelectorAll(".support-reason-btn");
   const supportTargetRow = document.getElementById("supportTargetRow");
   const supportTargetName = document.getElementById("supportTargetName");
   const supportReason = document.getElementById("supportReason");
@@ -5153,10 +5154,19 @@
   supportNewBtn?.addEventListener("click", () => supportNewModal?.classList.add("open"));
   supportNewClose?.addEventListener("click", () => supportNewModal?.classList.remove("open"));
   supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
-  supportReasonType?.addEventListener("change", () => {
-    const value = supportReasonType.value;
+  const setSupportReason = (value) => {
+    if (supportReasonType) supportReasonType.value = value;
     const needsTarget = value === "moderator" || value === "user";
     supportTargetRow?.classList.toggle("is-hidden", !needsTarget);
+    supportReasonButtons?.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.value === value);
+    });
+  };
+
+  supportReasonButtons?.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setSupportReason(btn.dataset.value || "");
+    });
   });
   supportCreateBtn?.addEventListener("click", async () => {
     const subject = supportReason.value.trim();
@@ -5174,7 +5184,7 @@
     });
     supportReason.value = "";
     supportTargetName.value = "";
-    supportReasonType.value = "";
+    setSupportReason("");
     supportTargetRow?.classList.add("is-hidden");
     supportNewModal.classList.remove("open");
     await loadSupport();
