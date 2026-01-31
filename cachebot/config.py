@@ -29,6 +29,7 @@ class Config:
     webhook_path: str = "/crypto-pay/webhook"
     crypto_pay_webhook_secret: str | None = None
     allow_unsafe_initdata: bool = False
+    allow_unsafe_initdata_ids: Set[int] = None
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -56,6 +57,7 @@ class Config:
         webhook_path = os.getenv("CRYPTO_PAY_WEBHOOK_PATH", "/crypto-pay/webhook")
         webhook_secret = os.getenv("CRYPTO_PAY_WEBHOOK_SECRET") or None
         allow_unsafe = os.getenv("ALLOW_UNSAFE_INITDATA", "0").lower() in {"1", "true", "yes"}
+        unsafe_ids = _parse_admin_ids(os.getenv("ALLOW_UNSAFE_INITDATA_IDS"))
         return cls(
             telegram_bot_token=token,
             crypto_pay_token=crypto_pay_token,
@@ -75,6 +77,7 @@ class Config:
             webhook_path=webhook_path,
             crypto_pay_webhook_secret=webhook_secret,
             allow_unsafe_initdata=allow_unsafe,
+            allow_unsafe_initdata_ids=unsafe_ids,
         )
 
 

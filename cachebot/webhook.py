@@ -2248,6 +2248,17 @@ async def _require_user(request: web.Request) -> tuple[dict[str, Any], int]:
                 logger.warning("Unsafe initData accepted for user_id=%s", user.get("id"))
         except Exception:
             user = None
+    if not user and deps.config.allow_unsafe_initdata_ids:
+        try:
+            pairs = parse_qsl(init_data, keep_blank_values=True)
+            data = dict(pairs)
+            user_raw = data.get("user")
+            candidate = json.loads(user_raw) if user_raw else {}
+            if candidate and int(candidate.get("id", 0)) in deps.config.allow_unsafe_initdata_ids:
+                user = candidate
+                logger.warning("Unsafe initData accepted via allowlist for user_id=%s", user.get("id"))
+        except Exception:
+            user = None
     if not user or "id" not in user:
         init_len = len(init_data or "")
         has_hash = "hash=" in init_data
