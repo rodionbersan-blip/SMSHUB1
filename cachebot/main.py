@@ -22,6 +22,7 @@ from cachebot.services.scheduler import dispute_timer_watcher, expiry_watcher, i
 from cachebot.services.topups import TopupService
 from cachebot.services.users import UserService
 from cachebot.services.chats import ChatService
+from cachebot.services.support import SupportService
 from cachebot.storage import StateRepository
 from cachebot.webhook import create_app
 
@@ -47,6 +48,7 @@ async def run_bot() -> None:
     advert_service = AdvertService(repository)
     topup_service = TopupService(repository)
     chat_service = ChatService(repository)
+    support_service = SupportService(config.support_db_path)
     deal_service = DealService(
         repository,
         rate_provider,
@@ -68,6 +70,7 @@ async def run_bot() -> None:
             advert_service=advert_service,
             topup_service=topup_service,
             chat_service=chat_service,
+            support_service=support_service,
         )
     )
 

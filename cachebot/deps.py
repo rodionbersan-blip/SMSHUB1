@@ -14,6 +14,7 @@ from cachebot.services.reviews import ReviewService
 from cachebot.services.topups import TopupService
 from cachebot.services.users import UserService
 from cachebot.services.chats import ChatService
+from cachebot.services.support import SupportService
 
 
 @dataclass(slots=True)
@@ -29,6 +30,7 @@ class AppDeps:
     advert_service: AdvertService
     topup_service: TopupService
     chat_service: ChatService
+    support_service: SupportService
 
 
 _current: Optional[AppDeps] = None

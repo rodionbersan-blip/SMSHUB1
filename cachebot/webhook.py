@@ -98,6 +98,12 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/admin/deals/search", _api_admin_deals_search)
     app.router.add_post("/api/admin/users/{user_id}/moderation", _api_admin_user_moderation)
     app.router.add_get("/api/admin/actions", _api_admin_actions)
+    app.router.add_get("/api/support/tickets", _api_support_tickets)
+    app.router.add_post("/api/support/tickets", _api_support_create_ticket)
+    app.router.add_get("/api/support/tickets/{ticket_id}", _api_support_ticket_detail)
+    app.router.add_post("/api/support/tickets/{ticket_id}/messages", _api_support_ticket_message)
+    app.router.add_post("/api/support/tickets/{ticket_id}/assign", _api_support_ticket_assign)
+    app.router.add_post("/api/support/tickets/{ticket_id}/close", _api_support_ticket_close)
     app.router.add_get("/api/reviews", _api_reviews_list)
     app.router.add_post("/api/reviews", _api_reviews_add)
     app.router.add_get("/api/summary", _api_summary)
@@ -2136,6 +2142,145 @@ async def _api_admin_actions(request: web.Request) -> web.Response:
             }
         )
     return web.json_response({"ok": True, "actions": output})
+
+
+async def _api_support_tickets(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    user, user_id = await _require_user(request)
+    can_manage = await _has_moderation_access(user_id, deps)
+    tickets = await deps.support_service.list_tickets(
+        user_id=None if can_manage else user_id, include_all=can_manage
+    )
+    payload = []
+    for ticket in tickets:
+        profile = await deps.user_service.profile_of(ticket.user_id)
+        name = (
+            profile.display_name
+            if profile and profile.display_name
+            else (profile.full_name if profile else None)
+            or (profile.username if profile else None)
+            or str(ticket.user_id)
+        )
+        payload.append(
+            {
+                "id": ticket.id,
+                "user_id": ticket.user_id,
+                "user_name": name,
+                "subject": ticket.subject,
+                "moderator_name": ticket.moderator_name,
+                "status": ticket.status,
+                "assigned_to": ticket.assigned_to,
+                "created_at": ticket.created_at,
+                "updated_at": ticket.updated_at,
+            }
+        )
+    return web.json_response({"ok": True, "can_manage": can_manage, "tickets": payload})
+
+
+async def _api_support_create_ticket(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    subject = str(body.get("subject") or "").strip()
+    moderator_name = str(body.get("moderator_name") or "").strip() or None
+    if not subject:
+        raise web.HTTPBadRequest(text="Нужно указать причину")
+    ticket = await deps.support_service.create_ticket(user_id, subject, moderator_name)
+    return web.json_response({"ok": True, "ticket_id": ticket.id})
+
+
+async def _api_support_ticket_detail(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    ticket_id = int(request.match_info["ticket_id"])
+    ticket = await deps.support_service.get_ticket(ticket_id)
+    if not ticket:
+        raise web.HTTPNotFound(text="Чат не найден")
+    can_manage = await _has_moderation_access(user_id, deps)
+    if not can_manage and ticket.user_id != user_id:
+        raise web.HTTPForbidden(text="Нет доступа")
+    messages = await deps.support_service.list_messages(ticket_id)
+    payload_messages = [
+        {
+            "id": msg.id,
+            "author_id": msg.author_id,
+            "author_role": msg.author_role,
+            "text": msg.text,
+            "created_at": msg.created_at,
+        }
+        for msg in messages
+    ]
+    profile = await deps.user_service.profile_of(ticket.user_id)
+    return web.json_response(
+        {
+            "ok": True,
+            "ticket": {
+                "id": ticket.id,
+                "user_id": ticket.user_id,
+                "subject": ticket.subject,
+                "moderator_name": ticket.moderator_name,
+                "status": ticket.status,
+                "assigned_to": ticket.assigned_to,
+                "created_at": ticket.created_at,
+                "updated_at": ticket.updated_at,
+            },
+            "user": _profile_payload(profile, request=request, include_private=True),
+            "messages": payload_messages,
+            "can_manage": can_manage,
+        }
+    )
+
+
+async def _api_support_ticket_message(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    ticket_id = int(request.match_info["ticket_id"])
+    ticket = await deps.support_service.get_ticket(ticket_id)
+    if not ticket:
+        raise web.HTTPNotFound(text="Чат не найден")
+    can_manage = await _has_moderation_access(user_id, deps)
+    if not can_manage and ticket.user_id != user_id:
+        raise web.HTTPForbidden(text="Нет доступа")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    text = str(body.get("text") or "").strip()
+    if not text:
+        raise web.HTTPBadRequest(text="Пустое сообщение")
+    role = "moderator" if can_manage else "user"
+    msg = await deps.support_service.add_message(ticket_id, user_id, role, text)
+    return web.json_response({"ok": True, "message_id": msg.id})
+
+
+async def _api_support_ticket_assign(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not await _has_moderation_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    ticket_id = int(request.match_info["ticket_id"])
+    ticket = await deps.support_service.get_ticket(ticket_id)
+    if not ticket:
+        raise web.HTTPNotFound(text="Чат не найден")
+    await deps.support_service.assign(ticket_id, user_id)
+    return web.json_response({"ok": True})
+
+
+async def _api_support_ticket_close(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    ticket_id = int(request.match_info["ticket_id"])
+    ticket = await deps.support_service.get_ticket(ticket_id)
+    if not ticket:
+        raise web.HTTPNotFound(text="Чат не найден")
+    can_manage = await _has_moderation_access(user_id, deps)
+    if not can_manage and ticket.user_id != user_id:
+        raise web.HTTPForbidden(text="Нет доступа")
+    await deps.support_service.close(ticket_id)
+    return web.json_response({"ok": True})
 
 
 async def _api_reviews_list(request: web.Request) -> web.Response:

@@ -170,10 +170,11 @@
         </div>
         <div class="panel-body">
           <div class="support-card">
-            <div class="support-title">Нужна помощь?</div>
-            <div class="support-text">Опиши проблему — мы ответим как можно быстрее.</div>
-            <button class="btn ghost">Написать в поддержку</button>
+            <div class="support-title">Активные чаты</div>
+            <div class="support-text">Выбери чат или создай новый.</div>
+            <button id="supportNewBtn" class="btn primary">Начать новый чат</button>
           </div>
+          <div id="supportList" class="deal-list"></div>
         </div>
       </section>
 
@@ -696,6 +697,44 @@
           <div class="admin-list" id="adminMerchantStats"></div>
           <div class="admin-list" id="adminMerchantDeals"></div>
           <button id="adminMerchantRemove" class="btn pill admin-pill ghost">Исключить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="supportNewModal">
+      <div class="modal-card glass moderation-modal">
+        <div class="modal-header">
+          <div class="modal-title">Новый чат поддержки</div>
+          <button id="supportNewClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body">
+          <label>Причина обращения
+            <textarea id="supportReason" rows="3" placeholder="Опишите проблему"></textarea>
+          </label>
+          <label>Имя модератора (если оспариваете блокировку)
+            <input id="supportModeratorName" type="text" placeholder="Например: Bastard" />
+          </label>
+          <button id="supportCreateBtn" class="btn primary">Создать чат</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="supportChatModal">
+      <div class="modal-card glass moderation-modal">
+        <div class="modal-header">
+          <div class="modal-title" id="supportChatTitle">Чат поддержки</div>
+          <button id="supportChatClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body">
+          <div id="supportChatList" class="chat-list"></div>
+          <form id="supportChatForm" class="chat-form">
+            <input id="supportChatInput" type="text" placeholder="Сообщение" />
+            <button id="supportChatSend" class="btn pill" type="submit">Отправить</button>
+          </form>
+          <div class="modal-actions-row modal-actions-bottom">
+            <button id="supportAssignBtn" class="btn">Взять в работу</button>
+            <button id="supportCloseBtn" class="btn danger">Закрыть чат</button>
+          </div>
         </div>
       </div>
     </div>

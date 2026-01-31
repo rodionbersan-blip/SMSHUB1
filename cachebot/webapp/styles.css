@@ -2887,6 +2887,24 @@ body.modal-open #app {
   color: var(--muted);
 }
 
+#supportList .deal-item {
+  cursor: pointer;
+}
+
+#supportChatList {
+  max-height: 320px;
+  overflow: auto;
+}
+
+#supportChatForm {
+  display: flex;
+  gap: 8px;
+}
+
+#supportChatForm input {
+  flex: 1 1 auto;
+}
+
 .p2p-edit-grid {
   display: grid;
   gap: 8px;

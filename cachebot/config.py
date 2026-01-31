@@ -30,6 +30,7 @@ class Config:
     crypto_pay_webhook_secret: str | None = None
     allow_unsafe_initdata: bool = False
     allow_unsafe_initdata_ids: Set[int] = None
+    support_db_path: Path = Path("var/support.db")
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -58,6 +59,10 @@ class Config:
         webhook_secret = os.getenv("CRYPTO_PAY_WEBHOOK_SECRET") or None
         allow_unsafe = os.getenv("ALLOW_UNSAFE_INITDATA", "0").lower() in {"1", "true", "yes"}
         unsafe_ids = _parse_admin_ids(os.getenv("ALLOW_UNSAFE_INITDATA_IDS"))
+        support_db_path = Path(os.getenv("SUPPORT_DB_PATH", "var/support.db")).expanduser()
+        if not support_db_path.is_absolute():
+            project_root = Path(__file__).resolve().parent.parent
+            support_db_path = (project_root / support_db_path).resolve()
         return cls(
             telegram_bot_token=token,
             crypto_pay_token=crypto_pay_token,
@@ -78,6 +83,7 @@ class Config:
             crypto_pay_webhook_secret=webhook_secret,
             allow_unsafe_initdata=allow_unsafe,
             allow_unsafe_initdata_ids=unsafe_ids,
+            support_db_path=support_db_path,
         )
 
 

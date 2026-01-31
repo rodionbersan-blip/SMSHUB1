@@ -282,6 +282,21 @@
   const adminMerchantRemove = document.getElementById("adminMerchantRemove");
   const adminMerchants = document.getElementById("adminMerchants");
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
+  const supportNewBtn = document.getElementById("supportNewBtn");
+  const supportList = document.getElementById("supportList");
+  const supportNewModal = document.getElementById("supportNewModal");
+  const supportNewClose = document.getElementById("supportNewClose");
+  const supportReason = document.getElementById("supportReason");
+  const supportModeratorName = document.getElementById("supportModeratorName");
+  const supportCreateBtn = document.getElementById("supportCreateBtn");
+  const supportChatModal = document.getElementById("supportChatModal");
+  const supportChatClose = document.getElementById("supportChatClose");
+  const supportChatTitle = document.getElementById("supportChatTitle");
+  const supportChatList = document.getElementById("supportChatList");
+  const supportChatForm = document.getElementById("supportChatForm");
+  const supportChatInput = document.getElementById("supportChatInput");
+  const supportAssignBtn = document.getElementById("supportAssignBtn");
+  const supportCloseBtn = document.getElementById("supportCloseBtn");
   const systemPanel = document.getElementById("systemPanel");
   const reviewsOpen = document.getElementById("reviewsOpen");
   const reviewsModal = document.getElementById("reviewsModal");
@@ -2289,6 +2304,83 @@
     navButtons.forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.view === viewId);
     });
+    if (viewId === "support") {
+      loadSupport();
+    }
+  };
+
+  const loadSupport = async () => {
+    const payload = await fetchJson("/api/support/tickets");
+    if (!payload?.ok || !supportList) return;
+    const tickets = payload.tickets || [];
+    supportList.innerHTML = "";
+    if (!tickets.length) {
+      supportList.innerHTML = "<div class=\"deal-empty\">Активных чатов нет.</div>";
+      return;
+    }
+    tickets.forEach((ticket) => {
+      const row = document.createElement("div");
+      row.className = "deal-item";
+      const who = payload.can_manage ? ticket.user_name : "Поддержка";
+      const status =
+        ticket.status === "in_progress"
+          ? "В работе"
+          : ticket.status === "open"
+          ? "Новый"
+          : "Закрыт";
+      row.innerHTML = `
+        <div class="deal-header">
+          <div class="deal-id">${who}</div>
+          <div class="deal-status">${status}</div>
+        </div>
+        <div class="deal-row">${ticket.subject}</div>
+      `;
+      row.addEventListener("click", () => openSupportChat(ticket.id, payload.can_manage));
+      supportList.appendChild(row);
+    });
+  };
+
+  const openSupportChat = async (ticketId, canManage) => {
+    if (!supportChatModal || !supportChatList) return;
+    const payload = await fetchJson(`/api/support/tickets/${ticketId}`);
+    if (!payload?.ok) return;
+    supportChatList.innerHTML = "";
+    const title =
+      payload.user?.display_name ||
+      payload.user?.full_name ||
+      payload.user?.username ||
+      `Чат #${ticketId}`;
+    if (supportChatTitle) supportChatTitle.textContent = title;
+    (payload.messages || []).forEach((msg) => {
+      const row = document.createElement("div");
+      row.className = "chat-message";
+      row.classList.add(msg.author_role === "moderator" ? "me" : "other");
+      row.textContent = msg.text;
+      supportChatList.appendChild(row);
+    });
+    supportAssignBtn.style.display = canManage ? "" : "none";
+    supportCloseBtn.style.display = canManage ? "" : "none";
+    supportAssignBtn.onclick = async () => {
+      await fetchJson(`/api/support/tickets/${ticketId}/assign`, { method: "POST", body: "{}" });
+      await loadSupport();
+    };
+    supportCloseBtn.onclick = async () => {
+      await fetchJson(`/api/support/tickets/${ticketId}/close`, { method: "POST", body: "{}" });
+      supportChatModal.classList.remove("open");
+      await loadSupport();
+    };
+    supportChatForm.onsubmit = async (event) => {
+      event.preventDefault();
+      const text = supportChatInput.value.trim();
+      if (!text) return;
+      await fetchJson(`/api/support/tickets/${ticketId}/messages`, {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      });
+      supportChatInput.value = "";
+      await openSupportChat(ticketId, canManage);
+    };
+    supportChatModal.classList.add("open");
   };
 
   const loadDisputes = async () => {
@@ -5028,6 +5120,27 @@
   adminActionsClose?.addEventListener("click", closeAdminActions);
   adminModeratorModalClose?.addEventListener("click", closeModeratorProfile);
   adminMerchantModalClose?.addEventListener("click", closeMerchantProfile);
+  supportNewBtn?.addEventListener("click", () => supportNewModal?.classList.add("open"));
+  supportNewClose?.addEventListener("click", () => supportNewModal?.classList.remove("open"));
+  supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
+  supportCreateBtn?.addEventListener("click", async () => {
+    const subject = supportReason.value.trim();
+    if (!subject) {
+      showNotice("Укажите причину обращения.");
+      return;
+    }
+    await fetchJson("/api/support/tickets", {
+      method: "POST",
+      body: JSON.stringify({
+        subject,
+        moderator_name: supportModeratorName.value.trim(),
+      }),
+    });
+    supportReason.value = "";
+    supportModeratorName.value = "";
+    supportNewModal.classList.remove("open");
+    await loadSupport();
+  });
 
   reviewsOpen?.addEventListener("click", async () => {
     state.reviewsTargetUserId = null;
