@@ -2247,6 +2247,11 @@ body.modal-open #app {
   border-color: rgba(20, 28, 38, 0.18);
 }
 
+:root[data-theme="dark"] .moderation-tabs .btn.pill {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
 :root[data-theme="light"] .moderation-user-actions .btn {
   background: rgba(255, 255, 255, 0.75);
   color: #1a2433;
