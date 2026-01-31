@@ -10,7 +10,7 @@ from datetime import datetime, timezone, timedelta
 from contextlib import suppress
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qsl, unquote
+from urllib.parse import parse_qsl, unquote, quote, quote_plus
 from decimal import Decimal, InvalidOperation, ROUND_UP
 
 from aiohttp import web
@@ -2152,6 +2152,12 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
             data_check_raw_unsorted
         )
         raw_sorted_expected, raw_sorted_legacy, raw_sorted_plain = _hashes(data_check_raw_sorted)
+        encoded_pairs = [(k, quote(v, safe="-_.~")) for k, v in data.items()]
+        encoded_sorted = "\n".join(f"{k}={v}" for k, v in sorted(encoded_pairs))
+        encoded_plus_pairs = [(k, quote_plus(v, safe="-_.~")) for k, v in data.items()]
+        encoded_plus_sorted = "\n".join(f"{k}={v}" for k, v in sorted(encoded_plus_pairs))
+        encoded_expected, encoded_legacy, encoded_plain = _hashes(encoded_sorted)
+        encoded_plus_expected, encoded_plus_legacy, encoded_plus_plain = _hashes(encoded_plus_sorted)
         if not (
             hmac.compare_digest(received_hash, raw_expected)
             or hmac.compare_digest(received_hash, raw_legacy)
@@ -2162,6 +2168,12 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
             or hmac.compare_digest(received_hash, raw_sorted_expected)
             or hmac.compare_digest(received_hash, raw_sorted_legacy)
             or hmac.compare_digest(received_hash, raw_sorted_plain)
+            or hmac.compare_digest(received_hash, encoded_expected)
+            or hmac.compare_digest(received_hash, encoded_legacy)
+            or hmac.compare_digest(received_hash, encoded_plain)
+            or hmac.compare_digest(received_hash, encoded_plus_expected)
+            or hmac.compare_digest(received_hash, encoded_plus_legacy)
+            or hmac.compare_digest(received_hash, encoded_plus_plain)
         ):
             logger.warning(
                 "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s raw_prefix=%s",
