@@ -2922,6 +2922,12 @@ body.modal-open #app {
   color: var(--muted);
 }
 
+#supportNewModal .support-reason-group select,
+#supportNewModal .support-reason-group input,
+#supportNewModal .support-reason-group textarea {
+  width: 100%;
+}
+
 .p2p-edit-grid {
   display: grid;
   gap: 8px;
