@@ -147,7 +147,7 @@ h2 {
 }
 
 :root[data-theme="light"] .profile-admin-badge {
-  background: linear-gradient(90deg, #8a6a10, #f2c86d 45%, #fff3c4 55%, #c08010);
+  background: linear-gradient(90deg, #7a5710, #b3872a 45%, #b3872a 55%, #7a5710);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -170,6 +170,11 @@ h2 {
 
 .profile-admin-badge::after {
   bottom: -2px;
+}
+
+:root[data-theme="light"] .profile-admin-badge::before,
+:root[data-theme="light"] .profile-admin-badge::after {
+  background: linear-gradient(90deg, transparent, #b3872a 30%, #b3872a 50%, #7a5710 70%, transparent);
 }
 
 
@@ -3746,11 +3751,15 @@ body.modal-open #app {
 
 :root[data-theme="light"] #profileModal .modal-title,
 :root[data-theme="light"] #profileModal .profile-value {
-  color: #fff;
+  color: #0f1115;
 }
 
 :root[data-theme="light"] #profileModal .profile-muted {
-  color: rgba(255, 255, 255, 0.68);
+  color: #3c4654;
+}
+
+:root[data-theme="light"] #profileModal .btn.pill {
+  color: var(--accent);
 }
 
 .modal-header {
