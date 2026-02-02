@@ -20,7 +20,7 @@ from cachebot.services.scheduler import handle_paid_invoice
 from cachebot.models.advert import AdvertSide
 from cachebot.models.deal import DealStatus
 from cachebot.models.dispute import EvidenceItem
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile, WebAppInfo
 from PIL import Image, ImageChops, ImageDraw
 from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
@@ -1321,22 +1321,22 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
         await deps.advert_service.reduce_volume(ad.id, base_usdt)
     except Exception as exc:
         raise web.HTTPBadRequest(text=f"Не удалось создать предложение: {exc}")
+    deal_kind = "продажу" if ad.side == AdvertSide.SELL else "покупку"
     offer_text = (
-        f"🆕 Новая сделка\n"
-        f"Объявление: {ad.public_id}\n"
+        f"🆕 Новая сделка на <b>{deal_kind}</b>\n"
         f"Сумма: ₽{rub_amount}\n"
         f"USDT: {deal.usdt_amount.quantize(Decimal('0.001'))}\n"
-        f"Сделка: {deal.hashtag}\n\n"
-        "Перейдите в приложение для обработки сделки."
+        "Перейдите в приложение для принятия"
     )
     if buyer_id != user_id:
         markup = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
-                    InlineKeyboardButton(text="✅ Принять", callback_data=f"p2p:offer:accept:{deal.id}"),
-                    InlineKeyboardButton(text="❌ Отклонить", callback_data=f"p2p:offer:decline:{deal.id}"),
-                ],
-                [InlineKeyboardButton(text="К сделке", callback_data=f"deal_info:{deal.id}")],
+                    InlineKeyboardButton(
+                        text="Открыть приложение",
+                        web_app=WebAppInfo(url=deps.config.webapp_url),
+                    )
+                ]
             ]
         )
         await bot.send_message(buyer_id, offer_text, reply_markup=markup)

@@ -8,7 +8,7 @@ from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, InlineKeyboardButton, Message
+from aiogram.types import CallbackQuery, InlineKeyboardButton, Message, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from cachebot.constants import BANK_OPTIONS, bank_label
@@ -1378,21 +1378,21 @@ async def p2p_offer_confirm(callback: CallbackQuery, state: FSMContext) -> None:
         await state.clear()
         return
     await state.clear()
+    deal_kind = "продажу" if ad.side == AdvertSide.SELL else "покупку"
     offer_text = (
-        f"🆕 Новая сделка\n"
-        f"Объявление: {ad.public_id}\n"
+        f"🆕 Новая сделка на <b>{deal_kind}</b>\n"
         f"Сумма: ₽{rub_amount}\n"
         f"USDT: {deal.usdt_amount.quantize(Decimal('0.001'))}\n"
-        f"Сделка: {deal.hashtag}\n\n"
-        "Перейдите в приложение для обработки сделки."
+        "Перейдите в приложение для принятия"
     )
+    webapp_url = deps.config.webapp_url
     builder = InlineKeyboardBuilder()
-    builder.button(text="✅ Принять", callback_data=f"{P2P_OFFER_ACCEPT_PREFIX}{deal.id}")
-    builder.button(text="❌ Отклонить", callback_data=f"{P2P_OFFER_DECLINE_PREFIX}{deal.id}")
-    builder.adjust(2)
-    builder.row(InlineKeyboardButton(text="К сделке", callback_data=f"{DEAL_INFO_PREFIX}{deal.id}"))
+    if webapp_url:
+        builder.button(text="Открыть приложение", web_app=WebAppInfo(url=webapp_url))
+        builder.adjust(1)
     if buyer_id != callback.from_user.id:
-        await callback.bot.send_message(buyer_id, offer_text, reply_markup=builder.as_markup())
+        markup = builder.as_markup() if webapp_url else None
+        await callback.bot.send_message(buyer_id, offer_text, reply_markup=markup)
     await _delete_callback_message(callback)
     info_builder = InlineKeyboardBuilder()
     info_builder.button(text="К сделке", callback_data=f"{DEAL_INFO_PREFIX}{deal.id}")
