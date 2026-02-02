@@ -3499,10 +3499,14 @@
     };
     const isCompleted = deal.status === "completed";
     if (!isCompleted && actions.accept_offer) {
-      addAction(topRow, "Принять", () => dealAction("accept", deal.id), true);
+      addAction(topRow, "Принять", () => dealAction("accept", deal.id), false, "", {
+        className: "deal-accept-btn",
+      });
     }
     if (!isCompleted && actions.decline_offer) {
-      addAction(topRow, "Отменить", () => dealAction("decline", deal.id), false, "status-bad");
+      addAction(topRow, "Отменить", () => dealAction("decline", deal.id), false, "", {
+        className: "deal-decline-btn",
+      });
     }
     if (!isCompleted && deal.status !== "dispute") {
       if (actions.seller_ready) {
