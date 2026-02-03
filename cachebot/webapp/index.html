@@ -320,6 +320,7 @@
                 <div class="admin-actions-row">
                   <button id="adminAddAdmin" class="btn pill admin-gradient-btn">Назначить</button>
                 </div>
+                <div id="adminAdmins" class="admin-list"></div>
               </div>
             </div>
           </div>
@@ -723,6 +724,25 @@
           <div class="admin-list" id="adminMerchantStats"></div>
           <div class="admin-list" id="adminMerchantDeals"></div>
           <button id="adminMerchantRemove" class="btn pill admin-pill ghost">Исключить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="adminAdminModal">
+      <div class="modal-card glass">
+        <div class="modal-header">
+          <div class="modal-title" id="adminAdminModalTitle">Профиль администратора</div>
+          <button id="adminAdminModalClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body moderation-user">
+          <div class="moderation-user-head">
+            <div class="admin-avatar" id="adminAdminAvatar"></div>
+            <div>
+              <div class="profile-title" id="adminAdminName">—</div>
+              <span class="moderation-status" id="adminAdminMeta">—</span>
+            </div>
+          </div>
+          <div class="admin-list" id="adminAdminActions"></div>
         </div>
       </div>
     </div>

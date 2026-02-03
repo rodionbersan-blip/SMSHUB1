@@ -288,6 +288,14 @@
   const adminAdminUsername = document.getElementById("adminAdminUsername");
   const adminAddAdmin = document.getElementById("adminAddAdmin");
   const adminAdminsCard = document.getElementById("adminAdminsCard");
+  const adminAdmins = document.getElementById("adminAdmins");
+  const adminAdminModal = document.getElementById("adminAdminModal");
+  const adminAdminModalClose = document.getElementById("adminAdminModalClose");
+  const adminAdminModalTitle = document.getElementById("adminAdminModalTitle");
+  const adminAdminAvatar = document.getElementById("adminAdminAvatar");
+  const adminAdminName = document.getElementById("adminAdminName");
+  const adminAdminMeta = document.getElementById("adminAdminMeta");
+  const adminAdminActions = document.getElementById("adminAdminActions");
   const adminMerchants = document.getElementById("adminMerchants");
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
   const supportNewBtn = document.getElementById("supportNewBtn");
@@ -3029,6 +3037,40 @@
         adminMerchants.appendChild(row);
       });
     }
+
+    const admins = await fetchJson("/api/admin/admins");
+    if (admins?.ok && adminAdmins) {
+      adminAdmins.innerHTML = "";
+      admins.admins.forEach((admin) => {
+        const name =
+          admin.profile?.display_name ||
+          admin.profile?.full_name ||
+          admin.profile?.username ||
+          admin.user_id;
+        const row = document.createElement("div");
+        row.className = "admin-item";
+        const btn = document.createElement("button");
+        btn.className = "admin-person-btn";
+        btn.type = "button";
+        const avatar = document.createElement("span");
+        avatar.className = "admin-avatar";
+        if (admin.profile?.avatar_url) {
+          avatar.innerHTML = `<img src="${admin.profile.avatar_url}" alt="" />`;
+        } else {
+          const initials =
+            String(name).replace(/[^A-Za-zА-Яа-я0-9]/g, "").slice(0, 2).toUpperCase() || "BC";
+          avatar.textContent = initials;
+        }
+        const text = document.createElement("div");
+        text.className = "admin-person-text";
+        text.innerHTML = `<div class="name">${name}</div>`;
+        btn.appendChild(avatar);
+        btn.appendChild(text);
+        btn.addEventListener("click", () => openAdminProfile(admin.user_id));
+        row.appendChild(btn);
+        adminAdmins.appendChild(row);
+      });
+    }
   };
 
   const openAdminActions = async () => {
@@ -3059,6 +3101,56 @@
   };
 
   const closeAdminActions = () => adminActionsModal?.classList.remove("open");
+
+  const openAdminProfile = async (adminId) => {
+    if (!adminAdminModal) return;
+    if (adminAdminActions) adminAdminActions.innerHTML = "";
+    const payload = await fetchJson(`/api/admin/admins/${adminId}`);
+    if (!payload?.ok) return;
+    const profile = payload.profile || {};
+    const name =
+      profile.display_name || profile.full_name || profile.username || adminId;
+    if (adminAdminModalTitle) {
+      adminAdminModalTitle.textContent = `Администратор: ${name}`;
+    }
+    if (adminAdminName) adminAdminName.textContent = name;
+    if (adminAdminMeta) {
+      adminAdminMeta.textContent = `ID: ${adminId}`;
+    }
+    if (adminAdminAvatar) {
+      if (profile.avatar_url) {
+        adminAdminAvatar.innerHTML = `<img src="${profile.avatar_url}" alt="" />`;
+      } else {
+        const initials =
+          String(name).replace(/[^A-Za-zА-Яа-я0-9]/g, "").slice(0, 2).toUpperCase() || "BC";
+        adminAdminAvatar.textContent = initials;
+      }
+    }
+    if (adminAdminActions) {
+      if (payload.actions?.length) {
+        payload.actions.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "admin-item";
+          row.innerHTML = `
+            <span>${item.title}</span>
+            <span>${item.when}</span>
+          `;
+          if (item.reason) {
+            const reason = document.createElement("div");
+            reason.className = "admin-pill-info";
+            reason.textContent = `Причина: ${item.reason}`;
+            row.appendChild(reason);
+          }
+          adminAdminActions.appendChild(row);
+        });
+      } else {
+        adminAdminActions.innerHTML = "<div class=\"deal-empty\">Действий нет.</div>";
+      }
+    }
+    adminAdminModal.classList.add("open");
+  };
+
+  const closeAdminProfile = () => adminAdminModal?.classList.remove("open");
 
   const openModeratorProfile = async (moderatorId) => {
     if (!adminModeratorModal) return;
@@ -5436,6 +5528,7 @@
   adminActionsClose?.addEventListener("click", closeAdminActions);
   adminModeratorModalClose?.addEventListener("click", closeModeratorProfile);
   adminMerchantModalClose?.addEventListener("click", closeMerchantProfile);
+  adminAdminModalClose?.addEventListener("click", closeAdminProfile);
   supportNewBtn?.addEventListener("click", () => {
     setSupportReason("");
     supportNewModal?.classList.add("open");

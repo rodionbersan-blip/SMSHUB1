@@ -90,6 +90,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/admin/moderators", _api_admin_add_moderator)
     app.router.add_delete("/api/admin/moderators/{user_id}", _api_admin_remove_moderator)
     app.router.add_post("/api/admin/admins", _api_admin_add_admin)
+    app.router.add_get("/api/admin/admins", _api_admin_admins)
+    app.router.add_get("/api/admin/admins/{user_id}", _api_admin_admin_detail)
     app.router.add_get("/api/admin/users/{user_id}/ads", _api_admin_user_ads)
     app.router.add_post("/api/admin/users/{user_id}/ads/{ad_id}/toggle", _api_admin_user_ads_toggle)
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
@@ -1784,6 +1786,73 @@ async def _api_admin_moderator_detail(request: web.Request) -> web.Response:
             "profile": _profile_payload(profile, request=request, include_private=True),
             "resolved": resolved,
             "open_disputes": open_payload,
+            "actions": action_payload,
+        }
+    )
+
+
+async def _api_admin_admins(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not _is_admin(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    admins = await deps.user_service.list_admins()
+    payload = []
+    for admin_id in admins:
+        profile = await deps.user_service.profile_of(admin_id)
+        payload.append(
+            {
+                "user_id": admin_id,
+                "profile": _profile_payload(profile, request=request, include_private=True),
+            }
+        )
+    return web.json_response({"ok": True, "admins": payload})
+
+
+async def _api_admin_admin_detail(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not _is_admin(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    target_id = int(request.match_info["user_id"])
+    profile = await deps.user_service.profile_of(target_id)
+    if not profile:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    actions = await deps.user_service.list_admin_actions()
+    recent = [item for item in actions if int(item.get("moderator_id", 0)) == target_id]
+    recent = recent[-20:][::-1]
+    action_payload = []
+    for item in recent:
+        when = item.get("ts") or ""
+        try:
+            dt = datetime.fromisoformat(when.replace("Z", "+00:00"))
+            when = dt.strftime("%d.%m.%Y, %H:%M")
+        except Exception:
+            when = item.get("ts") or "—"
+        action = item.get("action")
+        target_name = item.get("target_name") or str(item.get("target_id") or "—")
+        title = target_name
+        if action == "ban":
+            title = f"Заблокировал {target_name}"
+        elif action == "unban":
+            title = f"Разблокировал {target_name}"
+        elif action == "warn":
+            title = f"Предупредил {target_name}"
+        elif action == "block_deals":
+            title = f"Отключил сделки {target_name}"
+        elif action == "unblock_deals":
+            title = f"Включил сделки {target_name}"
+        action_payload.append(
+            {
+                "title": title,
+                "when": when,
+                "reason": item.get("reason") or "",
+            }
+        )
+    return web.json_response(
+        {
+            "ok": True,
+            "profile": _profile_payload(profile, request=request, include_private=True),
             "actions": action_payload,
         }
     )
