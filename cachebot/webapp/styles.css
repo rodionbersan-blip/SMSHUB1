@@ -1393,15 +1393,6 @@ body.modal-open #app {
   overflow: hidden;
 }
 
-.deal-review-block::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  pointer-events: none;
-}
-
 .deal-review-title {
   font-size: 12px;
   color: var(--muted);
@@ -1419,15 +1410,33 @@ body.modal-open #app {
   height: 28px;
   border-radius: 999px;
   padding: 4px 12px;
-  border: 2px solid transparent;
+  border: 0;
+}
+
+.deal-review-body.is-positive::after,
+.deal-review-body.is-negative::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  pointer-events: none;
+  border: 3px solid transparent;
+}
+
+.deal-review-body.is-positive::after {
+  border-color: rgba(46, 204, 113, 0.75);
+}
+
+.deal-review-body.is-negative::after {
+  border-color: rgba(229, 83, 61, 0.85);
 }
 
 .deal-review-body.is-positive {
-  border-color: rgba(46, 204, 113, 0.7);
+  position: relative;
 }
 
 .deal-review-body.is-negative {
-  border-color: rgba(229, 83, 61, 0.75);
+  position: relative;
 }
 
 .deal-review-text {
