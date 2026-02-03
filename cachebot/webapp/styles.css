@@ -2540,6 +2540,17 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(122, 146, 255, 0.78), rgba(186, 136, 255, 0.78));
 }
 
+#adminActionsBtn {
+  height: 40px;
+  background: linear-gradient(135deg, rgba(96, 140, 255, 0.6), rgba(120, 190, 255, 0.6));
+  color: #ffffff;
+  border: 1px solid rgba(120, 190, 255, 0.4);
+}
+
+#adminActionsBtn:hover {
+  background: linear-gradient(135deg, rgba(110, 155, 255, 0.75), rgba(140, 205, 255, 0.75));
+}
+
 #adminAddMerchant {
   flex: 1 1 100%;
   height: 40px;
