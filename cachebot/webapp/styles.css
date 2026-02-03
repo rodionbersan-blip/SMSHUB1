@@ -779,7 +779,7 @@ body.modal-open #app {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
   position: sticky;
   top: 12px;
@@ -803,8 +803,14 @@ body.modal-open #app {
   margin-left: auto;
 }
 
+.tabs .tab {
+  grid-column: span 2;
+  width: 100%;
+}
+
 #disputesTab,
 #adminTab {
+  grid-column: span 3;
   margin-top: 0;
   width: auto;
   flex: 0 0 auto;
@@ -812,7 +818,9 @@ body.modal-open #app {
 }
 
 .tabs-break {
-  display: none;
+  display: block;
+  grid-column: 1 / -1;
+  height: 0;
 }
 
 .nav-btn.with-icon {
