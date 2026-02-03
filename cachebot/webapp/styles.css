@@ -1384,13 +1384,16 @@ body.modal-open #app {
 
 .deal-review-block {
   margin-top: 10px;
-  padding: 6px 14px;
+  padding: 0;
   border-radius: 999px;
   background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
   border: 1px solid rgba(214, 170, 90, 0.5);
   text-align: center;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .deal-review-title {
@@ -1406,11 +1409,12 @@ body.modal-open #app {
   gap: 8px;
   font-size: 13px;
   color: #ffffff;
-  min-height: 24px;
-  height: 28px;
+  min-height: 30px;
+  height: 32px;
   border-radius: 999px;
-  padding: 4px 12px;
+  padding: 0 16px;
   border: 0;
+  width: 100%;
 }
 
 .deal-review-body.is-positive::after,
@@ -1420,7 +1424,7 @@ body.modal-open #app {
   inset: 0;
   border-radius: 999px;
   pointer-events: none;
-  border: 2px solid transparent;
+  border: 3px solid transparent;
 }
 
 .deal-review-body.is-positive::after {
