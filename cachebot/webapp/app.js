@@ -1613,12 +1613,6 @@
         deal.status === "completed" && !deal.reviewed
           ? '<span class="deal-review-badge">Оставьте отзыв</span>'
           : "";
-      const reviewLine =
-        deal.status === "completed" && deal.review
-          ? `<div class="deal-review-text">Оценка: ${deal.review.rating > 0 ? "👍" : "👎"}${
-              deal.review.comment ? ` • ${deal.review.comment}` : ""
-            }</div>`
-          : "";
       item.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">Сделка #${deal.public_id}</div>
@@ -1630,7 +1624,6 @@
         <div class="deal-row deal-row-meta"><span>Дата: ${formatDate(
           deal.created_at
         )}</span>${reviewBadge}</div>
-        ${reviewLine}
       `;
       item.addEventListener("click", () => openDealModal(deal.id));
       dealsList.appendChild(item);
@@ -1950,14 +1943,6 @@
         <div class="quick-deal-status ${statusClass(deal)}">${statusLabel(deal)}</div>
         <div class="quick-deal-unread" aria-hidden="true"></div>
       `;
-      if (deal.status === "completed" && deal.review) {
-        const review = document.createElement("div");
-        review.className = "quick-deal-review";
-        review.textContent = `Оценка: ${deal.review.rating > 0 ? "👍" : "👎"}${
-          deal.review.comment ? ` • ${deal.review.comment}` : ""
-        }`;
-        row.appendChild(review);
-      }
       row.addEventListener("click", () => {
         quickDealsPanel?.classList.remove("open");
         openDealModal(deal.id);
@@ -3576,6 +3561,18 @@
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>
     `;
+    if (deal.status === "completed" && deal.review) {
+      const review = document.createElement("div");
+      review.className = "deal-review-block";
+      review.innerHTML = `
+        <div class="deal-review-title">Отзыв</div>
+        <div class="deal-review-body">
+          <span class="deal-review-rating">${deal.review.rating > 0 ? "👍" : "👎"}</span>
+          <span class="deal-review-text">${deal.review.comment || "Без комментария"}</span>
+        </div>
+      `;
+      dealModalBody.appendChild(review);
+    }
     if (deal.status === "paid" && deal.qr_stage === "awaiting_seller_attach" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";

@@ -1379,11 +1379,30 @@ body.modal-open #app {
   margin-top: 4px;
 }
 
-.deal-review-text {
-  margin-top: 6px;
+.deal-review-block {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(120, 180, 255, 0.12);
+  border: 1px solid rgba(120, 180, 255, 0.2);
+}
+
+.deal-review-title {
   font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.deal-review-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
   color: var(--text);
-  opacity: 0.9;
+}
+
+.deal-review-rating {
+  font-size: 16px;
 }
 
 .deal-row-split {
@@ -5307,11 +5326,6 @@ body.pin-lock {
   white-space: nowrap;
 }
 
-.quick-deal-review {
-  margin-top: 6px;
-  font-size: 11px;
-  color: var(--muted);
-}
 
 .quick-deal-status.status-ok {
   background: rgba(46, 204, 113, 0.18);
