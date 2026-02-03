@@ -1817,6 +1817,31 @@ body.modal-open #app {
   color: #000000;
 }
 
+:root[data-theme="light"] .p2p-toolbar {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(20, 28, 38, 0.18);
+}
+
+:root[data-theme="light"] .p2p-toolbar .btn {
+  color: #1a2433;
+}
+
+:root[data-theme="light"] .p2p-toolbar .btn.primary {
+  background: rgba(31, 41, 55, 0.9);
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .p2p-toolbar .btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+  color: #1a2433;
+  transform: none;
+}
+
+:root[data-theme="light"] .p2p-toolbar .btn.primary:hover {
+  background: rgba(31, 41, 55, 0.95);
+  color: #ffffff;
+}
+
 @media (max-width: 480px) {
   .p2p-toolbar {
     flex-wrap: nowrap;
