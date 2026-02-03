@@ -4910,25 +4910,28 @@
   const setDonut = (el, segments, emptyColor = "rgba(140, 150, 170, 0.25)") => {
     if (!el) return;
     const total = segments.reduce((sum, item) => sum + item.value, 0);
-    if (!total) {
-      el.style.background = `conic-gradient(${emptyColor} 0 100%)`;
-    } else {
-      let start = 0;
-      const parts = segments.map((item) => {
-        const from = start;
-        const to = start + (item.value / total) * 100;
-        start = to;
-        return `${item.color} ${from}% ${to}%`;
-      });
-      el.style.background = `conic-gradient(${parts.join(",")})`;
-    }
+    const nextBackground = total
+      ? (() => {
+          let start = 0;
+          const parts = segments.map((item) => {
+            const from = start;
+            const to = start + (item.value / total) * 100;
+            start = to;
+            return `${item.color} ${from}% ${to}%`;
+          });
+          return `conic-gradient(${parts.join(",")})`;
+        })()
+      : `conic-gradient(${emptyColor} 0 100%)`;
+
     const maskCircle = el.querySelector(".stats-donut-mask circle");
     if (!maskCircle) return;
     const radius = 40;
     const circumference = 2 * Math.PI * radius;
     maskCircle.style.strokeDasharray = `${circumference}`;
     maskCircle.style.strokeDashoffset = `${circumference}`;
+    el.style.background = "conic-gradient(transparent 0 100%)";
     requestAnimationFrame(() => {
+      el.style.background = nextBackground;
       maskCircle.style.strokeDashoffset = "0";
     });
   };
