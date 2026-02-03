@@ -1097,7 +1097,7 @@ body.modal-open #app {
 #profileBalance {
   order: 2;
   grid-column: 1 / -1;
-  margin-top: 6px;
+  margin-top: 2px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
