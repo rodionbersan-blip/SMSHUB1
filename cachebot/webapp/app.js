@@ -1613,6 +1613,12 @@
         deal.status === "completed" && !deal.reviewed
           ? '<span class="deal-review-badge">Оставьте отзыв</span>'
           : "";
+      const reviewLine =
+        deal.status === "completed" && deal.review
+          ? `<div class="deal-review-text">Оценка: ${deal.review.rating > 0 ? "👍" : "👎"}${
+              deal.review.comment ? ` • ${deal.review.comment}` : ""
+            }</div>`
+          : "";
       item.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">Сделка #${deal.public_id}</div>
@@ -1624,6 +1630,7 @@
         <div class="deal-row deal-row-meta"><span>Дата: ${formatDate(
           deal.created_at
         )}</span>${reviewBadge}</div>
+        ${reviewLine}
       `;
       item.addEventListener("click", () => openDealModal(deal.id));
       dealsList.appendChild(item);
@@ -1943,6 +1950,14 @@
         <div class="quick-deal-status ${statusClass(deal)}">${statusLabel(deal)}</div>
         <div class="quick-deal-unread" aria-hidden="true"></div>
       `;
+      if (deal.status === "completed" && deal.review) {
+        const review = document.createElement("div");
+        review.className = "quick-deal-review";
+        review.textContent = `Оценка: ${deal.review.rating > 0 ? "👍" : "👎"}${
+          deal.review.comment ? ` • ${deal.review.comment}` : ""
+        }`;
+        row.appendChild(review);
+      }
       row.addEventListener("click", () => {
         quickDealsPanel?.classList.remove("open");
         openDealModal(deal.id);

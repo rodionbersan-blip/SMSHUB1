@@ -3158,11 +3158,21 @@ async def _deal_payload(
         else None,
     }
     reviewed = False
+    review_payload = None
     try:
-        reviewed = await deps.review_service.review_for_deal(deal.id, prefer_from=user_id) is not None
+        review = await deps.review_service.review_for_deal(deal.id, prefer_from=user_id)
+        if review and review.from_user_id == user_id:
+            reviewed = True
+            review_payload = {
+                "rating": review.rating,
+                "comment": review.comment or "",
+                "created_at": review.created_at.isoformat(),
+            }
     except Exception:
         reviewed = False
     payload["reviewed"] = reviewed
+    if review_payload:
+        payload["review"] = review_payload
     if deal.status == DealStatus.DISPUTE:
         dispute = await deps.dispute_service.dispute_for_deal(deal.id)
         payload["dispute_id"] = dispute.id if dispute else None
