@@ -549,6 +549,17 @@ body.modal-open #app {
   color: #ffffff;
 }
 
+.deal-qr-btn {
+  background: linear-gradient(135deg, #ffb55a, #ef8d3a);
+  color: #ffffff;
+  border: none;
+}
+
+.deal-qr-btn:hover {
+  background: linear-gradient(135deg, #ffc36f, #f09a47);
+  color: #ffffff;
+}
+
 .btn:hover {
   color: #ffffff;
 }

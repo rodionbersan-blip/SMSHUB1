@@ -3519,14 +3519,6 @@
     if (!isCompleted && actions.confirm_seller && deal.qr_stage === "ready") {
       addAction(topRow, "Получил нал", () => openConfirmComplete(deal), true);
     }
-    if (
-      !isCompleted &&
-      deal.status === "paid" &&
-      deal.role === "seller" &&
-      ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)
-    ) {
-      addAction(topRow, "Прикрепить QR", () => uploadQrForDeal(deal.id), true);
-    }
     if (!isCompleted && actions.confirm_buyer && deal.qr_stage === "ready" && !deal.buyer_cash_confirmed) {
       addAction(topRow, "Успешно снял", () => openBuyerProofModal(deal.id), true);
     } else if (
@@ -3550,6 +3542,21 @@
         badgeClass: "dot",
         className: "deal-chat-btn",
       });
+    }
+    if (
+      !isCompleted &&
+      deal.status === "paid" &&
+      deal.role === "seller" &&
+      ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)
+    ) {
+      addAction(
+        bottomRow,
+        "Прикрепить QR",
+        () => uploadQrForDeal(deal.id),
+        false,
+        "",
+        { className: "deal-qr-btn" }
+      );
     }
     if (!isCompleted && deal.status === "dispute" && deal.dispute_id) {
       addAction(
