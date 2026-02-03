@@ -699,6 +699,11 @@ body.modal-open #app {
   border: none;
 }
 
+.btn.status-ok:hover {
+  background: linear-gradient(135deg, #48d786, #33b372);
+  color: #ffffff;
+}
+
 .btn.status-bad {
   border: 1px solid rgba(229, 83, 61, 0.35);
   color: #e5533d;
@@ -3314,6 +3319,22 @@ body.modal-open #app {
   color: #1b2b4a;
   background: rgba(15, 17, 21, 0.06);
   border: 1px solid rgba(15, 17, 21, 0.14);
+}
+
+:root[data-theme="light"] #confirmCompleteModal #confirmCompleteSubmit {
+  background: linear-gradient(135deg, #3bcf7a, #2aa866);
+  color: #ffffff;
+  border: none;
+}
+
+#confirmCompleteModal #confirmCompleteSubmit {
+  background: linear-gradient(135deg, #3bcf7a, #2aa866);
+  color: #ffffff;
+  border: none;
+}
+
+#confirmCompleteModal #confirmCompleteCancel {
+  color: #e5533d;
 }
 
 :root[data-theme="light"] #confirmCompleteModal .modal-actions .btn:not(.primary) {
