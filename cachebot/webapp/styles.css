@@ -1223,7 +1223,7 @@ body.modal-open #app {
   text-align: center;
   display: inline-flex;
   align-items: center;
-  margin-top: -8px;
+  margin-top: -20px;
 }
 
 #profileWithdraw,
