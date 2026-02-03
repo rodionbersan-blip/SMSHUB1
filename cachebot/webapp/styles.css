@@ -515,6 +515,30 @@ body.modal-open #app {
   right: -6px;
 }
 
+.deal-chat-btn {
+  background: linear-gradient(135deg, rgba(255, 176, 88, 0.92), rgba(240, 136, 50, 0.92));
+  color: #ffffff;
+  border: none;
+}
+
+.deal-chat-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 195, 120, 0.98), rgba(245, 150, 70, 0.95));
+  color: #ffffff;
+}
+
+.deal-dispute-btn,
+.deal-cancel-btn {
+  background: linear-gradient(135deg, #ff6b5b, #e24b3e);
+  color: #ffffff;
+  border: none;
+}
+
+.deal-dispute-btn:hover,
+.deal-cancel-btn:hover {
+  background: linear-gradient(135deg, #ff7a6c, #e95a4d);
+  color: #ffffff;
+}
+
 .btn:hover {
   color: #ffffff;
 }
@@ -648,7 +672,6 @@ body.modal-open #app {
 .deal-accept-btn {
   background: linear-gradient(135deg, #2ecc71, #22b861);
   color: #ffffff;
-  box-shadow: 0 10px 18px rgba(34, 184, 97, 0.3);
 }
 
 .deal-accept-btn:hover {
@@ -659,7 +682,6 @@ body.modal-open #app {
 .deal-decline-btn {
   background: linear-gradient(135deg, #ff5a5a, #e54848);
   color: #ffffff;
-  box-shadow: 0 10px 18px rgba(229, 72, 72, 0.3);
 }
 
 .deal-decline-btn:hover {
@@ -3217,16 +3239,19 @@ body.modal-open #app {
   text-align: center;
   font-weight: 600;
   font-size: 13px;
-  color: var(--accent);
-  background: rgba(77, 163, 255, 0.14);
-  border: 1px solid rgba(77, 163, 255, 0.3);
+  color: #f6c46f;
+  background: rgba(255, 162, 77, 0.16);
+  border: 1px solid rgba(255, 162, 77, 0.32);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: inset 0 0 0 1px rgba(255, 190, 120, 0.15);
   white-space: pre-line;
 }
 
 :root[data-theme="light"] #confirmCompleteModal .deal-alert {
-  color: #1b2b4a;
-  background: rgba(77, 163, 255, 0.2);
-  border-color: rgba(77, 163, 255, 0.45);
+  color: #9b5a14;
+  background: rgba(255, 166, 90, 0.18);
+  border-color: rgba(255, 166, 90, 0.38);
 }
 
 :root[data-theme="light"] #confirmCompleteModal .btn.ghost {

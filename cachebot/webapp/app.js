@@ -3575,7 +3575,8 @@
           openDisputeModal(deal.id);
         },
         false,
-        "status-bad"
+        "",
+        { className: "deal-dispute-btn" }
       );
     }
     if (!isCompleted && actions.cancel) {
@@ -3584,7 +3585,8 @@
         "Отменить сделку",
         () => dealAction("cancel", deal.id),
         false,
-        "status-bad"
+        "",
+        { className: "deal-cancel-btn" }
       );
     }
     if (deal.status === "completed" && !deal.reviewed) {
