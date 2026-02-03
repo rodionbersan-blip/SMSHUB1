@@ -617,50 +617,50 @@ body.modal-open #app {
 }
 
 .btn.reviews-btn {
-  background: linear-gradient(135deg, rgba(199, 152, 62, 0.9), rgba(226, 186, 92, 0.95));
-  border: 1px solid rgba(214, 170, 90, 0.45);
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75), rgba(86, 62, 180, 0.75));
+  border: 1px solid rgba(90, 140, 220, 0.35);
   color: #ffffff;
-  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.18);
+  box-shadow: 0 8px 18px rgba(90, 130, 210, 0.2);
 }
 
 .btn.reviews-btn:hover {
-  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
   color: #ffffff;
 }
 
 :root[data-theme="dark"] .btn.reviews-btn {
-  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
-  border: 1px solid rgba(214, 170, 90, 0.45);
+  background: linear-gradient(135deg, rgba(32, 78, 160, 0.85), rgba(54, 44, 140, 0.85));
+  border: 1px solid rgba(90, 120, 200, 0.4);
   color: #ffffff;
-  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.2);
+  box-shadow: 0 8px 18px rgba(50, 80, 150, 0.25);
 }
 
 :root[data-theme="dark"] .btn.reviews-btn:hover {
-  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  background: linear-gradient(135deg, rgba(44, 96, 178, 0.92), rgba(70, 56, 160, 0.92));
   color: #ffffff;
 }
 
 .btn.stats-btn {
-  background: linear-gradient(135deg, rgba(199, 152, 62, 0.9), rgba(226, 186, 92, 0.95));
-  border: 1px solid rgba(214, 170, 90, 0.45);
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75), rgba(86, 62, 180, 0.75));
+  border: 1px solid rgba(90, 140, 220, 0.35);
   color: #ffffff;
-  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.18);
+  box-shadow: 0 8px 18px rgba(90, 130, 210, 0.2);
 }
 
 .btn.stats-btn:hover {
-  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
   color: #ffffff;
 }
 
 :root[data-theme="dark"] .btn.stats-btn {
-  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
-  border: 1px solid rgba(214, 170, 90, 0.45);
+  background: linear-gradient(135deg, rgba(32, 78, 160, 0.85), rgba(54, 44, 140, 0.85));
+  border: 1px solid rgba(90, 120, 200, 0.4);
   color: #ffffff;
-  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.2);
+  box-shadow: 0 8px 18px rgba(50, 80, 150, 0.25);
 }
 
 :root[data-theme="dark"] .btn.stats-btn:hover {
-  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  background: linear-gradient(135deg, rgba(44, 96, 178, 0.92), rgba(70, 56, 160, 0.92));
   color: #ffffff;
 }
 
@@ -3792,23 +3792,16 @@ body.modal-open #app {
   position: relative;
   display: grid;
   place-items: center;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+  -webkit-mask-image: conic-gradient(#000 var(--donut-sweep), transparent 0);
+  mask-image: conic-gradient(#000 var(--donut-sweep), transparent 0);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 
 .stats-donut.animate {
   animation: donut-pop 0.4s ease;
   transition: --donut-sweep 0.9s ease;
-}
-
-.stats-donut::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(transparent var(--donut-sweep), rgba(0, 0, 0, 0.85) 0);
-  -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%);
-  mask: radial-gradient(circle, transparent 58%, #000 60%);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .stats-donut::after {
@@ -3880,10 +3873,6 @@ body.modal-open #app {
 
 :root[data-theme="light"] .stats-donut::after {
   background: rgba(255, 255, 255, 0.9);
-}
-
-:root[data-theme="light"] .stats-donut::before {
-  background: conic-gradient(transparent var(--donut-sweep), rgba(255, 255, 255, 0.85) 0);
 }
 
 :root[data-theme="light"] .stats-row {
