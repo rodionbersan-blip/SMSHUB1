@@ -1972,8 +1972,10 @@
           <div class="deal-id">${price} • ${limit}</div>
           ${ownerId ? `<button class="btn p2p-owner-btn" data-owner="${ownerId}">${ownerName}</button>` : ""}
         </div>
-        <div class="deal-row">Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</div>
-        ${isOwner ? '<div class="p2p-owner-badge">Это ваше объявление</div>' : ""}
+        <div class="deal-row p2p-owner-row">
+          <span>Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</span>
+          ${isOwner ? '<span class="p2p-owner-badge">Это ваше объявление</span>' : ""}
+        </div>
       `;
       item.addEventListener("click", () => openP2PAd(ad.id));
       const ownerBtn = item.querySelector(".p2p-owner-btn");
