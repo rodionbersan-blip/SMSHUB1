@@ -1148,6 +1148,10 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
     if not values:
         raise web.HTTPBadRequest(text="Некорректные значения")
     side, total_usdt, price_rub, min_rub, max_rub, banks, terms = values
+    existing_ads = await deps.advert_service.list_user_ads(user_id)
+    if any(ad.side == side for ad in existing_ads):
+        side_label = "покупки" if side == "buy" else "продажи" if side == "sell" else "покупки или продажи"
+        raise web.HTTPBadRequest(text=f"Объявление {side_label} уже создано")
     balance = await deps.deal_service.balance_of(user_id)
     if total_usdt > balance:
         raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
