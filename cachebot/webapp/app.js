@@ -5385,6 +5385,10 @@
       return;
     }
     const username = adminModeratorUsername.value.trim();
+    if (!username && adminAddModeratorPanel?.classList.contains("open")) {
+      adminAddModeratorPanel.classList.remove("open");
+      return;
+    }
     if (!username) {
       log("Укажи username", "warn");
       adminModeratorUsername?.focus();
@@ -5395,6 +5399,7 @@
       body: JSON.stringify({ username }),
     });
     adminModeratorUsername.value = "";
+    adminAddModeratorPanel?.classList.remove("open");
     await loadAdmin();
   });
 
@@ -5405,6 +5410,10 @@
       return;
     }
     const username = adminMerchantUsername.value.trim();
+    if (!username && adminAddMerchantPanel?.classList.contains("open")) {
+      adminAddMerchantPanel.classList.remove("open");
+      return;
+    }
     if (!username) {
       log("Укажи username", "warn");
       adminMerchantUsername?.focus();
@@ -5415,6 +5424,7 @@
       body: JSON.stringify({ username }),
     });
     adminMerchantUsername.value = "";
+    adminAddMerchantPanel?.classList.remove("open");
     await loadAdmin();
   });
 
@@ -5425,6 +5435,10 @@
       return;
     }
     const username = adminAdminUsername.value.trim();
+    if (!username && adminAddAdminPanel?.classList.contains("open")) {
+      adminAddAdminPanel.classList.remove("open");
+      return;
+    }
     if (!username) {
       log("Укажи username", "warn");
       adminAdminUsername?.focus();
@@ -5438,6 +5452,7 @@
       showNotice("Администратор добавлен");
     }
     adminAdminUsername.value = "";
+    adminAddAdminPanel?.classList.remove("open");
     await loadAdmin();
   });
 
