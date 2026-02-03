@@ -4929,10 +4929,12 @@
     const circumference = 2 * Math.PI * radius;
     maskCircle.style.strokeDasharray = `${circumference}`;
     maskCircle.style.strokeDashoffset = `${circumference}`;
+    maskCircle.style.transition = "none";
     el.style.background = "conic-gradient(transparent 0 100%)";
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         el.style.background = nextBackground;
+        maskCircle.style.transition = "stroke-dashoffset 0.9s ease";
         maskCircle.style.strokeDashoffset = "0";
       });
     });
@@ -5977,6 +5979,8 @@
 
   statsClose?.addEventListener("click", () => {
     statsModal?.classList.remove("open");
+    if (statsFundsDonut) statsFundsDonut.style.background = "conic-gradient(transparent 0 100%)";
+    if (statsDealsDonut) statsDealsDonut.style.background = "conic-gradient(transparent 0 100%)";
   });
 
   statsTabButtons.forEach((btn) => {
