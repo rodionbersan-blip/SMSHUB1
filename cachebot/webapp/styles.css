@@ -2587,6 +2587,26 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(122, 146, 255, 0.78), rgba(186, 136, 255, 0.78));
 }
 
+:root[data-theme="light"] #adminSaveRates,
+:root[data-theme="light"] #adminActionsBtn {
+  background: linear-gradient(135deg, rgba(120, 170, 255, 0.45), rgba(180, 220, 255, 0.45));
+  border: 1px solid rgba(120, 170, 255, 0.4);
+  color: #1b2b4a;
+}
+
+:root[data-theme="light"] #adminSaveRates:hover,
+:root[data-theme="light"] #adminActionsBtn:hover {
+  background: linear-gradient(135deg, rgba(140, 185, 255, 0.6), rgba(195, 230, 255, 0.6));
+}
+
+#adminSaveRates,
+#adminActionsBtn,
+#adminAddModerator,
+#adminAddMerchant,
+#adminAddAdmin {
+  transition: none;
+}
+
 .admin-list {
   display: grid;
   gap: 10px;
