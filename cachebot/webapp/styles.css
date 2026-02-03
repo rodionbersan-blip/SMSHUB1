@@ -757,10 +757,20 @@ body.modal-open #app {
   box-shadow: none;
 }
 
+.btn.review-btn:hover {
+  filter: brightness(1.07);
+  box-shadow: 0 8px 18px rgba(244, 114, 46, 0.25);
+}
+
 :root[data-theme="light"] .btn.review-btn {
   background: linear-gradient(135deg, rgba(255, 167, 66, 0.94), rgba(244, 114, 46, 0.88));
   border-color: rgba(0, 0, 0, 0.25);
   color: #ffffff;
+}
+
+:root[data-theme="light"] .btn.review-btn:hover {
+  filter: brightness(1.07);
+  box-shadow: 0 8px 18px rgba(244, 114, 46, 0.22);
 }
 
 .tabs {
