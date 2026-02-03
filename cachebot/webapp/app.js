@@ -4937,6 +4937,12 @@
     if (buyerProofSend) buyerProofSend.disabled = true;
   });
 
+  buyerProofImg?.addEventListener("click", () => {
+    const src = buyerProofImg.getAttribute("src");
+    if (!src) return;
+    openImageModal(src, "Фото операции");
+  });
+
   buyerProofSend?.addEventListener("click", () => {
     const dealId = state.buyerProofDealId;
     if (!dealId) return;

@@ -3375,6 +3375,7 @@ body.modal-open #app {
   max-height: 140px;
   border-radius: 12px;
   border: 1px solid var(--border);
+  cursor: pointer;
 }
 
 .proof-clear-btn {
