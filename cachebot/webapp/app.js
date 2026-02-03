@@ -3564,11 +3564,12 @@
     if (deal.status === "completed" && deal.review) {
       const review = document.createElement("div");
       review.className = "deal-review-block";
+      const comment = (deal.review.comment || "").trim();
       review.innerHTML = `
         <div class="deal-review-title">Отзыв</div>
         <div class="deal-review-body">
           <span class="deal-review-rating">${deal.review.rating > 0 ? "👍" : "👎"}</span>
-          <span class="deal-review-text">${deal.review.comment || "Без комментария"}</span>
+          ${comment ? `<span class="deal-review-text">${comment}</span>` : ""}
         </div>
       `;
       dealModalBody.appendChild(review);

@@ -754,8 +754,11 @@ body.modal-open #app {
 }
 
 .btn.review-btn {
-  background: linear-gradient(135deg, rgba(255, 167, 66, 0.96), rgba(244, 114, 46, 0.9));
-  border: 1px solid rgba(0, 0, 0, 0.25);
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
+  border: 1px solid rgba(214, 170, 90, 0.5);
   color: #ffffff;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.6);
   box-shadow: none;
@@ -767,8 +770,8 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .btn.review-btn {
-  background: linear-gradient(135deg, rgba(255, 167, 66, 0.94), rgba(244, 114, 46, 0.88));
-  border-color: rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
+  border-color: rgba(214, 170, 90, 0.5);
   color: #ffffff;
 }
 
