@@ -1094,13 +1094,14 @@ body.modal-open #app {
   width: var(--action-btn-width);
   justify-content: center;
   justify-self: end;
+  transform: translateX(6px);
 }
 
 #profileBalance {
   order: 2;
   grid-column: 1 / 2;
   justify-self: start;
-  margin-top: -6px;
+  margin-top: -23px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
