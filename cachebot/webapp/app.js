@@ -1956,11 +1956,22 @@
     if (!payload?.ok) return;
   };
 
+  const formatLimitK = (value) => {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return "—";
+    if (Math.abs(num) < 1000) return `${formatAmount(num, 0)}`;
+    const kValue = Math.round((num / 1000) * 100) / 100;
+    const kText = kValue % 1 === 0 ? `${kValue.toFixed(0)}` : `${kValue}`;
+    return `${kText}К`;
+  };
+
   const renderP2PItem = (ad, type) => {
     const item = document.createElement("div");
     item.className = "deal-item";
     const sideLabel = ad.side === "sell" ? "Продажа" : "Покупка";
-    const limit = `${formatAmount(ad.min_rub, 0)}-${formatAmount(ad.max_rub, 0)}`;
+    const limitMin = formatLimitK(ad.min_rub);
+    const limitMax = formatLimitK(ad.max_rub);
+    const limit = limitMin === limitMax ? limitMin : `${limitMin} - ${limitMax}`;
     const price = `${formatAmount(ad.price_rub, 0)}р`;
     const owner = ad.owner || {};
     const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id;
