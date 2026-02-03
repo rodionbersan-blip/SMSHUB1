@@ -4826,7 +4826,7 @@
     }
   };
 
-  const setStatsTab = (tab) => {
+  const setStatsTab = (tab, opts = {}) => {
     statsTabButtons.forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.tab === tab);
     });
@@ -4836,7 +4836,9 @@
     if (statsRange) {
       statsRange.style.display = tab === "funds" ? "" : "none";
     }
-    loadProfileStats(tab === "deals" ? "deals" : "funds");
+    if (!opts.skipLoad) {
+      loadProfileStats(tab === "deals" ? "deals" : "funds");
+    }
   };
 
   const setDonut = (el, segments, emptyColor = "rgba(140, 150, 170, 0.25)") => {
@@ -5885,8 +5887,8 @@
     const toDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     if (statsFrom) statsFrom.value = formatDateInput(fromDate);
     if (statsTo) statsTo.value = formatDateInput(toDate);
-    setStatsTab("funds");
-    await loadProfileStats();
+    setStatsTab("funds", { skipLoad: true });
+    await loadProfileStats("funds");
     statsModal?.classList.add("open");
   });
 
