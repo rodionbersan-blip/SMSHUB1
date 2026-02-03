@@ -3387,6 +3387,22 @@ body.modal-open #app {
   min-height: 42px;
 }
 
+#buyerProofModal .deal-proof-actions .btn {
+  min-height: 46px;
+}
+
+:root[data-theme="light"] #buyerProofModal #buyerProofPick {
+  background: rgba(77, 163, 255, 0.18);
+  border: 1px solid rgba(77, 163, 255, 0.45);
+  color: #1b2b4a;
+}
+
+:root[data-theme="light"] #buyerProofModal #buyerProofPick:hover {
+  background: rgba(77, 163, 255, 0.28);
+  border-color: rgba(77, 163, 255, 0.6);
+  color: #0f1115;
+}
+
 #disputeOpenModal .deal-proof-actions .btn {
   min-height: 46px;
 }
