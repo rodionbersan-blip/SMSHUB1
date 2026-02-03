@@ -5849,10 +5849,10 @@
 
   profileStatsOpen?.addEventListener("click", async () => {
     const today = new Date();
-    const fromDate = new Date();
-    fromDate.setDate(today.getDate() - 29);
+    const fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    const toDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     if (statsFrom) statsFrom.value = formatDateInput(fromDate);
-    if (statsTo) statsTo.value = formatDateInput(today);
+    if (statsTo) statsTo.value = formatDateInput(toDate);
     setStatsTab("funds");
     await loadProfileStats();
     statsModal?.classList.add("open");
