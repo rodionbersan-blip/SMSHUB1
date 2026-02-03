@@ -252,89 +252,91 @@
           <span class="badge">Управление</span>
         </div>
         <div class="admin-grid">
-          <div class="admin-card admin-accordion">
-            <button class="search-toggle admin-toggle" data-target="adminRatesPanel">
-              <span>Управление ценой</span>
-              <span class="toggle-plus" aria-hidden="true">+</span>
-            </button>
-            <div id="adminRatesPanel" class="search-panel is-collapsed">
-              <div class="search-panel-inner">
-                <label>Курс USDT/RUB
-                  <input id="adminRate" type="number" step="0.01" />
-                </label>
-                <label>Комиссия пополнения (%)
-                  <input id="adminFee" type="number" step="0.01" />
-                </label>
-                <label>Комиссия на вывод (%)
-                  <input id="adminWithdrawFee" type="number" step="0.01" />
-                </label>
-                <button id="adminSaveRates" class="btn primary admin-gradient-btn">Сохранить</button>
+          <div class="admin-card admin-accordion-group">
+            <div class="admin-accordion">
+              <button class="search-toggle admin-toggle" data-target="adminRatesPanel">
+                <span>Управление ценой</span>
+                <span class="toggle-plus" aria-hidden="true">+</span>
+              </button>
+              <div id="adminRatesPanel" class="search-panel is-collapsed">
+                <div class="search-panel-inner">
+                  <label>Курс USDT/RUB
+                    <input id="adminRate" type="number" step="0.01" />
+                  </label>
+                  <label>Комиссия пополнения (%)
+                    <input id="adminFee" type="number" step="0.01" />
+                  </label>
+                  <label>Комиссия на вывод (%)
+                    <input id="adminWithdrawFee" type="number" step="0.01" />
+                  </label>
+                  <button id="adminSaveRates" class="btn primary admin-gradient-btn">Сохранить</button>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="admin-card admin-accordion">
-            <button class="search-toggle admin-toggle" data-target="adminModeratorsPanel">
-              <span id="adminModeratorsTitle">Управление модераторами</span>
-              <span class="toggle-plus" aria-hidden="true">+</span>
-            </button>
-            <div id="adminModeratorsPanel" class="search-panel is-collapsed">
-              <div class="search-panel-inner">
-                <div class="admin-actions-row">
-                  <button id="adminAddModerator" class="btn admin-gradient-btn">Добавить модератора</button>
-                </div>
-                <div id="adminAddModeratorPanel" class="admin-add-panel search-panel is-collapsed">
-                  <div class="search-panel-inner">
-                    <div class="admin-row">
-                      <input id="adminModeratorUsername" placeholder="@username" />
+            <div class="admin-accordion">
+              <button class="search-toggle admin-toggle" data-target="adminModeratorsPanel">
+                <span id="adminModeratorsTitle">Управление модераторами</span>
+                <span class="toggle-plus" aria-hidden="true">+</span>
+              </button>
+              <div id="adminModeratorsPanel" class="search-panel is-collapsed">
+                <div class="search-panel-inner">
+                  <div class="admin-actions-row">
+                    <button id="adminAddModerator" class="btn admin-gradient-btn">Добавить модератора</button>
+                  </div>
+                  <div id="adminAddModeratorPanel" class="admin-add-panel search-panel is-collapsed">
+                    <div class="search-panel-inner">
+                      <div class="admin-row">
+                        <input id="adminModeratorUsername" placeholder="@username" />
+                      </div>
                     </div>
                   </div>
+                  <div id="adminModeratorsActions" class="admin-actions-row">
+                    <button id="adminActionsBtn" class="btn admin-gradient-btn">Последние действия</button>
+                  </div>
+                  <div id="adminModerators" class="admin-list"></div>
                 </div>
-                <div id="adminModeratorsActions" class="admin-actions-row">
-                  <button id="adminActionsBtn" class="btn admin-gradient-btn">Последние действия</button>
-                </div>
-                <div id="adminModerators" class="admin-list"></div>
               </div>
             </div>
-          </div>
-          <div class="admin-card admin-accordion">
-            <button class="search-toggle admin-toggle" data-target="adminMerchantsPanel">
-              <span id="adminMerchantsTitle">Управление мерчантами</span>
-              <span class="toggle-plus" aria-hidden="true">+</span>
-            </button>
-            <div id="adminMerchantsPanel" class="search-panel is-collapsed">
-              <div class="search-panel-inner">
-                <div class="admin-actions-row">
-                  <button id="adminAddMerchant" class="btn admin-gradient-btn">Добавить мерчанта</button>
-                </div>
-                <div id="adminAddMerchantPanel" class="admin-add-panel search-panel is-collapsed">
-                  <div class="search-panel-inner">
-                    <div class="admin-row">
-                      <input id="adminMerchantUsername" placeholder="@username" />
+            <div class="admin-accordion">
+              <button class="search-toggle admin-toggle" data-target="adminMerchantsPanel">
+                <span id="adminMerchantsTitle">Управление мерчантами</span>
+                <span class="toggle-plus" aria-hidden="true">+</span>
+              </button>
+              <div id="adminMerchantsPanel" class="search-panel is-collapsed">
+                <div class="search-panel-inner">
+                  <div class="admin-actions-row">
+                    <button id="adminAddMerchant" class="btn admin-gradient-btn">Добавить мерчанта</button>
+                  </div>
+                  <div id="adminAddMerchantPanel" class="admin-add-panel search-panel is-collapsed">
+                    <div class="search-panel-inner">
+                      <div class="admin-row">
+                        <input id="adminMerchantUsername" placeholder="@username" />
+                      </div>
                     </div>
                   </div>
+                  <div id="adminMerchants" class="admin-list"></div>
                 </div>
-                <div id="adminMerchants" class="admin-list"></div>
               </div>
             </div>
-          </div>
-          <div class="admin-card admin-accordion" id="adminAdminsCard">
-            <button class="search-toggle admin-toggle" data-target="adminAdminsPanel">
-              <span>Управление Админами</span>
-              <span class="toggle-plus" aria-hidden="true">+</span>
-            </button>
-            <div id="adminAdminsPanel" class="search-panel is-collapsed">
-              <div class="search-panel-inner">
-                <div class="admin-actions-row">
-                  <button id="adminAddAdmin" class="btn admin-gradient-btn">Добавить админа</button>
-                </div>
-                <div id="adminAddAdminPanel" class="admin-add-panel search-panel is-collapsed">
-                  <div class="search-panel-inner">
-                    <div class="admin-row">
-                      <input id="adminAdminUsername" placeholder="@username" />
+            <div class="admin-accordion" id="adminAdminsCard">
+              <button class="search-toggle admin-toggle" data-target="adminAdminsPanel">
+                <span>Управление Админами</span>
+                <span class="toggle-plus" aria-hidden="true">+</span>
+              </button>
+              <div id="adminAdminsPanel" class="search-panel is-collapsed">
+                <div class="search-panel-inner">
+                  <div class="admin-actions-row">
+                    <button id="adminAddAdmin" class="btn admin-gradient-btn">Добавить админа</button>
+                  </div>
+                  <div id="adminAddAdminPanel" class="admin-add-panel search-panel is-collapsed">
+                    <div class="search-panel-inner">
+                      <div class="admin-row">
+                        <input id="adminAdminUsername" placeholder="@username" />
+                      </div>
                     </div>
                   </div>
+                  <div id="adminAdmins" class="admin-list"></div>
                 </div>
-                <div id="adminAdmins" class="admin-list"></div>
               </div>
             </div>
           </div>

@@ -2304,6 +2304,16 @@ body.modal-open #app {
   gap: 8px;
 }
 
+.admin-accordion-group {
+  display: grid;
+  gap: 10px;
+  padding: 12px 12px 6px;
+}
+
+.admin-accordion-group .admin-accordion {
+  padding: 0;
+}
+
 .admin-accordion:not(.open) {
   gap: 0;
   padding-top: 6px;
