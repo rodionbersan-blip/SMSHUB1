@@ -2280,7 +2280,8 @@ body.modal-open #app {
 .moderation-search-group {
   display: grid;
   gap: 10px;
-  padding: 12px 12px 2px;
+  padding: 12px 12px 0;
+  margin-bottom: -6px;
 }
 
 .moderation-search-group .moderation-search {
