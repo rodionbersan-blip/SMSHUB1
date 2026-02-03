@@ -1413,6 +1413,18 @@ body.modal-open #app {
   font-size: 16px;
 }
 
+.deal-review-rating.positive {
+  width: 22px;
+  height: 22px;
+  background: url("/app/assets/thumbs-up-green.svg") center/contain no-repeat;
+  font-size: 0;
+  line-height: 0;
+}
+
+.deal-review-rating.negative {
+  font-size: 16px;
+}
+
 .deal-row-split {
   display: flex;
   align-items: center;

@@ -3568,7 +3568,7 @@
       const fallback = deal.review.rating > 0 ? "Положительный отзыв" : "Отрицательный отзыв";
       review.innerHTML = `
         <div class="deal-review-body">
-          <span class="deal-review-rating">${deal.review.rating > 0 ? "👍" : "👎"}</span>
+          <span class="deal-review-rating ${deal.review.rating > 0 ? "positive" : "negative"}">${deal.review.rating > 0 ? "" : "👎"}</span>
           <span class="deal-review-text">${comment || fallback}</span>
         </div>
       `;
