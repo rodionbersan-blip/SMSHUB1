@@ -1343,6 +1343,11 @@ body.modal-open #app {
   color: #2ecc71;
 }
 
+:root[data-theme="light"] .deal-status.status-ok {
+  background: rgba(46, 204, 113, 0.25);
+  color: #1a8f52;
+}
+
 .deal-status.status-bad {
   background: rgba(229, 83, 61, 0.2);
   color: #e5533d;
@@ -5233,6 +5238,11 @@ body.pin-lock {
 .quick-deal-status.status-ok {
   background: rgba(46, 204, 113, 0.18);
   color: #2ecc71;
+}
+
+:root[data-theme="light"] .quick-deal-status.status-ok {
+  background: rgba(46, 204, 113, 0.25);
+  color: #1a8f52;
 }
 
 .quick-deal-status.status-bad {
