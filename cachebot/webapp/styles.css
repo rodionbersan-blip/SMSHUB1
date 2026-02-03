@@ -3834,6 +3834,13 @@ body.modal-open #app {
   color: var(--text);
 }
 
+.stats-donut-unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
 .stats-rows {
   width: 100%;
   display: grid;

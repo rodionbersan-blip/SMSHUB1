@@ -4845,7 +4845,12 @@
     const totalFunds = buySum + sellSum;
 
     if (statsFundsTotal) {
-      statsFundsTotal.textContent = `${formatAmount(totalFunds, 2)} USDT`;
+      const totalLabel = formatAmount(totalFunds, 2);
+      if (totalFunds > 100) {
+        statsFundsTotal.innerHTML = `${totalLabel}<div class="stats-donut-unit">USDT</div>`;
+      } else {
+        statsFundsTotal.textContent = `${totalLabel} USDT`;
+      }
     }
     if (statsFundsSummary) {
       statsFundsSummary.innerHTML = `
