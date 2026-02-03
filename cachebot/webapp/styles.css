@@ -2585,6 +2585,7 @@ body.modal-open #app {
 .admin-item {
   display: grid;
   gap: 8px;
+  width: 100%;
 }
 
 .admin-person-btn {
@@ -2599,6 +2600,7 @@ body.modal-open #app {
   color: var(--text);
   width: 100%;
   box-sizing: border-box;
+  max-width: 100%;
 }
 
 .admin-person-text {
