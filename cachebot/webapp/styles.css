@@ -2718,8 +2718,8 @@ body.modal-open #app {
 
 :root[data-theme="light"] .admin-person-btn {
   background: linear-gradient(135deg, rgba(120, 150, 255, 0.12), rgba(170, 140, 255, 0.12));
-  border-color: rgba(120, 150, 255, 0.35);
-  border-left-color: rgba(120, 150, 255, 0.7);
+  border-color: rgba(255, 160, 70, 0.35);
+  border-left-color: rgba(255, 160, 70, 0.7);
   color: #1a2433;
 }
 
