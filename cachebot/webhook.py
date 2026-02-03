@@ -291,6 +291,7 @@ async def _api_profile(request: web.Request) -> web.Response:
 async def _api_profile_stats(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
+    scope = (request.query.get("scope") or "").strip().lower()
     now = datetime.now(timezone.utc)
     default_from = now - timedelta(days=29)
     from_param = _parse_date_param(request.query.get("from"))
@@ -320,8 +321,9 @@ async def _api_profile_stats(request: web.Request) -> web.Response:
     expired = 0
     total = 0
     for deal in deals:
-        if deal.created_at < range_from or deal.created_at > range_to:
-            continue
+        if scope != "deals_all":
+            if deal.created_at < range_from or deal.created_at > range_to:
+                continue
         total += 1
         if deal.buyer_id == user_id:
             buy_sum += deal.usdt_amount

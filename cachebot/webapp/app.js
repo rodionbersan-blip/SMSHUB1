@@ -335,6 +335,7 @@
   const statsClose = document.getElementById("statsClose");
   const statsFrom = document.getElementById("statsFrom");
   const statsTo = document.getElementById("statsTo");
+  const statsRange = document.querySelector(".stats-range");
   const statsFundsDonut = document.getElementById("statsFundsDonut");
   const statsDealsDonut = document.getElementById("statsDealsDonut");
   const statsFundsSummary = document.getElementById("statsFundsSummary");
@@ -4809,6 +4810,10 @@
     document.querySelectorAll(".stats-panel").forEach((panel) => {
       panel.classList.toggle("active", panel.dataset.panel === tab);
     });
+    if (statsRange) {
+      statsRange.style.display = tab === "funds" ? "" : "none";
+    }
+    loadProfileStats(tab === "deals" ? "deals" : "funds");
   };
 
   const setDonut = (el, segments, emptyColor = "rgba(140, 150, 170, 0.25)") => {
@@ -4893,15 +4898,19 @@
     ]);
   };
 
-  const loadProfileStats = async () => {
+  const loadProfileStats = async (mode = "funds") => {
     if (!statsFrom || !statsTo) return;
     const fromValue = statsFrom.value;
     const toValue = statsTo.value;
-    if (fromValue && toValue && fromValue > toValue) {
+    if (mode === "funds" && fromValue && toValue && fromValue > toValue) {
       showNotice("Период задан неверно");
       return;
     }
-    const payload = await fetchJson(`/api/profile/stats?from=${fromValue}&to=${toValue}`);
+    const query =
+      mode === "deals"
+        ? "scope=deals_all"
+        : `from=${fromValue}&to=${toValue}`;
+    const payload = await fetchJson(`/api/profile/stats?${query}`);
     if (!payload?.ok) {
       showNotice("Не удалось загрузить статистику");
       return;
@@ -5868,8 +5877,16 @@
     });
   });
 
-  statsFrom?.addEventListener("change", loadProfileStats);
-  statsTo?.addEventListener("change", loadProfileStats);
+  statsFrom?.addEventListener("change", () => {
+    if (document.querySelector(".stats-panel.active")?.dataset.panel === "funds") {
+      loadProfileStats("funds");
+    }
+  });
+  statsTo?.addEventListener("change", () => {
+    if (document.querySelector(".stats-panel.active")?.dataset.panel === "funds") {
+      loadProfileStats("funds");
+    }
+  });
 
   reviewsClose?.addEventListener("click", () => {
     reviewsModal.classList.remove("open");
