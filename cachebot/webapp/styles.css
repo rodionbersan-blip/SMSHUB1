@@ -1406,6 +1406,9 @@ body.modal-open #app {
   color: #ffffff;
 }
 
+.deal-review-text {
+  font-weight: 700;
+}
 .deal-review-rating {
   font-size: 16px;
 }

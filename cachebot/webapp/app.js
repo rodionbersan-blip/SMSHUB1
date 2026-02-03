@@ -3565,11 +3565,11 @@
       const review = document.createElement("div");
       review.className = "deal-review-block";
       const comment = (deal.review.comment || "").trim();
+      const fallback = deal.review.rating > 0 ? "Положительный отзыв" : "Отрицательный отзыв";
       review.innerHTML = `
-        <div class="deal-review-title">Отзыв</div>
         <div class="deal-review-body">
           <span class="deal-review-rating">${deal.review.rating > 0 ? "👍" : "👎"}</span>
-          ${comment ? `<span class="deal-review-text">${comment}</span>` : ""}
+          <span class="deal-review-text">${comment || fallback}</span>
         </div>
       `;
       dealModalBody.appendChild(review);
