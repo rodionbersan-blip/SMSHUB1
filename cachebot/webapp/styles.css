@@ -2573,52 +2573,52 @@ body.modal-open #app {
 #adminAddModerator {
   flex: 1 1 100%;
   height: 40px;
-  background: linear-gradient(135deg, rgba(110, 132, 255, 0.65), rgba(171, 118, 255, 0.65));
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
   color: #ffffff;
-  border: 1px solid rgba(140, 140, 255, 0.4);
+  border: 1px solid rgba(214, 170, 90, 0.5);
   margin-top: 4px;
 }
 
 #adminAddModerator:hover {
-  background: linear-gradient(135deg, rgba(122, 146, 255, 0.78), rgba(186, 136, 255, 0.78));
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
 #adminActionsBtn {
   height: 40px;
-  background: linear-gradient(135deg, rgba(110, 132, 255, 0.65), rgba(171, 118, 255, 0.65));
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
   color: #ffffff;
-  border: 1px solid rgba(140, 140, 255, 0.4);
+  border: 1px solid rgba(214, 170, 90, 0.5);
   width: 100%;
 }
 
 #adminActionsBtn:hover {
-  background: linear-gradient(135deg, rgba(122, 146, 255, 0.78), rgba(186, 136, 255, 0.78));
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
 #adminAddMerchant {
   flex: 1 1 100%;
   height: 40px;
-  background: linear-gradient(135deg, rgba(110, 132, 255, 0.65), rgba(171, 118, 255, 0.65));
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
   color: #ffffff;
-  border: 1px solid rgba(140, 140, 255, 0.4);
+  border: 1px solid rgba(214, 170, 90, 0.5);
   margin-top: 4px;
 }
 
 #adminAddMerchant:hover {
-  background: linear-gradient(135deg, rgba(122, 146, 255, 0.78), rgba(186, 136, 255, 0.78));
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
 #adminAddAdmin {
   flex: 1 1 100%;
   height: 40px;
-  background: linear-gradient(135deg, rgba(110, 132, 255, 0.65), rgba(171, 118, 255, 0.65));
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
   color: #ffffff;
-  border: 1px solid rgba(140, 140, 255, 0.4);
+  border: 1px solid rgba(214, 170, 90, 0.5);
   margin-top: 4px;
 }
 
 #adminAddAdmin:hover {
-  background: linear-gradient(135deg, rgba(122, 146, 255, 0.78), rgba(186, 136, 255, 0.78));
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
 :root[data-theme="light"] #adminSaveRates,
@@ -2773,14 +2773,14 @@ body.modal-open #app {
 
 #adminSaveRates {
   height: 40px;
-  background: linear-gradient(135deg, rgba(110, 132, 255, 0.65), rgba(171, 118, 255, 0.65));
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
   color: #ffffff;
-  border: 1px solid rgba(140, 140, 255, 0.4);
+  border: 1px solid rgba(214, 170, 90, 0.5);
   margin-top: 4px;
 }
 
 #adminSaveRates:hover {
-  background: linear-gradient(135deg, rgba(122, 146, 255, 0.78), rgba(186, 136, 255, 0.78));
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
 #adminSaveRates:active {
