@@ -1966,12 +1966,14 @@
     const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id;
     const ownerName = owner.display_name || owner.full_name || owner.username || "—";
     if (type === "public") {
+      const isOwner = ownerId && state.userId && Number(ownerId) === Number(state.userId);
       item.innerHTML = `
         <div class="deal-header">
-          <div class="deal-id">${price} * ${limit}</div>
+          <div class="deal-id">${price} • ${limit}</div>
           ${ownerId ? `<button class="btn p2p-owner-btn" data-owner="${ownerId}">${ownerName}</button>` : ""}
         </div>
         <div class="deal-row">Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</div>
+        ${isOwner ? '<div class="p2p-owner-badge">Это ваше объявление</div>' : ""}
       `;
       item.addEventListener("click", () => openP2PAd(ad.id));
       const ownerBtn = item.querySelector(".p2p-owner-btn");
