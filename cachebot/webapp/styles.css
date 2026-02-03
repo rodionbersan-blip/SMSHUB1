@@ -2291,6 +2291,7 @@ body.modal-open #app {
 
 .moderation-search-group.admin-card {
   padding-bottom: 0;
+  margin-bottom: -6px;
 }
 
 .moderation-search-group .moderation-search {
