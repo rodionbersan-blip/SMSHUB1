@@ -1522,6 +1522,10 @@ body.modal-open #app {
   justify-content: flex-end;
 }
 
+.p2p-bank-logos-inline {
+  margin-top: 0;
+}
+
 .p2p-bank-logos .p2p-bank-logo {
   width: 20px;
   height: 20px;

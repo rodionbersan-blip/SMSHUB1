@@ -1986,6 +1986,12 @@
         })
         .filter(Boolean)
         .join("");
+      const ownerRowRight = isOwner
+        ? '<span class="p2p-owner-badge">Это ваше объявление</span>'
+        : bankIcons
+          ? `<span class="p2p-bank-logos p2p-bank-logos-inline">${bankIcons}</span>`
+          : "";
+      const bankRow = isOwner && bankIcons ? `<div class="deal-row p2p-bank-logos">${bankIcons}</div>` : "";
       item.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">${price} • ${limit}</div>
@@ -1993,9 +1999,9 @@
         </div>
         <div class="deal-row p2p-owner-row">
           <span>Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</span>
-          ${isOwner ? '<span class="p2p-owner-badge">Это ваше объявление</span>' : ""}
+          ${ownerRowRight}
         </div>
-        ${bankIcons ? `<div class="deal-row p2p-bank-logos">${bankIcons}</div>` : ""}
+        ${bankRow}
       `;
       item.addEventListener("click", () => openP2PAd(ad.id));
       const ownerBtn = item.querySelector(".p2p-owner-btn");
