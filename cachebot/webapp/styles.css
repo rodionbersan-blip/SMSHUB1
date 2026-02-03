@@ -1415,10 +1415,10 @@ body.modal-open #app {
   gap: 8px;
   font-size: 13px;
   color: #ffffff;
-  min-height: 30px;
-  height: 34px;
+  min-height: 24px;
+  height: 28px;
   border-radius: 999px;
-  padding: 6px 12px;
+  padding: 4px 12px;
   border: 2px solid transparent;
 }
 
