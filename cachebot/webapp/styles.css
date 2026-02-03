@@ -1189,6 +1189,11 @@ body.modal-open #app {
   color: var(--text);
 }
 
+#profileRegistered {
+  text-align: center;
+  display: block;
+}
+
 .profile-balance-row.balance-only {
   grid-template-columns: 1fr;
   justify-items: start;
