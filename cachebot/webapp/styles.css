@@ -3962,6 +3962,10 @@ body.modal-open #app {
   background: rgba(255, 255, 255, 0.9);
 }
 
+:root[data-theme="light"] .stats-donut {
+  filter: saturate(1.2);
+}
+
 :root[data-theme="light"] .stats-row {
   background: rgba(240, 244, 252, 0.9);
 }
