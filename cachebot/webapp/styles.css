@@ -2557,6 +2557,15 @@ body.modal-open #app {
   align-items: stretch;
 }
 
+#adminModeratorsPanel .admin-actions-row {
+  margin-top: 2px;
+}
+
+#adminModeratorsPanel #adminModeratorsActions {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
 #adminModeratorsPanel .admin-row input {
   flex: 1 1 100%;
 }
