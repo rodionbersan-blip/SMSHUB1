@@ -4927,6 +4927,17 @@
     el.style.setProperty("--donut-reveal", "0deg");
     void el.offsetWidth;
     el.classList.add("animate");
+    const start = performance.now();
+    const duration = 900;
+    const step = (now) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const angle = progress * 360;
+      el.style.setProperty("--donut-reveal", `${angle}deg`);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
   };
 
   const renderProfileStats = (payload) => {
