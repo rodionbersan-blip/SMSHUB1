@@ -1538,7 +1538,7 @@
     const profile = data?.profile;
     state.userId = profile?.user_id ?? null;
     const display = profile?.display_name || profile?.full_name || "Без имени";
-    profileName.textContent = display;
+    if (profileName) profileName.textContent = display;
     if (profileDisplayName) profileDisplayName.textContent = display;
     if (profileUsername) {
       profileUsername.textContent = "";
