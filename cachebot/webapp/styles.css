@@ -5834,30 +5834,6 @@ body.pin-lock {
   color: #ffffff;
 }
 
-.balance-manage-panel {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease, opacity 0.35s ease;
-}
-
-.balance-manage-panel.open {
-  max-height: 240px;
-  opacity: 1;
-}
-
-.balance-manage-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: -6px;
-}
-
-.balance-manage-panel .stats-tab-btn,
-#balanceManageOpen.stats-tab-btn {
-  color: #ffffff !important;
-}
-
 .balance-manage-form {
   display: grid;
   gap: 10px;
@@ -5886,4 +5862,31 @@ body.pin-lock {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(120, 140, 200, 0.3);
   color: #1b1e28;
+}
+
+.balance-manage-btn,
+.balance-manage-submit {
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.9), rgba(226, 186, 92, 0.95));
+  border: 1px solid rgba(214, 170, 90, 0.45);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.18);
+}
+
+.balance-manage-btn:hover,
+.balance-manage-submit:hover {
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .balance-manage-btn,
+:root[data-theme="dark"] .balance-manage-submit {
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
+  border: 1px solid rgba(214, 170, 90, 0.45);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.2);
+}
+
+:root[data-theme="dark"] .balance-manage-btn:hover,
+:root[data-theme="dark"] .balance-manage-submit:hover {
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
 }

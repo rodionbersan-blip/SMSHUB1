@@ -108,16 +108,6 @@
             <div class="profile-balance-row history-row">
               <button id="balanceManageOpen" class="btn pill stats-tab-btn">Управление балансом</button>
             </div>
-            <div class="balance-manage-panel" id="balanceManagePanel">
-              <div class="balance-manage-actions">
-                <button id="balanceManageTopup" class="btn pill stats-tab-btn" type="button">Пополнить</button>
-                <button id="balanceManageWithdraw" class="btn pill stats-tab-btn" type="button">Вывести</button>
-              </div>
-              <form id="balanceManageForm" class="balance-manage-form">
-                <input id="balanceManageAmount" type="number" step="0.001" min="0" placeholder="Сумма в USDT" />
-                <button id="balanceManageSubmit" class="btn pill stats-tab-btn" type="submit">Пополнить</button>
-              </form>
-            </div>
             <div class="profile-balance-row history-row">
               <button id="balanceHistoryOpen" class="btn pill with-icon">
                 <span class="btn-icon"><img src="/app/assets/balance-history-icon.png" alt="" /></span>
@@ -897,6 +887,25 @@
             </label>
             <button type="submit" class="btn primary">Оплатить</button>
           </form>
+        </div>
+      </div>
+
+      <div class="modal" id="balanceManageModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Управление балансом</div>
+            <button id="balanceManageClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-actions-row">
+              <button id="balanceManageTopup" class="btn pill balance-manage-btn" type="button">Пополнить</button>
+              <button id="balanceManageWithdraw" class="btn pill balance-manage-btn" type="button">Вывести</button>
+            </div>
+            <form id="balanceManageForm" class="balance-manage-form">
+              <input id="balanceManageAmount" type="number" step="0.001" min="0" placeholder="Сумма в USDT" />
+              <button id="balanceManageSubmit" class="btn pill balance-manage-submit" type="submit">Пополнить</button>
+            </form>
+          </div>
         </div>
       </div>
 

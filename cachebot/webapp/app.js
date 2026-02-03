@@ -103,7 +103,8 @@
   const profileBalanceReserved = document.getElementById("profileBalanceReserved");
   const profileWithdraw = document.getElementById("profileWithdraw");
   const balanceManageOpen = document.getElementById("balanceManageOpen");
-  const balanceManagePanel = document.getElementById("balanceManagePanel");
+  const balanceManageModal = document.getElementById("balanceManageModal");
+  const balanceManageClose = document.getElementById("balanceManageClose");
   const balanceManageTopup = document.getElementById("balanceManageTopup");
   const balanceManageWithdraw = document.getElementById("balanceManageWithdraw");
   const balanceManageForm = document.getElementById("balanceManageForm");
@@ -1623,24 +1624,21 @@
     if (balanceManageSubmit) {
       balanceManageSubmit.textContent = mode === "withdraw" ? "Вывести" : "Пополнить";
     }
-    if (mode === "withdraw") {
-      balanceManageForm?.classList.remove("show");
-      balanceManagePanel?.classList.remove("open");
-      withdrawModal?.classList.add("open");
-    } else {
-      balanceManageForm?.classList.add("show");
-    }
+    balanceManageForm?.classList.add("show");
   };
 
   balanceManageOpen?.addEventListener("click", () => {
-    balanceManagePanel?.classList.toggle("open");
-    if (!balanceManagePanel?.classList.contains("open")) {
-      balanceManageForm?.classList.remove("show");
-    }
+    balanceManageModal?.classList.add("open");
+    balanceManageForm?.classList.remove("show");
   });
 
   balanceManageTopup?.addEventListener("click", () => setBalanceManageMode("topup"));
   balanceManageWithdraw?.addEventListener("click", () => setBalanceManageMode("withdraw"));
+
+  balanceManageClose?.addEventListener("click", () => {
+    balanceManageModal?.classList.remove("open");
+    balanceManageForm?.classList.remove("show");
+  });
 
   balanceManageForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1649,14 +1647,42 @@
       log("Введите сумму в USDT", "warn");
       return;
     }
-    const payload = await fetchJson("/api/balance/topup", {
+    if (balanceManageMode === "topup") {
+      const payload = await fetchJson("/api/balance/topup", {
+        method: "POST",
+        body: JSON.stringify({ amount }),
+      });
+      if (payload?.ok) {
+        balanceManageForm.reset();
+        openLink(payload.pay_url);
+        log("Счёт создан. Если не открылось, используй кнопку в сообщении.", "info");
+      }
+      return;
+    }
+    if (!state.initData) {
+      showNotice("Вывод пока недоступен. Попробуйте немного позже.");
+      return;
+    }
+    const res = await fetch("/api/balance/withdraw", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Telegram-Init-Data": state.initData,
+      },
       body: JSON.stringify({ amount }),
     });
+    if (!res.ok) {
+      const text = await res.text();
+      showNotice("Вывод пока недоступен. Попробуйте немного позже.");
+      log(`Ошибка API /api/balance/withdraw: ${text}`, "error");
+      return;
+    }
+    const payload = await res.json();
     if (payload?.ok) {
       balanceManageForm.reset();
-      openLink(payload.pay_url);
-      log("Счёт создан. Если не открылось, используй кнопку в сообщении.", "info");
+      await loadBalance();
+      playSuccessAnimation();
+      log("Вывод выполнен. Средства отправлены в Crypto Bot.", "info");
     }
   });
 
