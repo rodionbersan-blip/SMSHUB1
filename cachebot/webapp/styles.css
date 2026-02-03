@@ -1419,8 +1419,8 @@ body.modal-open #app {
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
 
 .deal-review-rating.positive {
