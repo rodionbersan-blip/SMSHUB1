@@ -5436,6 +5436,8 @@
       p2pCreateForm.reset();
       await loadMyAds();
       await loadP2PSummary();
+    } else if (payload?.error) {
+      showNotice(payload.error);
     }
   });
 
