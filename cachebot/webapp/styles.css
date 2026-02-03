@@ -1156,6 +1156,15 @@ body.modal-open #app {
   --action-btn-gap: 10px;
 }
 
+#profileBalanceCard .profile-balance-row {
+  margin-top: -6px;
+}
+
+#profileBalanceCard .profile-title {
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
 .profile-balance-row.balance-only {
   grid-template-columns: 1fr;
   justify-items: start;
