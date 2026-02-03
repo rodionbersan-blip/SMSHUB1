@@ -2555,12 +2555,19 @@ body.modal-open #app {
   align-items: center;
   gap: 10px;
   border-radius: 999px;
-  padding: 6px 12px;
-  background: rgba(120, 180, 255, 0.16);
-  border: 1px solid rgba(120, 180, 255, 0.25);
+  padding: 6px 14px;
+  background: rgba(120, 180, 255, 0.14);
+  border: 1px solid rgba(120, 180, 255, 0.2);
   color: var(--text);
   width: 100%;
   box-sizing: border-box;
+}
+
+.admin-person-btn .name,
+.admin-person-btn .meta {
+  text-align: center;
+  width: 100%;
+  display: block;
 }
 
 .admin-person-btn .name {
@@ -2592,8 +2599,8 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .admin-person-btn {
-  background: rgba(255, 170, 70, 0.14);
-  border-color: rgba(255, 150, 60, 0.35);
+  background: rgba(255, 170, 70, 0.12);
+  border-color: rgba(255, 150, 60, 0.25);
   color: #2b1a05;
 }
 
@@ -2663,6 +2670,13 @@ body.modal-open #app {
 :root[data-theme="light"] .admin-pill.ghost {
   color: #1a2433;
   border-color: rgba(20, 28, 38, 0.25);
+}
+
+:root[data-theme="light"] #adminModeratorRemove,
+:root[data-theme="light"] #adminMerchantRemove {
+  background: rgba(255, 77, 79, 0.12);
+  color: #d64343;
+  border-color: rgba(220, 70, 70, 0.45);
 }
 
 .admin-card label {
