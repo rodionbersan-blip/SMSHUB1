@@ -577,6 +577,10 @@ body.modal-open #app {
   color: #ffffff;
 }
 
+.btn.review-btn:hover {
+  color: #ffffff;
+}
+
 .btn.primary {
   background: var(--accent);
   color: #ffffff;
@@ -758,8 +762,8 @@ body.modal-open #app {
 }
 
 .btn.review-btn:hover {
-  filter: brightness(1.07);
-  box-shadow: 0 8px 18px rgba(244, 114, 46, 0.25);
+  filter: none;
+  box-shadow: none;
 }
 
 :root[data-theme="light"] .btn.review-btn {
@@ -769,8 +773,8 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .btn.review-btn:hover {
-  filter: brightness(1.07);
-  box-shadow: 0 8px 18px rgba(244, 114, 46, 0.22);
+  filter: none;
+  box-shadow: none;
 }
 
 .tabs {
