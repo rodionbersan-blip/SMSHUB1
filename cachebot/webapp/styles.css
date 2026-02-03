@@ -1642,7 +1642,7 @@ body.modal-open #app {
   background: transparent;
   border: none;
   box-shadow: none;
-  color: var(--accent);
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -1764,7 +1764,7 @@ body.modal-open #app {
   background: transparent;
   border: none;
   box-shadow: none;
-  color: var(--accent);
+  color: #1a2433;
 }
 
 :root[data-theme="light"] .p2p-toolbar .btn.primary {
@@ -1849,6 +1849,8 @@ body.modal-open #app {
   }
 
   .p2p-toolbar .btn {
+    flex: 1 1 0;
+    min-width: 0;
     padding: 0 10px;
     font-size: 11px;
   }
