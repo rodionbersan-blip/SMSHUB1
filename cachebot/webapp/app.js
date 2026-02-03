@@ -1370,6 +1370,13 @@
     return "Статус";
   };
 
+  const statusClass = (deal) => {
+    if (deal.status === "completed") return "status-ok";
+    if (deal.status === "canceled") return "status-bad";
+    if (deal.status === "expired") return "status-warn";
+    return "";
+  };
+
   const getRawInitDataFromUrl = () => {
     const query = window.location.search || "";
     if (!query) return "";
@@ -1608,7 +1615,7 @@
       item.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">Сделка #${deal.public_id}</div>
-          <div class="deal-status">${statusLabel(deal)}</div>
+          <div class="deal-status ${statusClass(deal)}">${statusLabel(deal)}</div>
         </div>
         <div class="deal-row">${formatAmount(deal.cash_rub, 2)}₽-${formatAmount(
         deal.usdt_amount
@@ -1932,7 +1939,7 @@
           <div class="quick-deal-id">Сделка #${deal.public_id}</div>
           <div class="quick-deal-meta">${amountText}</div>
         </div>
-        <div class="quick-deal-status">${statusLabel(deal)}</div>
+        <div class="quick-deal-status ${statusClass(deal)}">${statusLabel(deal)}</div>
         <div class="quick-deal-unread" aria-hidden="true"></div>
       `;
       row.addEventListener("click", () => {

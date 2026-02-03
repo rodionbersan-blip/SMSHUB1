@@ -1339,6 +1339,11 @@ body.modal-open #app {
   color: #e5533d;
 }
 
+.deal-status.status-warn {
+  background: rgba(255, 167, 66, 0.22);
+  color: #ff9a2f;
+}
+
 #view-p2p .deal-status.status-bad {
   background: rgba(255, 167, 66, 0.22);
   color: #ff9a2f;
@@ -5214,6 +5219,21 @@ body.pin-lock {
   border-radius: 999px;
   background: rgba(77, 163, 255, 0.12);
   white-space: nowrap;
+}
+
+.quick-deal-status.status-ok {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+}
+
+.quick-deal-status.status-bad {
+  background: rgba(229, 83, 61, 0.2);
+  color: #e5533d;
+}
+
+.quick-deal-status.status-warn {
+  background: rgba(255, 167, 66, 0.22);
+  color: #ff9a2f;
 }
 
 .quick-deal-unread {
