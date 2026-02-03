@@ -1625,6 +1625,7 @@
     }
     if (mode === "withdraw") {
       balanceManageForm?.classList.remove("show");
+      balanceManagePanel?.classList.remove("open");
       withdrawModal?.classList.add("open");
     } else {
       balanceManageForm?.classList.add("show");
