@@ -2171,6 +2171,7 @@ body.modal-open #app {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  justify-content: center;
   margin: 4px 0 12px;
   padding: 6px;
   border-radius: 999px;
