@@ -1522,7 +1522,7 @@ body.modal-open #app {
 .deal-pagination .btn.back-btn::before {
   content: "";
   position: absolute;
-  left: 50%;
+  left: 60%;
   top: 50%;
   width: 16px;
   height: 16px;
