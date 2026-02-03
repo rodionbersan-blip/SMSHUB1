@@ -516,13 +516,13 @@ body.modal-open #app {
 }
 
 .deal-chat-btn {
-  background: linear-gradient(135deg, rgba(255, 176, 88, 0.92), rgba(240, 136, 50, 0.92));
+  background: linear-gradient(135deg, rgba(77, 163, 255, 0.95), rgba(53, 140, 245, 0.95));
   color: #ffffff;
   border: none;
 }
 
 .deal-chat-btn:hover {
-  background: linear-gradient(135deg, rgba(255, 195, 120, 0.98), rgba(245, 150, 70, 0.95));
+  background: linear-gradient(135deg, rgba(99, 176, 255, 0.98), rgba(67, 153, 250, 0.98));
   color: #ffffff;
 }
 
@@ -1097,7 +1097,7 @@ body.modal-open #app {
 #profileBalance {
   order: 2;
   grid-column: 1 / -1;
-  margin-top: -16px;
+  margin-top: -25px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
