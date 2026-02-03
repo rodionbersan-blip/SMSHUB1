@@ -2277,6 +2277,21 @@ body.modal-open #app {
   margin-bottom: 14px;
 }
 
+.moderation-search-group {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.moderation-search-group .moderation-search {
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.moderation-search-group .moderation-search:last-child {
+  margin-bottom: 0;
+}
+
 .moderation-search:not(.open) {
   gap: 0;
   padding-top: 8px;
