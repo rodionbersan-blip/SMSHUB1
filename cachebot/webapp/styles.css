@@ -1514,6 +1514,18 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
+.p2p-bank-logos {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.p2p-bank-logos .p2p-bank-logo {
+  width: 16px;
+  height: 16px;
+}
+
 .p2p-edit-btn {
   padding: 6px 12px;
   font-size: 12px;

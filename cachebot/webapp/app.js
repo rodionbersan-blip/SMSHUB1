@@ -1978,6 +1978,14 @@
     const ownerName = owner.display_name || owner.full_name || owner.username || "—";
     if (type === "public") {
       const isOwner = ownerId && state.userId && Number(ownerId) === Number(state.userId);
+      const bankIcons = (ad.banks || [])
+        .map((bank) => {
+          const icon = bankIcon(bank);
+          if (!icon) return "";
+          return `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" />`;
+        })
+        .filter(Boolean)
+        .join("");
       item.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">${price} • ${limit}</div>
@@ -1987,6 +1995,7 @@
           <span>Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</span>
           ${isOwner ? '<span class="p2p-owner-badge">Это ваше объявление</span>' : ""}
         </div>
+        ${bankIcons ? `<div class="deal-row p2p-bank-logos">${bankIcons}</div>` : ""}
       `;
       item.addEventListener("click", () => openP2PAd(ad.id));
       const ownerBtn = item.querySelector(".p2p-owner-btn");
