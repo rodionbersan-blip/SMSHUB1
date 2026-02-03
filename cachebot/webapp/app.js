@@ -1548,7 +1548,7 @@
     state.balance = available;
     state.balanceReserved = reserved;
     if (profileBalance) {
-      profileBalance.textContent = `${formatAmount(available, 2)} USDT`;
+      profileBalance.innerHTML = `<span class="balance-amount">${formatAmount(available, 2)}</span><span class="balance-currency">USDT</span>`;
     }
     if (profileBalanceReserved) {
       profileBalanceReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
