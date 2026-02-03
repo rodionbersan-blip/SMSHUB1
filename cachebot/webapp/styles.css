@@ -3939,7 +3939,7 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .stats-donut::before {
-  background: conic-gradient(transparent 0 var(--donut-reveal), rgba(255, 255, 255, 0.9) 0);
+  background: conic-gradient(transparent 0 var(--donut-reveal), var(--stats-card-bg) 0);
 }
 
 .stats-donut {
@@ -3962,10 +3962,9 @@ body.modal-open #app {
 .stats-donut::before {
   content: "";
   position: absolute;
-  inset: -4px;
+  inset: 0;
   border-radius: 50%;
-  background: conic-gradient(transparent 0 var(--donut-reveal), rgba(0, 0, 0, 0.72) 0);
-  filter: blur(2px);
+  background: conic-gradient(transparent 0 var(--donut-reveal), var(--stats-card-bg) 0);
   pointer-events: none;
   z-index: 0;
 }

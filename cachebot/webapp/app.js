@@ -4923,10 +4923,7 @@
       });
       el.style.background = `conic-gradient(${parts.join(",")})`;
     }
-    el.classList.remove("animate");
     el.style.setProperty("--donut-reveal", "0deg");
-    void el.offsetWidth;
-    el.classList.add("animate");
     const start = performance.now();
     const duration = 900;
     const step = (now) => {
