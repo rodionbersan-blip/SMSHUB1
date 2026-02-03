@@ -3620,7 +3620,7 @@
         bottomRow,
         "Оценить сделку",
         () => openReviewForDeal(deal),
-        true,
+        false,
         "",
         { className: "review-btn" }
       );
