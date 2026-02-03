@@ -1203,6 +1203,11 @@ body.modal-open #app {
   margin-top: 6px;
 }
 
+#profileBalanceReserved {
+  text-align: center;
+  width: 100%;
+}
+
 .profile-edit-row {
   display: grid;
   grid-template-columns: 1fr 60px;
