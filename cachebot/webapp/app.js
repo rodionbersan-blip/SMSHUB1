@@ -5505,6 +5505,11 @@
       if (!panel) return;
       const shell = toggle.closest(".admin-accordion");
       const nextOpen = !panel.classList.contains("open");
+      const collapseAdminAddPanels = () => {
+        adminAddModeratorPanel?.classList.remove("open");
+        adminAddMerchantPanel?.classList.remove("open");
+        adminAddAdminPanel?.classList.remove("open");
+      };
       adminToggles.forEach((btn) => {
         const otherId = btn.dataset.target;
         if (!otherId) return;
@@ -5514,6 +5519,7 @@
         otherPanel?.classList.remove("open");
         otherShell?.classList.remove("open");
       });
+      collapseAdminAddPanels();
       if (nextOpen) {
         toggle.classList.add("active");
         panel.classList.add("open");
