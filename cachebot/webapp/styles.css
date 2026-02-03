@@ -1059,17 +1059,16 @@ body.modal-open #app {
 
 .profile-balance-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 0;
+  margin-top: -24px;
   --action-btn-width: 110px;
   --action-btn-gap: 10px;
 }
 
 .profile-balance-row:not(.history-row) {
-  margin-bottom: 0;
+  margin-bottom: -20px;
 }
 
 .profile-balance-row.history-row {
@@ -1090,15 +1089,12 @@ body.modal-open #app {
 
 #profileWithdraw,
 #topupOpen {
-  order: 1;
   width: var(--action-btn-width);
   justify-content: center;
 }
 
 #profileBalance {
-  order: 2;
-  flex: 1 1 100%;
-  margin-top: 6px;
+  margin-top: 16px;
 }
 
 .profile-card .profile-title + .profile-value {
