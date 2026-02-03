@@ -3517,10 +3517,14 @@
       }
     }
     if (!isCompleted && actions.confirm_seller && deal.qr_stage === "ready") {
-      addAction(topRow, "Получил нал", () => openConfirmComplete(deal), true);
+      addAction(topRow, "Получил нал", () => openConfirmComplete(deal), false, "", {
+        className: "deal-cash-btn",
+      });
     }
     if (!isCompleted && actions.confirm_buyer && deal.qr_stage === "ready" && !deal.buyer_cash_confirmed) {
-      addAction(topRow, "Успешно снял", () => openBuyerProofModal(deal.id), true);
+      addAction(topRow, "Успешно снял", () => openBuyerProofModal(deal.id), false, "", {
+        className: "deal-cash-btn",
+      });
     } else if (
       !isCompleted &&
       deal.role === "buyer" &&

@@ -553,10 +553,23 @@ body.modal-open #app {
   background: linear-gradient(135deg, #ffb55a, #ef8d3a);
   color: #ffffff;
   border: none;
+  animation: none;
+  transition: none;
 }
 
 .deal-qr-btn:hover {
   background: linear-gradient(135deg, #ffc36f, #f09a47);
+  color: #ffffff;
+}
+
+.deal-cash-btn {
+  background: linear-gradient(135deg, #3bcf7a, #2aa866);
+  color: #ffffff;
+  border: none;
+}
+
+.deal-cash-btn:hover {
+  background: linear-gradient(135deg, #48d786, #33b372);
   color: #ffffff;
 }
 
