@@ -766,6 +766,11 @@
   let successAnimHideTimer = null;
   let noticeTimer = null;
   const showNotice = (message) => {
+    const telegramAlert = window.Telegram?.WebApp?.showAlert;
+    if (typeof telegramAlert === "function") {
+      telegramAlert(message);
+      return;
+    }
     if (!centerNotice) return;
     centerNotice.textContent = message;
     centerNotice.classList.add("show");
