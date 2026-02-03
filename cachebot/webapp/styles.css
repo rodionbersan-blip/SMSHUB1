@@ -1508,7 +1508,7 @@ body.modal-open #app {
 .deal-pagination .btn.next-btn::before {
   content: "";
   position: absolute;
-  left: 48%;
+  left: 40%;
   top: 50%;
   width: 16px;
   height: 16px;
