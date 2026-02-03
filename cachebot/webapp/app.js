@@ -3563,7 +3563,7 @@
     `;
     if (deal.status === "completed" && deal.review) {
       const review = document.createElement("div");
-      review.className = "deal-review-block";
+      review.className = "deal-review-block has-label";
       const comment = (deal.review.comment || "").trim();
       const fallback = deal.review.rating > 0 ? "Положительный отзыв" : "Отрицательный отзыв";
       review.innerHTML = `

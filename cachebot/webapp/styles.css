@@ -1400,6 +1400,15 @@ body.modal-open #app {
   gap: 6px;
 }
 
+.deal-review-block.has-label {
+  background: transparent;
+  border: 0;
+}
+
+.deal-review-block.has-label .deal-review-body {
+  background-clip: padding-box;
+}
+
 .deal-review-title,
 .deal-review-label {
   font-size: 12px;
