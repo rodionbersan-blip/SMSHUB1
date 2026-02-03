@@ -3868,10 +3868,16 @@ body.modal-open #app {
   flex-direction: column;
   gap: 14px;
   align-items: center;
+  opacity: 1;
+  transition: opacity 0.2s ease;
 }
 
 .stats-panel.active {
   display: flex;
+}
+
+.stats-panel.is-loading {
+  opacity: 0;
 }
 
 @property --donut-sweep {
@@ -3887,11 +3893,11 @@ body.modal-open #app {
 }
 
 .stats-modal .modal-card {
-  --stats-card-bg: var(--glass-bg);
+  --stats-card-bg: rgba(12, 14, 20, 0.2);
 }
 
 :root[data-theme="light"] .stats-modal .modal-card {
-  --stats-card-bg: rgba(255, 255, 255, 0.78);
+  --stats-card-bg: rgba(255, 255, 255, 0.02);
 }
 
 .stats-donut {

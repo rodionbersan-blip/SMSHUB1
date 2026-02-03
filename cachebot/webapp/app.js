@@ -4902,6 +4902,12 @@
     }
   };
 
+  const setStatsLoading = (mode, loading) => {
+    const panel = document.querySelector(`.stats-panel[data-panel="${mode}"]`);
+    if (!panel) return;
+    panel.classList.toggle("is-loading", loading);
+  };
+
   const setDonut = (el, segments, emptyColor = "rgba(140, 150, 170, 0.25)") => {
     if (!el) return;
     const total = segments.reduce((sum, item) => sum + item.value, 0);
@@ -4986,10 +4992,12 @@
     state.statsRequestId = (state.statsRequestId || 0) + 1;
     const requestId = state.statsRequestId;
     state.statsActiveMode = mode;
+    setStatsLoading(mode, true);
     const fromValue = statsFrom.value;
     const toValue = statsTo.value;
     if (mode === "funds" && fromValue && toValue && fromValue > toValue) {
       showNotice("Период задан неверно");
+      setStatsLoading(mode, false);
       return;
     }
     const query =
@@ -5002,9 +5010,11 @@
     }
     if (!payload?.ok) {
       showNotice("Не удалось загрузить статистику");
+      setStatsLoading(mode, false);
       return;
     }
     renderProfileStats(payload);
+    setStatsLoading(mode, false);
   };
 
   systemNoticeLike?.addEventListener("click", () => setReviewRating(1));
