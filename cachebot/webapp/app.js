@@ -4840,7 +4840,9 @@
     const deals = payload?.deals || {};
     const topup = Number(funds.topup || 0);
     const withdraw = Number(funds.withdraw || 0);
-    const totalFunds = topup + withdraw;
+    const buySum = Number(deals.buy || 0);
+    const sellSum = Number(deals.sell || 0);
+    const totalFunds = buySum + sellSum;
 
     if (statsFundsTotal) {
       statsFundsTotal.textContent = `${formatAmount(totalFunds, 2)} USDT`;
@@ -4851,8 +4853,6 @@
         <div class="stats-row"><span>Вывод</span><strong>${formatAmount(withdraw, 2)} USDT</strong></div>
       `;
     }
-    const buySum = Number(deals.buy || 0);
-    const sellSum = Number(deals.sell || 0);
     if (statsSideSummary) {
       statsSideSummary.innerHTML = `
         <div class="stats-row"><span>Сумма покупок</span><strong>${formatAmount(buySum, 2)} USDT</strong></div>
