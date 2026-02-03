@@ -1059,8 +1059,9 @@ body.modal-open #app {
 
 .profile-balance-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--action-btn-width) var(--action-btn-width);
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
+  justify-items: end;
   gap: 10px;
   margin-top: -24px;
   --action-btn-width: 110px;
@@ -1098,6 +1099,7 @@ body.modal-open #app {
 #profileBalance {
   order: 2;
   grid-column: 1 / 2;
+  justify-self: start;
   margin-top: -6px;
   display: flex;
   flex-direction: column;
