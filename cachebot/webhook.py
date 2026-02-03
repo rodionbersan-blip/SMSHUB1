@@ -92,6 +92,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/admin/admins", _api_admin_add_admin)
     app.router.add_get("/api/admin/admins", _api_admin_admins)
     app.router.add_get("/api/admin/admins/{user_id}", _api_admin_admin_detail)
+    app.router.add_delete("/api/admin/admins/{user_id}", _api_admin_remove_admin)
     app.router.add_get("/api/admin/users/{user_id}/ads", _api_admin_user_ads)
     app.router.add_post("/api/admin/users/{user_id}/ads/{ad_id}/toggle", _api_admin_user_ads_toggle)
     app.router.add_get("/api/admin/merchants", _api_admin_merchants)
@@ -1815,6 +1816,8 @@ async def _api_admin_admin_detail(request: web.Request) -> web.Response:
     if not _is_admin(user_id, deps):
         raise web.HTTPForbidden(text="Нет доступа")
     target_id = int(request.match_info["user_id"])
+    owner_ids = set(deps.config.owner_ids or set())
+    is_owner = target_id in owner_ids
     profile = await deps.user_service.profile_of(target_id)
     if not profile:
         raise web.HTTPNotFound(text="Пользователь не найден")
@@ -1854,8 +1857,24 @@ async def _api_admin_admin_detail(request: web.Request) -> web.Response:
             "ok": True,
             "profile": _profile_payload(profile, request=request, include_private=True),
             "actions": action_payload,
+            "is_owner": is_owner,
         }
     )
+
+
+async def _api_admin_remove_admin(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not _is_admin(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    target_id = int(request.match_info["user_id"])
+    owner_ids = set(deps.config.owner_ids or set())
+    if target_id in owner_ids:
+        raise web.HTTPForbidden(text="Нельзя исключить владельца")
+    await deps.user_service.remove_admin(target_id)
+    deps.config.admin_ids.discard(target_id)
+    deps.deal_service.remove_admin_id(target_id)
+    return web.json_response({"ok": True})
 
 
 async def _api_admin_add_moderator(request: web.Request) -> web.Response:

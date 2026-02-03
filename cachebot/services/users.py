@@ -227,6 +227,11 @@ class UserService:
             self._admins.add(user_id)
             await self._persist()
 
+    async def remove_admin(self, user_id: int) -> None:
+        async with self._lock:
+            self._admins.discard(user_id)
+            await self._persist()
+
     async def list_merchants(self) -> List[MerchantRecord]:
         async with self._lock:
             records = [

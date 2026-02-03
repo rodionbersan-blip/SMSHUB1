@@ -14,6 +14,7 @@ class Config:
     telegram_bot_token: str
     crypto_pay_token: str | None
     admin_ids: Set[int]
+    owner_ids: Set[int]
     payment_window_minutes: int = 15
     offer_window_minutes: int = 15
     invoice_poll_interval: int = 30
@@ -67,6 +68,7 @@ class Config:
             telegram_bot_token=token,
             crypto_pay_token=crypto_pay_token,
             admin_ids=admin_ids,
+            owner_ids=set(admin_ids),
             payment_window_minutes=payment_window,
             offer_window_minutes=offer_window,
             invoice_poll_interval=poll_interval,

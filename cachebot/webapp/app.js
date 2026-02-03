@@ -299,6 +299,7 @@
   const adminAdminName = document.getElementById("adminAdminName");
   const adminAdminMeta = document.getElementById("adminAdminMeta");
   const adminAdminActions = document.getElementById("adminAdminActions");
+  const adminAdminRemove = document.getElementById("adminAdminRemove");
   const adminMerchants = document.getElementById("adminMerchants");
   const adminMerchantsTitle = document.getElementById("adminMerchantsTitle");
   const supportNewBtn = document.getElementById("supportNewBtn");
@@ -3108,6 +3109,7 @@
   const openAdminProfile = async (adminId) => {
     if (!adminAdminModal) return;
     if (adminAdminActions) adminAdminActions.innerHTML = "";
+    if (adminAdminRemove) adminAdminRemove.classList.add("is-hidden");
     const payload = await fetchJson(`/api/admin/admins/${adminId}`);
     if (!payload?.ok) return;
     const profile = payload.profile || {};
@@ -3148,6 +3150,17 @@
         });
       } else {
         adminAdminActions.innerHTML = "<div class=\"deal-empty\">Действий нет.</div>";
+      }
+    }
+    if (adminAdminRemove) {
+      const canRemove = !payload.is_owner;
+      adminAdminRemove.classList.toggle("is-hidden", !canRemove);
+      if (canRemove) {
+        adminAdminRemove.onclick = async () => {
+          await fetchJson(`/api/admin/admins/${adminId}`, { method: "DELETE" });
+          adminAdminModal.classList.remove("open");
+          await loadAdmin();
+        };
       }
     }
     adminAdminModal.classList.add("open");

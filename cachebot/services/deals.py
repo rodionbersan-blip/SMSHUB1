@@ -786,6 +786,9 @@ class DealService:
     def add_admin_id(self, user_id: int) -> None:
         self._admin_ids.add(user_id)
 
+    def remove_admin_id(self, user_id: int) -> None:
+        self._admin_ids.discard(user_id)
+
     def _next_public_id_locked(self) -> str:
         self._deal_seq += 1
         return f"C{self._deal_seq:05d}"
