@@ -3724,8 +3724,8 @@ body.modal-open #app {
 .stats-tabs .tab-btn {
   min-width: 120px;
   border: none;
-  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75), rgba(86, 62, 180, 0.75));
-  color: #ffffff;
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75), rgba(86, 62, 180, 0.75)) !important;
+  color: #ffffff !important;
   font-weight: 700;
 }
 
@@ -3744,14 +3744,14 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .stats-tabs .tab-btn {
-  background: linear-gradient(135deg, rgba(70, 140, 255, 0.85), rgba(86, 62, 180, 0.85));
-  color: #ffffff;
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.85), rgba(86, 62, 180, 0.85)) !important;
+  color: #ffffff !important;
   box-shadow: 0 10px 22px rgba(60, 120, 220, 0.25);
 }
 
 :root[data-theme="light"] .stats-tabs .tab-btn.active,
 :root[data-theme="light"] .stats-tabs .tab-btn:hover {
-  background: linear-gradient(135deg, rgba(90, 160, 255, 0.95), rgba(108, 78, 200, 0.95));
+  background: linear-gradient(135deg, rgba(90, 160, 255, 0.95), rgba(108, 78, 200, 0.95)) !important;
   box-shadow: 0 12px 26px rgba(70, 130, 230, 0.28);
 }
 
