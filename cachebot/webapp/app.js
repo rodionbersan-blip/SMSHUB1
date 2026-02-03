@@ -178,6 +178,7 @@
   const systemNoticeRateForm = document.getElementById("systemNoticeRateForm");
   const systemNoticeLike = document.getElementById("systemNoticeLike");
   const systemNoticeDislike = document.getElementById("systemNoticeDislike");
+  const systemNoticeRateClose = document.getElementById("systemNoticeRateClose");
   const systemNoticeComment = document.getElementById("systemNoticeComment");
   const systemNoticeSubmit = document.getElementById("systemNoticeSubmit");
   const p2pList = document.getElementById("p2pList");
@@ -4676,6 +4677,19 @@
     if (systemNoticeComment) systemNoticeComment.value = "";
     removeSystemNotice(active.key);
     await loadDeals();
+  });
+
+  systemNoticeRateClose?.addEventListener("click", () => {
+    state.systemNoticeActive = null;
+    if (typeof pendingReviewRating !== "undefined") {
+      pendingReviewRating = null;
+    }
+    systemNoticeLike?.classList.remove("active");
+    systemNoticeDislike?.classList.remove("active");
+    if (systemNoticeComment) systemNoticeComment.value = "";
+    systemNoticeRateForm?.classList.remove("show");
+    systemNoticeActions?.classList.remove("is-collapsed");
+    hideSystemNotice();
   });
 
   const bindPressFeedback = () => {
