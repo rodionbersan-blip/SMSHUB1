@@ -333,6 +333,19 @@
   const reviewsPagination = document.getElementById("reviewsPagination");
   const reviewsTabs = document.querySelector(".reviews-tabs");
   const reviewTabButtons = document.querySelectorAll(".reviews-tabs .tab-btn");
+  const profileStatsOpen = document.getElementById("profileStatsOpen");
+  const statsModal = document.getElementById("statsModal");
+  const statsClose = document.getElementById("statsClose");
+  const statsFrom = document.getElementById("statsFrom");
+  const statsTo = document.getElementById("statsTo");
+  const statsFundsDonut = document.getElementById("statsFundsDonut");
+  const statsDealsDonut = document.getElementById("statsDealsDonut");
+  const statsFundsSummary = document.getElementById("statsFundsSummary");
+  const statsSideSummary = document.getElementById("statsSideSummary");
+  const statsDealsSummary = document.getElementById("statsDealsSummary");
+  const statsFundsTotal = document.getElementById("statsFundsTotal");
+  const statsSuccessValue = document.getElementById("statsSuccessValue");
+  const statsTabButtons = document.querySelectorAll(".stats-tabs .tab-btn");
 
   const state = {
     user: null,
@@ -1334,6 +1347,14 @@
     if (!iso) return "—";
     const dt = new Date(iso);
     return dt.toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" });
+  };
+
+  const formatDateInput = (date) => {
+    if (!(date instanceof Date)) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   const formatTime = (iso) => {
@@ -4790,6 +4811,102 @@
     }
   };
 
+  const setStatsTab = (tab) => {
+    statsTabButtons.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tab === tab);
+    });
+    document.querySelectorAll(".stats-panel").forEach((panel) => {
+      panel.classList.toggle("active", panel.dataset.panel === tab);
+    });
+  };
+
+  const setDonut = (el, segments, emptyColor = "rgba(140, 150, 170, 0.25)") => {
+    if (!el) return;
+    const total = segments.reduce((sum, item) => sum + item.value, 0);
+    if (!total) {
+      el.style.background = `conic-gradient(${emptyColor} 0 100%)`;
+    } else {
+      let start = 0;
+      const parts = segments.map((item) => {
+        const from = start;
+        const to = start + (item.value / total) * 100;
+        start = to;
+        return `${item.color} ${from}% ${to}%`;
+      });
+      el.style.background = `conic-gradient(${parts.join(",")})`;
+    }
+    el.classList.remove("animate");
+    void el.offsetWidth;
+    el.classList.add("animate");
+  };
+
+  const renderProfileStats = (payload) => {
+    const funds = payload?.funds || {};
+    const deals = payload?.deals || {};
+    const topup = Number(funds.topup || 0);
+    const withdraw = Number(funds.withdraw || 0);
+    const totalFunds = topup + withdraw;
+
+    if (statsFundsTotal) {
+      statsFundsTotal.textContent = `${formatAmount(totalFunds, 2)} USDT`;
+    }
+    if (statsFundsSummary) {
+      statsFundsSummary.innerHTML = `
+        <div class="stats-row"><span>Пополнение</span><strong>${formatAmount(topup, 2)} USDT</strong></div>
+        <div class="stats-row"><span>Вывод</span><strong>${formatAmount(withdraw, 2)} USDT</strong></div>
+      `;
+    }
+    if (statsSideSummary) {
+      statsSideSummary.innerHTML = `
+        <div class="stats-row"><span>Сделок на покупку</span><strong>${deals.buy ?? 0}</strong></div>
+        <div class="stats-row"><span>Сделок на продажу</span><strong>${deals.sell ?? 0}</strong></div>
+      `;
+    }
+
+    setDonut(statsFundsDonut, [
+      { value: topup, color: "#55e2a3" },
+      { value: withdraw, color: "#ffb36c" },
+    ]);
+
+    const completed = Number(deals.completed || 0);
+    const canceled = Number(deals.canceled || 0);
+    const expired = Number(deals.expired || 0);
+    const successPercent = Number(deals.success_percent || 0);
+    if (statsSuccessValue) {
+      statsSuccessValue.textContent = `${successPercent}%`;
+    }
+    if (statsDealsSummary) {
+      statsDealsSummary.innerHTML = `
+        <div class="stats-row"><span>Успешные</span><strong>${completed}</strong></div>
+        <div class="stats-row"><span>Отменённые</span><strong>${canceled}</strong></div>
+        <div class="stats-row"><span>Истекшие</span><strong>${expired}</strong></div>
+        <div class="stats-row"><span>Всего</span><strong>${deals.total ?? 0}</strong></div>
+      `;
+    }
+
+    setDonut(statsDealsDonut, [
+      { value: completed, color: "#55e2a3" },
+      { value: canceled, color: "#ff6b6b" },
+      { value: expired, color: "#ffb36c" },
+    ]);
+  };
+
+  const loadProfileStats = async () => {
+    if (!statsFrom || !statsTo) return;
+    const fromValue = statsFrom.value;
+    const toValue = statsTo.value;
+    if (fromValue && toValue && fromValue > toValue) {
+      showNotice("Период задан неверно");
+      return;
+    }
+    const payload = await fetchJson(`/api/profile/stats?from=${fromValue}&to=${toValue}`);
+    if (!payload?.ok) {
+      showNotice("Не удалось загрузить статистику");
+      return;
+    }
+    renderProfileStats(payload);
+  };
+
   systemNoticeLike?.addEventListener("click", () => setReviewRating(1));
   systemNoticeDislike?.addEventListener("click", () => setReviewRating(-1));
 
@@ -5727,6 +5844,30 @@
     window.setTimeout(updateReviewsIndicator, 0);
     window.setTimeout(updateReviewsIndicator, 320);
   });
+
+  profileStatsOpen?.addEventListener("click", async () => {
+    const today = new Date();
+    const fromDate = new Date();
+    fromDate.setDate(today.getDate() - 29);
+    if (statsFrom) statsFrom.value = formatDateInput(fromDate);
+    if (statsTo) statsTo.value = formatDateInput(today);
+    setStatsTab("funds");
+    await loadProfileStats();
+    statsModal?.classList.add("open");
+  });
+
+  statsClose?.addEventListener("click", () => {
+    statsModal?.classList.remove("open");
+  });
+
+  statsTabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setStatsTab(btn.dataset.tab || "funds");
+    });
+  });
+
+  statsFrom?.addEventListener("change", loadProfileStats);
+  statsTo?.addEventListener("change", loadProfileStats);
 
   reviewsClose?.addEventListener("click", () => {
     reviewsModal.classList.remove("open");

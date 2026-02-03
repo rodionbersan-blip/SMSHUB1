@@ -3671,6 +3671,155 @@ body.modal-open #app {
   will-change: opacity, backdrop-filter;
 }
 
+.stats-modal .modal-card {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  border-radius: 0;
+  padding: 18px 18px 24px;
+}
+
+.stats-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  height: calc(100% - 48px);
+}
+
+.stats-tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.stats-tabs .tab-btn {
+  min-width: 120px;
+}
+
+.stats-range {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.stats-range input[type="date"] {
+  background: rgba(12, 18, 28, 0.5);
+  border: 1px solid rgba(120, 180, 255, 0.2);
+  border-radius: 12px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.stats-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.stats-panel {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+.stats-panel.active {
+  display: flex;
+}
+
+.stats-donut {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: conic-gradient(#5fe1a4 0 50%, #ff8e68 50% 100%);
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+}
+
+.stats-donut.animate {
+  animation: donut-pop 0.6s ease;
+}
+
+.stats-donut::after {
+  content: "";
+  position: absolute;
+  width: 116px;
+  height: 116px;
+  background: rgba(10, 14, 20, 0.9);
+  border-radius: 50%;
+  box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.08);
+}
+
+.stats-donut-center {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-donut-title {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stats-donut-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stats-rows {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(12, 18, 28, 0.45);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.stats-row strong {
+  font-weight: 700;
+}
+
+@keyframes donut-pop {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+:root[data-theme="light"] .stats-range input[type="date"] {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(120, 140, 200, 0.3);
+  color: #1b1e28;
+}
+
+:root[data-theme="light"] .stats-donut::after {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme="light"] .stats-row {
+  background: rgba(240, 244, 252, 0.9);
+}
+
 .modal.open {
   display: flex;
   opacity: 1;

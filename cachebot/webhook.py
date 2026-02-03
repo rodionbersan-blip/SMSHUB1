@@ -38,6 +38,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/app/{path:.*}", _webapp_static)
     app.router.add_get("/api/me", _api_me)
     app.router.add_get("/api/profile", _api_profile)
+    app.router.add_get("/api/profile/stats", _api_profile_stats)
     app.router.add_post("/api/profile", _api_profile_update)
     app.router.add_post("/api/profile/avatar", _api_profile_avatar)
     app.router.add_get("/api/users/{user_id}", _api_public_profile)
@@ -285,6 +286,71 @@ async def _api_profile(request: web.Request) -> web.Response:
         },
     }
     return web.json_response({"ok": True, "data": payload})
+
+
+async def _api_profile_stats(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    now = datetime.now(timezone.utc)
+    default_from = now - timedelta(days=29)
+    from_param = _parse_date_param(request.query.get("from"))
+    to_param = _parse_date_param(request.query.get("to"))
+    range_from = from_param or default_from.replace(hour=0, minute=0, second=0, microsecond=0)
+    if to_param:
+        range_to = to_param.replace(hour=23, minute=59, second=59, microsecond=999999)
+    else:
+        range_to = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    events = await deps.deal_service.balance_history(user_id)
+    topup_total = Decimal("0")
+    withdraw_total = Decimal("0")
+    for event in events:
+        if event.created_at < range_from or event.created_at > range_to:
+            continue
+        if event.kind == "topup":
+            topup_total += event.amount
+        elif event.kind == "withdraw":
+            withdraw_total += abs(event.amount)
+
+    deals = await deps.deal_service.list_user_deals(user_id)
+    buy_count = 0
+    sell_count = 0
+    completed = 0
+    canceled = 0
+    expired = 0
+    total = 0
+    for deal in deals:
+        if deal.created_at < range_from or deal.created_at > range_to:
+            continue
+        total += 1
+        if deal.buyer_id == user_id:
+            buy_count += 1
+        if deal.seller_id == user_id:
+            sell_count += 1
+        if deal.status == DealStatus.COMPLETED:
+            completed += 1
+        elif deal.status == DealStatus.CANCELED:
+            canceled += 1
+        elif deal.status == DealStatus.EXPIRED:
+            expired += 1
+
+    success_percent = round((completed / total) * 100) if total else 0
+    return web.json_response(
+        {
+            "ok": True,
+            "range": {"from": range_from.isoformat(), "to": range_to.isoformat()},
+            "funds": {"topup": str(topup_total), "withdraw": str(withdraw_total)},
+            "deals": {
+                "buy": buy_count,
+                "sell": sell_count,
+                "completed": completed,
+                "canceled": canceled,
+                "expired": expired,
+                "total": total,
+                "success_percent": success_percent,
+            },
+        }
+    )
 
 
 async def _api_public_profile(request: web.Request) -> web.Response:
@@ -3044,6 +3110,16 @@ def _format_duration(minutes: int | None) -> str:
         return f"{round(hours)} ч"
     days = hours / 24
     return f"{round(days)} дн."
+
+
+def _parse_date_param(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        date_value = datetime.strptime(value, "%Y-%m-%d").date()
+        return datetime.combine(date_value, datetime.min.time(), tzinfo=timezone.utc)
+    except Exception:
+        return None
 
 
 async def _merchant_stats(deps: AppDeps, user_id: int) -> dict[str, int]:
