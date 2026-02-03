@@ -3363,6 +3363,7 @@ body.modal-open #app {
 .deal-proof-preview {
   display: none;
   justify-content: center;
+  position: relative;
 }
 
 .deal-proof-preview.show {
@@ -3374,6 +3375,29 @@ body.modal-open #app {
   max-height: 140px;
   border-radius: 12px;
   border: 1px solid var(--border);
+}
+
+.proof-clear-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(15, 17, 21, 0.75);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.proof-clear-btn:hover {
+  background: rgba(15, 17, 21, 0.9);
+}
+
+:root[data-theme="light"] .proof-clear-btn {
+  background: rgba(15, 17, 21, 0.65);
 }
 
 .deal-proof-actions {

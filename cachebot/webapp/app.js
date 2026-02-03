@@ -146,6 +146,7 @@
   const buyerProofSend = document.getElementById("buyerProofSend");
   const buyerProofPreview = document.getElementById("buyerProofPreview");
   const buyerProofImg = document.getElementById("buyerProofImg");
+  const buyerProofClear = document.getElementById("buyerProofClear");
   const buyerProofTitle = document.getElementById("buyerProofTitle");
   const buyerProofActions = document.getElementById("buyerProofActions");
   const disputeOpenModal = document.getElementById("disputeOpenModal");
@@ -3731,6 +3732,7 @@
     }
     if (buyerProofImg) buyerProofImg.removeAttribute("src");
     buyerProofPreview?.classList.remove("show");
+    buyerProofClear?.classList.add("is-hidden");
     if (buyerProofSend) buyerProofSend.disabled = true;
     if (buyerProofPick) buyerProofPick.disabled = false;
     buyerProofActions?.classList.remove("is-hidden");
@@ -3739,12 +3741,14 @@
       buyerProofImg.src = draft.url;
       buyerProofPreview.classList.add("show");
       buyerProofSend.disabled = false;
+      buyerProofClear?.classList.remove("is-hidden");
     }
     if (state.buyerProofSent?.[dealId]) {
       if (buyerProofTitle) buyerProofTitle.textContent = "Фото операции отправлено.";
       buyerProofActions?.classList.add("is-hidden");
       if (buyerProofSend) buyerProofSend.disabled = true;
       if (buyerProofPick) buyerProofPick.disabled = true;
+      buyerProofClear?.classList.add("is-hidden");
     }
   };
 
@@ -4905,13 +4909,32 @@
     input.onchange = () => {
       const file = input.files?.[0];
       if (!file) return;
+      const prevDraft = state.buyerProofDraft?.[dealId];
+      if (prevDraft?.url) {
+        URL.revokeObjectURL(prevDraft.url);
+      }
       const url = URL.createObjectURL(file);
       state.buyerProofDraft[dealId] = { file, url };
       if (buyerProofImg) buyerProofImg.src = url;
       buyerProofPreview?.classList.add("show");
       if (buyerProofSend) buyerProofSend.disabled = false;
+      buyerProofClear?.classList.remove("is-hidden");
     };
     input.click();
+  });
+
+  buyerProofClear?.addEventListener("click", () => {
+    const dealId = state.buyerProofDealId;
+    if (!dealId) return;
+    const draft = state.buyerProofDraft?.[dealId];
+    if (draft?.url) {
+      URL.revokeObjectURL(draft.url);
+    }
+    state.buyerProofDraft[dealId] = null;
+    if (buyerProofImg) buyerProofImg.removeAttribute("src");
+    buyerProofPreview?.classList.remove("show");
+    buyerProofClear?.classList.add("is-hidden");
+    if (buyerProofSend) buyerProofSend.disabled = true;
   });
 
   buyerProofSend?.addEventListener("click", () => {
