@@ -1986,7 +1986,7 @@
       const statusClass = ad.active ? "status-ok" : "status-bad";
       item.innerHTML = `
         <div class="deal-header">
-          <div class="deal-id">${sideLabel} • USDT - ${price}</div>
+          <div class="deal-id">USDT - ${price}</div>
           <div class="deal-status ${statusClass}">${status}</div>
         </div>
         <div class="deal-row">Объем: ${formatAmount(ad.remaining_usdt, 0)} / ${formatAmount(
