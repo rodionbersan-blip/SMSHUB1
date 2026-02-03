@@ -1389,6 +1389,17 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
   border: 1px solid rgba(214, 170, 90, 0.5);
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.deal-review-block::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
 }
 
 .deal-review-title {
