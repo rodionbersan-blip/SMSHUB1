@@ -1386,8 +1386,8 @@ body.modal-open #app {
   margin-top: 10px;
   padding: 10px 14px;
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(199, 152, 62, 0.45), rgba(226, 186, 92, 0.5));
-  border: 1px solid rgba(214, 170, 90, 0.35);
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
+  border: 1px solid rgba(214, 170, 90, 0.5);
   text-align: center;
 }
 
