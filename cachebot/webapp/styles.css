@@ -2895,12 +2895,12 @@ body.modal-open #app {
   }
 }
 
-.admin-list {
-  display: grid;
-  gap: 8px;
-}
-
-.admin-item {
+#adminActionsList .admin-item,
+#adminModeratorDisputes .admin-item,
+#adminModeratorActions .admin-item,
+#adminMerchantStats .admin-item,
+#adminMerchantDeals .admin-item,
+#adminAdminActions .admin-item {
   display: grid;
   grid-template-columns: 1fr auto auto;
   gap: 8px;
