@@ -3583,7 +3583,14 @@
       addAction(
         bottomRow,
         "Отменить сделку",
-        () => dealAction("cancel", deal.id),
+        () => {
+          const note = deal.balance_reserved
+            ? "Деньги вернутся на баланс."
+            : "Деньги будут отправлены другой стороне.";
+          const ok = window.confirm(`Вы уверены, что хотите отменить сделку?\n\n${note}`);
+          if (!ok) return;
+          dealAction("cancel", deal.id);
+        },
         false,
         "",
         { className: "deal-cancel-btn" }
