@@ -2984,7 +2984,7 @@
         }
         const text = document.createElement("div");
         text.className = "admin-person-text";
-        text.innerHTML = `<div class="name">${name}</div><div class="meta">Решено: ${mod.resolved}</div>`;
+        text.innerHTML = `<div class="name">${name}</div>`;
         btn.appendChild(avatar);
         btn.appendChild(text);
         btn.addEventListener("click", () => openModeratorProfile(mod.user_id));
@@ -3021,7 +3021,7 @@
         }
         const text = document.createElement("div");
         text.className = "admin-person-text";
-        text.innerHTML = `<div class="name">${name}</div><div class="meta">${stats.completed || 0}/${stats.total || 0}</div>`;
+        text.innerHTML = `<div class="name">${name}</div>`;
         pill.appendChild(avatar);
         pill.appendChild(text);
         pill.addEventListener("click", () => openMerchantProfile(merchant.user_id));

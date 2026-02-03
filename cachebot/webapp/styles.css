@@ -2592,12 +2592,20 @@ body.modal-open #app {
   align-items: center;
   gap: 10px;
   border-radius: 999px;
-  padding: 6px 14px;
-  background: rgba(120, 180, 255, 0.14);
-  border: 1px solid rgba(120, 180, 255, 0.2);
+  padding: 8px 16px;
+  background: rgba(22, 28, 38, 0.6);
+  border: 1px solid rgba(255, 160, 70, 0.35);
+  border-left: 4px solid rgba(255, 160, 70, 0.75);
   color: var(--text);
   width: 100%;
   box-sizing: border-box;
+}
+
+.admin-person-text {
+  flex: 1 1 auto;
+  display: grid;
+  align-items: center;
+  text-align: center;
 }
 
 .admin-person-btn .name,
@@ -2608,7 +2616,8 @@ body.modal-open #app {
 }
 
 .admin-person-btn .name {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .admin-person-btn .meta {
@@ -2636,8 +2645,9 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .admin-person-btn {
-  background: rgba(255, 170, 70, 0.12);
-  border-color: rgba(255, 150, 60, 0.25);
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 150, 60, 0.35);
+  border-left-color: rgba(255, 150, 60, 0.8);
   color: #2b1a05;
 }
 
