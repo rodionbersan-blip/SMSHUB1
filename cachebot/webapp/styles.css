@@ -1159,7 +1159,7 @@ body.modal-open #app {
 .profile-balance-row.balance-only {
   grid-template-columns: 1fr;
   justify-items: start;
-  margin-top: -10px;
+  margin-top: -6px;
   margin-bottom: 6px;
 }
 
@@ -1190,6 +1190,7 @@ body.modal-open #app {
   text-align: center;
   display: inline-flex;
   align-items: center;
+  margin-top: -8px;
 }
 
 #profileWithdraw,
@@ -1210,6 +1211,10 @@ body.modal-open #app {
 }
 
 .stats-tab-btn:hover {
+  background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
+}
+
+.stats-tab-btn.active {
   background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
 }
 
@@ -5824,4 +5829,56 @@ body.pin-lock {
   width: 22px;
   height: 22px;
   display: block;
+}
+:root[data-theme="light"] .stats-tab-btn {
+  color: #ffffff;
+}
+
+.balance-manage-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.35s ease;
+}
+
+.balance-manage-panel.open {
+  max-height: 240px;
+  opacity: 1;
+}
+
+.balance-manage-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: -6px;
+}
+
+.balance-manage-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.balance-manage-form.show {
+  opacity: 1;
+  max-height: 120px;
+}
+
+.balance-manage-form input {
+  background: rgba(12, 18, 28, 0.5);
+  border: 1px solid rgba(120, 180, 255, 0.2);
+  border-radius: 12px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+:root[data-theme="light"] .balance-manage-form input {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(120, 140, 200, 0.3);
+  color: #1b1e28;
 }

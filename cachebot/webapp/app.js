@@ -103,10 +103,12 @@
   const profileBalanceReserved = document.getElementById("profileBalanceReserved");
   const profileWithdraw = document.getElementById("profileWithdraw");
   const balanceManageOpen = document.getElementById("balanceManageOpen");
-  const balanceManageModal = document.getElementById("balanceManageModal");
-  const balanceManageClose = document.getElementById("balanceManageClose");
-  const balanceTopupBtn = document.getElementById("balanceTopupBtn");
-  const balanceWithdrawBtn = document.getElementById("balanceWithdrawBtn");
+  const balanceManagePanel = document.getElementById("balanceManagePanel");
+  const balanceManageTopup = document.getElementById("balanceManageTopup");
+  const balanceManageWithdraw = document.getElementById("balanceManageWithdraw");
+  const balanceManageForm = document.getElementById("balanceManageForm");
+  const balanceManageAmount = document.getElementById("balanceManageAmount");
+  const balanceManageSubmit = document.getElementById("balanceManageSubmit");
   const dealsCount = document.getElementById("dealsCount");
   const dealsList = document.getElementById("dealsList");
   const dealsPagination = document.getElementById("dealsPagination");
@@ -1612,22 +1614,72 @@
     withdrawModal?.classList.add("open");
   });
 
+  let balanceManageMode = "topup";
+
+  const setBalanceManageMode = (mode) => {
+    balanceManageMode = mode;
+    balanceManageTopup?.classList.toggle("active", mode === "topup");
+    balanceManageWithdraw?.classList.toggle("active", mode === "withdraw");
+    if (balanceManageSubmit) {
+      balanceManageSubmit.textContent = mode === "withdraw" ? "Вывести" : "Пополнить";
+    }
+    balanceManageForm?.classList.add("show");
+  };
+
   balanceManageOpen?.addEventListener("click", () => {
-    balanceManageModal?.classList.add("open");
+    balanceManagePanel?.classList.toggle("open");
+    if (!balanceManagePanel?.classList.contains("open")) {
+      balanceManageForm?.classList.remove("show");
+    }
   });
 
-  balanceManageClose?.addEventListener("click", () => {
-    balanceManageModal?.classList.remove("open");
-  });
+  balanceManageTopup?.addEventListener("click", () => setBalanceManageMode("topup"));
+  balanceManageWithdraw?.addEventListener("click", () => setBalanceManageMode("withdraw"));
 
-  balanceTopupBtn?.addEventListener("click", () => {
-    balanceManageModal?.classList.remove("open");
-    topupModal?.classList.add("open");
-  });
-
-  balanceWithdrawBtn?.addEventListener("click", () => {
-    balanceManageModal?.classList.remove("open");
-    withdrawModal?.classList.add("open");
+  balanceManageForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const amount = Number(balanceManageAmount?.value || 0);
+    if (!amount || amount <= 0) {
+      log("Введите сумму в USDT", "warn");
+      return;
+    }
+    if (balanceManageMode === "topup") {
+      const payload = await fetchJson("/api/balance/topup", {
+        method: "POST",
+        body: JSON.stringify({ amount }),
+      });
+      if (payload?.ok) {
+        balanceManageForm.reset();
+        openLink(payload.pay_url);
+        log("Счёт создан. Если не открылось, используй кнопку в сообщении.", "info");
+      }
+      return;
+    }
+    if (!state.initData) {
+      showNotice("Вывод пока недоступен. Попробуйте немного позже.");
+      return;
+    }
+    const res = await fetch("/api/balance/withdraw", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Telegram-Init-Data": state.initData,
+      },
+      body: JSON.stringify({ amount }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      showNotice("Вывод пока недоступен. Попробуйте немного позже.");
+      log(`Ошибка API /api/balance/withdraw: ${text}`, "error");
+      return;
+    }
+    const payload = await res.json();
+    if (payload?.ok) {
+      balanceManageForm.reset();
+      await loadBalance();
+      playSuccessAnimation();
+      log("Вывод выполнен. Средства отправлены в Crypto Bot.", "info");
+    }
   });
 
   const renderDealsPage = () => {
