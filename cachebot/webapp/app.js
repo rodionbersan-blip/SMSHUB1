@@ -5431,6 +5431,10 @@
         terms: p2pTerms.value,
       }),
     });
+    if (!payload) {
+      showNotice(state.lastInitError || "Не удалось создать объявление");
+      return;
+    }
     if (payload?.ok) {
       p2pCreateModal.classList.remove("open");
       p2pCreateForm.reset();
