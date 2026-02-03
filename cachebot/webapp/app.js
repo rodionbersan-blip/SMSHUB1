@@ -1618,11 +1618,16 @@
   let balanceManageMode = "topup";
 
   const setBalanceManageMode = (mode) => {
+    const isSame = balanceManageMode === mode;
     balanceManageMode = mode;
     balanceManageTopup?.classList.toggle("active", mode === "topup");
     balanceManageWithdraw?.classList.toggle("active", mode === "withdraw");
     if (balanceManageSubmit) {
       balanceManageSubmit.textContent = mode === "withdraw" ? "Вывести" : "Пополнить";
+    }
+    if (isSame && balanceManageForm?.classList.contains("show")) {
+      balanceManageForm.classList.remove("show");
+      return;
     }
     balanceManageForm?.classList.add("show");
   };
