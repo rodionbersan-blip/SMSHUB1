@@ -3743,6 +3743,18 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(44, 96, 178, 0.92), rgba(70, 56, 160, 0.92));
 }
 
+:root[data-theme="light"] .stats-tabs .tab-btn {
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.85), rgba(86, 62, 180, 0.85));
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(60, 120, 220, 0.25);
+}
+
+:root[data-theme="light"] .stats-tabs .tab-btn.active,
+:root[data-theme="light"] .stats-tabs .tab-btn:hover {
+  background: linear-gradient(135deg, rgba(90, 160, 255, 0.95), rgba(108, 78, 200, 0.95));
+  box-shadow: 0 12px 26px rgba(70, 130, 230, 0.28);
+}
+
 .stats-range {
   display: flex;
   align-items: center;
