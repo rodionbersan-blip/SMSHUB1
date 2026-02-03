@@ -102,9 +102,6 @@
   const profileBalance = document.getElementById("profileBalance");
   const profileBalanceReserved = document.getElementById("profileBalanceReserved");
   const profileWithdraw = document.getElementById("profileWithdraw");
-  const profileDealsTotal = document.getElementById("profileDealsTotal");
-  const profileDealsSuccess = document.getElementById("profileDealsSuccess");
-  const profileReviewsCount = document.getElementById("profileReviewsCount");
   const dealsCount = document.getElementById("dealsCount");
   const dealsList = document.getElementById("dealsList");
   const dealsPagination = document.getElementById("dealsPagination");
@@ -1520,14 +1517,8 @@
   };
 
   const applyProfileStats = (stats) => {
-    if (profileDealsTotal) {
-      profileDealsTotal.textContent = `Сделок: ${stats.total_deals ?? 0}`;
-    }
-    if (profileDealsSuccess) {
-      profileDealsSuccess.textContent = `Успешные: ${stats.success_percent ?? 0}%`;
-    }
-    if (profileReviewsCount) {
-      profileReviewsCount.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
+    if (reviewsOpen) {
+      reviewsOpen.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
     }
   };
 

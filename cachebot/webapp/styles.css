@@ -3336,6 +3336,10 @@ body.modal-open #app {
   flex-wrap: wrap;
 }
 
+.profile-actions .btn {
+  flex: 1 1 100%;
+}
+
 .reviews-tabs {
   position: relative;
   display: flex;
