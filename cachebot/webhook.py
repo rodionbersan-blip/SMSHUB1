@@ -614,12 +614,24 @@ async def _api_deal_buyer_ready(request: web.Request) -> web.Response:
         deal = await deps.deal_service.buyer_ready_for_qr(deal_id, user_id)
     except (PermissionError, ValueError) as exc:
         raise web.HTTPBadRequest(text=str(exc))
-    with suppress(Exception):
-        await bot.send_message(
-            deal.seller_id,
-            "🔔 Новое уведомление по сделке\n"
-            "Отправьте QR в течение 5 минут.",
-        )
+    await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=0,
+        text="Покупатель готов сканировать QR.",
+        file_path=None,
+        file_name=None,
+        system=True,
+        recipient_id=deal.seller_id,
+    )
+    await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=0,
+        text="Нужно отправить QR в приложении.",
+        file_path=None,
+        file_name=None,
+        system=True,
+        recipient_id=deal.seller_id,
+    )
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 
