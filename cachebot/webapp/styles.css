@@ -670,8 +670,9 @@ body.modal-open #app {
 }
 
 .btn.status-ok {
-  border: 1px solid rgba(46, 204, 113, 0.35);
-  color: #2ecc71;
+  background: linear-gradient(135deg, #2ecc71, #22b861);
+  color: #ffffff;
+  border: none;
 }
 
 .btn.status-bad {
