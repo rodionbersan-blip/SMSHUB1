@@ -4923,18 +4923,12 @@
       });
       el.style.background = `conic-gradient(${parts.join(",")})`;
     }
-    el.style.setProperty("--donut-reveal", "0deg");
-    const start = performance.now();
-    const duration = 900;
-    const step = (now) => {
-      const progress = Math.min(1, (now - start) / duration);
-      const angle = progress * 360;
-      el.style.setProperty("--donut-reveal", `${angle}deg`);
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-    requestAnimationFrame(step);
+    const rotateOverlay = el.querySelector(".stats-donut-reveal");
+    if (!rotateOverlay) return;
+    rotateOverlay.animate(
+      [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+      { duration: 900, easing: "ease", fill: "forwards" }
+    );
   };
 
   const renderProfileStats = (payload) => {

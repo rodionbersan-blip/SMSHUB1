@@ -3938,10 +3938,6 @@ body.modal-open #app {
   --stats-card-bg: rgba(255, 255, 255, 0.02);
 }
 
-:root[data-theme="light"] .stats-donut::before {
-  background: conic-gradient(transparent 0 var(--donut-reveal), var(--stats-card-bg) 0);
-}
-
 .stats-donut {
   --donut-sweep: 0deg;
   --donut-reveal: 0deg;
@@ -3956,17 +3952,17 @@ body.modal-open #app {
 }
 
 .stats-donut.animate {
-  animation: donut-pop 0.4s ease, donut-reveal 0.9s ease;
+  animation: donut-pop 0.4s ease;
 }
 
-.stats-donut::before {
-  content: "";
+.stats-donut-reveal {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(transparent 0 var(--donut-reveal), var(--stats-card-bg) 0);
+  background: conic-gradient(transparent 0 0, var(--stats-card-bg) 0);
   pointer-events: none;
   z-index: 0;
+  transform-origin: center;
 }
 
 .stats-donut::after {
@@ -4037,14 +4033,6 @@ body.modal-open #app {
   }
 }
 
-@keyframes donut-reveal {
-  from {
-    --donut-reveal: 0deg;
-  }
-  to {
-    --donut-reveal: 360deg;
-  }
-}
 
 :root[data-theme="light"] .stats-range input[type="date"] {
   background: rgba(255, 255, 255, 0.9);
