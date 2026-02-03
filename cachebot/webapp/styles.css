@@ -1498,6 +1498,22 @@ body.modal-open #app {
   white-space: nowrap;
 }
 
+.p2p-owner-btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
+  color: #ffffff;
+  border: 1px solid rgba(214, 170, 90, 0.5);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.p2p-owner-btn:hover {
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
+}
+
 .p2p-edit-btn {
   padding: 6px 12px;
   font-size: 12px;

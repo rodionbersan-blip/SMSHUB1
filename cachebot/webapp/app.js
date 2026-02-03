@@ -1960,23 +1960,27 @@
     const item = document.createElement("div");
     item.className = "deal-item";
     const sideLabel = ad.side === "sell" ? "Продажа" : "Покупка";
-    const limit = `₽${formatAmount(ad.min_rub, 0)}-₽${formatAmount(ad.max_rub, 0)}`;
+    const limit = `${formatAmount(ad.min_rub, 0)}-${formatAmount(ad.max_rub, 0)}`;
     const price = `${formatAmount(ad.price_rub, 0)}р`;
-    const ownerId = ad.owner_id ?? ad.ownerId ?? ad.owner?.user_id;
-    const isOwner = ownerId && state.userId && Number(ownerId) === Number(state.userId);
+    const owner = ad.owner || {};
+    const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id;
+    const ownerName = owner.display_name || owner.full_name || owner.username || "—";
     if (type === "public") {
       item.innerHTML = `
         <div class="deal-header">
-          <div class="deal-id">${sideLabel} • USDT - ${price}</div>
-          <div class="deal-status">${sideLabel}</div>
+          <div class="deal-id">${price} * ${limit}</div>
+          ${ownerId ? `<button class="btn p2p-owner-btn" data-owner="${ownerId}">${ownerName}</button>` : ""}
         </div>
         <div class="deal-row">Объем: ${formatAmount(ad.remaining_usdt, 0)} USDT</div>
-        <div class="deal-row deal-row-split">
-          <span>Лимиты: ${limit}</span>
-          ${isOwner ? '<span class="p2p-owner-badge">Это ваше объявление</span>' : ""}
-        </div>
       `;
       item.addEventListener("click", () => openP2PAd(ad.id));
+      const ownerBtn = item.querySelector(".p2p-owner-btn");
+      if (ownerBtn && ownerId) {
+        ownerBtn.addEventListener("click", (event) => {
+          event.stopPropagation();
+          openUserProfile(ownerId);
+        });
+      }
     } else {
       const status = ad.active ? "Активно" : "Не активно";
       const statusClass = ad.active ? "status-ok" : "status-bad";
