@@ -3129,9 +3129,7 @@ def _deal_actions(deal, user_id: int) -> dict[str, bool]:
     can_accept_offer = bool(deal.status.value == "pending" and is_recipient)
     can_decline_offer = bool(deal.status.value == "pending" and (is_recipient or is_initiator))
     can_buyer_ready = bool(is_buyer and deal.qr_stage.value == "awaiting_buyer_ready")
-    can_seller_ready = bool(
-        is_seller and deal.qr_stage.value in {"awaiting_seller_attach", "awaiting_buyer_ready"}
-    )
+    can_seller_ready = bool(is_seller and deal.qr_stage.value == "awaiting_seller_attach")
     can_confirm_buyer = bool(is_buyer and deal.status.value == "paid")
     can_confirm_seller = bool(is_seller and deal.status.value == "paid")
     can_open_dispute = bool(
