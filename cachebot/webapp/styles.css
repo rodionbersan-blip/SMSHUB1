@@ -1403,6 +1403,7 @@ body.modal-open #app {
 .deal-review-block.has-label {
   background: transparent;
   border: 0;
+  overflow: visible;
 }
 
 .deal-review-block.has-label .deal-review-body {
