@@ -3795,8 +3795,23 @@ body.modal-open #app {
   initial-value: 0deg;
 }
 
+@property --donut-reveal {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.stats-modal .modal-card {
+  --stats-card-bg: var(--glass-bg);
+}
+
+:root[data-theme="light"] .stats-modal .modal-card {
+  --stats-card-bg: rgba(255, 255, 255, 0.78);
+}
+
 .stats-donut {
   --donut-sweep: 0deg;
+  --donut-reveal: 0deg;
   width: 180px;
   height: 180px;
   border-radius: 50%;
@@ -3809,7 +3824,17 @@ body.modal-open #app {
 
 .stats-donut.animate {
   animation: donut-pop 0.4s ease;
-  transition: none;
+  transition: --donut-reveal 0.9s ease;
+}
+
+.stats-donut::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(transparent 0 var(--donut-reveal), var(--stats-card-bg) 0);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .stats-donut::after {

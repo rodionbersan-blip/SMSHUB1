@@ -4831,13 +4831,13 @@
       });
       el.style.background = `conic-gradient(${parts.join(",")})`;
     }
-    el.animate(
-      [{ transform: "rotate(-90deg)" }, { transform: "rotate(270deg)" }],
-      { duration: 900, easing: "ease", fill: "both" }
-    );
     el.classList.remove("animate");
+    el.style.setProperty("--donut-reveal", "0deg");
     void el.offsetWidth;
     el.classList.add("animate");
+    requestAnimationFrame(() => {
+      el.style.setProperty("--donut-reveal", "360deg");
+    });
   };
 
   const renderProfileStats = (payload) => {
@@ -4871,8 +4871,8 @@
     }
 
     setDonut(statsFundsDonut, [
-      { value: topup, color: "#55e2a3" },
-      { value: withdraw, color: "#ffb36c" },
+      { value: buySum, color: "#55e2a3" },
+      { value: sellSum, color: "#ffb36c" },
     ]);
 
     const completed = Number(deals.completed || 0);
