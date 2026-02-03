@@ -2626,9 +2626,9 @@ body.modal-open #app {
 :root[data-theme="light"] #adminAddModerator,
 :root[data-theme="light"] #adminAddMerchant,
 :root[data-theme="light"] #adminAddAdmin {
-  background: linear-gradient(135deg, rgba(214, 170, 90, 0.45), rgba(240, 208, 130, 0.5));
-  border: 1px solid rgba(214, 170, 90, 0.35);
-  color: #2b1e07;
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
+  border: 1px solid rgba(214, 170, 90, 0.5);
+  color: #ffffff;
 }
 
 :root[data-theme="light"] #adminSaveRates:hover,
@@ -2636,7 +2636,7 @@ body.modal-open #app {
 :root[data-theme="light"] #adminAddModerator:hover,
 :root[data-theme="light"] #adminAddMerchant:hover,
 :root[data-theme="light"] #adminAddAdmin:hover {
-  background: linear-gradient(135deg, rgba(226, 184, 102, 0.6), rgba(248, 220, 145, 0.62));
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
 #adminSaveRates,
