@@ -258,6 +258,7 @@
   const adminSaveRates = document.getElementById("adminSaveRates");
   const adminModeratorUsername = document.getElementById("adminModeratorUsername");
   const adminAddModerator = document.getElementById("adminAddModerator");
+  const adminAddModeratorPanel = document.getElementById("adminAddModeratorPanel");
   const adminModerators = document.getElementById("adminModerators");
   const adminModeratorsTitle = document.getElementById("adminModeratorsTitle");
   const adminModeratorsActions = document.getElementById("adminModeratorsActions");
@@ -285,8 +286,10 @@
   const adminMerchantRemove = document.getElementById("adminMerchantRemove");
   const adminMerchantUsername = document.getElementById("adminMerchantUsername");
   const adminAddMerchant = document.getElementById("adminAddMerchant");
+  const adminAddMerchantPanel = document.getElementById("adminAddMerchantPanel");
   const adminAdminUsername = document.getElementById("adminAdminUsername");
   const adminAddAdmin = document.getElementById("adminAddAdmin");
+  const adminAddAdminPanel = document.getElementById("adminAddAdminPanel");
   const adminAdminsCard = document.getElementById("adminAdminsCard");
   const adminAdmins = document.getElementById("adminAdmins");
   const adminAdminModal = document.getElementById("adminAdminModal");
@@ -5376,9 +5379,15 @@
   });
 
   adminAddModerator?.addEventListener("click", async () => {
+    if (adminAddModeratorPanel && !adminAddModeratorPanel.classList.contains("open")) {
+      adminAddModeratorPanel.classList.add("open");
+      adminModeratorUsername?.focus();
+      return;
+    }
     const username = adminModeratorUsername.value.trim();
     if (!username) {
       log("Укажи username", "warn");
+      adminModeratorUsername?.focus();
       return;
     }
     await fetchJson("/api/admin/moderators", {
@@ -5390,9 +5399,15 @@
   });
 
   adminAddMerchant?.addEventListener("click", async () => {
+    if (adminAddMerchantPanel && !adminAddMerchantPanel.classList.contains("open")) {
+      adminAddMerchantPanel.classList.add("open");
+      adminMerchantUsername?.focus();
+      return;
+    }
     const username = adminMerchantUsername.value.trim();
     if (!username) {
       log("Укажи username", "warn");
+      adminMerchantUsername?.focus();
       return;
     }
     await fetchJson("/api/admin/merchants", {
@@ -5404,9 +5419,15 @@
   });
 
   adminAddAdmin?.addEventListener("click", async () => {
+    if (adminAddAdminPanel && !adminAddAdminPanel.classList.contains("open")) {
+      adminAddAdminPanel.classList.add("open");
+      adminAdminUsername?.focus();
+      return;
+    }
     const username = adminAdminUsername.value.trim();
     if (!username) {
       log("Укажи username", "warn");
+      adminAdminUsername?.focus();
       return;
     }
     const payload = await fetchJson("/api/admin/admins", {

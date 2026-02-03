@@ -2536,6 +2536,22 @@ body.modal-open #app {
   flex-wrap: wrap;
 }
 
+.admin-add-panel.search-panel {
+  margin-top: 6px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.admin-add-panel.search-panel.open {
+  margin-top: 6px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.admin-add-panel .search-panel-inner {
+  padding-bottom: 0;
+}
+
 #adminModeratorsPanel .admin-row {
   flex-wrap: wrap;
   align-items: stretch;
