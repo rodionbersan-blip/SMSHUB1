@@ -1865,6 +1865,7 @@ body.modal-open #app {
   color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.25);
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.65);
+  height: 40px;
   box-shadow:
     0 6px 12px rgba(244, 114, 46, 0.2),
     inset 0 0 0 1px rgba(255, 255, 255, 0.22);
@@ -1882,6 +1883,7 @@ body.modal-open #app {
   color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.25);
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.65);
+  height: 40px;
   box-shadow:
     0 8px 14px rgba(244, 114, 46, 0.2),
     inset 0 0 0 1px rgba(255, 255, 255, 0.22);
