@@ -2537,13 +2537,13 @@ body.modal-open #app {
 }
 
 .admin-add-panel.search-panel {
-  margin-top: 6px;
+  margin-top: 2px;
   padding-top: 0;
   padding-bottom: 0;
 }
 
 .admin-add-panel.search-panel.open {
-  margin-top: 6px;
+  margin-top: 2px;
   padding-top: 0;
   padding-bottom: 0;
 }
@@ -2562,7 +2562,7 @@ body.modal-open #app {
 }
 
 #adminModeratorsPanel #adminModeratorsActions {
-  margin-top: 6px;
+  margin-top: 2px;
   margin-bottom: 12px;
 }
 
