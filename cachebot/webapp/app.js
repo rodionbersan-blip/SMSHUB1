@@ -4826,13 +4826,13 @@
       });
       el.style.background = `conic-gradient(${parts.join(",")})`;
     }
+    el.animate(
+      [{ transform: "rotate(-90deg)" }, { transform: "rotate(270deg)" }],
+      { duration: 900, easing: "ease", fill: "both" }
+    );
     el.classList.remove("animate");
-    el.style.setProperty("--donut-sweep", "0deg");
     void el.offsetWidth;
     el.classList.add("animate");
-    requestAnimationFrame(() => {
-      el.style.setProperty("--donut-sweep", "360deg");
-    });
   };
 
   const renderProfileStats = (payload) => {
