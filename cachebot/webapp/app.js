@@ -3465,7 +3465,11 @@
     if (deal.status === "paid" && deal.qr_stage === "ready" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
-      alert.textContent = "✅ QR прикреплен и отправлен в чат.";
+      if (deal.buyer_cash_confirmed) {
+        alert.innerHTML = "Покупатель подтвердил снятие.<br>Пересчитай и жми <b>Получил нал</b>";
+      } else {
+        alert.textContent = "✅ QR прикреплен и отправлен в чат.";
+      }
       dealModalBody.appendChild(alert);
     }
     const ownerLink = dealModalBody.querySelector(".owner-link");
