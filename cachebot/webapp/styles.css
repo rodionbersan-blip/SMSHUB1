@@ -2177,6 +2177,7 @@ body.modal-open #app {
   display: grid;
   gap: 10px;
   padding-bottom: 10px;
+  width: 100%;
 }
 
 .search-panel.open {
@@ -2580,6 +2581,7 @@ body.modal-open #app {
 .admin-list {
   display: grid;
   gap: 10px;
+  width: 100%;
 }
 
 .admin-item {
@@ -2601,6 +2603,7 @@ body.modal-open #app {
   border-left: 4px solid rgba(255, 160, 70, 0.75);
   color: var(--text);
   width: 100%;
+  min-width: 100%;
   box-sizing: border-box;
   max-width: 100%;
   justify-self: stretch;
