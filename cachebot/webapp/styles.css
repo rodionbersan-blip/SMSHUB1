@@ -4244,6 +4244,13 @@ body.modal-open #app {
   font-weight: 700;
 }
 
+.system-notice-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .system-notice-list {
   display: grid;
   gap: 6px;
@@ -4305,12 +4312,6 @@ body.modal-open #app {
   font-weight: 600;
 }
 
-.system-notice-rate-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
 
 .system-notice-rate-close {
   background: transparent;
