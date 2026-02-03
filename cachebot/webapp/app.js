@@ -1541,8 +1541,7 @@
     profileName.textContent = display;
     if (profileDisplayName) profileDisplayName.textContent = display;
     if (profileUsername) {
-      const username = profile?.username?.trim();
-      profileUsername.textContent = username ? `@${username}` : "";
+      profileUsername.textContent = "";
       profileUsername.style.display = "none";
     }
     profileRegistered.textContent = profile?.registered_at
