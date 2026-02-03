@@ -2644,7 +2644,7 @@ body.modal-open #app {
   box-sizing: border-box;
   max-width: 100%;
   justify-self: stretch;
-  margin-right: -20px;
+  margin: 0;
 }
 
 .admin-person-text {
