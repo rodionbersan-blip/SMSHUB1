@@ -1094,7 +1094,7 @@ body.modal-open #app {
   width: var(--action-btn-width);
   justify-content: center;
   justify-self: end;
-  transform: translateX(10px);
+  transform: translateX(14px);
 }
 
 #profileBalance {
