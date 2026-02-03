@@ -102,6 +102,11 @@
   const profileBalance = document.getElementById("profileBalance");
   const profileBalanceReserved = document.getElementById("profileBalanceReserved");
   const profileWithdraw = document.getElementById("profileWithdraw");
+  const balanceManageOpen = document.getElementById("balanceManageOpen");
+  const balanceManageModal = document.getElementById("balanceManageModal");
+  const balanceManageClose = document.getElementById("balanceManageClose");
+  const balanceTopupBtn = document.getElementById("balanceTopupBtn");
+  const balanceWithdrawBtn = document.getElementById("balanceWithdrawBtn");
   const dealsCount = document.getElementById("dealsCount");
   const dealsList = document.getElementById("dealsList");
   const dealsPagination = document.getElementById("dealsPagination");
@@ -1604,6 +1609,24 @@
   };
 
   profileWithdraw?.addEventListener("click", () => {
+    withdrawModal?.classList.add("open");
+  });
+
+  balanceManageOpen?.addEventListener("click", () => {
+    balanceManageModal?.classList.add("open");
+  });
+
+  balanceManageClose?.addEventListener("click", () => {
+    balanceManageModal?.classList.remove("open");
+  });
+
+  balanceTopupBtn?.addEventListener("click", () => {
+    balanceManageModal?.classList.remove("open");
+    topupModal?.classList.add("open");
+  });
+
+  balanceWithdrawBtn?.addEventListener("click", () => {
+    balanceManageModal?.classList.remove("open");
     withdrawModal?.classList.add("open");
   });
 

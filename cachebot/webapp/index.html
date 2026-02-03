@@ -102,16 +102,11 @@
           </div>
           <div class="profile-card">
             <div class="profile-title">Баланс</div>
-            <div class="profile-balance-row">
+            <div class="profile-balance-row balance-only">
               <div id="profileBalance" class="profile-value">—</div>
-              <button id="profileWithdraw" class="btn pill with-icon">
-                <span class="btn-icon"><img src="/app/assets/usdt-logo.png" alt="" /></span>
-                Вывести
-              </button>
-              <button id="topupOpen" class="btn pill with-icon">
-                <span class="btn-icon"><img src="/app/assets/topup-icon.png" alt="" /></span>
-                Пополнить
-              </button>
+            </div>
+            <div class="profile-balance-row history-row">
+              <button id="balanceManageOpen" class="btn pill stats-tab-btn">Управление балансом</button>
             </div>
             <div class="profile-balance-row history-row">
               <button id="balanceHistoryOpen" class="btn pill with-icon">
@@ -892,6 +887,21 @@
             </label>
             <button type="submit" class="btn primary">Оплатить</button>
           </form>
+        </div>
+      </div>
+
+      <div class="modal" id="balanceManageModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Управление балансом</div>
+            <button id="balanceManageClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-actions-row">
+              <button id="balanceTopupBtn" class="btn pill stats-tab-btn">Пополнить</button>
+              <button id="balanceWithdrawBtn" class="btn pill stats-tab-btn">Вывести</button>
+            </div>
+          </div>
         </div>
       </div>
 
