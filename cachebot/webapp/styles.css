@@ -1406,10 +1406,10 @@ body.modal-open #app {
   gap: 8px;
   font-size: 13px;
   color: #ffffff;
-  min-height: 24px;
-  height: 28px;
+  min-height: 20px;
+  height: 24px;
   border-radius: 999px;
-  padding: 4px 12px;
+  padding: 2px 12px;
   border: 0;
 }
 
@@ -1417,10 +1417,10 @@ body.modal-open #app {
 .deal-review-body.is-negative::after {
   content: "";
   position: absolute;
-  inset: -6px;
+  inset: 0;
   border-radius: 999px;
   pointer-events: none;
-  border: 3px solid transparent;
+  border: 2px solid transparent;
 }
 
 .deal-review-body.is-positive::after {
