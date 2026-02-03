@@ -252,6 +252,7 @@
   const moderationAdsClose = document.getElementById("moderationAdsClose");
   const moderationAdsList = document.getElementById("moderationAdsList");
   const adminTab = document.getElementById("adminTab");
+  const tabsNav = document.querySelector(".tabs");
   const adminRate = document.getElementById("adminRate");
   const adminFee = document.getElementById("adminFee");
   const adminWithdrawFee = document.getElementById("adminWithdrawFee");
@@ -2586,9 +2587,11 @@
     const summary = await fetchJson("/api/disputes/summary");
     if (!summary?.ok || !summary.can_access) {
       if (disputesTab) disputesTab.style.display = "none";
+      updateTabsLayout();
       return;
     }
     if (disputesTab) disputesTab.style.display = "inline-flex";
+    updateTabsLayout();
     state.canManageDisputes = !!summary.can_access;
     disputesCount.textContent = `${summary.count || 0}`;
     const payload = await fetchJson("/api/disputes");
@@ -2917,6 +2920,14 @@
     moderationAdsModal?.classList.remove("open");
   };
 
+  const updateTabsLayout = () => {
+    if (!tabsNav || !disputesTab) return;
+    const adminHidden =
+      !adminTab || adminTab.style.display === "none" || adminTab.classList.contains("is-hidden");
+    const disputesVisible = disputesTab.style.display !== "none";
+    tabsNav.classList.toggle("tabs-only-disputes", adminHidden && disputesVisible);
+  };
+
   const submitModerationAction = async () => {
     const userId = state.moderationUser?.user_id;
     const action = state.moderationAction;
@@ -2965,10 +2976,12 @@
     if (!summary?.ok || !summary.can_access) {
       if (adminTab) adminTab.style.display = "none";
       if (systemPanel) systemPanel.style.display = "none";
+      updateTabsLayout();
       return;
     }
     if (adminTab) adminTab.style.display = "inline-flex";
     if (systemPanel) systemPanel.style.display = "block";
+    updateTabsLayout();
     const settings = await fetchJson("/api/admin/settings");
     if (settings?.ok) {
       adminRate.value = settings.usd_rate;

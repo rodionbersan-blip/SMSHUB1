@@ -808,6 +808,15 @@ body.modal-open #app {
   width: 100%;
 }
 
+.tabs.tabs-only-disputes #disputesTab {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.tabs.tabs-only-disputes .tabs-break {
+  display: none;
+}
+
 #disputesTab,
 #adminTab {
   grid-column: span 3;
