@@ -46,15 +46,13 @@ async def dispute_timer_watcher(deal_service: DealService, bot: Bot, interval: i
         try:
             ready = await deal_service.list_dispute_ready()
             for deal in ready:
-                builder = InlineKeyboardBuilder()
-                builder.button(text="К сделке", callback_data=f"deal_info:{deal.id}")
                 text = (
                     f"⏳ Таймер по сделке {deal.hashtag} истёк.\n"
                     "Если есть спорные моменты, советуем открыть спор."
                 )
-                await bot.send_message(deal.seller_id, text, reply_markup=builder.as_markup())
+                await bot.send_message(deal.seller_id, text)
                 if deal.buyer_id:
-                    await bot.send_message(deal.buyer_id, text, reply_markup=builder.as_markup())
+                    await bot.send_message(deal.buyer_id, text)
                 await deal_service.mark_dispute_notified(deal.id)
         except Exception as exc:  # pragma: no cover
             logger.exception("Dispute timer watcher error: %s", exc)
