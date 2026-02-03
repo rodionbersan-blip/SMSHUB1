@@ -3884,8 +3884,7 @@ body.modal-open #app {
 }
 
 .stats-donut.animate {
-  animation: donut-pop 0.4s ease;
-  transition: --donut-reveal 0.9s ease;
+  animation: donut-pop 0.4s ease, donut-reveal 0.9s ease;
 }
 
 .stats-donut::before {
@@ -3963,6 +3962,15 @@ body.modal-open #app {
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes donut-reveal {
+  from {
+    --donut-reveal: 0deg;
+  }
+  to {
+    --donut-reveal: 360deg;
   }
 }
 

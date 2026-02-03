@@ -4921,9 +4921,6 @@
     el.style.setProperty("--donut-reveal", "0deg");
     void el.offsetWidth;
     el.classList.add("animate");
-    requestAnimationFrame(() => {
-      el.style.setProperty("--donut-reveal", "360deg");
-    });
   };
 
   const renderProfileStats = (payload) => {
@@ -4986,6 +4983,9 @@
 
   const loadProfileStats = async (mode = "funds") => {
     if (!statsFrom || !statsTo) return;
+    state.statsRequestId = (state.statsRequestId || 0) + 1;
+    const requestId = state.statsRequestId;
+    state.statsActiveMode = mode;
     const fromValue = statsFrom.value;
     const toValue = statsTo.value;
     if (mode === "funds" && fromValue && toValue && fromValue > toValue) {
@@ -4997,6 +4997,9 @@
         ? "scope=deals_all"
         : `from=${fromValue}&to=${toValue}`;
     const payload = await fetchJson(`/api/profile/stats?${query}`);
+    if (requestId !== state.statsRequestId || state.statsActiveMode !== mode) {
+      return;
+    }
     if (!payload?.ok) {
       showNotice("Не удалось загрузить статистику");
       return;
