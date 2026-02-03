@@ -1208,7 +1208,7 @@ body.modal-open #app {
 }
 
 .profile-balance-row.history-row + .profile-balance-row.history-row {
-  margin-top: 12px;
+  margin-top: 20px;
 }
 
 #balanceHistoryOpen {
@@ -1261,7 +1261,7 @@ body.modal-open #app {
   text-align: center;
   display: inline-flex;
   align-items: center;
-  margin-top: -48px;
+  margin-top: -64px;
 }
 
 #profileWithdraw,
