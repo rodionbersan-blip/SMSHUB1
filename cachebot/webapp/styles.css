@@ -2290,7 +2290,7 @@ body.modal-open #app {
 }
 
 .moderation-search-group.admin-card {
-  padding-bottom: 4px;
+  padding-bottom: 0;
 }
 
 .moderation-search-group .moderation-search {
