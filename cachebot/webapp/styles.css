@@ -1387,7 +1387,7 @@ body.modal-open #app {
   padding: 0;
   border-radius: 999px;
   background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
-  border: 1px solid rgba(214, 170, 90, 0.5);
+  border: 0;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -1419,30 +1419,15 @@ body.modal-open #app {
 
 .deal-review-body.is-positive::after,
 .deal-review-body.is-negative::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 999px;
-  pointer-events: none;
-  border: 5px solid transparent;
-}
-
-.deal-review-body.is-positive::after {
-  border-color: rgba(46, 204, 113, 0.85);
-  box-shadow: 0 0 8px rgba(46, 204, 113, 0.35);
-}
-
-.deal-review-body.is-negative::after {
-  border-color: rgba(229, 83, 61, 0.9);
-  box-shadow: 0 0 8px rgba(229, 83, 61, 0.35);
+  content: none;
 }
 
 .deal-review-body.is-positive {
-  position: relative;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.9), rgba(22, 163, 74, 0.9));
 }
 
 .deal-review-body.is-negative {
-  position: relative;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
 }
 
 .deal-review-text {
