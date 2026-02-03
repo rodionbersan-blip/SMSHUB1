@@ -3963,7 +3963,7 @@ body.modal-open #app {
 .stats-donut-mask {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 2;
   transform: rotate(-90deg);
 }
 
@@ -3987,7 +3987,7 @@ body.modal-open #app {
 
 .stats-donut-center {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   text-align: center;
   display: flex;
   flex-direction: column;

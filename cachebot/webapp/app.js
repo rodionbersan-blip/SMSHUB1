@@ -4931,8 +4931,10 @@
     maskCircle.style.strokeDashoffset = `${circumference}`;
     el.style.background = "conic-gradient(transparent 0 100%)";
     requestAnimationFrame(() => {
-      el.style.background = nextBackground;
-      maskCircle.style.strokeDashoffset = "0";
+      requestAnimationFrame(() => {
+        el.style.background = nextBackground;
+        maskCircle.style.strokeDashoffset = "0";
+      });
     });
   };
 
