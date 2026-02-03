@@ -3757,7 +3757,7 @@ body.modal-open #app {
 .stats-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   overflow-y: auto;
   height: calc(100% - 48px);
 }
@@ -3807,7 +3807,7 @@ body.modal-open #app {
   align-items: center;
   gap: 10px;
   justify-content: center;
-  margin-top: -4px;
+  margin-top: -10px;
 }
 
 .stats-range input[type="date"] {
