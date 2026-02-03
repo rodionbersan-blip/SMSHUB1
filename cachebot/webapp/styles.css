@@ -526,6 +526,16 @@ body.modal-open #app {
   color: #ffffff;
 }
 
+:root[data-theme="light"] .deal-chat-btn {
+  background: linear-gradient(135deg, rgba(77, 163, 255, 0.95), rgba(53, 140, 245, 0.95));
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .deal-chat-btn:hover {
+  background: linear-gradient(135deg, rgba(99, 176, 255, 0.98), rgba(67, 153, 250, 0.98));
+  color: #ffffff;
+}
+
 .deal-dispute-btn,
 .deal-cancel-btn {
   background: linear-gradient(135deg, #ff6b5b, #e24b3e);
