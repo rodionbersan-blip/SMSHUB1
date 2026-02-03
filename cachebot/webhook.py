@@ -313,8 +313,8 @@ async def _api_profile_stats(request: web.Request) -> web.Response:
             withdraw_total += abs(event.amount)
 
     deals = await deps.deal_service.list_user_deals(user_id)
-    buy_count = 0
-    sell_count = 0
+    buy_sum = Decimal("0")
+    sell_sum = Decimal("0")
     completed = 0
     canceled = 0
     expired = 0
@@ -324,9 +324,9 @@ async def _api_profile_stats(request: web.Request) -> web.Response:
             continue
         total += 1
         if deal.buyer_id == user_id:
-            buy_count += 1
+            buy_sum += deal.usdt_amount
         if deal.seller_id == user_id:
-            sell_count += 1
+            sell_sum += deal.usdt_amount
         if deal.status == DealStatus.COMPLETED:
             completed += 1
         elif deal.status == DealStatus.CANCELED:
@@ -341,8 +341,8 @@ async def _api_profile_stats(request: web.Request) -> web.Response:
             "range": {"from": range_from.isoformat(), "to": range_to.isoformat()},
             "funds": {"topup": str(topup_total), "withdraw": str(withdraw_total)},
             "deals": {
-                "buy": buy_count,
-                "sell": sell_count,
+                "buy": str(buy_sum),
+                "sell": str(sell_sum),
                 "completed": completed,
                 "canceled": canceled,
                 "expired": expired,

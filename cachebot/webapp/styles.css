@@ -617,27 +617,51 @@ body.modal-open #app {
 }
 
 .btn.reviews-btn {
-  background: rgba(255, 167, 66, 0.16);
-  border: 1px solid rgba(255, 167, 66, 0.32);
-  color: #c46912;
-  box-shadow: 0 2px 6px rgba(255, 144, 38, 0.08);
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.9), rgba(226, 186, 92, 0.95));
+  border: 1px solid rgba(214, 170, 90, 0.45);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.18);
 }
 
 .btn.reviews-btn:hover {
-  background: rgba(255, 167, 66, 0.22);
-  color: #c46912;
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  color: #ffffff;
 }
 
 :root[data-theme="dark"] .btn.reviews-btn {
-  background: rgba(255, 178, 76, 0.2);
-  border: 1px solid rgba(255, 178, 76, 0.38);
-  color: #ffb053;
-  box-shadow: 0 2px 8px rgba(255, 140, 40, 0.1);
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
+  border: 1px solid rgba(214, 170, 90, 0.45);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.2);
 }
 
 :root[data-theme="dark"] .btn.reviews-btn:hover {
-  background: rgba(255, 178, 76, 0.24);
-  color: #ffb053;
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  color: #ffffff;
+}
+
+.btn.stats-btn {
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.9), rgba(226, 186, 92, 0.95));
+  border: 1px solid rgba(214, 170, 90, 0.45);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.18);
+}
+
+.btn.stats-btn:hover {
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .btn.stats-btn {
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
+  border: 1px solid rgba(214, 170, 90, 0.45);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(214, 170, 90, 0.2);
+}
+
+:root[data-theme="dark"] .btn.stats-btn:hover {
+  background: linear-gradient(135deg, rgba(214, 168, 72, 0.96), rgba(240, 202, 110, 0.96));
+  color: #ffffff;
 }
 
 .btn-icon {
@@ -3682,7 +3706,7 @@ body.modal-open #app {
 .stats-body {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 12px;
   overflow-y: auto;
   height: calc(100% - 48px);
 }
@@ -3695,6 +3719,24 @@ body.modal-open #app {
 
 .stats-tabs .tab-btn {
   min-width: 120px;
+  border: none;
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75), rgba(86, 62, 180, 0.75));
+  color: #ffffff;
+  font-weight: 700;
+}
+
+:root[data-theme="dark"] .stats-tabs .tab-btn {
+  background: linear-gradient(135deg, rgba(32, 78, 160, 0.85), rgba(54, 44, 140, 0.85));
+}
+
+.stats-tabs .tab-btn.active,
+.stats-tabs .tab-btn:hover {
+  background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
+}
+
+:root[data-theme="dark"] .stats-tabs .tab-btn.active,
+:root[data-theme="dark"] .stats-tabs .tab-btn:hover {
+  background: linear-gradient(135deg, rgba(44, 96, 178, 0.92), rgba(70, 56, 160, 0.92));
 }
 
 .stats-range {
@@ -3702,6 +3744,7 @@ body.modal-open #app {
   align-items: center;
   gap: 10px;
   justify-content: center;
+  margin-top: -4px;
 }
 
 .stats-range input[type="date"] {
@@ -3730,7 +3773,14 @@ body.modal-open #app {
   display: flex;
 }
 
+@property --donut-sweep {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .stats-donut {
+  --donut-sweep: 0deg;
   width: 180px;
   height: 180px;
   border-radius: 50%;
@@ -3738,11 +3788,23 @@ body.modal-open #app {
   position: relative;
   display: grid;
   place-items: center;
-  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
 }
 
 .stats-donut.animate {
-  animation: donut-pop 0.6s ease;
+  animation: donut-pop 0.4s ease;
+  transition: --donut-sweep 0.9s ease;
+}
+
+.stats-donut::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(transparent var(--donut-sweep), rgba(0, 0, 0, 0.85) 0);
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%);
+  mask: radial-gradient(circle, transparent 58%, #000 60%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .stats-donut::after {
@@ -3814,6 +3876,10 @@ body.modal-open #app {
 
 :root[data-theme="light"] .stats-donut::after {
   background: rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme="light"] .stats-donut::before {
+  background: conic-gradient(transparent var(--donut-sweep), rgba(255, 255, 255, 0.85) 0);
 }
 
 :root[data-theme="light"] .stats-row {

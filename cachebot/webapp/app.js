@@ -4836,8 +4836,12 @@
       el.style.background = `conic-gradient(${parts.join(",")})`;
     }
     el.classList.remove("animate");
+    el.style.setProperty("--donut-sweep", "0deg");
     void el.offsetWidth;
     el.classList.add("animate");
+    requestAnimationFrame(() => {
+      el.style.setProperty("--donut-sweep", "360deg");
+    });
   };
 
   const renderProfileStats = (payload) => {
@@ -4856,10 +4860,12 @@
         <div class="stats-row"><span>Вывод</span><strong>${formatAmount(withdraw, 2)} USDT</strong></div>
       `;
     }
+    const buySum = Number(deals.buy || 0);
+    const sellSum = Number(deals.sell || 0);
     if (statsSideSummary) {
       statsSideSummary.innerHTML = `
-        <div class="stats-row"><span>Сделок на покупку</span><strong>${deals.buy ?? 0}</strong></div>
-        <div class="stats-row"><span>Сделок на продажу</span><strong>${deals.sell ?? 0}</strong></div>
+        <div class="stats-row"><span>Сумма покупок</span><strong>${formatAmount(buySum, 2)} USDT</strong></div>
+        <div class="stats-row"><span>Сумма продаж</span><strong>${formatAmount(sellSum, 2)} USDT</strong></div>
       `;
     }
 
