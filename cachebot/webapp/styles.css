@@ -4248,6 +4248,15 @@ body.modal-open #app {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  max-height: 120px;
+  transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease;
+}
+
+.system-notice-actions.is-collapsed {
+  opacity: 0;
+  transform: translateY(-6px);
+  max-height: 0;
+  pointer-events: none;
 }
 
 .system-notice-actions .btn {
@@ -4258,14 +4267,23 @@ body.modal-open #app {
 }
 
 .system-notice-rate {
-  display: none;
+  display: grid;
   gap: 10px;
   position: relative;
   z-index: 1;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease;
 }
 
 .system-notice-rate.show {
-  display: grid;
+  max-height: 220px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .system-notice-rate-title {
@@ -4285,15 +4303,45 @@ body.modal-open #app {
 
 .system-notice-rate-actions .btn.active {
   color: #fff;
-  background: rgba(77, 163, 255, 0.9);
-  border-color: rgba(77, 163, 255, 0.95);
-  box-shadow: 0 0 0 1px rgba(77, 163, 255, 0.35), 0 10px 24px rgba(77, 163, 255, 0.3);
+  background: rgba(77, 163, 255, 0.3);
+  border-color: rgba(77, 163, 255, 0.5);
+  box-shadow: none;
+}
+
+.system-notice-rate-actions .btn.status-ok {
+  background: rgba(59, 207, 122, 0.12);
+  border: 1px solid rgba(59, 207, 122, 0.4);
+  color: #3bcf7a;
+}
+
+.system-notice-rate-actions .btn.status-bad {
+  background: rgba(255, 91, 91, 0.12);
+  border: 1px solid rgba(255, 91, 91, 0.4);
+  color: #ff6b6b;
+}
+
+.system-notice-rate-actions .btn.status-ok.active {
+  background: linear-gradient(135deg, #3bcf7a, #2aa866);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(59, 207, 122, 0.35), 0 10px 24px rgba(42, 168, 102, 0.28);
 }
 
 .system-notice-rate-actions .btn.status-bad.active {
-  background: rgba(255, 91, 91, 0.92);
-  border-color: rgba(255, 91, 91, 0.95);
-  box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.35), 0 10px 24px rgba(255, 91, 91, 0.25);
+  background: linear-gradient(135deg, #ff6b5b, #e24b3e);
+  border-color: transparent;
+  box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.35), 0 10px 24px rgba(226, 75, 62, 0.25);
+}
+
+#systemNoticeRate {
+  background: linear-gradient(135deg, #ffb55a, #ef8d3a);
+  color: #ffffff;
+  border: none;
+}
+
+#systemNoticeRate:hover {
+  background: linear-gradient(135deg, #ffc36f, #f09a47);
+  color: #ffffff;
 }
 .system-notice-rate textarea {
   width: 100%;

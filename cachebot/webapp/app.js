@@ -650,6 +650,7 @@
       systemNoticeRateForm?.classList.remove("show");
     } else {
       systemNoticeActions?.classList.remove("hidden");
+      systemNoticeActions?.classList.remove("is-collapsed");
       systemNoticeRateForm?.classList.remove("show");
     }
     if (typeof pendingReviewRating !== "undefined") {
@@ -688,6 +689,7 @@
     };
     showSystemNotice(item, { autoClose: false });
     systemNoticeRateForm?.classList.add("show");
+    systemNoticeActions?.classList.add("is-collapsed");
     if (systemNoticeSubmit) {
       systemNoticeSubmit.disabled = !pendingReviewRating;
     }
@@ -4579,6 +4581,7 @@
     event.stopPropagation();
     clearSystemNoticeTimer();
     systemNoticeRateForm?.classList.add("show");
+    systemNoticeActions?.classList.add("is-collapsed");
     if (systemNoticeSubmit) {
       systemNoticeSubmit.disabled = !pendingReviewRating;
     }
@@ -4593,6 +4596,7 @@
     systemNoticeDislike?.classList.remove("active");
     if (systemNoticeComment) systemNoticeComment.value = "";
     systemNoticeRateForm?.classList.remove("show");
+    systemNoticeActions?.classList.remove("is-collapsed");
     hideSystemNotice();
   });
 
