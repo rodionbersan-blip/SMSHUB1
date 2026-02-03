@@ -2142,6 +2142,14 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(95, 160, 255, 0.85), rgba(102, 74, 200, 0.85));
 }
 
+:root[data-theme="dark"] .search-toggle {
+  background: linear-gradient(135deg, rgba(32, 78, 160, 0.85), rgba(54, 44, 140, 0.85));
+}
+
+:root[data-theme="dark"] .search-toggle:hover {
+  background: linear-gradient(135deg, rgba(44, 96, 178, 0.92), rgba(70, 56, 160, 0.92));
+}
+
 .search-toggle .toggle-plus {
   font-size: 18px;
   line-height: 1;
@@ -2806,6 +2814,18 @@ body.modal-open #app {
   white-space: nowrap;
   max-width: 100%;
   padding: 8px 12px;
+}
+
+:root[data-theme="dark"] #moderationSearchBtn,
+:root[data-theme="dark"] #moderationDealSearchBtn {
+  background: linear-gradient(135deg, rgba(32, 78, 160, 0.85), rgba(54, 44, 140, 0.85));
+  color: #ffffff;
+  border: 1px solid rgba(70, 96, 190, 0.4);
+}
+
+:root[data-theme="dark"] #moderationSearchBtn:hover,
+:root[data-theme="dark"] #moderationDealSearchBtn:hover {
+  background: linear-gradient(135deg, rgba(44, 96, 178, 0.92), rgba(70, 56, 160, 0.92));
 }
 
 :root[data-theme="light"] #moderationSearchBtn:hover {
