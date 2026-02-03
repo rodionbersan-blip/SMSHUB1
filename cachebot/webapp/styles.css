@@ -3955,14 +3955,19 @@ body.modal-open #app {
   animation: donut-pop 0.4s ease;
 }
 
-.stats-donut-reveal {
+.stats-donut-mask {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(transparent 0 0, var(--stats-card-bg) 0);
-  pointer-events: none;
   z-index: 0;
-  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+.stats-donut-mask circle {
+  fill: none;
+  stroke: var(--stats-card-bg);
+  stroke-width: 80;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s ease;
 }
 
 .stats-donut::after {

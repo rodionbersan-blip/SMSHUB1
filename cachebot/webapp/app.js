@@ -4923,12 +4923,15 @@
       });
       el.style.background = `conic-gradient(${parts.join(",")})`;
     }
-    const rotateOverlay = el.querySelector(".stats-donut-reveal");
-    if (!rotateOverlay) return;
-    rotateOverlay.animate(
-      [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
-      { duration: 900, easing: "ease", fill: "forwards" }
-    );
+    const maskCircle = el.querySelector(".stats-donut-mask circle");
+    if (!maskCircle) return;
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
+    maskCircle.style.strokeDasharray = `${circumference}`;
+    maskCircle.style.strokeDashoffset = `${circumference}`;
+    requestAnimationFrame(() => {
+      maskCircle.style.strokeDashoffset = "0";
+    });
   };
 
   const renderProfileStats = (payload) => {
