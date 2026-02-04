@@ -1312,7 +1312,9 @@
 
   const applySystemTheme = () => {
     if (!isSystemThemeEnabled()) return;
-    const next = detectTheme();
+    const tgTheme = tg?.colorScheme;
+    const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = tgTheme || (mediaDark ? "dark" : "light");
     applyTheme(next);
     updateThemeToggle(next);
   };
