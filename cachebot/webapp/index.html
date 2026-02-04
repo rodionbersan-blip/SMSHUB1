@@ -114,6 +114,7 @@
         <div class="profile-actions">
           <button id="reviewsOpen" class="btn pill reviews-btn">Отзывы: —</button>
           <button id="profileStatsOpen" class="btn pill stats-btn">Статистика</button>
+          <button id="profileSettingsOpen" class="btn pill stats-btn">Настройки</button>
         </div>
       </section>
 
@@ -812,7 +813,7 @@
         </div>
       </div>
 
-      <div class="modal stats-modal" id="statsModal">
+    <div class="modal stats-modal" id="statsModal">
         <div class="modal-card glass stats-card">
           <div class="modal-header">
             <div class="modal-title">Статистика</div>
@@ -962,6 +963,31 @@
           <div class="quick-deals-title">Активные сделки</div>
         </div>
         <div id="quickDealsList" class="quick-deals-list"></div>
+      </div>
+    </div>
+
+    <div class="modal stats-modal" id="settingsModal">
+      <div class="modal-card glass stats-card">
+        <div class="modal-header">
+          <div class="modal-title">Настройки</div>
+          <button id="settingsClose" class="btn ghost">Закрыть</button>
+        </div>
+        <div class="modal-body stats-body">
+          <div class="settings-section">
+            <div class="settings-title">Смена никнейма</div>
+            <input id="settingsNickname" type="text" maxlength="32" placeholder="Новый никнейм" />
+            <div id="settingsNicknameHint" class="profile-muted"></div>
+            <button id="settingsNicknameSave" class="btn pill balance-manage-submit">Сохранить</button>
+          </div>
+          <div class="settings-section">
+            <div class="settings-title">Автовход Face ID</div>
+            <label class="settings-toggle">
+              <input id="settingsFaceId" type="checkbox" />
+              <span class="toggle-slider"></span>
+              <span class="toggle-label">Включить</span>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 

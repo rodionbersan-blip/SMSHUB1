@@ -399,6 +399,15 @@ async def _api_profile_update(request: web.Request) -> web.Response:
     display_name = str(body.get("display_name") or "").strip()
     if len(display_name) < 2 or len(display_name) > 32:
         raise web.HTTPBadRequest(text="Некорректное имя")
+    profile = await deps.user_service.profile_of(user_id)
+    if profile and display_name != (profile.display_name or ""):
+        last_change = profile.nickname_changed_at or profile.registered_at
+        next_allowed = last_change + timedelta(days=60)
+        if datetime.now(timezone.utc) < next_allowed:
+            available_at = next_allowed.strftime("%d.%m.%Y")
+            raise web.HTTPBadRequest(
+                text=f"Никнейм можно менять раз в 60 дней. Доступно с {available_at}."
+            )
     profile = await deps.user_service.update_profile(user_id, display_name=display_name)
     payload = _profile_payload(profile, request=request, include_private=_is_admin(user_id, deps))
     return web.json_response({"ok": True, "profile": payload})
@@ -3020,6 +3029,9 @@ def _profile_payload(
         "avatar_url": _avatar_url(request, profile) if request else None,
         "registered_at": profile.registered_at.isoformat(),
         "last_seen_at": profile.last_seen_at.isoformat() if profile.last_seen_at else None,
+        "nickname_changed_at": profile.nickname_changed_at.isoformat()
+        if profile.nickname_changed_at
+        else None,
     }
     if include_private:
         payload["full_name"] = profile.full_name

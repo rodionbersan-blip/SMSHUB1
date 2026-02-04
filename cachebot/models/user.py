@@ -66,6 +66,7 @@ class UserProfile:
     last_seen_at: datetime
     display_name: str | None = None
     avatar_path: str | None = None
+    nickname_changed_at: datetime | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -76,11 +77,15 @@ class UserProfile:
             "avatar_path": self.avatar_path,
             "registered_at": self.registered_at.isoformat(),
             "last_seen_at": self.last_seen_at.isoformat(),
+            "nickname_changed_at": self.nickname_changed_at.isoformat()
+            if self.nickname_changed_at
+            else None,
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "UserProfile":
         registered = datetime.fromisoformat(data["registered_at"])
+        nickname_changed_at = data.get("nickname_changed_at")
         return cls(
             user_id=int(data["user_id"]),
             full_name=data.get("full_name"),
@@ -89,4 +94,7 @@ class UserProfile:
             avatar_path=data.get("avatar_path"),
             registered_at=registered,
             last_seen_at=datetime.fromisoformat(data.get("last_seen_at", data["registered_at"])),
+            nickname_changed_at=datetime.fromisoformat(nickname_changed_at)
+            if nickname_changed_at
+            else registered,
         )

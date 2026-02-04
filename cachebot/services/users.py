@@ -123,6 +123,7 @@ class UserService:
                     avatar_path=None,
                     registered_at=now,
                     last_seen_at=now,
+                    nickname_changed_at=now,
                 )
             else:
                 profile = UserProfile(
@@ -133,6 +134,7 @@ class UserService:
                     avatar_path=profile.avatar_path,
                     registered_at=profile.registered_at,
                     last_seen_at=now,
+                    nickname_changed_at=profile.nickname_changed_at,
                 )
             self._profiles[user_id] = profile
             await self._persist()
@@ -165,7 +167,10 @@ class UserService:
                 avatar_path=avatar_path if avatar_path is not None else profile.avatar_path,
                 registered_at=profile.registered_at,
                 last_seen_at=profile.last_seen_at,
+                nickname_changed_at=profile.nickname_changed_at,
             )
+            if display_name and display_name != profile.display_name:
+                profile.nickname_changed_at = datetime.now(timezone.utc)
             self._profiles[user_id] = profile
             await self._persist()
             return profile

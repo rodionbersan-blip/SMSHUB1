@@ -341,6 +341,13 @@
   const profileStatsOpen = document.getElementById("profileStatsOpen");
   const statsModal = document.getElementById("statsModal");
   const statsClose = document.getElementById("statsClose");
+  const profileSettingsOpen = document.getElementById("profileSettingsOpen");
+  const settingsModal = document.getElementById("settingsModal");
+  const settingsClose = document.getElementById("settingsClose");
+  const settingsNickname = document.getElementById("settingsNickname");
+  const settingsNicknameHint = document.getElementById("settingsNicknameHint");
+  const settingsNicknameSave = document.getElementById("settingsNicknameSave");
+  const settingsFaceId = document.getElementById("settingsFaceId");
   const statsFrom = document.getElementById("statsFrom");
   const statsTo = document.getElementById("statsTo");
   const statsRange = document.querySelector(".stats-range");
@@ -404,6 +411,7 @@
     livePollInFlight: false,
     reviewsTargetUserId: null,
     canManageDisputes: false,
+    profileData: null,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -1355,6 +1363,19 @@
     return dt.toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" });
   };
 
+  const profileDisplayLabel = (profile) =>
+    profile?.display_name || profile?.full_name || profile?.username || "Без имени";
+
+  const getNicknameNextAllowed = (profile) => {
+    const lastChangeRaw = profile?.nickname_changed_at || profile?.registered_at;
+    if (!lastChangeRaw) return null;
+    const lastChange = new Date(lastChangeRaw);
+    if (Number.isNaN(lastChange.getTime())) return null;
+    const nextAllowed = new Date(lastChange.getTime());
+    nextAllowed.setDate(nextAllowed.getDate() + 60);
+    return nextAllowed;
+  };
+
   const formatDateInput = (date) => {
     if (!(date instanceof Date)) return "";
     const year = date.getFullYear();
@@ -1531,13 +1552,40 @@
     }
   };
 
+  const updateSettingsNicknameState = () => {
+    if (!settingsNicknameHint || !settingsNicknameSave) return;
+    const profile = state.profileData || {};
+    const nextAllowed = getNicknameNextAllowed(profile);
+    if (!nextAllowed) {
+      settingsNicknameHint.textContent = "Изменение доступно.";
+      settingsNicknameSave.disabled = false;
+      return;
+    }
+    const now = new Date();
+    if (now < nextAllowed) {
+      settingsNicknameHint.textContent = `Смена доступна с ${formatDate(nextAllowed.toISOString())}`;
+      settingsNicknameSave.disabled = true;
+      return;
+    }
+    settingsNicknameHint.textContent = "Изменение доступно.";
+    settingsNicknameSave.disabled = false;
+  };
+
+  const updateSettingsFaceLabel = () => {
+    if (!settingsFaceId) return;
+    const label = settingsFaceId.parentElement?.querySelector(".toggle-label");
+    if (!label) return;
+    label.textContent = settingsFaceId.checked ? "Включено" : "Выключено";
+  };
+
   const loadProfile = async () => {
     const payload = await fetchJson("/api/profile");
     if (!payload?.ok) return;
     const { data } = payload;
     const profile = data?.profile;
+    state.profileData = profile || null;
     state.userId = profile?.user_id ?? null;
-    const display = profile?.display_name || profile?.full_name || "Без имени";
+    const display = profileDisplayLabel(profile);
     if (profileName) profileName.textContent = display;
     if (profileDisplayName) profileDisplayName.textContent = display;
     if (profileUsername) {
@@ -1587,6 +1635,7 @@
     applyProfileStats(state.profileStats);
     setAvatarNode(profileAvatar, display, profile?.avatar_url);
     setAvatarNode(profileAvatarLarge, display, profile?.avatar_url);
+    updateSettingsNicknameState();
   };
 
   const loadBalance = async () => {
@@ -5995,6 +6044,55 @@
     statsModal?.classList.remove("open");
     if (statsFundsDonut) statsFundsDonut.style.background = "conic-gradient(transparent 0 100%)";
     if (statsDealsDonut) statsDealsDonut.style.background = "conic-gradient(transparent 0 100%)";
+  });
+
+  profileSettingsOpen?.addEventListener("click", () => {
+    const profile = state.profileData || {};
+    if (settingsNickname) {
+      settingsNickname.value = profileDisplayLabel(profile);
+    }
+    if (settingsFaceId) {
+      settingsFaceId.checked = loadBioFlag();
+      updateSettingsFaceLabel();
+    }
+    updateSettingsNicknameState();
+    settingsModal?.classList.add("open");
+  });
+
+  settingsClose?.addEventListener("click", () => {
+    settingsModal?.classList.remove("open");
+  });
+
+  settingsFaceId?.addEventListener("change", () => {
+    saveBioFlag(!!settingsFaceId.checked);
+    updateSettingsFaceLabel();
+    showNotice(settingsFaceId.checked ? "Автовход Face ID включён" : "Автовход Face ID выключен");
+  });
+
+  settingsNicknameSave?.addEventListener("click", async () => {
+    if (settingsNicknameSave.disabled) return;
+    const nextName = settingsNickname?.value.trim();
+    if (!nextName || nextName.length < 2) {
+      showNotice("Никнейм должен быть не короче 2 символов.");
+      return;
+    }
+    if (nextName.length > 32) {
+      showNotice("Никнейм слишком длинный.");
+      return;
+    }
+    const payload = await fetchJson("/api/profile", {
+      method: "POST",
+      body: JSON.stringify({ display_name: nextName }),
+    });
+    if (!payload?.ok) {
+      const reason = state.lastInitError || "Не удалось обновить профиль";
+      showNotice(reason);
+      return;
+    }
+    state.profileData = payload.profile || state.profileData;
+    updateSettingsNicknameState();
+    await loadProfile();
+    showNotice("Никнейм обновлён.");
   });
 
   statsTabButtons.forEach((btn) => {
