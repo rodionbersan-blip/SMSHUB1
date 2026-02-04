@@ -6148,14 +6148,19 @@ body.pin-lock {
   box-shadow: 0 12px 26px rgba(214, 150, 70, 0.3);
 }
 
+:root[data-theme="light"] #settingsNicknameSave.balance-manage-submit {
+  background: linear-gradient(135deg, rgba(242, 179, 96, 0.98), rgba(220, 145, 62, 0.98));
+  box-shadow: 0 10px 22px rgba(214, 150, 70, 0.3);
+}
+
 #systemNotice[data-type="info"] #systemNoticeRate {
   display: none;
 }
 
 #systemNotice[data-type="info"] #systemNoticeSkip {
   width: 100%;
-  min-height: 40px;
-  padding: 8px 14px;
+  min-height: 34px;
+  padding: 6px 12px;
   border-radius: 999px;
   background: linear-gradient(135deg, rgba(90, 160, 255, 0.92), rgba(108, 78, 200, 0.92));
   color: #ffffff;
