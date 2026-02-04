@@ -3944,12 +3944,10 @@ body.modal-open #app {
 }
 
 .stats-donut {
-  --donut-sweep: 0deg;
-  --donut-reveal: 0deg;
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: conic-gradient(#5fe1a4 0 50%, #ff8e68 50% 100%);
+  background: transparent;
   position: relative;
   display: grid;
   place-items: center;
@@ -3958,6 +3956,18 @@ body.modal-open #app {
 
 .stats-donut.animate {
   animation: donut-pop 0.4s ease;
+}
+
+.stats-donut-svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.stats-donut-svg circle {
+  fill: none;
+  stroke-width: 18;
+  transition: stroke-dashoffset 0.9s ease;
 }
 
 

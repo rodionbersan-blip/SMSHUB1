@@ -4909,33 +4909,49 @@
 
   const setDonut = (el, segments, emptyColor = "rgba(140, 150, 170, 0.25)") => {
     if (!el) return;
+    const svg = el.querySelector(".stats-donut-svg");
+    if (!svg) return;
+    svg.innerHTML = "";
     const total = segments.reduce((sum, item) => sum + item.value, 0);
-    const nextBackground = total
-      ? (() => {
-          let start = 0;
-          const parts = segments.map((item) => {
-            const from = start;
-            const to = start + (item.value / total) * 100;
-            start = to;
-            return `${item.color} ${from}% ${to}%`;
-          });
-          return `conic-gradient(${parts.join(",")})`;
-        })()
-      : `conic-gradient(${emptyColor} 0 100%)`;
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
 
-    el.style.background = nextBackground;
-    el.style.clipPath = "conic-gradient(from -90deg, #000 0deg, #000 0deg, transparent 0deg)";
-    const start = performance.now();
-    const duration = 900;
-    const step = (now) => {
-      const progress = Math.min(1, (now - start) / duration);
-      const angle = progress * 360;
-      el.style.clipPath = `conic-gradient(from -90deg, #000 0deg, #000 ${angle}deg, transparent ${angle}deg)`;
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-    requestAnimationFrame(step);
+    if (!total) {
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", "50");
+      circle.setAttribute("cy", "50");
+      circle.setAttribute("r", String(radius));
+      circle.style.stroke = emptyColor;
+      circle.style.strokeDasharray = `${circumference} ${circumference}`;
+      circle.style.strokeDashoffset = `${circumference}`;
+      svg.appendChild(circle);
+      requestAnimationFrame(() => {
+        circle.style.strokeDashoffset = "0";
+      });
+      return;
+    }
+
+    let startLen = 0;
+    const circles = segments.map((item) => {
+      const length = (item.value / total) * circumference;
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", "50");
+      circle.setAttribute("cy", "50");
+      circle.setAttribute("r", String(radius));
+      circle.style.stroke = item.color;
+      circle.style.strokeDasharray = `${length} ${circumference - length}`;
+      circle.style.strokeDashoffset = `${circumference}`;
+      circle.dataset.targetOffset = String(circumference - startLen);
+      startLen += length;
+      svg.appendChild(circle);
+      return circle;
+    });
+
+    requestAnimationFrame(() => {
+      circles.forEach((circle) => {
+        circle.style.strokeDashoffset = circle.dataset.targetOffset || "0";
+      });
+    });
   };
 
   const renderProfileStats = (payload) => {
