@@ -349,6 +349,12 @@
   const settingsNicknameSave = document.getElementById("settingsNicknameSave");
   const settingsNicknameToggle = document.getElementById("settingsNicknameToggle");
   const settingsNicknamePanel = document.querySelector(".settings-nickname-panel");
+  const settingsAvatarToggle = document.getElementById("settingsAvatarToggle");
+  const settingsAvatarPanel = document.querySelector(".settings-avatar-panel");
+  const settingsAvatarPreview = document.getElementById("settingsAvatarPreview");
+  const settingsAvatarFile = document.getElementById("settingsAvatarFile");
+  const settingsAvatarZoom = document.getElementById("settingsAvatarZoom");
+  const settingsAvatarSave = document.getElementById("settingsAvatarSave");
   const settingsFaceId = document.getElementById("settingsFaceId");
   const statsFrom = document.getElementById("statsFrom");
   const statsTo = document.getElementById("statsTo");
@@ -416,6 +422,8 @@
     profileData: null,
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
+    settingsAvatarOpen: false,
+    avatarCrop: null,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -1600,6 +1608,64 @@
     const label = settingsFaceId.parentElement?.querySelector(".toggle-label");
     if (!label) return;
     label.textContent = "Автовход Face ID";
+  };
+
+  const resetAvatarCrop = () => {
+    state.avatarCrop = null;
+    if (settingsAvatarPreview) {
+      settingsAvatarPreview.style.backgroundImage = "";
+      settingsAvatarPreview.classList.remove("has-image");
+    }
+    if (settingsAvatarZoom) settingsAvatarZoom.value = "1";
+    if (settingsAvatarSave) settingsAvatarSave.disabled = true;
+  };
+
+  const renderAvatarPreview = () => {
+    if (!settingsAvatarPreview || !state.avatarCrop) return;
+    const { img, scale, offsetX, offsetY } = state.avatarCrop;
+    const size = settingsAvatarPreview.clientWidth || 140;
+    const scaledW = img.width * scale;
+    const scaledH = img.height * scale;
+    settingsAvatarPreview.style.backgroundImage = `url(${img.src})`;
+    settingsAvatarPreview.style.backgroundSize = `${scaledW}px ${scaledH}px`;
+    settingsAvatarPreview.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
+    settingsAvatarPreview.classList.add("has-image");
+    if (settingsAvatarZoom) settingsAvatarZoom.value = String(scale / state.avatarCrop.minScale);
+  };
+
+  const clampAvatarOffsets = () => {
+    if (!settingsAvatarPreview || !state.avatarCrop) return;
+    const size = settingsAvatarPreview.clientWidth || 140;
+    const { img, scale } = state.avatarCrop;
+    const scaledW = img.width * scale;
+    const scaledH = img.height * scale;
+    const minX = size - scaledW;
+    const minY = size - scaledH;
+    state.avatarCrop.offsetX = Math.min(0, Math.max(minX, state.avatarCrop.offsetX));
+    state.avatarCrop.offsetY = Math.min(0, Math.max(minY, state.avatarCrop.offsetY));
+  };
+
+  const setupAvatarCrop = (file) => {
+    if (!settingsAvatarPreview || !file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const size = settingsAvatarPreview.clientWidth || 140;
+        const minScale = Math.max(size / img.width, size / img.height);
+        const scale = minScale;
+        const scaledW = img.width * scale;
+        const scaledH = img.height * scale;
+        const offsetX = (size - scaledW) / 2;
+        const offsetY = (size - scaledH) / 2;
+        state.avatarCrop = { img, scale, minScale, offsetX, offsetY };
+        clampAvatarOffsets();
+        renderAvatarPreview();
+        if (settingsAvatarSave) settingsAvatarSave.disabled = false;
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const loadProfile = async () => {
@@ -6084,6 +6150,11 @@
       settingsNicknamePanel.classList.remove("show");
       state.settingsNicknameOpen = false;
     }
+    if (settingsAvatarPanel) {
+      settingsAvatarPanel.classList.remove("show");
+      state.settingsAvatarOpen = false;
+      resetAvatarCrop();
+    }
     if (settingsFaceId) {
       settingsFaceId.checked = loadBioFlag();
       updateSettingsFaceLabel();
@@ -6099,6 +6170,99 @@
   settingsNicknameToggle?.addEventListener("click", () => {
     state.settingsNicknameOpen = !state.settingsNicknameOpen;
     settingsNicknamePanel?.classList.toggle("show", state.settingsNicknameOpen);
+  });
+
+  settingsAvatarToggle?.addEventListener("click", () => {
+    state.settingsAvatarOpen = !state.settingsAvatarOpen;
+    settingsAvatarPanel?.classList.toggle("show", state.settingsAvatarOpen);
+  });
+
+  settingsAvatarFile?.addEventListener("change", () => {
+    const file = settingsAvatarFile.files?.[0];
+    if (!file) {
+      resetAvatarCrop();
+      return;
+    }
+    setupAvatarCrop(file);
+  });
+
+  settingsAvatarZoom?.addEventListener("input", () => {
+    if (!state.avatarCrop || !settingsAvatarPreview) return;
+    const ratio = Number(settingsAvatarZoom.value || 1);
+    const newScale = state.avatarCrop.minScale * ratio;
+    const size = settingsAvatarPreview.clientWidth || 140;
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const prevScale = state.avatarCrop.scale;
+    const relX = (centerX - state.avatarCrop.offsetX) / prevScale;
+    const relY = (centerY - state.avatarCrop.offsetY) / prevScale;
+    state.avatarCrop.scale = newScale;
+    state.avatarCrop.offsetX = centerX - relX * newScale;
+    state.avatarCrop.offsetY = centerY - relY * newScale;
+    clampAvatarOffsets();
+    renderAvatarPreview();
+  });
+
+  if (settingsAvatarPreview) {
+    let drag = null;
+    settingsAvatarPreview.addEventListener("pointerdown", (event) => {
+      if (!state.avatarCrop) return;
+      drag = { x: event.clientX, y: event.clientY };
+      settingsAvatarPreview.setPointerCapture(event.pointerId);
+    });
+    settingsAvatarPreview.addEventListener("pointermove", (event) => {
+      if (!drag || !state.avatarCrop) return;
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+      drag = { x: event.clientX, y: event.clientY };
+      state.avatarCrop.offsetX += dx;
+      state.avatarCrop.offsetY += dy;
+      clampAvatarOffsets();
+      renderAvatarPreview();
+    });
+    settingsAvatarPreview.addEventListener("pointerup", () => {
+      drag = null;
+    });
+    settingsAvatarPreview.addEventListener("pointercancel", () => {
+      drag = null;
+    });
+  }
+
+  settingsAvatarSave?.addEventListener("click", async () => {
+    if (!state.avatarCrop || !settingsAvatarPreview) return;
+    const size = settingsAvatarPreview.clientWidth || 140;
+    const canvas = document.createElement("canvas");
+    const outputSize = 512;
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const scale = state.avatarCrop.scale * (outputSize / size);
+    const offsetX = state.avatarCrop.offsetX * (outputSize / size);
+    const offsetY = state.avatarCrop.offsetY * (outputSize / size);
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, outputSize, outputSize);
+    ctx.drawImage(state.avatarCrop.img, offsetX, offsetY, state.avatarCrop.img.width * scale, state.avatarCrop.img.height * scale);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+    if (!blob) {
+      showNotice("Не удалось подготовить фото.");
+      return;
+    }
+    const form = new FormData();
+    form.append("avatar", blob, "avatar.jpg");
+    const res = await fetch("/api/profile/avatar", {
+      method: "POST",
+      headers: { "X-Telegram-Init-Data": state.initData },
+      body: form,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      showNotice(text || "Ошибка загрузки фото.");
+      return;
+    }
+    resetAvatarCrop();
+    await loadProfile();
+    showNotice("Фото профиля обновлено.");
   });
 
   settingsFaceId?.addEventListener("change", () => {
