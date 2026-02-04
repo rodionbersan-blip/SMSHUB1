@@ -347,6 +347,8 @@
   const settingsNickname = document.getElementById("settingsNickname");
   const settingsNicknameHint = document.getElementById("settingsNicknameHint");
   const settingsNicknameSave = document.getElementById("settingsNicknameSave");
+  const settingsNicknameToggle = document.getElementById("settingsNicknameToggle");
+  const settingsNicknamePanel = document.querySelector(".settings-nickname-panel");
   const settingsFaceId = document.getElementById("settingsFaceId");
   const statsFrom = document.getElementById("statsFrom");
   const statsTo = document.getElementById("statsTo");
@@ -413,6 +415,7 @@
     canManageDisputes: false,
     profileData: null,
     nicknameNextAllowed: null,
+    settingsNicknameOpen: false,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -6060,6 +6063,10 @@
     if (settingsNickname) {
       settingsNickname.value = profileDisplayLabel(profile);
     }
+    if (settingsNicknamePanel) {
+      settingsNicknamePanel.classList.remove("show");
+      state.settingsNicknameOpen = false;
+    }
     if (settingsFaceId) {
       settingsFaceId.checked = loadBioFlag();
       updateSettingsFaceLabel();
@@ -6070,6 +6077,11 @@
 
   settingsClose?.addEventListener("click", () => {
     settingsModal?.classList.remove("open");
+  });
+
+  settingsNicknameToggle?.addEventListener("click", () => {
+    state.settingsNicknameOpen = !state.settingsNicknameOpen;
+    settingsNicknamePanel?.classList.toggle("show", state.settingsNicknameOpen);
   });
 
   settingsFaceId?.addEventListener("change", () => {

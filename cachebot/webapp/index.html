@@ -974,10 +974,14 @@
         </div>
         <div class="modal-body stats-body">
           <div class="settings-section">
-            <div class="settings-title">Смена никнейма</div>
-            <input id="settingsNickname" type="text" maxlength="32" placeholder="Новый никнейм" />
-            <div id="settingsNicknameHint" class="profile-muted"></div>
-            <button id="settingsNicknameSave" class="btn pill balance-manage-submit">Сохранить</button>
+            <button id="settingsNicknameToggle" class="btn pill settings-nickname-toggle">
+              Смена никнейма
+            </button>
+            <div class="settings-nickname-panel">
+              <input id="settingsNickname" type="text" maxlength="32" placeholder="Новый никнейм" />
+              <div id="settingsNicknameHint" class="profile-muted"></div>
+              <button id="settingsNicknameSave" class="btn pill balance-manage-submit">Сохранить</button>
+            </div>
           </div>
           <div class="settings-section">
             <label class="settings-toggle">

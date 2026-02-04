@@ -4140,6 +4140,33 @@ body.modal-open #app {
   background: rgba(240, 244, 252, 0.9);
 }
 
+.settings-nickname-toggle {
+  width: 100%;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.9), rgba(86, 62, 180, 0.9));
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 10px 22px rgba(70, 130, 230, 0.25);
+}
+
+.settings-nickname-panel {
+  display: grid;
+  gap: 10px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.35s ease;
+}
+
+.settings-nickname-panel.show {
+  max-height: 220px;
+  opacity: 1;
+}
+
+.settings-nickname-panel input[type="text"] {
+  margin-top: 2px;
+}
+
 :root[data-theme="light"] .settings-section {
   background: transparent;
   border-color: transparent;
@@ -4154,6 +4181,11 @@ body.modal-open #app {
 :root[data-theme="light"] .settings-toggle {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(120, 140, 200, 0.2);
+}
+
+:root[data-theme="light"] .settings-nickname-toggle {
+  background: linear-gradient(135deg, rgba(86, 152, 255, 0.92), rgba(104, 76, 196, 0.92));
+  box-shadow: 0 10px 22px rgba(70, 130, 230, 0.25);
 }
 
 .modal.open {
