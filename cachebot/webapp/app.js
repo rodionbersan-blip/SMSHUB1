@@ -1637,6 +1637,8 @@
     settingsAvatarPanel?.classList.remove("has-image");
     if (settingsAvatarZoom) settingsAvatarZoom.value = "1";
     if (settingsAvatarSave) settingsAvatarSave.disabled = true;
+    if (settingsAvatarFile) settingsAvatarFile.value = "";
+    updateAvatarFileLabel?.();
   };
 
   const renderAvatarPreview = () => {
@@ -6212,13 +6214,23 @@
     settingsAvatarPanel?.classList.toggle("show", state.settingsAvatarOpen);
   });
 
+  const updateAvatarFileLabel = () => {
+    if (!settingsAvatarFile) return;
+    const label = settingsAvatarFile.closest('.settings-avatar-panel')?.querySelector('.settings-file-label');
+    if (!label) return;
+    const file = settingsAvatarFile.files?.[0];
+    label.textContent = file ? file.name : "";
+  };
+
   settingsAvatarFile?.addEventListener("change", () => {
     const file = settingsAvatarFile.files?.[0];
     if (!file) {
       resetAvatarCrop();
+      updateAvatarFileLabel();
       return;
     }
     setupAvatarCrop(file);
+    updateAvatarFileLabel();
   });
 
   settingsAvatarZoom?.addEventListener("input", () => {

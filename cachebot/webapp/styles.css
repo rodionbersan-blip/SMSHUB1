@@ -4246,7 +4246,14 @@ body.modal-open #app {
   cursor: grabbing;
 }
 
-.settings-avatar-panel input[type="file"] {
+.settings-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.settings-file input[type="file"] {
   color: var(--text);
   background: rgba(18, 22, 30, 0.6);
   border: 1px solid rgba(120, 170, 255, 0.2);
@@ -4254,7 +4261,7 @@ body.modal-open #app {
   padding: 6px 10px;
 }
 
-.settings-avatar-panel input[type="file"]::file-selector-button {
+.settings-file input[type="file"]::file-selector-button {
   background: linear-gradient(135deg, rgba(199, 152, 62, 0.9), rgba(226, 186, 92, 0.95));
   color: #fff;
   border: none;
@@ -4264,14 +4271,19 @@ body.modal-open #app {
   cursor: pointer;
 }
 
-:root[data-theme="light"] .settings-avatar-panel input[type="file"] {
+:root[data-theme="light"] .settings-file input[type="file"] {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(120, 140, 200, 0.25);
   color: #1b1e28;
 }
 
-:root[data-theme="light"] .settings-avatar-panel input[type="file"]::file-selector-button {
+:root[data-theme="light"] .settings-file input[type="file"]::file-selector-button {
   background: linear-gradient(135deg, rgba(242, 179, 96, 0.96), rgba(220, 145, 62, 0.96));
+}
+
+.settings-file-label {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .settings-avatar-panel input[type="range"] {
