@@ -681,6 +681,18 @@
     clearSystemNoticeTimer();
   };
 
+  const dismissSystemNotice = () => {
+    if (state.systemNoticeActive?.key) {
+      state.systemNotifications = (state.systemNotifications || []).filter(
+        (entry) => entry.key !== state.systemNoticeActive.key
+      );
+      persistSystemNotifications();
+    }
+    state.systemNoticeActive = null;
+    hideSystemNotice();
+    renderSystemNotifications();
+  };
+
   const showSystemNotice = (item, { autoClose = true } = {}) => {
     if (!systemNotice || !systemNoticeList) return;
     state.systemNoticeActive = item;
@@ -4925,18 +4937,7 @@
     }
   });
 
-  systemNoticeSkip?.addEventListener("click", () => {
-    state.systemNoticeActive = null;
-    if (typeof pendingReviewRating !== "undefined") {
-      pendingReviewRating = null;
-    }
-    systemNoticeLike?.classList.remove("active");
-    systemNoticeDislike?.classList.remove("active");
-    if (systemNoticeComment) systemNoticeComment.value = "";
-    systemNoticeRateForm?.classList.remove("show");
-    systemNoticeActions?.classList.remove("is-collapsed");
-    hideSystemNotice();
-  });
+  systemNoticeSkip?.addEventListener("click", dismissSystemNotice);
 
   const setReviewRating = (value) => {
     pendingReviewRating = value;
@@ -5172,18 +5173,34 @@
     await loadDeals();
   });
 
-  systemNoticeRateClose?.addEventListener("click", () => {
-    state.systemNoticeActive = null;
-    if (typeof pendingReviewRating !== "undefined") {
-      pendingReviewRating = null;
-    }
-    systemNoticeLike?.classList.remove("active");
-    systemNoticeDislike?.classList.remove("active");
-    if (systemNoticeComment) systemNoticeComment.value = "";
-    systemNoticeRateForm?.classList.remove("show");
-    systemNoticeActions?.classList.remove("is-collapsed");
-    hideSystemNotice();
-  });
+  systemNoticeRateClose?.addEventListener("click", dismissSystemNotice);
+
+  if (systemNotice) {
+    let startY = 0;
+    let active = false;
+    systemNotice.addEventListener(
+      "touchstart",
+      (event) => {
+        if (!systemNotice.classList.contains("show")) return;
+        startY = event.touches[0]?.clientY || 0;
+        active = true;
+      },
+      { passive: true }
+    );
+    systemNotice.addEventListener(
+      "touchmove",
+      (event) => {
+        if (!active) return;
+        const currentY = event.touches[0]?.clientY || 0;
+        const delta = startY - currentY;
+        if (delta > 60) {
+          active = false;
+          dismissSystemNotice();
+        }
+      },
+      { passive: true }
+    );
+  }
 
   const bindPressFeedback = () => {
     const pressClass = "is-pressed";

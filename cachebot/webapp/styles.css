@@ -6158,16 +6158,13 @@ body.pin-lock {
 }
 
 #systemNotice[data-type="info"] #systemNoticeSkip {
-  width: 100%;
-  min-height: 34px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(90, 160, 255, 0.92), rgba(108, 78, 200, 0.92));
-  color: #ffffff;
-  border: none;
+  display: none;
 }
 
 :root[data-theme="light"] #systemNotice[data-type="info"] #systemNoticeSkip {
-  background: linear-gradient(135deg, rgba(90, 160, 255, 0.9), rgba(108, 78, 200, 0.9));
-  color: #ffffff;
+  display: none;
+}
+
+#systemNotice[data-type="info"] #systemNoticeActions {
+  display: none;
 }
