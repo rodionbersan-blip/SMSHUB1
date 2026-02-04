@@ -4923,21 +4923,19 @@
         })()
       : `conic-gradient(${emptyColor} 0 100%)`;
 
-    const maskCircle = el.querySelector(".stats-donut-mask circle");
-    if (!maskCircle) return;
-    const radius = 40;
-    const circumference = 2 * Math.PI * radius;
-    maskCircle.style.strokeDasharray = `${circumference}`;
-    maskCircle.style.strokeDashoffset = `${circumference}`;
-    maskCircle.style.transition = "none";
-    el.style.background = "conic-gradient(transparent 0 100%)";
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        el.style.background = nextBackground;
-        maskCircle.style.transition = "stroke-dashoffset 0.9s ease";
-        maskCircle.style.strokeDashoffset = "0";
-      });
-    });
+    el.style.background = nextBackground;
+    el.style.clipPath = "conic-gradient(from -90deg, #000 0deg, #000 0deg, transparent 0deg)";
+    const start = performance.now();
+    const duration = 900;
+    const step = (now) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const angle = progress * 360;
+      el.style.clipPath = `conic-gradient(from -90deg, #000 0deg, #000 ${angle}deg, transparent ${angle}deg)`;
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
   };
 
   const renderProfileStats = (payload) => {

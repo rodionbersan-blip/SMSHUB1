@@ -3960,21 +3960,6 @@ body.modal-open #app {
   animation: donut-pop 0.4s ease;
 }
 
-.stats-donut-mask {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  transform: rotate(-90deg);
-  overflow: visible;
-}
-
-.stats-donut-mask circle {
-  fill: none;
-  stroke: var(--stats-card-bg);
-  stroke-width: 100;
-  stroke-linecap: butt;
-  transition: stroke-dashoffset 0.9s ease;
-}
 
 .stats-donut::after {
   content: "";
