@@ -5196,8 +5196,8 @@
     }
     if (statsSideSummary) {
       statsSideSummary.innerHTML = `
-        <div class="stats-row"><span>Сумма покупок</span><strong>${formatAmount(buySum, 2)} USDT</strong></div>
-        <div class="stats-row"><span>Сумма продаж</span><strong>${formatAmount(sellSum, 2)} USDT</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#55e2a3;"></span>Сумма покупок</span><strong>${formatAmount(buySum, 2)} USDT</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#ffb36c;"></span>Сумма продаж</span><strong>${formatAmount(sellSum, 2)} USDT</strong></div>
       `;
     }
 
@@ -5215,9 +5215,9 @@
     }
     if (statsDealsSummary) {
       statsDealsSummary.innerHTML = `
-        <div class="stats-row"><span>Успешные</span><strong>${completed}</strong></div>
-        <div class="stats-row"><span>Отменённые</span><strong>${canceled}</strong></div>
-        <div class="stats-row"><span>Истекшие</span><strong>${expired}</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#55e2a3;"></span>Успешные</span><strong>${completed}</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#ff6b6b;"></span>Отменённые</span><strong>${canceled}</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#ffb36c;"></span>Истекшие</span><strong>${expired}</strong></div>
         <div class="stats-row"><span>Всего</span><strong>${deals.total ?? 0}</strong></div>
       `;
     }

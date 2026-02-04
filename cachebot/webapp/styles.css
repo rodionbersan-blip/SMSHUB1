@@ -4041,6 +4041,17 @@ body.modal-open #app {
   font-size: 13px;
 }
 
+.stats-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot-color, #ffffff);
+  display: inline-block;
+  margin-right: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+  vertical-align: middle;
+}
+
 .stats-row strong {
   font-weight: 700;
 }
