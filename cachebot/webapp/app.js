@@ -426,6 +426,7 @@
     settingsAvatarOpen: false,
     avatarCrop: null,
     systemThemeTimer: null,
+    systemThemeCurrent: null,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -1316,6 +1317,8 @@
     const tgTheme = tg?.colorScheme;
     const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const next = tgTheme || (mediaDark ? "dark" : "light");
+    if (state.systemThemeCurrent === next) return;
+    state.systemThemeCurrent = next;
     applyTheme(next);
     updateThemeToggle(next);
   };
@@ -1325,13 +1328,14 @@
     state.systemThemeTimer = window.setInterval(() => {
       if (!isSystemThemeEnabled()) return;
       applySystemTheme();
-    }, 1000);
+    }, 500);
   };
 
   const stopSystemThemeWatcher = () => {
     if (!state.systemThemeTimer) return;
     window.clearInterval(state.systemThemeTimer);
     state.systemThemeTimer = null;
+    state.systemThemeCurrent = null;
   };
 
   const setAvatarNode = (node, display, avatarUrl) => {
@@ -4775,11 +4779,14 @@
       updateInitDebug();
       if (tg.onEvent) {
         tg.onEvent("themeChanged", () => {
+          state.systemThemeCurrent = null;
           applySystemTheme();
         });
       }
       if (isSystemThemeEnabled()) {
+        state.systemThemeCurrent = null;
         startSystemThemeWatcher();
+        applySystemTheme();
       }
     } else {
       const theme = detectTheme();
@@ -6341,6 +6348,7 @@
   settingsSystemTheme?.addEventListener("change", () => {
     if (settingsSystemTheme.checked) {
       persistTheme("system");
+      state.systemThemeCurrent = null;
       applySystemTheme();
       startSystemThemeWatcher();
     } else {
