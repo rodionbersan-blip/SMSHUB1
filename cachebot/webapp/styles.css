@@ -4255,7 +4255,7 @@ body.modal-open #app {
 }
 
 .settings-avatar-panel input[type="file"]::file-selector-button {
-  background: linear-gradient(135deg, rgba(70, 140, 255, 0.9), rgba(86, 70, 190, 0.9));
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.9), rgba(226, 186, 92, 0.95));
   color: #fff;
   border: none;
   border-radius: 999px;
@@ -4271,7 +4271,7 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .settings-avatar-panel input[type="file"]::file-selector-button {
-  background: linear-gradient(135deg, rgba(88, 150, 248, 0.92), rgba(110, 86, 196, 0.92));
+  background: linear-gradient(135deg, rgba(242, 179, 96, 0.96), rgba(220, 145, 62, 0.96));
 }
 
 .settings-avatar-panel input[type="range"] {
