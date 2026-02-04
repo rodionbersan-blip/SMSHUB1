@@ -3839,7 +3839,7 @@ body.modal-open #app {
 .stats-body {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   overflow-y: auto;
   height: calc(100% - 48px);
 }
@@ -4148,7 +4148,7 @@ body.modal-open #app {
 }
 
 .settings-section + .settings-section {
-  margin-top: 2px;
+  margin-top: 0px;
 }
 
 .settings-nickname-toggle {
@@ -4164,7 +4164,7 @@ body.modal-open #app {
 
 .settings-nickname-panel {
   display: grid;
-  gap: 10px;
+  gap: 6px;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
@@ -4192,7 +4192,7 @@ body.modal-open #app {
 
 .settings-avatar-panel {
   display: grid;
-  gap: 10px;
+  gap: 6px;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
