@@ -4274,7 +4274,7 @@ body.modal-open #app {
   border-radius: 999px;
   padding: 4px 12px;
   height: 52px;
-  margin-top: 8px;
+  margin-top: 14px;
 }
 
 :root[data-theme="light"] .settings-file {
