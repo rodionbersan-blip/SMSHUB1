@@ -425,6 +425,7 @@
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
     avatarCrop: null,
+    systemThemeTimer: null,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -1317,6 +1318,20 @@
     const next = tgTheme || (mediaDark ? "dark" : "light");
     applyTheme(next);
     updateThemeToggle(next);
+  };
+
+  const startSystemThemeWatcher = () => {
+    if (state.systemThemeTimer) return;
+    state.systemThemeTimer = window.setInterval(() => {
+      if (!isSystemThemeEnabled()) return;
+      applySystemTheme();
+    }, 1000);
+  };
+
+  const stopSystemThemeWatcher = () => {
+    if (!state.systemThemeTimer) return;
+    window.clearInterval(state.systemThemeTimer);
+    state.systemThemeTimer = null;
   };
 
   const setAvatarNode = (node, display, avatarUrl) => {
@@ -4763,6 +4778,9 @@
           applySystemTheme();
         });
       }
+      if (isSystemThemeEnabled()) {
+        startSystemThemeWatcher();
+      }
     } else {
       const theme = detectTheme();
       applyTheme(theme);
@@ -4984,6 +5002,7 @@
     updateThemeToggle(next);
     persistTheme(next);
     if (settingsSystemTheme) settingsSystemTheme.checked = false;
+    stopSystemThemeWatcher();
   });
 
   navButtons.forEach((btn) => {
@@ -6323,11 +6342,13 @@
     if (settingsSystemTheme.checked) {
       persistTheme("system");
       applySystemTheme();
+      startSystemThemeWatcher();
     } else {
       const current = document.documentElement.dataset.theme || "light";
       persistTheme(current);
       applyTheme(current);
       updateThemeToggle(current);
+      stopSystemThemeWatcher();
     }
   });
 
