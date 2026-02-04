@@ -4033,10 +4033,10 @@ body.modal-open #app {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 14px;
+  padding: 4px 0;
   border-radius: 16px;
-  background: rgba(12, 18, 28, 0.45);
-  border: 1px solid rgba(120, 170, 255, 0.18);
+  background: transparent;
+  border: none;
 }
 
 .settings-title {
@@ -4062,10 +4062,10 @@ body.modal-open #app {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(12, 18, 28, 0.35);
-  border: 1px solid rgba(120, 170, 255, 0.18);
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(12, 18, 28, 0.2);
+  border: 1px solid rgba(120, 170, 255, 0.14);
   cursor: pointer;
   user-select: none;
 }
@@ -4075,8 +4075,8 @@ body.modal-open #app {
 }
 
 .toggle-slider {
-  width: 44px;
-  height: 24px;
+  width: 52px;
+  height: 28px;
   border-radius: 999px;
   background: rgba(120, 130, 150, 0.5);
   position: relative;
@@ -4086,8 +4086,8 @@ body.modal-open #app {
 .toggle-slider::after {
   content: "";
   position: absolute;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   left: 3px;
   top: 3px;
@@ -4096,11 +4096,11 @@ body.modal-open #app {
 }
 
 .settings-toggle input:checked + .toggle-slider {
-  background: linear-gradient(135deg, rgba(82, 166, 255, 0.95), rgba(110, 86, 210, 0.95));
+  background: linear-gradient(135deg, rgba(52, 194, 126, 0.95), rgba(34, 155, 98, 0.95));
 }
 
 .settings-toggle input:checked + .toggle-slider::after {
-  transform: translateX(20px);
+  transform: translateX(24px);
 }
 
 .toggle-label {
@@ -4140,8 +4140,8 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .settings-section {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(120, 140, 200, 0.25);
+  background: transparent;
+  border-color: transparent;
 }
 
 :root[data-theme="light"] .settings-section input[type="text"] {
@@ -4151,8 +4151,8 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .settings-toggle {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(120, 140, 200, 0.25);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(120, 140, 200, 0.2);
 }
 
 .modal.open {

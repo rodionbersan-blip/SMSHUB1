@@ -412,6 +412,7 @@
     reviewsTargetUserId: null,
     canManageDisputes: false,
     profileData: null,
+    nicknameNextAllowed: null,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -1559,23 +1560,26 @@
     if (!nextAllowed) {
       settingsNicknameHint.textContent = "Изменение доступно.";
       settingsNicknameSave.disabled = false;
+      state.nicknameNextAllowed = null;
       return;
     }
     const now = new Date();
     if (now < nextAllowed) {
       settingsNicknameHint.textContent = `Смена доступна с ${formatDate(nextAllowed.toISOString())}`;
-      settingsNicknameSave.disabled = true;
+      settingsNicknameSave.disabled = false;
+      state.nicknameNextAllowed = nextAllowed;
       return;
     }
     settingsNicknameHint.textContent = "Изменение доступно.";
     settingsNicknameSave.disabled = false;
+    state.nicknameNextAllowed = null;
   };
 
   const updateSettingsFaceLabel = () => {
     if (!settingsFaceId) return;
     const label = settingsFaceId.parentElement?.querySelector(".toggle-label");
     if (!label) return;
-    label.textContent = settingsFaceId.checked ? "Включено" : "Выключено";
+    label.textContent = "Автовход Face ID";
   };
 
   const loadProfile = async () => {
@@ -6071,6 +6075,13 @@
 
   settingsNicknameSave?.addEventListener("click", async () => {
     if (settingsNicknameSave.disabled) return;
+    if (state.nicknameNextAllowed) {
+      showSystemNotice({
+        key: "nickname_blocked",
+        message: `Смена никнейма доступна с ${formatDate(state.nicknameNextAllowed.toISOString())}`,
+      });
+      return;
+    }
     const nextName = settingsNickname?.value.trim();
     if (!nextName || nextName.length < 2) {
       showNotice("Никнейм должен быть не короче 2 символов.");
