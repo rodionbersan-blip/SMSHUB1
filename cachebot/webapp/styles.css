@@ -3963,6 +3963,8 @@ body.modal-open #app {
   position: absolute;
   inset: 0;
   transform: rotate(-90deg);
+  opacity: 1;
+  pointer-events: none;
 }
 
 .stats-donut-svg circle {
