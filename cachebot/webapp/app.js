@@ -428,6 +428,7 @@
     systemThemeTimer: null,
     systemThemeCurrent: null,
     systemThemeSignature: null,
+    systemThemeEnabled: null,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -1283,6 +1284,7 @@
     } catch {
       // ignore storage errors
     }
+    state.systemThemeEnabled = theme === "system";
   };
 
   const updateThemeToggle = (theme) => {
@@ -1295,6 +1297,7 @@
   };
 
   const isSystemThemeEnabled = () => {
+    if (typeof state.systemThemeEnabled === "boolean") return state.systemThemeEnabled;
     try {
       return window.localStorage.getItem(themeStorageKey) === "system";
     } catch {
@@ -1333,9 +1336,9 @@
       rgb ? (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255 : null;
     const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const next =
-      (luminance !== null ? (luminance < 0.5 ? "dark" : "light") : null) ||
       tgTheme ||
-      (mediaDark ? "dark" : "light");
+      (mediaDark ? "dark" : "light") ||
+      (luminance !== null ? (luminance < 0.5 ? "dark" : "light") : null);
     const signature = [
       tgTheme || "",
       bg || "",
@@ -4800,6 +4803,13 @@
       const initFromHash = getRawInitDataFromHash();
       state.initData = tg.initData || initFromHash || initFromUrl || "";
       refreshInitData();
+      state.systemThemeEnabled = (() => {
+        try {
+          return window.localStorage.getItem(themeStorageKey) === "system";
+        } catch {
+          return false;
+        }
+      })();
       const theme = detectTheme();
       applyTheme(theme);
       updateThemeToggle(theme);
@@ -4823,6 +4833,13 @@
       updateThemeToggle(theme);
       log("WebApp API не найден. Проверьте запуск через Telegram.", "warn");
       updateInitDebug();
+      state.systemThemeEnabled = (() => {
+        try {
+          return window.localStorage.getItem(themeStorageKey) === "system";
+        } catch {
+          return false;
+        }
+      })();
     }
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     if (media && media.addEventListener) {
