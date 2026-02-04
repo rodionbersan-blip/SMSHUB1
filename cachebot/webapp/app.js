@@ -1336,9 +1336,9 @@
       rgb ? (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255 : null;
     const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const next =
+      (luminance !== null ? (luminance < 0.5 ? "dark" : "light") : null) ||
       tgTheme ||
-      (mediaDark ? "dark" : "light") ||
-      (luminance !== null ? (luminance < 0.5 ? "dark" : "light") : null);
+      (mediaDark ? "dark" : "light");
     const signature = [
       tgTheme || "",
       bg || "",
