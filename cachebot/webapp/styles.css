@@ -3846,6 +3846,7 @@ body.modal-open #app {
 
 #settingsModal .stats-body {
   overflow-y: hidden;
+  gap: 0 !important;
 }
 
 .stats-tabs {
@@ -4148,7 +4149,7 @@ body.modal-open #app {
 }
 
 .settings-section + .settings-section {
-  margin-top: -16px;
+  margin-top: -24px !important;
 }
 
 .settings-nickname-toggle {
@@ -4160,6 +4161,8 @@ body.modal-open #app {
   border: none !important;
   box-shadow: none !important;
   margin: 0 auto;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
 }
 
 .settings-nickname-panel {
@@ -4174,6 +4177,7 @@ body.modal-open #app {
 .settings-nickname-panel.show {
   max-height: 220px;
   opacity: 1;
+  margin-top: -6px;
 }
 
 .settings-nickname-panel input[type="text"] {
@@ -4202,6 +4206,7 @@ body.modal-open #app {
 .settings-avatar-panel.show {
   max-height: 360px;
   opacity: 1;
+  margin-top: -6px;
 }
 
 .settings-avatar-preview {
@@ -4260,8 +4265,15 @@ body.modal-open #app {
 #settingsModal .settings-avatar-panel #settingsAvatarSave {
   width: 100%;
   max-width: 100%;
-  margin-left: 0;
-  margin-right: 0;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+#settingsModal .settings-section {
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 #settingsModal .profile-muted {
