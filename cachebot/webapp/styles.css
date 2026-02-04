@@ -141,7 +141,8 @@ h2 {
   background: linear-gradient(90deg, #8a6a10, #f2d37a 45%, #fff1b8 55%, #c8951b);
   -webkit-background-clip: text;
   background-clip: text;
-  color: var(--text);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
   display: inline-block;
   position: relative;
 }
@@ -150,7 +151,8 @@ h2 {
   background: linear-gradient(90deg, #7a5710, #b3872a 45%, #b3872a 55%, #7a5710);
   -webkit-background-clip: text;
   background-clip: text;
-  color: var(--text);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 .profile-admin-badge::before,
@@ -6344,4 +6346,49 @@ body.pin-lock {
 
 #systemNotice[data-type="info"] #systemNoticeActions {
   display: none;
+}
+
+@media (hover: none) {
+  .btn:hover,
+  .btn.pill:hover,
+  .btn.primary:hover,
+  .btn.review-btn:hover,
+  .btn.reviews-btn:hover,
+  .btn.stats-btn:hover,
+  .btn.warning:hover,
+  .btn.danger:hover,
+  .stats-tab-btn:hover,
+  .stats-tabs .tab-btn:hover,
+  #balanceHistoryOpen:hover,
+  .deal-item:hover,
+  .deal-pagination .btn:hover,
+  .deal-chat-btn:hover,
+  .deal-dispute-btn:hover,
+  .deal-cancel-btn:hover,
+  .deal-qr-btn:hover,
+  .deal-cash-btn:hover,
+  .deal-accept-btn:hover,
+  .deal-decline-btn:hover,
+  .p2p-toolbar .btn:hover,
+  .p2p-actions .btn:hover,
+  .p2p-bank:hover,
+  .p2p-owner-btn:hover,
+  .search-toggle:hover,
+  .admin-gradient-btn:hover,
+  .reviews-pagination .btn:hover,
+  .quick-deal-item:hover,
+  .balance-manage-btn:hover,
+  .balance-manage-submit:hover,
+  #adminSaveRates:hover,
+  #adminActionsBtn:hover,
+  #adminAddModerator:hover,
+  #adminAddMerchant:hover,
+  #adminAddAdmin:hover,
+  #moderationSearchBtn:hover,
+  #moderationDealSearchBtn:hover,
+  #p2pCreateBtn:hover {
+    filter: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
 }
