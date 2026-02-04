@@ -4061,13 +4061,16 @@ body.modal-open #app {
 .settings-toggle {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
+  gap: 10px;
+  padding: 6px 8px;
   border-radius: 999px;
   background: rgba(12, 18, 28, 0.2);
   border: 1px solid rgba(120, 170, 255, 0.14);
   cursor: pointer;
   user-select: none;
+  width: 86%;
+  max-width: 300px;
+  margin: 0 auto;
 }
 
 .settings-toggle input {
@@ -4145,8 +4148,8 @@ body.modal-open #app {
 }
 
 .settings-nickname-toggle {
-  width: 88%;
-  max-width: 320px;
+  width: 80%;
+  max-width: 280px;
   justify-content: center;
   background: linear-gradient(135deg, rgba(62, 126, 235, 0.96), rgba(86, 70, 190, 0.96)) !important;
   color: #ffffff !important;
