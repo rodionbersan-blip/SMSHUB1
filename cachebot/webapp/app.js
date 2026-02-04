@@ -4922,13 +4922,10 @@
       circle.setAttribute("cy", "50");
       circle.setAttribute("r", String(radius));
       circle.style.stroke = emptyColor;
-      circle.style.transition = "none";
       circle.style.strokeDasharray = `${circumference} ${circumference}`;
       circle.style.strokeDashoffset = `${circumference}`;
       svg.appendChild(circle);
       requestAnimationFrame(() => {
-        circle.getBoundingClientRect();
-        circle.style.transition = "stroke-dashoffset 0.9s ease";
         circle.style.strokeDashoffset = "0";
       });
       return;
@@ -4942,8 +4939,7 @@
       circle.setAttribute("cy", "50");
       circle.setAttribute("r", String(radius));
       circle.style.stroke = item.color;
-      circle.style.transition = "none";
-      circle.style.strokeDasharray = `${length} ${circumference}`;
+      circle.style.strokeDasharray = `${length} ${circumference - length}`;
       circle.style.strokeDashoffset = `${circumference}`;
       circle.dataset.targetOffset = String(circumference - startLen);
       startLen += length;
@@ -4952,9 +4948,7 @@
     });
 
     requestAnimationFrame(() => {
-      circles.forEach((circle) => circle.getBoundingClientRect());
       circles.forEach((circle) => {
-        circle.style.transition = "stroke-dashoffset 0.9s ease";
         circle.style.strokeDashoffset = circle.dataset.targetOffset || "0";
       });
     });
