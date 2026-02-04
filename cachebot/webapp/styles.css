@@ -3838,7 +3838,7 @@ body.modal-open #app {
 
 #settingsModal .modal-card {
   height: auto;
-  max-height: calc(100dvh - 140px);
+  max-height: calc(100dvh - 90px);
   border-radius: 26px;
 }
 
@@ -3852,7 +3852,7 @@ body.modal-open #app {
 
 #settingsModal .stats-body {
   overflow-y: auto;
-  max-height: calc(100dvh - 220px);
+  max-height: calc(100dvh - 180px);
   gap: 0 !important;
 }
 
