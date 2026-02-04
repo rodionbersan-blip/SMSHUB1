@@ -4180,7 +4180,7 @@ body.modal-open #app {
 
 .settings-nickname-panel {
   display: grid;
-  gap: 8px;
+  gap: 12px;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
@@ -4192,7 +4192,7 @@ body.modal-open #app {
   max-height: 260px;
   opacity: 1;
   transform: translateY(0);
-  margin-top: 10px;
+  margin-top: 14px;
 }
 
 .settings-nickname-panel input[type="text"] {
@@ -4211,7 +4211,7 @@ body.modal-open #app {
 
 .settings-avatar-panel {
   display: grid;
-  gap: 8px;
+  gap: 12px;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
@@ -4223,7 +4223,7 @@ body.modal-open #app {
   max-height: 360px;
   opacity: 1;
   transform: translateY(0);
-  margin-top: 10px;
+  margin-top: 14px;
 }
 
 .settings-avatar-preview {
@@ -4262,8 +4262,11 @@ body.modal-open #app {
   background: rgba(12, 18, 28, 0.2);
   border: 1px solid rgba(120, 170, 255, 0.14);
   border-radius: 999px;
-  padding: 6px 10px;
-  height: 40px;
+  padding: 6px 12px;
+  height: 46px;
+  width: 100%;
+  text-shadow: 0 0 0 transparent;
+  caret-color: transparent;
 }
 
 .settings-file input[type="file"]::file-selector-button {
@@ -4279,7 +4282,8 @@ body.modal-open #app {
 :root[data-theme="light"] .settings-file input[type="file"] {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(120, 140, 200, 0.2);
-  color: #1b1e28;
+  color: transparent;
+  text-shadow: 0 0 0 transparent;
 }
 
 :root[data-theme="light"] .settings-file input[type="file"]::file-selector-button {
@@ -4329,6 +4333,11 @@ body.modal-open #app {
 #settingsModal .settings-section {
   padding: 0;
   margin: 0;
+  gap: 0;
+}
+
+#settingsModal .settings-section + .settings-section {
+  margin-top: 6px;
 }
 
 #settingsModal .profile-muted {

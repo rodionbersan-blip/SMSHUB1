@@ -427,6 +427,7 @@
     avatarCrop: null,
     systemThemeTimer: null,
     systemThemeCurrent: null,
+    systemThemeSignature: null,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -1315,9 +1316,34 @@
   const applySystemTheme = () => {
     if (!isSystemThemeEnabled()) return;
     const tgTheme = tg?.colorScheme;
+    const themeParams = tg?.themeParams || {};
+    const bg = themeParams?.bg_color;
+    const int = (v) => Number.parseInt(v, 16);
+    const parseHex = (hex) => {
+      if (!hex || typeof hex !== "string") return null;
+      const raw = hex.replace("#", "");
+      if (raw.length !== 6) return null;
+      const r = int(raw.slice(0, 2));
+      const g = int(raw.slice(2, 4));
+      const b = int(raw.slice(4, 6));
+      return { r, g, b };
+    };
+    const rgb = parseHex(bg);
+    const luminance =
+      rgb ? (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255 : null;
     const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const next = tgTheme || (mediaDark ? "dark" : "light");
-    if (state.systemThemeCurrent === next) return;
+    const next =
+      (luminance !== null ? (luminance < 0.5 ? "dark" : "light") : null) ||
+      tgTheme ||
+      (mediaDark ? "dark" : "light");
+    const signature = [
+      tgTheme || "",
+      bg || "",
+      themeParams?.secondary_bg_color || "",
+      themeParams?.text_color || "",
+    ].join("|");
+    if (state.systemThemeCurrent === next && state.systemThemeSignature === signature) return;
+    state.systemThemeSignature = signature;
     state.systemThemeCurrent = next;
     applyTheme(next);
     updateThemeToggle(next);
@@ -1336,6 +1362,7 @@
     window.clearInterval(state.systemThemeTimer);
     state.systemThemeTimer = null;
     state.systemThemeCurrent = null;
+    state.systemThemeSignature = null;
   };
 
   const setAvatarNode = (node, display, avatarUrl) => {
@@ -4780,14 +4807,16 @@
       if (tg.onEvent) {
         tg.onEvent("themeChanged", () => {
           state.systemThemeCurrent = null;
+          state.systemThemeSignature = null;
           applySystemTheme();
         });
       }
-      if (isSystemThemeEnabled()) {
-        state.systemThemeCurrent = null;
-        startSystemThemeWatcher();
-        applySystemTheme();
-      }
+    if (isSystemThemeEnabled()) {
+      state.systemThemeCurrent = null;
+      state.systemThemeSignature = null;
+      startSystemThemeWatcher();
+      applySystemTheme();
+    }
     } else {
       const theme = detectTheme();
       applyTheme(theme);
@@ -6349,6 +6378,7 @@
     if (settingsSystemTheme.checked) {
       persistTheme("system");
       state.systemThemeCurrent = null;
+      state.systemThemeSignature = null;
       applySystemTheme();
       startSystemThemeWatcher();
     } else {
