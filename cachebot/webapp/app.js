@@ -1616,6 +1616,7 @@
       settingsAvatarPreview.style.backgroundImage = "";
       settingsAvatarPreview.classList.remove("has-image");
     }
+    settingsAvatarPanel?.classList.remove("has-image");
     if (settingsAvatarZoom) settingsAvatarZoom.value = "1";
     if (settingsAvatarSave) settingsAvatarSave.disabled = true;
   };
@@ -1661,6 +1662,7 @@
         state.avatarCrop = { img, scale, minScale, offsetX, offsetY };
         clampAvatarOffsets();
         renderAvatarPreview();
+        settingsAvatarPanel?.classList.add("has-image");
         if (settingsAvatarSave) settingsAvatarSave.disabled = false;
       };
       img.src = reader.result;
