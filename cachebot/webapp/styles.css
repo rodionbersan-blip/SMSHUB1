@@ -3836,6 +3836,12 @@ body.modal-open #app {
   padding: 12px 14px 16px;
 }
 
+#settingsModal .modal-card {
+  height: auto;
+  max-height: calc(100dvh - 140px);
+  border-radius: 26px;
+}
+
 .stats-body {
   display: flex;
   flex-direction: column;
@@ -3845,7 +3851,8 @@ body.modal-open #app {
 }
 
 #settingsModal .stats-body {
-  overflow-y: hidden;
+  overflow-y: auto;
+  max-height: calc(100dvh - 220px);
   gap: 0 !important;
 }
 
