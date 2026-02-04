@@ -5209,8 +5209,8 @@
     }
     if (statsFundsSummary) {
       statsFundsSummary.innerHTML = `
-        <div class="stats-row"><span>Пополнение</span><strong>${formatAmount(topup, 2)} USDT</strong></div>
-        <div class="stats-row"><span>Вывод</span><strong>${formatAmount(withdraw, 2)} USDT</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#55e2a3;"></span>Пополнение</span><strong>${formatAmount(topup, 2)} USDT</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#ffb36c;"></span>Вывод</span><strong>${formatAmount(withdraw, 2)} USDT</strong></div>
       `;
     }
     if (statsSideSummary) {
@@ -5221,8 +5221,8 @@
     }
 
     setDonut(statsFundsDonut, [
-      { value: buySum, color: "#55e2a3" },
-      { value: sellSum, color: "#ffb36c" },
+      { value: topup, color: "#55e2a3" },
+      { value: withdraw, color: "#ffb36c" },
     ]);
 
     const completed = Number(deals.completed || 0);
