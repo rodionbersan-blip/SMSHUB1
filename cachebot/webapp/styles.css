@@ -3965,13 +3965,14 @@ body.modal-open #app {
   inset: 0;
   z-index: 2;
   transform: rotate(-90deg);
+  overflow: visible;
 }
 
 .stats-donut-mask circle {
   fill: none;
   stroke: var(--stats-card-bg);
-  stroke-width: 80;
-  stroke-linecap: round;
+  stroke-width: 100;
+  stroke-linecap: butt;
   transition: stroke-dashoffset 0.9s ease;
 }
 
