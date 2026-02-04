@@ -3844,6 +3844,11 @@ body.modal-open #app {
   height: calc(100% - 48px);
 }
 
+#settingsModal .stats-body {
+  overflow-y: hidden;
+  align-items: center;
+}
+
 .stats-tabs {
   display: flex;
   gap: 10px;
@@ -4144,7 +4149,7 @@ body.modal-open #app {
 }
 
 .settings-section + .settings-section {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .settings-nickname-toggle {
@@ -4239,6 +4244,25 @@ body.modal-open #app {
 
 .settings-avatar-panel:not(.has-image) #settingsAvatarSave {
   display: none;
+}
+
+.settings-unified-width {
+  width: 82%;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#settingsModal .settings-nickname-toggle,
+#settingsModal .settings-toggle,
+#settingsModal .settings-nickname-panel input[type="text"],
+#settingsModal .settings-nickname-panel #settingsNicknameSave,
+#settingsModal .settings-avatar-panel input[type="file"],
+#settingsModal .settings-avatar-panel #settingsAvatarSave {
+  width: 82%;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 :root[data-theme="light"] .settings-section {
