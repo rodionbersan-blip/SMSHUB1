@@ -1334,11 +1334,13 @@
     const rgb = parseHex(bg);
     const luminance =
       rgb ? (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255 : null;
-    const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const mediaQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    const mediaDark = mediaQuery ? mediaQuery.matches : null;
     const next =
+      (mediaDark !== null ? (mediaDark ? "dark" : "light") : null) ||
       (luminance !== null ? (luminance < 0.5 ? "dark" : "light") : null) ||
       tgTheme ||
-      (mediaDark ? "dark" : "light");
+      "light";
     const signature = [
       tgTheme || "",
       bg || "",
