@@ -3846,7 +3846,6 @@ body.modal-open #app {
 
 #settingsModal .stats-body {
   overflow-y: hidden;
-  align-items: center;
 }
 
 .stats-tabs {
@@ -4247,10 +4246,10 @@ body.modal-open #app {
 }
 
 .settings-unified-width {
-  width: 82%;
-  max-width: 280px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 #settingsModal .settings-nickname-toggle,
@@ -4259,10 +4258,14 @@ body.modal-open #app {
 #settingsModal .settings-nickname-panel #settingsNicknameSave,
 #settingsModal .settings-avatar-panel input[type="file"],
 #settingsModal .settings-avatar-panel #settingsAvatarSave {
-  width: 82%;
-  max-width: 280px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#settingsModal .profile-muted {
+  text-align: center;
 }
 
 :root[data-theme="light"] .settings-section {
