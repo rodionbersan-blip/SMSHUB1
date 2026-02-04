@@ -6271,10 +6271,14 @@
 
   const updateAvatarFileLabel = () => {
     if (!settingsAvatarFile) return;
-    const label = settingsAvatarFile.closest('.settings-avatar-panel')?.querySelector('.settings-file-label');
+    const fileWrap = settingsAvatarFile.closest(".settings-file");
+    const label = fileWrap?.querySelector(".settings-file-label");
     if (!label) return;
     const file = settingsAvatarFile.files?.[0];
     label.textContent = file ? file.name : "";
+    if (fileWrap) {
+      fileWrap.classList.toggle("has-file", Boolean(file));
+    }
   };
 
   settingsAvatarFile?.addEventListener("change", () => {
