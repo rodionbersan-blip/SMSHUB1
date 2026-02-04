@@ -4149,7 +4149,7 @@ body.modal-open #app {
 }
 
 .settings-section + .settings-section {
-  margin-top: -24px !important;
+  margin-top: -12px !important;
 }
 
 .settings-nickname-toggle {
@@ -4167,7 +4167,7 @@ body.modal-open #app {
 
 .settings-nickname-panel {
   display: grid;
-  gap: 2px;
+  gap: 8px;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
@@ -4175,9 +4175,9 @@ body.modal-open #app {
 }
 
 .settings-nickname-panel.show {
-  max-height: 220px;
+  max-height: 240px;
   opacity: 1;
-  margin-top: -6px;
+  margin-top: 6px;
 }
 
 .settings-nickname-panel input[type="text"] {
@@ -4196,7 +4196,7 @@ body.modal-open #app {
 
 .settings-avatar-panel {
   display: grid;
-  gap: 2px;
+  gap: 8px;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
@@ -4206,7 +4206,7 @@ body.modal-open #app {
 .settings-avatar-panel.show {
   max-height: 360px;
   opacity: 1;
-  margin-top: -6px;
+  margin-top: 6px;
 }
 
 .settings-avatar-preview {
