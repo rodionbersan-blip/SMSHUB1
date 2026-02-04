@@ -3839,7 +3839,7 @@ body.modal-open #app {
 .stats-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   overflow-y: auto;
   height: calc(100% - 48px);
 }
@@ -4141,17 +4141,17 @@ body.modal-open #app {
 }
 
 .settings-section + .settings-section {
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .settings-nickname-toggle {
-  width: 92%;
-  max-width: 360px;
+  width: 88%;
+  max-width: 320px;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(70, 140, 255, 0.9), rgba(86, 62, 180, 0.9));
-  color: #ffffff;
-  border: none;
-  box-shadow: none;
+  background: linear-gradient(135deg, rgba(62, 126, 235, 0.96), rgba(86, 70, 190, 0.96)) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: none !important;
   margin: 0 auto;
 }
 
@@ -4224,6 +4224,10 @@ body.modal-open #app {
   display: block;
 }
 
+.settings-avatar-panel:not(.has-image) #settingsAvatarSave {
+  display: none;
+}
+
 :root[data-theme="light"] .settings-section {
   background: transparent;
   border-color: transparent;
@@ -4241,8 +4245,8 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .settings-nickname-toggle {
-  background: linear-gradient(135deg, rgba(92, 158, 255, 0.92), rgba(112, 86, 204, 0.92));
-  box-shadow: none;
+  background: linear-gradient(135deg, rgba(88, 150, 248, 0.92), rgba(110, 86, 196, 0.92)) !important;
+  box-shadow: none !important;
 }
 
 .modal.open {
