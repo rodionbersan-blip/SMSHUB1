@@ -4259,8 +4259,8 @@ body.modal-open #app {
 
 .settings-file input[type="file"] {
   color: var(--text);
-  background: rgba(18, 22, 30, 0.6);
-  border: 1px solid rgba(120, 170, 255, 0.2);
+  background: rgba(12, 18, 28, 0.2);
+  border: 1px solid rgba(120, 170, 255, 0.14);
   border-radius: 999px;
   padding: 6px 10px;
 }
@@ -4277,7 +4277,7 @@ body.modal-open #app {
 
 :root[data-theme="light"] .settings-file input[type="file"] {
   background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(120, 140, 200, 0.25);
+  border-color: rgba(120, 140, 200, 0.2);
   color: #1b1e28;
 }
 
