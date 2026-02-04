@@ -4143,10 +4143,10 @@ body.modal-open #app {
 .settings-nickname-toggle {
   width: 100%;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(70, 140, 255, 0.9), rgba(86, 62, 180, 0.9));
+  background: linear-gradient(135deg, rgba(199, 152, 62, 0.9), rgba(226, 186, 92, 0.95));
   color: #ffffff;
   border: none;
-  box-shadow: 0 10px 22px rgba(70, 130, 230, 0.25);
+  box-shadow: 0 10px 22px rgba(214, 170, 90, 0.22);
 }
 
 .settings-nickname-panel {
@@ -4184,8 +4184,8 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .settings-nickname-toggle {
-  background: linear-gradient(135deg, rgba(86, 152, 255, 0.92), rgba(104, 76, 196, 0.92));
-  box-shadow: 0 10px 22px rgba(70, 130, 230, 0.25);
+  background: linear-gradient(135deg, rgba(242, 179, 96, 0.96), rgba(220, 145, 62, 0.96));
+  box-shadow: 0 10px 22px rgba(214, 150, 70, 0.22);
 }
 
 .modal.open {
