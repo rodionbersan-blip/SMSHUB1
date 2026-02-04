@@ -356,6 +356,7 @@
   const settingsAvatarZoom = document.getElementById("settingsAvatarZoom");
   const settingsAvatarSave = document.getElementById("settingsAvatarSave");
   const settingsFaceId = document.getElementById("settingsFaceId");
+  const settingsSystemTheme = document.getElementById("settingsSystemTheme");
   const statsFrom = document.getElementById("statsFrom");
   const statsTo = document.getElementById("statsTo");
   const statsRange = document.querySelector(".stats-range");
@@ -1290,6 +1291,14 @@
     themeToggle.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
   };
 
+  const isSystemThemeEnabled = () => {
+    try {
+      return window.localStorage.getItem(themeStorageKey) === "system";
+    } catch {
+      return false;
+    }
+  };
+
   const detectTheme = () => {
     try {
       const saved = window.localStorage.getItem(themeStorageKey);
@@ -1299,6 +1308,13 @@
     }
     if (tg?.colorScheme) return tg.colorScheme;
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  };
+
+  const applySystemTheme = () => {
+    if (!isSystemThemeEnabled()) return;
+    const next = detectTheme();
+    applyTheme(next);
+    updateThemeToggle(next);
   };
 
   const setAvatarNode = (node, display, avatarUrl) => {
@@ -4738,12 +4754,23 @@
       applyTheme(theme);
       updateThemeToggle(theme);
       updateInitDebug();
+      if (tg.onEvent) {
+        tg.onEvent("themeChanged", () => {
+          applySystemTheme();
+        });
+      }
     } else {
       const theme = detectTheme();
       applyTheme(theme);
       updateThemeToggle(theme);
       log("WebApp API не найден. Проверьте запуск через Telegram.", "warn");
       updateInitDebug();
+    }
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    if (media && media.addEventListener) {
+      media.addEventListener("change", () => {
+        applySystemTheme();
+      });
     }
     const unsafeUser = tg?.initDataUnsafe?.user;
     const parsedUser = !unsafeUser ? parseInitDataUser(state.initData) : null;
@@ -4952,6 +4979,7 @@
     applyTheme(next);
     updateThemeToggle(next);
     persistTheme(next);
+    if (settingsSystemTheme) settingsSystemTheme.checked = false;
   });
 
   navButtons.forEach((btn) => {
@@ -6161,6 +6189,9 @@
       settingsFaceId.checked = loadBioFlag();
       updateSettingsFaceLabel();
     }
+    if (settingsSystemTheme) {
+      settingsSystemTheme.checked = isSystemThemeEnabled();
+    }
     updateSettingsNicknameState();
     settingsModal?.classList.add("open");
   });
@@ -6270,6 +6301,18 @@
   settingsFaceId?.addEventListener("change", () => {
     saveBioFlag(!!settingsFaceId.checked);
     updateSettingsFaceLabel();
+  });
+
+  settingsSystemTheme?.addEventListener("change", () => {
+    if (settingsSystemTheme.checked) {
+      persistTheme("system");
+      applySystemTheme();
+    } else {
+      const current = document.documentElement.dataset.theme || "light";
+      persistTheme(current);
+      applyTheme(current);
+      updateThemeToggle(current);
+    }
   });
 
   settingsNicknameSave?.addEventListener("click", async () => {
