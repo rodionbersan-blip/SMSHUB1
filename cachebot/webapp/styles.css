@@ -4174,6 +4174,16 @@ body.modal-open #app {
 
 .settings-nickname-panel input[type="text"] {
   margin-top: 2px;
+  width: 86%;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.settings-nickname-panel #settingsNicknameSave {
+  width: 86%;
+  max-width: 300px;
+  margin: 0 auto;
 }
 
 .settings-avatar-panel {
