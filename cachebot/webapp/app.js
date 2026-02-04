@@ -6242,11 +6242,13 @@
     let drag = null;
     settingsAvatarPreview.addEventListener("pointerdown", (event) => {
       if (!state.avatarCrop) return;
+      event.preventDefault();
       drag = { x: event.clientX, y: event.clientY };
       settingsAvatarPreview.setPointerCapture(event.pointerId);
     });
     settingsAvatarPreview.addEventListener("pointermove", (event) => {
       if (!drag || !state.avatarCrop) return;
+      event.preventDefault();
       const dx = event.clientX - drag.x;
       const dy = event.clientY - drag.y;
       drag = { x: event.clientX, y: event.clientY };
