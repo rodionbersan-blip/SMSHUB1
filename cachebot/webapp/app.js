@@ -681,6 +681,7 @@
   const showSystemNotice = (item, { autoClose = true } = {}) => {
     if (!systemNotice || !systemNoticeList) return;
     state.systemNoticeActive = item;
+    systemNotice.dataset.type = item?.type || "";
     systemNoticeTitle.textContent = "Уведомление";
     systemNoticeList.innerHTML = "";
     const row = document.createElement("div");
@@ -689,6 +690,10 @@
     systemNoticeList.appendChild(row);
     if (item?.type === "dispute_resolved") {
       systemNoticeActions?.classList.add("hidden");
+      systemNoticeRateForm?.classList.remove("show");
+    } else if (item?.type === "info") {
+      systemNoticeActions?.classList.remove("hidden");
+      systemNoticeActions?.classList.remove("is-collapsed");
       systemNoticeRateForm?.classList.remove("show");
     } else {
       systemNoticeActions?.classList.remove("hidden");
@@ -6070,7 +6075,6 @@
   settingsFaceId?.addEventListener("change", () => {
     saveBioFlag(!!settingsFaceId.checked);
     updateSettingsFaceLabel();
-    showNotice(settingsFaceId.checked ? "Автовход Face ID включён" : "Автовход Face ID выключен");
   });
 
   settingsNicknameSave?.addEventListener("click", async () => {
@@ -6078,6 +6082,7 @@
     if (state.nicknameNextAllowed) {
       showSystemNotice({
         key: "nickname_blocked",
+        type: "info",
         message: `Смена никнейма доступна с ${formatDate(state.nicknameNextAllowed.toISOString())}`,
       });
       return;
