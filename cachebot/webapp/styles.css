@@ -5098,7 +5098,7 @@ body.modal-open #app {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
+  line-height: 1.2;
   box-sizing: border-box;
 }
 
@@ -5108,6 +5108,7 @@ body.modal-open #app {
   height: 44px;
   min-height: 44px;
   padding: 0 16px;
+  line-height: 1.2;
 }
 
 .history-date-btn:hover {
@@ -5271,7 +5272,7 @@ body.modal-open #app {
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend.active {
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.98) 0%, rgba(190, 240, 242, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.98) 0%, rgba(255, 158, 180, 0.95) 100%);
   border-color: transparent;
   color: #ffffff;
   text-shadow: none;
