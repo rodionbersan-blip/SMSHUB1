@@ -5095,7 +5095,7 @@ body.modal-open #app {
 }
 
 .history-date-btn.active {
-  background: linear-gradient(135deg, rgba(90, 160, 255, 0.95), rgba(108, 78, 200, 0.95));
+  background: linear-gradient(135deg, rgba(90, 160, 255, 0.9), rgba(108, 78, 200, 0.9));
 }
 
 .history-date-btn:hover {
@@ -5105,7 +5105,7 @@ body.modal-open #app {
 }
 
 .history-date-btn.active:hover {
-  background: linear-gradient(135deg, rgba(90, 160, 255, 0.95), rgba(108, 78, 200, 0.95));
+  background: linear-gradient(135deg, rgba(90, 160, 255, 0.9), rgba(108, 78, 200, 0.9));
   border-color: rgba(90, 140, 220, 0.35);
   color: #ffffff;
 }
