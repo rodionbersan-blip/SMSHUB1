@@ -29,7 +29,7 @@ class Config:
     webhook_port: int = 8080
     webhook_path: str = "/crypto-pay/webhook"
     crypto_pay_webhook_secret: str | None = None
-    allow_unsafe_initdata: bool = True
+    allow_unsafe_initdata: bool = False
     allow_unsafe_initdata_ids: Set[int] = None
     support_db_path: Path = Path("var/support.db")
 
@@ -58,7 +58,7 @@ class Config:
         webhook_port = int(os.getenv("CRYPTO_PAY_WEBHOOK_PORT", "8080"))
         webhook_path = os.getenv("CRYPTO_PAY_WEBHOOK_PATH", "/crypto-pay/webhook")
         webhook_secret = os.getenv("CRYPTO_PAY_WEBHOOK_SECRET") or None
-        allow_unsafe = os.getenv("ALLOW_UNSAFE_INITDATA", "1").lower() in {"1", "true", "yes"}
+        allow_unsafe = os.getenv("ALLOW_UNSAFE_INITDATA", "0").lower() in {"1", "true", "yes"}
         unsafe_ids = _parse_admin_ids(os.getenv("ALLOW_UNSAFE_INITDATA_IDS"))
         support_db_path = Path(os.getenv("SUPPORT_DB_PATH", "var/support.db")).expanduser()
         if not support_db_path.is_absolute():
