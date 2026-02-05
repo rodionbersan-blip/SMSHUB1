@@ -2738,20 +2738,22 @@ def _validate_init_data(init_data: str, bot_token: str) -> dict[str, Any] | None
             or hmac.compare_digest(received_hash, encoded_plus_legacy)
             or hmac.compare_digest(received_hash, encoded_plus_plain)
         ):
-            logger.warning(
-                "Invalid initData hash: received=%s expected=%s legacy=%s keys=%s raw_prefix=%s",
-                received_hash[:12],
-                expected_hash[:12],
-                legacy_hash[:12],
-                ",".join(sorted(data.keys())),
-                init_data[:32],
-            )
             return None
     try:
         user_raw = data.get("user")
         return json.loads(user_raw) if user_raw else {}
     except Exception:
         return {}
+
+
+def _validate_init_data_any(init_data: str, tokens: Iterable[str]) -> dict[str, Any] | None:
+    for token in tokens:
+        if not token:
+            continue
+        user = _validate_init_data(init_data, token)
+        if user:
+            return user
+    return None
 
 
 def _normalize_init_data(init_data: str) -> list[str]:
@@ -2795,10 +2797,10 @@ async def _require_user(request: web.Request) -> tuple[dict[str, Any], int]:
     init_data = request.headers.get("X-Telegram-Init-Data") or request.query.get("initData")
     if not init_data:
         raise web.HTTPUnauthorized(text="Missing initData")
-    user = _validate_init_data(init_data, deps.config.telegram_bot_token)
+    user = _validate_init_data_any(init_data, deps.config.telegram_bot_tokens or (deps.config.telegram_bot_token,))
     if not user:
         for candidate in _normalize_init_data(init_data):
-            user = _validate_init_data(candidate, deps.config.telegram_bot_token)
+            user = _validate_init_data_any(candidate, deps.config.telegram_bot_tokens or (deps.config.telegram_bot_token,))
             if user:
                 break
     if not user and deps.config.allow_unsafe_initdata:

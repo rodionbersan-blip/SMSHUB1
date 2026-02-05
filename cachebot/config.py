@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 @dataclass(slots=True)
 class Config:
     telegram_bot_token: str
+    telegram_bot_tokens: tuple[str, ...] = ()
     crypto_pay_token: str | None
     admin_ids: Set[int]
     owner_ids: Set[int]
@@ -40,6 +41,12 @@ class Config:
         if not token:
             raise RuntimeError("TELEGRAM_BOT_TOKEN is required")
         token = token.strip()
+        extra_tokens_raw = os.getenv("TELEGRAM_BOT_TOKENS", "")
+        extra_tokens = tuple(
+            t.strip()
+            for t in extra_tokens_raw.replace(";", ",").split(",")
+            if t.strip()
+        )
         crypto_pay_token = os.getenv("CRYPTO_PAY_TOKEN") or None
         admin_ids = _parse_admin_ids(os.getenv("ADMIN_USER_IDS"))
         storage_path = Path(os.getenv("STATE_FILE", "var/state.json")).expanduser()
@@ -67,6 +74,7 @@ class Config:
             support_db_path = (project_root / support_db_path).resolve()
         return cls(
             telegram_bot_token=token,
+            telegram_bot_tokens=(token,) + extra_tokens,
             crypto_pay_token=crypto_pay_token,
             admin_ids=admin_ids,
             owner_ids=set(admin_ids),
