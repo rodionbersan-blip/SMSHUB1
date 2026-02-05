@@ -5259,7 +5259,7 @@ body.modal-open #app {
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup.active {
-  background: linear-gradient(135deg, rgba(70, 200, 120, 0.98) 0%, rgba(189, 255, 112, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(60, 185, 110, 0.98) 0%, rgba(170, 235, 95, 0.95) 100%);
   border-color: transparent;
   color: #ffffff;
   text-shadow: none;
