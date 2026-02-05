@@ -5087,7 +5087,7 @@ body.modal-open #app {
 
 .history-date-btn {
   background: linear-gradient(135deg, rgba(70, 140, 255, 0.85), rgba(86, 62, 180, 0.85));
-  border: 1px solid rgba(90, 140, 220, 0.45);
+  border: 1px solid rgba(90, 140, 220, 0.35);
   color: #ffffff;
   font-weight: 700;
 }
@@ -5096,15 +5096,7 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(90, 160, 255, 0.95), rgba(108, 78, 200, 0.95));
 }
 
-:root[data-theme="light"] .history-date-btn {
-  background: linear-gradient(135deg, rgba(120, 186, 255, 0.7), rgba(120, 186, 255, 0.45));
-  border-color: rgba(120, 186, 255, 0.6);
-  color: #ffffff;
-}
-
-:root[data-theme="light"] .history-date-btn.active {
-  background: linear-gradient(135deg, rgba(140, 200, 255, 0.85), rgba(140, 200, 255, 0.55));
-}
+/* use same colors as "Все" on both themes */
 
 .balance-history-range {
   display: grid;

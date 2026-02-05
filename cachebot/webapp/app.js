@@ -6805,7 +6805,10 @@
   balanceHistoryTopup?.addEventListener("click", () => setBalanceHistoryFilter("topup"));
   balanceHistorySpend?.addEventListener("click", () => setBalanceHistoryFilter("spend"));
   balanceHistoryAllTime?.addEventListener("click", () => setBalanceHistoryDateMode("all"));
-  balanceHistoryByDate?.addEventListener("click", () => setBalanceHistoryDateMode("range"));
+  balanceHistoryByDate?.addEventListener("click", () => {
+    const next = state.balanceHistoryDateMode === "range" ? "all" : "range";
+    setBalanceHistoryDateMode(next);
+  });
   balanceHistoryFrom?.addEventListener("change", () => renderBalanceHistory());
   balanceHistoryTo?.addEventListener("change", () => renderBalanceHistory());
 
