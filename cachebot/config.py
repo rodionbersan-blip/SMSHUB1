@@ -12,7 +12,6 @@ from dotenv import load_dotenv
 @dataclass(slots=True)
 class Config:
     telegram_bot_token: str
-    telegram_bot_tokens: tuple[str, ...] = ()
     crypto_pay_token: str | None
     admin_ids: Set[int]
     owner_ids: Set[int]
@@ -33,6 +32,7 @@ class Config:
     allow_unsafe_initdata: bool = False
     allow_unsafe_initdata_ids: Set[int] = None
     support_db_path: Path = Path("var/support.db")
+    telegram_bot_tokens: tuple[str, ...] = ()
 
     @classmethod
     def from_env(cls) -> "Config":
