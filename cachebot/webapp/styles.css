@@ -5119,23 +5119,33 @@ body.modal-open #app {
 }
 
 .history-filter-topup {
-  background: rgba(30, 40, 60, 0.3);
+  background: linear-gradient(135deg, rgba(70, 210, 130, 0.75), rgba(70, 210, 130, 0.35));
   border-color: rgba(70, 210, 130, 0.35);
-  color: var(--text);
+  color: #ffffff;
 }
 
 .history-filter-topup.active {
-  background: rgba(70, 210, 130, 0.2);
+  background: linear-gradient(135deg, rgba(70, 210, 130, 0.88), rgba(70, 210, 130, 0.45));
 }
 
 .history-filter-spend {
-  background: rgba(30, 40, 60, 0.3);
+  background: linear-gradient(135deg, rgba(255, 110, 110, 0.75), rgba(255, 110, 110, 0.35));
   border-color: rgba(255, 110, 110, 0.35);
-  color: var(--text);
+  color: #ffffff;
 }
 
 .history-filter-spend.active {
-  background: rgba(255, 110, 110, 0.2);
+  background: linear-gradient(135deg, rgba(255, 110, 110, 0.88), rgba(255, 110, 110, 0.45));
+}
+
+#balanceHistoryAll {
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.85), rgba(86, 62, 180, 0.85));
+  border-color: rgba(90, 140, 220, 0.35);
+  color: #ffffff;
+}
+
+#balanceHistoryAll.active {
+  background: linear-gradient(135deg, rgba(90, 160, 255, 0.95), rgba(108, 78, 200, 0.95));
 }
 
 .balance-history-list {
@@ -5165,12 +5175,12 @@ body.modal-open #app {
 
 .balance-item.pos {
   border-color: rgba(46, 204, 113, 0.35);
-  background: linear-gradient(135deg, rgba(46, 204, 113, 0.25), rgba(46, 204, 113, 0.02));
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.18), rgba(46, 204, 113, 0.02));
 }
 
 .balance-item.neg {
   border-color: rgba(231, 76, 60, 0.35);
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.25), rgba(231, 76, 60, 0.02));
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.18), rgba(231, 76, 60, 0.02));
 }
 
 .balance-info {
