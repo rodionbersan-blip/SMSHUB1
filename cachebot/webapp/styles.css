@@ -5138,7 +5138,7 @@ body.modal-open #app {
 :root[data-theme="light"] .history-date-btn.active:hover {
   background: linear-gradient(135deg, rgba(90, 160, 255, 0.9), rgba(108, 78, 200, 0.9));
   border-color: rgba(90, 140, 220, 0.35);
-  color: #111111;
+  color: #ffffff;
 }
 
 .balance-history-range {
