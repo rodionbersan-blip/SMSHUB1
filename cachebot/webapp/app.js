@@ -429,6 +429,7 @@
     systemThemeCurrent: null,
     systemThemeSignature: null,
     systemThemeEnabled: null,
+    initDebugSentAt: 0,
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -1387,6 +1388,32 @@
     initDebug.classList.toggle("show", !hasTg || !hasInit || !hasUser);
   };
 
+  const sendInitDebug = async (tag, message) => {
+    const now = Date.now();
+    if (now - state.initDebugSentAt < 3000) return;
+    state.initDebugSentAt = now;
+    try {
+      await fetch("/api/debug/initdata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tag,
+          message,
+          init_data: state.initData || "",
+          unsafe: tg?.initDataUnsafe || null,
+          platform: tg?.platform,
+          version: tg?.version,
+          colorScheme: tg?.colorScheme,
+          themeParams: tg?.themeParams || null,
+          href: window.location.href,
+          ua: navigator.userAgent,
+        }),
+      });
+    } catch {
+      // ignore debug errors
+    }
+  };
+
   const formatAmount = (value, digits = 3) => {
     const num = Number(value);
     if (!Number.isFinite(num)) return "—";
@@ -1559,6 +1586,7 @@
       if (!res.ok) {
         const text = await res.text();
         if (retry && /initdata|invalid/i.test(text)) {
+          sendInitDebug("invalid-initdata", text || "fetch-me");
           state.initData = "";
           refreshInitData();
           return fetchMe(false);
@@ -1600,6 +1628,7 @@
       if (!res.ok) {
         const text = await res.text();
         if (retry && /initdata|invalid/i.test(text)) {
+          sendInitDebug("invalid-initdata", text || "fetch-json");
           state.initData = "";
           refreshInitData();
           return fetchJson(path, options, false);

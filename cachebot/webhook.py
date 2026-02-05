@@ -221,14 +221,22 @@ async def _api_debug_initdata(request: web.Request) -> web.Response:
     line = payload.get("line")
     col = payload.get("col")
     stack = payload.get("stack")
+    platform = payload.get("platform")
+    version = payload.get("version")
+    color_scheme = payload.get("colorScheme")
+    href = payload.get("href")
     logger.warning(
-        "WebApp init debug: tag=%s has_init=%s len=%s has_unsafe=%s user=%s ua=%s msg=%s src=%s line=%s col=%s",
+        "WebApp init debug: tag=%s has_init=%s len=%s has_unsafe=%s user=%s ua=%s platform=%s version=%s scheme=%s href=%s msg=%s src=%s line=%s col=%s",
         tag,
         bool(init_data),
         len(init_data),
         bool(unsafe),
         (unsafe or {}).get("user"),
         request.headers.get("User-Agent"),
+        platform,
+        version,
+        color_scheme,
+        href,
         message,
         source,
         line,
