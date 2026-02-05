@@ -1318,35 +1318,10 @@
 
   const applySystemTheme = () => {
     if (!isSystemThemeEnabled()) return;
-    const tgTheme = tg?.colorScheme;
-    const themeParams = tg?.themeParams || {};
-    const bg = themeParams?.bg_color;
-    const int = (v) => Number.parseInt(v, 16);
-    const parseHex = (hex) => {
-      if (!hex || typeof hex !== "string") return null;
-      const raw = hex.replace("#", "");
-      if (raw.length !== 6) return null;
-      const r = int(raw.slice(0, 2));
-      const g = int(raw.slice(2, 4));
-      const b = int(raw.slice(4, 6));
-      return { r, g, b };
-    };
-    const rgb = parseHex(bg);
-    const luminance =
-      rgb ? (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255 : null;
     const mediaQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
     const mediaDark = mediaQuery ? mediaQuery.matches : null;
-    const next =
-      (mediaDark !== null ? (mediaDark ? "dark" : "light") : null) ||
-      (luminance !== null ? (luminance < 0.5 ? "dark" : "light") : null) ||
-      tgTheme ||
-      "light";
-    const signature = [
-      tgTheme || "",
-      bg || "",
-      themeParams?.secondary_bg_color || "",
-      themeParams?.text_color || "",
-    ].join("|");
+    const next = mediaDark !== null ? (mediaDark ? "dark" : "light") : "light";
+    const signature = `media:${mediaDark === null ? "na" : mediaDark ? "dark" : "light"}`;
     if (state.systemThemeCurrent === next && state.systemThemeSignature === signature) return;
     state.systemThemeSignature = signature;
     state.systemThemeCurrent = next;
