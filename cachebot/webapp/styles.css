@@ -5119,38 +5119,38 @@ body.modal-open #app {
 }
 
 .history-filter-topup {
-  background: #2ecc71;
-  border-color: #2ecc71;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.28) 0%, rgba(46, 204, 113, 0.12) 40%, rgba(46, 204, 113, 0.01) 100%);
+  border-color: rgba(46, 204, 113, 0.28);
   color: #ffffff;
 }
 
 .history-filter-topup.active {
-  background: #2ecc71;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.38) 0%, rgba(46, 204, 113, 0.16) 40%, rgba(46, 204, 113, 0.02) 100%);
 }
 
 .history-filter-spend {
-  background: #e74c3c;
-  border-color: #e74c3c;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.28) 0%, rgba(231, 76, 60, 0.12) 40%, rgba(231, 76, 60, 0.01) 100%);
+  border-color: rgba(231, 76, 60, 0.28);
   color: #ffffff;
 }
 
 .history-filter-spend.active {
-  background: #e74c3c;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.38) 0%, rgba(231, 76, 60, 0.16) 40%, rgba(231, 76, 60, 0.02) 100%);
 }
 
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup.active {
-  background: #2ecc71;
-  border-color: #2ecc71;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.28) 0%, rgba(46, 204, 113, 0.12) 40%, rgba(46, 204, 113, 0.01) 100%);
+  border-color: rgba(46, 204, 113, 0.28);
   color: #ffffff;
 }
 
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend.active {
-  background: #e74c3c;
-  border-color: #e74c3c;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.28) 0%, rgba(231, 76, 60, 0.12) 40%, rgba(231, 76, 60, 0.01) 100%);
+  border-color: rgba(231, 76, 60, 0.28);
   color: #ffffff;
 }
 
@@ -5190,12 +5190,12 @@ body.modal-open #app {
 }
 
 .balance-item.pos {
-  border-color: rgba(46, 204, 113, 0.35);
+  border-color: var(--card-contrast-border);
   background: linear-gradient(135deg, rgba(46, 204, 113, 0.28) 0%, rgba(46, 204, 113, 0.12) 40%, rgba(46, 204, 113, 0.01) 100%);
 }
 
 .balance-item.neg {
-  border-color: rgba(231, 76, 60, 0.35);
+  border-color: var(--card-contrast-border);
   background: linear-gradient(135deg, rgba(231, 76, 60, 0.28) 0%, rgba(231, 76, 60, 0.12) 40%, rgba(231, 76, 60, 0.01) 100%);
 }
 
