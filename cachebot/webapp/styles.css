@@ -5175,12 +5175,12 @@ body.modal-open #app {
 
 .balance-item.pos {
   border-color: rgba(46, 204, 113, 0.35);
-  background: linear-gradient(135deg, rgba(46, 204, 113, 0.16) 0%, rgba(46, 204, 113, 0.08) 40%, rgba(46, 204, 113, 0.01) 100%);
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.28) 0%, rgba(46, 204, 113, 0.12) 40%, rgba(46, 204, 113, 0.01) 100%);
 }
 
 .balance-item.neg {
   border-color: rgba(231, 76, 60, 0.35);
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.16) 0%, rgba(231, 76, 60, 0.08) 40%, rgba(231, 76, 60, 0.01) 100%);
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.28) 0%, rgba(231, 76, 60, 0.12) 40%, rgba(231, 76, 60, 0.01) 100%);
 }
 
 .balance-info {
