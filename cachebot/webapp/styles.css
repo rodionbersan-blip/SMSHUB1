@@ -5138,6 +5138,22 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(231, 76, 60, 0.38) 0%, rgba(231, 76, 60, 0.16) 40%, rgba(231, 76, 60, 0.02) 100%);
 }
 
+:root[data-theme="dark"] #balanceHistoryModal .history-filter-topup,
+:root[data-theme="dark"] #balanceHistoryModal .history-filter-topup:hover,
+:root[data-theme="dark"] #balanceHistoryModal .history-filter-topup.active {
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.55) 0%, rgba(46, 204, 113, 0.22) 40%, rgba(46, 204, 113, 0.04) 100%);
+  border-color: rgba(46, 204, 113, 0.45);
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] #balanceHistoryModal .history-filter-spend,
+:root[data-theme="dark"] #balanceHistoryModal .history-filter-spend:hover,
+:root[data-theme="dark"] #balanceHistoryModal .history-filter-spend.active {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.55) 0%, rgba(231, 76, 60, 0.22) 40%, rgba(231, 76, 60, 0.04) 100%);
+  border-color: rgba(231, 76, 60, 0.45);
+  color: #ffffff;
+}
+
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup.active {
