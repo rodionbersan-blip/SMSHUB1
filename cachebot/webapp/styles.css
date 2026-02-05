@@ -5343,7 +5343,7 @@ body.modal-open #app {
 .balance-amount {
   font-weight: 700;
   color: var(--text);
-  font-size: 0.8em;
+  font-size: 0.9em;
   white-space: nowrap;
 }
 
