@@ -2713,6 +2713,7 @@ body.modal-open #app {
   margin-top: 0;
   padding: 0;
   transform: none;
+  grid-template-rows: none !important;
 }
 
 #moderationUserSearchPanel.open,
@@ -2720,6 +2721,9 @@ body.modal-open #app {
   max-height: 220px;
   opacity: 1;
   margin-top: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+  transform: none;
 }
 .moderation-deals-list {
   margin-top: 8px;
