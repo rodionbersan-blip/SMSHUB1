@@ -39,6 +39,7 @@ class Config:
         token = os.getenv("TELEGRAM_BOT_TOKEN")
         if not token:
             raise RuntimeError("TELEGRAM_BOT_TOKEN is required")
+        token = token.strip()
         crypto_pay_token = os.getenv("CRYPTO_PAY_TOKEN") or None
         admin_ids = _parse_admin_ids(os.getenv("ADMIN_USER_IDS"))
         storage_path = Path(os.getenv("STATE_FILE", "var/state.json")).expanduser()
