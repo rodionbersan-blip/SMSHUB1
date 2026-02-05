@@ -5092,9 +5092,9 @@ body.modal-open #app {
   box-shadow: none;
   backdrop-filter: blur(10px);
   font-weight: 700;
-  height: 42px;
-  min-height: 42px;
-  padding: 0 14px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5105,9 +5105,9 @@ body.modal-open #app {
 .history-date-btn.active {
   background: linear-gradient(135deg, rgba(90, 160, 255, 0.9), rgba(108, 78, 200, 0.9));
   border-width: 1px;
-  height: 42px;
-  min-height: 42px;
-  padding: 0 14px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 16px;
 }
 
 .history-date-btn:hover {
@@ -5260,7 +5260,7 @@ body.modal-open #app {
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup.active {
-  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75) 0%, rgba(46, 204, 113, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(165, 140, 240, 0.7) 0%, rgba(46, 204, 113, 0.95) 100%);
   border-color: transparent;
   color: #ffffff;
   text-shadow: none;
@@ -5271,7 +5271,7 @@ body.modal-open #app {
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend.active {
-  background: linear-gradient(135deg, rgba(70, 140, 255, 0.75) 0%, rgba(231, 76, 60, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(165, 140, 240, 0.7) 0%, rgba(231, 76, 60, 0.95) 100%);
   border-color: transparent;
   color: #ffffff;
   text-shadow: none;
