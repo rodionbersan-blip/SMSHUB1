@@ -5073,6 +5073,71 @@ body.modal-open #app {
     calc(16px + env(safe-area-inset-left, 0px));
 }
 
+.balance-history-controls {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.balance-history-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.balance-history-dates input[type="date"] {
+  background: rgba(12, 18, 28, 0.5);
+  border: 1px solid rgba(120, 180, 255, 0.2);
+  border-radius: 12px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+:root[data-theme="light"] .balance-history-dates input[type="date"] {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(120, 140, 200, 0.3);
+  color: #1b1e28;
+}
+
+.balance-history-filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.history-filter-btn {
+  border: 1px solid rgba(90, 140, 220, 0.25);
+  color: var(--text);
+  background: rgba(30, 40, 60, 0.3);
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.history-filter-btn.active {
+  box-shadow: 0 8px 18px rgba(50, 90, 160, 0.2);
+}
+
+.history-filter-topup {
+  background: linear-gradient(135deg, rgba(70, 210, 130, 0.65), rgba(70, 210, 130, 0.05));
+  border-color: rgba(70, 210, 130, 0.35);
+  color: #eafff5;
+}
+
+.history-filter-topup.active {
+  background: linear-gradient(135deg, rgba(70, 210, 130, 0.85), rgba(70, 210, 130, 0.2));
+}
+
+.history-filter-spend {
+  background: linear-gradient(135deg, rgba(255, 110, 110, 0.65), rgba(255, 110, 110, 0.05));
+  border-color: rgba(255, 110, 110, 0.35);
+  color: #fff0f0;
+}
+
+.history-filter-spend.active {
+  background: linear-gradient(135deg, rgba(255, 110, 110, 0.85), rgba(255, 110, 110, 0.2));
+}
+
 .balance-history-list {
   flex: 1 1 auto;
   overflow-y: auto;

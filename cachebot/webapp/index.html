@@ -927,6 +927,17 @@
             <div class="modal-title">История баланса</div>
             <button id="balanceHistoryClose" class="btn ghost">Закрыть</button>
           </div>
+          <div class="balance-history-controls">
+            <div class="balance-history-dates">
+              <input id="balanceHistoryFrom" type="date" />
+              <input id="balanceHistoryTo" type="date" />
+            </div>
+            <div class="balance-history-filters">
+              <button id="balanceHistoryAll" class="btn pill history-filter-btn active" data-filter="all">Все</button>
+              <button id="balanceHistoryTopup" class="btn pill history-filter-btn history-filter-topup" data-filter="topup">Пополнения</button>
+              <button id="balanceHistorySpend" class="btn pill history-filter-btn history-filter-spend" data-filter="spend">Расходы</button>
+            </div>
+          </div>
           <div id="balanceHistoryList" class="balance-history-list"></div>
         </div>
       </div>

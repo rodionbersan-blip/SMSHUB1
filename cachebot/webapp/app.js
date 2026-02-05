@@ -58,6 +58,11 @@
   const balanceHistoryModal = document.getElementById("balanceHistoryModal");
   const balanceHistoryClose = document.getElementById("balanceHistoryClose");
   const balanceHistoryList = document.getElementById("balanceHistoryList");
+  const balanceHistoryFrom = document.getElementById("balanceHistoryFrom");
+  const balanceHistoryTo = document.getElementById("balanceHistoryTo");
+  const balanceHistoryAll = document.getElementById("balanceHistoryAll");
+  const balanceHistoryTopup = document.getElementById("balanceHistoryTopup");
+  const balanceHistorySpend = document.getElementById("balanceHistorySpend");
   const withdrawModal = document.getElementById("withdrawModal");
   const withdrawClose = document.getElementById("withdrawClose");
   const withdrawForm = document.getElementById("withdrawForm");
@@ -430,6 +435,8 @@
     systemThemeSignature: null,
     systemThemeEnabled: null,
     initDebugSentAt: 0,
+    balanceHistoryItems: [],
+    balanceHistoryFilter: "all",
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -6702,44 +6709,84 @@
     withdrawModal?.classList.remove("open");
   });
 
+  const setBalanceHistoryFilter = (next) => {
+    state.balanceHistoryFilter = next;
+    balanceHistoryAll?.classList.toggle("active", next === "all");
+    balanceHistoryTopup?.classList.toggle("active", next === "topup");
+    balanceHistorySpend?.classList.toggle("active", next === "spend");
+    renderBalanceHistory();
+  };
+
+  const renderBalanceHistory = () => {
+    if (!balanceHistoryList) return;
+    const items = state.balanceHistoryItems || [];
+    const fromValue = balanceHistoryFrom?.value;
+    const toValue = balanceHistoryTo?.value;
+    const fromDate = fromValue ? new Date(`${fromValue}T00:00:00`) : null;
+    const toDate = toValue ? new Date(`${toValue}T23:59:59`) : null;
+    const filtered = items.filter((item) => {
+      const amount = Number(item.amount || 0);
+      const created = item.created_at ? new Date(item.created_at) : null;
+      if (fromDate && created && created < fromDate) return false;
+      if (toDate && created && created > toDate) return false;
+      if (state.balanceHistoryFilter === "topup") {
+        return item.kind === "topup" || amount > 0;
+      }
+      if (state.balanceHistoryFilter === "spend") {
+        return item.kind === "withdraw" || amount < 0;
+      }
+      return true;
+    });
+    balanceHistoryList.innerHTML = "";
+    if (!filtered.length) {
+      balanceHistoryList.innerHTML = "<div class=\"deal-empty\">Нет операций.</div>";
+      return;
+    }
+    filtered.forEach((item) => {
+      const amount = Number(item.amount || 0);
+      const isPositive = amount > 0;
+      const row = document.createElement("div");
+      row.className = `balance-item ${isPositive ? "pos" : "neg"}`;
+      let title = "Операция";
+      if (item.kind === "topup") title = "Пополнение";
+      if (item.kind === "withdraw") title = "Вывод";
+      if (item.kind === "deal" || item.kind === "dispute") {
+        const dealId = item.meta?.public_id ? `#${item.meta.public_id}` : "";
+        title = isPositive ? `Получены средства по сделке ${dealId}` : `Списание по сделке ${dealId}`;
+      }
+      const date = item.created_at ? formatDate(item.created_at) : "";
+      row.innerHTML = `
+        <div class="balance-info">
+          <div class="balance-title">${title}</div>
+          <div class="balance-date">${date}</div>
+        </div>
+        <div class="balance-amount">${isPositive ? "+" : ""}${formatAmount(amount, 3)} USDT</div>
+      `;
+      balanceHistoryList.appendChild(row);
+    });
+  };
+
   balanceHistoryOpen?.addEventListener("click", async () => {
     if (!balanceHistoryModal || !balanceHistoryList) return;
     const payload = await fetchJson("/api/balance/history");
     if (!payload?.ok) return;
-    const items = payload.items || [];
-    balanceHistoryList.innerHTML = "";
-    if (!items.length) {
-      balanceHistoryList.innerHTML = "<div class=\"deal-empty\">Нет операций.</div>";
-    } else {
-      items.forEach((item) => {
-        const amount = Number(item.amount || 0);
-        const isPositive = amount > 0;
-        const row = document.createElement("div");
-        row.className = `balance-item ${isPositive ? "pos" : "neg"}`;
-        let title = "Операция";
-        if (item.kind === "topup") title = "Пополнение";
-        if (item.kind === "withdraw") title = "Вывод";
-        if (item.kind === "deal" || item.kind === "dispute") {
-          const dealId = item.meta?.public_id ? `#${item.meta.public_id}` : "";
-          title = isPositive ? `Получены средства по сделке ${dealId}` : `Списание по сделке ${dealId}`;
-        }
-        const date = item.created_at ? formatDate(item.created_at) : "";
-        row.innerHTML = `
-          <div class="balance-info">
-            <div class="balance-title">${title}</div>
-            <div class="balance-date">${date}</div>
-          </div>
-          <div class="balance-amount">${isPositive ? "+" : ""}${formatAmount(amount, 3)} USDT</div>
-        `;
-        balanceHistoryList.appendChild(row);
-      });
-    }
+    state.balanceHistoryItems = payload.items || [];
+    if (balanceHistoryFrom) balanceHistoryFrom.value = "";
+    if (balanceHistoryTo) balanceHistoryTo.value = "";
+    setBalanceHistoryFilter("all");
+    renderBalanceHistory();
     balanceHistoryModal.classList.add("open");
   });
 
   balanceHistoryClose?.addEventListener("click", () => {
     balanceHistoryModal?.classList.remove("open");
   });
+
+  balanceHistoryAll?.addEventListener("click", () => setBalanceHistoryFilter("all"));
+  balanceHistoryTopup?.addEventListener("click", () => setBalanceHistoryFilter("topup"));
+  balanceHistorySpend?.addEventListener("click", () => setBalanceHistoryFilter("spend"));
+  balanceHistoryFrom?.addEventListener("change", () => renderBalanceHistory());
+  balanceHistoryTo?.addEventListener("change", () => renderBalanceHistory());
 
   withdrawForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
