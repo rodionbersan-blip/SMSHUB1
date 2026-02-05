@@ -5253,6 +5253,8 @@ body.modal-open #app {
   border-color: rgba(0, 0, 0, 0.35);
   color: #ffffff;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.6);
+  font-weight: 800;
+  font-size: 15px;
 }
 
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend,
@@ -5262,6 +5264,8 @@ body.modal-open #app {
   border-color: rgba(0, 0, 0, 0.35);
   color: #ffffff;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.6);
+  font-weight: 800;
+  font-size: 15px;
 }
 
 #balanceHistoryAll {
