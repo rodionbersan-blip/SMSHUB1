@@ -5092,22 +5092,20 @@ body.modal-open #app {
   box-shadow: none;
   backdrop-filter: blur(10px);
   font-weight: 700;
-  height: 42px;
-  min-height: 42px;
+  height: 44px;
+  min-height: 44px;
   padding: 0 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 1.2;
   box-sizing: border-box;
+  background-clip: border-box;
 }
 
 .history-date-btn.active {
   background: linear-gradient(135deg, rgba(90, 160, 255, 0.9), rgba(108, 78, 200, 0.9));
   border-width: 1px;
-  height: 44px;
-  min-height: 44px;
-  padding: 0 16px;
   line-height: 1.2;
 }
 
