@@ -2702,6 +2702,25 @@ body.modal-open #app {
   border: none;
   border-radius: 40px;
 }
+
+#moderationUserSearchPanel,
+#moderationDealSearchPanel {
+  display: block;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  margin-top: 0;
+  padding: 0;
+  transform: none;
+}
+
+#moderationUserSearchPanel.open,
+#moderationDealSearchPanel.open {
+  max-height: 220px;
+  opacity: 1;
+  margin-top: 10px;
+}
 .moderation-deals-list {
   margin-top: 8px;
   max-height: 360px;
