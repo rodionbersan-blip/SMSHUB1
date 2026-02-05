@@ -5213,20 +5213,22 @@
     }
     if (statsFundsSummary) {
       statsFundsSummary.innerHTML = `
-        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#55e2a3;"></span>Пополнение</span><strong>${formatAmount(topup, 2)} USDT</strong></div>
-        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#ffb36c;"></span>Вывод</span><strong>${formatAmount(withdraw, 2)} USDT</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#4fd38a;"></span>Пополнение</span><strong>${formatAmount(topup, 2)} USDT</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#ff7b7b;"></span>Вывод</span><strong>${formatAmount(withdraw, 2)} USDT</strong></div>
       `;
     }
     if (statsSideSummary) {
       statsSideSummary.innerHTML = `
-        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#55e2a3;"></span>Сумма покупок</span><strong>${formatAmount(buySum, 2)} USDT</strong></div>
+        <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#6aa8ff;"></span>Сумма покупок</span><strong>${formatAmount(buySum, 2)} USDT</strong></div>
         <div class="stats-row"><span><span class="stats-dot" style="--dot-color:#ffb36c;"></span>Сумма продаж</span><strong>${formatAmount(sellSum, 2)} USDT</strong></div>
       `;
     }
 
     setDonut(statsFundsDonut, [
-      { value: topup, color: "#55e2a3" },
-      { value: withdraw, color: "#ffb36c" },
+      { value: topup, color: "#4fd38a" },
+      { value: withdraw, color: "#ff7b7b" },
+      { value: buySum, color: "#6aa8ff" },
+      { value: sellSum, color: "#ffb36c" },
     ]);
 
     const completed = Number(deals.completed || 0);
