@@ -5079,13 +5079,61 @@ body.modal-open #app {
   margin-bottom: 12px;
 }
 
-.balance-history-dates {
+.balance-history-date-toggle {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.balance-history-dates input[type="date"] {
+.history-date-btn {
+  background: linear-gradient(135deg, rgba(70, 140, 255, 0.85), rgba(86, 62, 180, 0.85));
+  border: 1px solid rgba(90, 140, 220, 0.45);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.history-date-btn.active {
+  background: linear-gradient(135deg, rgba(90, 160, 255, 0.95), rgba(108, 78, 200, 0.95));
+}
+
+:root[data-theme="light"] .history-date-btn {
+  background: linear-gradient(135deg, rgba(120, 186, 255, 0.7), rgba(120, 186, 255, 0.45));
+  border-color: rgba(120, 186, 255, 0.6);
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .history-date-btn.active {
+  background: linear-gradient(135deg, rgba(140, 200, 255, 0.85), rgba(140, 200, 255, 0.55));
+}
+
+.balance-history-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.balance-history-range.open {
+  max-height: 120px;
+  opacity: 1;
+}
+
+.balance-history-range .date-field {
+  display: grid;
+  gap: 6px;
+}
+
+.balance-history-range label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  padding-left: 6px;
+}
+
+.balance-history-range input[type="date"] {
   background: rgba(12, 18, 28, 0.5);
   border: 1px solid rgba(120, 180, 255, 0.2);
   border-radius: 12px;
@@ -5094,7 +5142,7 @@ body.modal-open #app {
   font-size: 13px;
 }
 
-:root[data-theme="light"] .balance-history-dates input[type="date"] {
+:root[data-theme="light"] .balance-history-range input[type="date"] {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(120, 140, 200, 0.3);
   color: #1b1e28;

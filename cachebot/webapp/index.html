@@ -928,9 +928,19 @@
             <button id="balanceHistoryClose" class="btn ghost">Закрыть</button>
           </div>
           <div class="balance-history-controls">
-            <div class="balance-history-dates">
-              <input id="balanceHistoryFrom" type="date" />
-              <input id="balanceHistoryTo" type="date" />
+            <div class="balance-history-date-toggle">
+              <button id="balanceHistoryAllTime" class="btn pill history-date-btn active" data-mode="all">За все время</button>
+              <button id="balanceHistoryByDate" class="btn pill history-date-btn" data-mode="range">По дате</button>
+            </div>
+            <div class="balance-history-range" id="balanceHistoryRange">
+              <div class="date-field">
+                <label for="balanceHistoryFrom">С</label>
+                <input id="balanceHistoryFrom" type="date" />
+              </div>
+              <div class="date-field">
+                <label for="balanceHistoryTo">По</label>
+                <input id="balanceHistoryTo" type="date" />
+              </div>
             </div>
             <div class="balance-history-filters">
               <button id="balanceHistoryAll" class="btn pill history-filter-btn active" data-filter="all">Все</button>

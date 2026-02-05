@@ -58,6 +58,9 @@
   const balanceHistoryModal = document.getElementById("balanceHistoryModal");
   const balanceHistoryClose = document.getElementById("balanceHistoryClose");
   const balanceHistoryList = document.getElementById("balanceHistoryList");
+  const balanceHistoryAllTime = document.getElementById("balanceHistoryAllTime");
+  const balanceHistoryByDate = document.getElementById("balanceHistoryByDate");
+  const balanceHistoryRange = document.getElementById("balanceHistoryRange");
   const balanceHistoryFrom = document.getElementById("balanceHistoryFrom");
   const balanceHistoryTo = document.getElementById("balanceHistoryTo");
   const balanceHistoryAll = document.getElementById("balanceHistoryAll");
@@ -437,6 +440,7 @@
     initDebugSentAt: 0,
     balanceHistoryItems: [],
     balanceHistoryFilter: "all",
+    balanceHistoryDateMode: "all",
     moderationUser: null,
     profileModeration: null,
     moderationAction: null,
@@ -6717,11 +6721,25 @@
     renderBalanceHistory();
   };
 
+  const setBalanceHistoryDateMode = (mode) => {
+    state.balanceHistoryDateMode = mode;
+    balanceHistoryAllTime?.classList.toggle("active", mode === "all");
+    balanceHistoryByDate?.classList.toggle("active", mode === "range");
+    if (balanceHistoryRange) {
+      balanceHistoryRange.classList.toggle("open", mode === "range");
+    }
+    if (mode === "all") {
+      if (balanceHistoryFrom) balanceHistoryFrom.value = "";
+      if (balanceHistoryTo) balanceHistoryTo.value = "";
+    }
+    renderBalanceHistory();
+  };
+
   const renderBalanceHistory = () => {
     if (!balanceHistoryList) return;
     const items = state.balanceHistoryItems || [];
-    const fromValue = balanceHistoryFrom?.value;
-    const toValue = balanceHistoryTo?.value;
+    const fromValue = state.balanceHistoryDateMode === "range" ? balanceHistoryFrom?.value : "";
+    const toValue = state.balanceHistoryDateMode === "range" ? balanceHistoryTo?.value : "";
     const fromDate = fromValue ? new Date(`${fromValue}T00:00:00`) : null;
     const toDate = toValue ? new Date(`${toValue}T23:59:59`) : null;
     const filtered = items.filter((item) => {
@@ -6773,6 +6791,7 @@
     state.balanceHistoryItems = payload.items || [];
     if (balanceHistoryFrom) balanceHistoryFrom.value = "";
     if (balanceHistoryTo) balanceHistoryTo.value = "";
+    setBalanceHistoryDateMode("all");
     setBalanceHistoryFilter("all");
     renderBalanceHistory();
     balanceHistoryModal.classList.add("open");
@@ -6785,6 +6804,8 @@
   balanceHistoryAll?.addEventListener("click", () => setBalanceHistoryFilter("all"));
   balanceHistoryTopup?.addEventListener("click", () => setBalanceHistoryFilter("topup"));
   balanceHistorySpend?.addEventListener("click", () => setBalanceHistoryFilter("spend"));
+  balanceHistoryAllTime?.addEventListener("click", () => setBalanceHistoryDateMode("all"));
+  balanceHistoryByDate?.addEventListener("click", () => setBalanceHistoryDateMode("range"));
   balanceHistoryFrom?.addEventListener("change", () => renderBalanceHistory());
   balanceHistoryTo?.addEventListener("change", () => renderBalanceHistory());
 
