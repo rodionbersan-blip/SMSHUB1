@@ -5254,7 +5254,7 @@ body.modal-open #app {
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup.active {
-  background: #2ecc71;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.7) 0%, rgba(220, 226, 234, 0.9) 100%);
   border-color: rgba(0, 0, 0, 0.35);
   color: #ffffff;
   text-shadow: none;
@@ -5265,7 +5265,7 @@ body.modal-open #app {
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend.active {
-  background: #e74c3c;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.7) 0%, rgba(220, 226, 234, 0.9) 100%);
   border-color: rgba(0, 0, 0, 0.35);
   color: #ffffff;
   text-shadow: none;
