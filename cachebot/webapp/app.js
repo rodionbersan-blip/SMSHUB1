@@ -6760,7 +6760,7 @@
           <div class="balance-title">${title}</div>
           <div class="balance-date">${date}</div>
         </div>
-        <div class="balance-amount">${isPositive ? "+" : ""}${formatAmount(amount, 3)} USDT</div>
+        <div class="balance-amount">${isPositive ? "+" : ""}${formatAmount(amount, 2)} USDT</div>
       `;
       balanceHistoryList.appendChild(row);
     });

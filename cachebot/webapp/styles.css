@@ -5119,23 +5119,23 @@ body.modal-open #app {
 }
 
 .history-filter-topup {
-  background: linear-gradient(135deg, rgba(70, 210, 130, 0.75), rgba(70, 210, 130, 0.35));
-  border-color: rgba(70, 210, 130, 0.35);
+  background: #2ecc71;
+  border-color: #2ecc71;
   color: #ffffff;
 }
 
 .history-filter-topup.active {
-  background: linear-gradient(135deg, rgba(70, 210, 130, 0.88), rgba(70, 210, 130, 0.45));
+  background: #2ecc71;
 }
 
 .history-filter-spend {
-  background: linear-gradient(135deg, rgba(255, 110, 110, 0.75), rgba(255, 110, 110, 0.35));
-  border-color: rgba(255, 110, 110, 0.35);
+  background: #e74c3c;
+  border-color: #e74c3c;
   color: #ffffff;
 }
 
 .history-filter-spend.active {
-  background: linear-gradient(135deg, rgba(255, 110, 110, 0.88), rgba(255, 110, 110, 0.45));
+  background: #e74c3c;
 }
 
 #balanceHistoryAll {
