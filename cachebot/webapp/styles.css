@@ -4194,18 +4194,16 @@ body.modal-open #app {
 .settings-nickname-panel {
   display: grid;
   gap: 12px;
-  max-height: 0;
+  margin-top: 10px;
   opacity: 0;
+  max-height: 0;
   overflow: hidden;
-  transform: translateY(-6px);
-  transition: max-height 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.45s ease, transform 0.45s ease;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
 }
 
 .settings-nickname-panel.show {
-  max-height: 260px;
   opacity: 1;
-  transform: translateY(0);
-  margin-top: 14px;
+  max-height: 260px;
 }
 
 .settings-nickname-panel input[type="text"] {
@@ -4225,19 +4223,16 @@ body.modal-open #app {
 .settings-avatar-panel {
   display: grid;
   gap: 12px;
-  max-height: 0;
+  margin-top: 10px;
   opacity: 0;
+  max-height: 0;
   overflow: hidden;
-  transform: translateY(-6px);
-  transition: max-height 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.45s ease, transform 0.45s ease;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
 }
 
 .settings-avatar-panel.show {
   max-height: 360px;
   opacity: 1;
-  transform: translateY(0);
-  margin-top: 14px;
-  padding-top: 6px;
 }
 
 .settings-avatar-preview {
