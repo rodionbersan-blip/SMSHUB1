@@ -5255,27 +5255,23 @@ body.modal-open #app {
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup.active {
-  background: linear-gradient(135deg, rgba(46, 204, 113, 0.9) 0%, rgba(46, 204, 113, 0.5) 45%, rgba(46, 204, 113, 0.12) 100%);
+  background: #2ecc71;
   border-color: rgba(0, 0, 0, 0.35);
   color: #ffffff;
-  text-shadow:
-    0 0 1px rgba(0, 0, 0, 0.95),
-    0 1px 2px rgba(0, 0, 0, 0.55);
-  font-weight: 800;
-  font-size: 15px;
+  text-shadow: none;
+  font-weight: 700;
+  font-size: 14px;
 }
 
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend.active {
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.9) 0%, rgba(231, 76, 60, 0.5) 45%, rgba(231, 76, 60, 0.12) 100%);
+  background: #e74c3c;
   border-color: rgba(0, 0, 0, 0.35);
   color: #ffffff;
-  text-shadow:
-    0 0 1px rgba(0, 0, 0, 0.95),
-    0 1px 2px rgba(0, 0, 0, 0.55);
-  font-weight: 800;
-  font-size: 15px;
+  text-shadow: none;
+  font-weight: 700;
+  font-size: 14px;
 }
 
 #balanceHistoryAll {
