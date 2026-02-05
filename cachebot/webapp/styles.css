@@ -5119,8 +5119,8 @@ body.modal-open #app {
 }
 
 .history-filter-topup {
-  background: linear-gradient(135deg, rgba(46, 204, 113, 0.28) 0%, rgba(46, 204, 113, 0.12) 40%, rgba(46, 204, 113, 0.01) 100%);
-  border-color: rgba(46, 204, 113, 0.28);
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.55) 0%, rgba(46, 204, 113, 0.22) 40%, rgba(46, 204, 113, 0.04) 100%);
+  border-color: rgba(46, 204, 113, 0.45);
   color: #ffffff;
 }
 
@@ -5129,8 +5129,8 @@ body.modal-open #app {
 }
 
 .history-filter-spend {
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.28) 0%, rgba(231, 76, 60, 0.12) 40%, rgba(231, 76, 60, 0.01) 100%);
-  border-color: rgba(231, 76, 60, 0.28);
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.55) 0%, rgba(231, 76, 60, 0.22) 40%, rgba(231, 76, 60, 0.04) 100%);
+  border-color: rgba(231, 76, 60, 0.45);
   color: #ffffff;
 }
 
@@ -5141,17 +5141,17 @@ body.modal-open #app {
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-topup.active {
-  background: linear-gradient(135deg, rgba(46, 204, 113, 0.28) 0%, rgba(46, 204, 113, 0.12) 40%, rgba(46, 204, 113, 0.01) 100%);
-  border-color: rgba(46, 204, 113, 0.28);
-  color: #ffffff;
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.55) 0%, rgba(46, 204, 113, 0.22) 40%, rgba(46, 204, 113, 0.04) 100%);
+  border-color: rgba(46, 204, 113, 0.45);
+  color: #111111;
 }
 
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend:hover,
 :root[data-theme="light"] #balanceHistoryModal .history-filter-spend.active {
-  background: linear-gradient(135deg, rgba(231, 76, 60, 0.28) 0%, rgba(231, 76, 60, 0.12) 40%, rgba(231, 76, 60, 0.01) 100%);
-  border-color: rgba(231, 76, 60, 0.28);
-  color: #ffffff;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.55) 0%, rgba(231, 76, 60, 0.22) 40%, rgba(231, 76, 60, 0.04) 100%);
+  border-color: rgba(231, 76, 60, 0.45);
+  color: #111111;
 }
 
 #balanceHistoryAll {
