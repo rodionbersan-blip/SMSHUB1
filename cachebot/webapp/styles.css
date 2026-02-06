@@ -6541,11 +6541,13 @@ body.pin-lock {
 .balance-manage-form input {
   background: rgba(12, 18, 28, 0.4);
   border: 1px solid rgba(120, 180, 255, 0.2);
-  border-radius: 18px;
+  border-radius: 16px;
   color: var(--text);
-  padding: 10px 12px;
-  font-size: 14px;
+  padding: 8px 10px;
+  font-size: 13px;
   backdrop-filter: blur(10px);
+  max-width: 92%;
+  justify-self: center;
 }
 
 .balance-manage-form input:focus {
