@@ -1993,6 +1993,20 @@
     }
   });
 
+  const balanceManageModalEl = document.getElementById("balanceManageModal");
+  balanceManageModalEl?.addEventListener(
+    "focusin",
+    (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (!target.matches("input, textarea")) return;
+      window.setTimeout(() => {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 150);
+    },
+    true
+  );
+
   balanceManageForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const amount = Number(balanceManageAmount?.value || 0);
