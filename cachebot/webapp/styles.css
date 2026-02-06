@@ -3845,6 +3845,12 @@ body.modal-open #app {
   overscroll-behavior: contain;
 }
 
+#balanceManageModal .modal-card {
+  max-height: calc(100dvh - 90px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .stats-body {
   display: flex;
   flex-direction: column;

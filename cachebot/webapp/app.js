@@ -1903,7 +1903,10 @@
       return;
     }
     balanceTransferMatch.classList.remove("hidden");
-    balanceTransferMatch.innerHTML = profiles
+    const visibleProfiles = selectedId
+      ? profiles.filter((profile) => Number(profile.user_id) === Number(selectedId))
+      : profiles;
+    balanceTransferMatch.innerHTML = visibleProfiles
       .map((profile) => {
         const display = profile.display_name || profile.full_name || profile.username || profile.user_id;
         const username = profile.username ? `@${profile.username}` : "";
