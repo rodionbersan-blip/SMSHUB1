@@ -6546,7 +6546,7 @@ body.pin-lock {
   padding: 8px 10px;
   font-size: 13px;
   backdrop-filter: blur(10px);
-  max-width: 92%;
+  max-width: 96%;
   justify-self: center;
 }
 
@@ -6633,7 +6633,30 @@ body.pin-lock {
 .balance-transfer-cover input {
   width: 18px;
   height: 18px;
-  accent-color: #f0a03c;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 4px;
+  border: 2px solid rgba(240, 160, 60, 0.7);
+  background: transparent;
+  display: inline-grid;
+  place-content: center;
+}
+
+.balance-transfer-cover input::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.balance-transfer-cover input:checked {
+  background: rgba(240, 160, 60, 0.2);
+  border-color: rgba(240, 160, 60, 0.9);
+}
+
+.balance-transfer-cover input:checked::after {
+  background: #f0a03c;
 }
 
 .balance-transfer-select {
