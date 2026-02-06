@@ -49,6 +49,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/balance/withdraw", _api_balance_withdraw)
     app.router.add_post("/api/balance/transfer", _api_balance_transfer)
     app.router.add_get("/api/users/lookup", _api_users_lookup)
+    app.router.add_get("/api/users/search", _api_users_search)
     app.router.add_get("/api/my-deals", _api_my_deals)
     app.router.add_post("/api/deals", _api_create_deal)
     app.router.add_get("/api/deals/{deal_id}", _api_deal_detail)
@@ -543,6 +544,30 @@ async def _api_users_lookup(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Нельзя выбрать себя")
     payload = _profile_payload(profile, request=request, include_private=True)
     return web.json_response({"ok": True, "profile": payload})
+
+
+async def _api_users_search(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    query = (request.query.get("query") or "").strip()
+    if not query:
+        raise web.HTTPBadRequest(text="Нужно указать запрос")
+    matched_ids = await deps.user_service.search_user_ids(query)
+    items = []
+    for candidate_id in matched_ids:
+        if candidate_id == user_id:
+            continue
+        profile = await deps.user_service.profile_of(candidate_id)
+        if not profile:
+            continue
+        payload = _profile_payload(profile, request=request, include_private=True)
+        if payload:
+            items.append(payload)
+        if len(items) >= 5:
+            break
+    if not items:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    return web.json_response({"ok": True, "items": items})
 
 
 async def _api_balance_withdraw(request: web.Request) -> web.Response:

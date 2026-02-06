@@ -1895,28 +1895,42 @@
     balanceTransferPanel?.classList.remove("show");
   });
 
-  const renderTransferMatch = (profile) => {
+  const renderTransferMatch = (profiles, selectedId = null) => {
     if (!balanceTransferMatch) return;
-    if (!profile) {
+    if (!profiles || !profiles.length) {
       balanceTransferMatch.classList.add("hidden");
       balanceTransferMatch.innerHTML = "";
       return;
     }
-    const display = profile.display_name || profile.full_name || profile.username || profile.user_id;
     balanceTransferMatch.classList.remove("hidden");
-    balanceTransferMatch.innerHTML = `
-      <div class="balance-transfer-user">
-        <span>${display}</span>
-        <button class="btn pill balance-transfer-select" type="button">Выбрать</button>
-      </div>
-    `;
-    balanceTransferMatch.querySelector("button")?.addEventListener("click", () => {
-      balanceTransferTarget = profile;
-      balanceTransferMatch.innerHTML = `
-        <div class="balance-transfer-user selected">
-          <span>Выбран: ${display}</span>
-        </div>
-      `;
+    balanceTransferMatch.innerHTML = profiles
+      .map((profile) => {
+        const display = profile.display_name || profile.full_name || profile.username || profile.user_id;
+        const username = profile.username ? `@${profile.username}` : "";
+        const avatar = profile.avatar_url || "/app/assets/avatar-placeholder.png";
+        const selected = selectedId && profile.user_id === selectedId;
+        return `
+          <div class="balance-transfer-user ${selected ? "selected" : ""}" data-user-id="${profile.user_id}">
+            <img class="balance-transfer-avatar" src="${avatar}" alt="" />
+            <div class="balance-transfer-meta">
+              <div class="balance-transfer-name">${display}</div>
+              <div class="balance-transfer-username">${username}</div>
+            </div>
+            <button class="btn pill balance-transfer-select" type="button">${selected ? "Выбран" : "Выбрать"}</button>
+          </div>
+        `;
+      })
+      .join("");
+    balanceTransferMatch.querySelectorAll(".balance-transfer-select").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const row = event.target.closest(".balance-transfer-user");
+        if (!row) return;
+        const userId = Number(row.dataset.userId);
+        const profile = profiles.find((item) => Number(item.user_id) === userId);
+        if (!profile) return;
+        balanceTransferTarget = profile;
+        renderTransferMatch(profiles, userId);
+      });
     });
   };
 
@@ -1924,28 +1938,29 @@
     if (!state.initData) return;
     if (!query) {
       balanceTransferTarget = null;
-      renderTransferMatch(null);
+      renderTransferMatch([]);
       return;
     }
     try {
-      const res = await fetch(`/api/users/lookup?query=${encodeURIComponent(query)}`, {
+      const res = await fetch(`/api/users/search?query=${encodeURIComponent(query)}`, {
         headers: { "X-Telegram-Init-Data": state.initData },
       });
       if (!res.ok) {
-        renderTransferMatch(null);
+        renderTransferMatch([]);
         return;
       }
       const payload = await res.json();
       balanceTransferTarget = null;
-      renderTransferMatch(payload.profile);
+      renderTransferMatch(payload.items || []);
     } catch {
-      renderTransferMatch(null);
+      renderTransferMatch([]);
     }
   };
 
   let transferLookupTimer = null;
   balanceTransferUsername?.addEventListener("input", (event) => {
     const value = event.target.value.trim();
+    balanceTransferTarget = null;
     if (transferLookupTimer) clearTimeout(transferLookupTimer);
     transferLookupTimer = setTimeout(() => lookupTransferUser(value), 350);
   });
@@ -1985,7 +2000,7 @@
       balanceTransferUsername.value = "";
       balanceTransferCoverFee.checked = false;
       balanceTransferTarget = null;
-      renderTransferMatch(null);
+      renderTransferMatch([]);
       await loadBalance();
       playSuccessAnimation();
       log("Перевод выполнен.", "info");

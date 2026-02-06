@@ -6583,10 +6583,41 @@ body.pin-lock {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 180, 255, 0.18);
+  background: rgba(15, 22, 34, 0.35);
 }
 
 .balance-transfer-user.selected {
   font-weight: 700;
+  border-color: rgba(120, 180, 255, 0.45);
+  background: rgba(18, 28, 44, 0.5);
+}
+
+.balance-transfer-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.balance-transfer-meta {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 auto;
+}
+
+.balance-transfer-name {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.balance-transfer-username {
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .balance-transfer-cover {
@@ -6613,6 +6644,19 @@ body.pin-lock {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(120, 140, 200, 0.3);
   color: #1b1e28;
+}
+
+:root[data-theme="light"] .balance-transfer-user {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(120, 140, 200, 0.3);
+}
+
+:root[data-theme="light"] .balance-transfer-user.selected {
+  background: rgba(230, 235, 245, 0.9);
+}
+
+:root[data-theme="light"] .balance-transfer-avatar {
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .balance-manage-btn {
