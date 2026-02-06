@@ -1895,7 +1895,7 @@
     balanceTransferPanel?.classList.remove("show");
   });
 
-  const renderTransferMatch = (profiles, selectedId = null) => {
+  const renderTransferMatch = (profiles, selectedId = null, showUsername = true) => {
     if (!balanceTransferMatch) return;
     if (!profiles || !profiles.length) {
       balanceTransferMatch.classList.add("hidden");
@@ -1907,14 +1907,22 @@
       .map((profile) => {
         const display = profile.display_name || profile.full_name || profile.username || profile.user_id;
         const username = profile.username ? `@${profile.username}` : "";
-        const avatar = profile.avatar_url || "/app/assets/avatar-placeholder.png";
+        const initials = String(display || "?")
+          .trim()
+          .slice(0, 2)
+          .toUpperCase();
+        const avatar = profile.avatar_url;
         const selected = selectedId && profile.user_id === selectedId;
         return `
           <div class="balance-transfer-user ${selected ? "selected" : ""}" data-user-id="${profile.user_id}">
-            <img class="balance-transfer-avatar" src="${avatar}" alt="" />
+            ${
+              avatar
+                ? `<img class="balance-transfer-avatar" src="${avatar}" alt="" />`
+                : `<div class="balance-transfer-avatar fallback">${initials}</div>`
+            }
             <div class="balance-transfer-meta">
               <div class="balance-transfer-name">${display}</div>
-              <div class="balance-transfer-username">${username}</div>
+              ${showUsername ? `<div class="balance-transfer-username">${username}</div>` : ""}
             </div>
             <button class="btn pill balance-transfer-select" type="button">${selected ? "Выбран" : "Выбрать"}</button>
           </div>
@@ -1941,6 +1949,7 @@
       renderTransferMatch([]);
       return;
     }
+    const showUsername = query.trim().startsWith("@");
     try {
       const res = await fetch(`/api/users/search?query=${encodeURIComponent(query)}`, {
         headers: { "X-Telegram-Init-Data": state.initData },
@@ -1951,7 +1960,7 @@
       }
       const payload = await res.json();
       balanceTransferTarget = null;
-      renderTransferMatch(payload.items || []);
+      renderTransferMatch(payload.items || [], null, showUsername);
     } catch {
       renderTransferMatch([]);
     }

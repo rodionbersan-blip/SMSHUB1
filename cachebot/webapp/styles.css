@@ -6535,7 +6535,7 @@ body.pin-lock {
 }
 
 .balance-transfer-form.show {
-  max-height: 220px;
+  max-height: 420px;
 }
 
 .balance-manage-form input {
@@ -6546,8 +6546,9 @@ body.pin-lock {
   padding: 8px 10px;
   font-size: 13px;
   backdrop-filter: blur(10px);
-  max-width: 96%;
-  justify-self: center;
+  width: 100%;
+  max-width: 100%;
+  justify-self: stretch;
 }
 
 .balance-manage-form input:focus {
@@ -6569,10 +6570,10 @@ body.pin-lock {
 }
 
 .balance-transfer-match {
-  padding: 8px 12px;
-  border-radius: 12px;
-  background: rgba(20, 28, 42, 0.4);
-  border: 1px solid rgba(120, 180, 255, 0.2);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
   color: var(--text);
 }
 
@@ -6585,16 +6586,16 @@ body.pin-lock {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(120, 180, 255, 0.18);
-  background: rgba(15, 22, 34, 0.35);
+  padding: 10px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(240, 160, 60, 0.25);
+  background: linear-gradient(90deg, rgba(240, 160, 60, 0.18) 0%, rgba(240, 160, 60, 0) 70%);
 }
 
 .balance-transfer-user.selected {
   font-weight: 700;
-  border-color: rgba(120, 180, 255, 0.45);
-  background: rgba(18, 28, 44, 0.5);
+  border-color: rgba(240, 160, 60, 0.6);
+  background: linear-gradient(90deg, rgba(240, 160, 60, 0.28) 0%, rgba(240, 160, 60, 0) 70%);
 }
 
 .balance-transfer-avatar {
@@ -6604,6 +6605,15 @@ body.pin-lock {
   object-fit: cover;
   flex: 0 0 auto;
   border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.balance-transfer-avatar.fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(240, 160, 60, 0.8), rgba(120, 90, 200, 0.8));
 }
 
 .balance-transfer-meta {
@@ -6635,7 +6645,7 @@ body.pin-lock {
   height: 18px;
   -webkit-appearance: none;
   appearance: none;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 2px solid rgba(240, 160, 60, 0.7);
   background: transparent;
   display: inline-grid;
@@ -6644,10 +6654,12 @@ body.pin-lock {
 
 .balance-transfer-cover input::after {
   content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  background: transparent;
+  width: 8px;
+  height: 8px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
 }
 
 .balance-transfer-cover input:checked {
@@ -6656,28 +6668,31 @@ body.pin-lock {
 }
 
 .balance-transfer-cover input:checked::after {
-  background: #f0a03c;
+  opacity: 1;
 }
 
 .balance-transfer-select {
   padding: 0 14px;
   height: 36px;
   font-size: 13px;
+  background: linear-gradient(135deg, rgba(240, 160, 60, 0.9), rgba(198, 120, 40, 0.9));
+  border: 1px solid rgba(240, 160, 60, 0.45);
+  color: #ffffff;
 }
 
 :root[data-theme="light"] .balance-transfer-match {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(120, 140, 200, 0.3);
+  background: transparent;
+  border: none;
   color: #1b1e28;
 }
 
 :root[data-theme="light"] .balance-transfer-user {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(120, 140, 200, 0.3);
+  background: linear-gradient(90deg, rgba(240, 160, 60, 0.2) 0%, rgba(240, 160, 60, 0) 70%);
+  border-color: rgba(240, 160, 60, 0.35);
 }
 
 :root[data-theme="light"] .balance-transfer-user.selected {
-  background: rgba(230, 235, 245, 0.9);
+  background: linear-gradient(90deg, rgba(240, 160, 60, 0.3) 0%, rgba(240, 160, 60, 0) 70%);
 }
 
 :root[data-theme="light"] .balance-transfer-avatar {
