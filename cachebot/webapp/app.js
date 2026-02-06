@@ -1941,7 +1941,7 @@
         const profile = profiles.find((item) => Number(item.user_id) === userId);
         if (!profile) return;
         balanceTransferTarget = profile;
-        renderTransferMatch(profiles, userId);
+        renderTransferMatch(profiles, userId, false);
       });
     });
   };

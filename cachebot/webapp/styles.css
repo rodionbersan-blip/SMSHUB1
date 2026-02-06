@@ -5555,6 +5555,10 @@ body.modal-open #app {
   width: 100%;
 }
 
+.modal-actions-row .balance-manage-transfer {
+  grid-column: 1 / -1;
+}
+
 .dispute-resolve-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
