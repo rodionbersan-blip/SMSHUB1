@@ -123,6 +123,7 @@
   const balanceTransferAmount = document.getElementById("balanceTransferAmount");
   const balanceTransferCoverFee = document.getElementById("balanceTransferCoverFee");
   const balanceTransferSubmit = document.getElementById("balanceTransferSubmit");
+  const balanceTransferFeeLabel = document.getElementById("balanceTransferFeeLabel");
   const balanceManageAmount = document.getElementById("balanceManageAmount");
   const balanceManageSubmit = document.getElementById("balanceManageSubmit");
   const dealsCount = document.getElementById("dealsCount");
@@ -3466,14 +3467,17 @@
     if (systemPanel) systemPanel.style.display = "block";
     updateTabsLayout();
     const settings = await fetchJson("/api/admin/settings");
-    if (settings?.ok) {
-      adminRate.value = settings.usd_rate;
-      adminFee.value = settings.fee_percent;
-      adminWithdrawFee.value = settings.withdraw_fee_percent;
-      if (adminTransferFee) {
-        adminTransferFee.value = settings.transfer_fee_percent || "2.0";
-      }
+  if (settings?.ok) {
+    adminRate.value = settings.usd_rate;
+    adminFee.value = settings.fee_percent;
+    adminWithdrawFee.value = settings.withdraw_fee_percent;
+    if (adminTransferFee) {
+      adminTransferFee.value = settings.transfer_fee_percent || "2.0";
     }
+    if (balanceTransferFeeLabel && settings.transfer_fee_percent) {
+      balanceTransferFeeLabel.textContent = `(${settings.transfer_fee_percent}%)`;
+    }
+  }
     if (adminAdminsCard) {
       adminAdminsCard.classList.toggle("is-hidden", !summary.can_manage_admins);
     }

@@ -6539,16 +6539,17 @@ body.pin-lock {
 }
 
 .balance-manage-form input {
-  background: rgba(12, 18, 28, 0.5);
+  background: rgba(12, 18, 28, 0.4);
   border: 1px solid rgba(120, 180, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 18px;
   color: var(--text);
   padding: 10px 12px;
   font-size: 14px;
+  backdrop-filter: blur(10px);
 }
 
 :root[data-theme="light"] .balance-manage-form input {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.75);
   border-color: rgba(120, 140, 200, 0.3);
   color: #1b1e28;
 }
@@ -6585,8 +6586,9 @@ body.pin-lock {
 }
 
 .balance-transfer-cover input {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
+  accent-color: #f0a03c;
 }
 
 .balance-transfer-select {
@@ -6606,6 +6608,10 @@ body.pin-lock {
   border: 1px solid rgba(90, 140, 220, 0.35);
   color: #ffffff;
   box-shadow: 0 8px 18px rgba(90, 130, 210, 0.2);
+}
+
+.balance-manage-transfer {
+  width: 100%;
 }
 
 .balance-manage-btn:hover {
