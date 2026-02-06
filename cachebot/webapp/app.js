@@ -1910,6 +1910,7 @@
       .map((profile) => {
         const display = profile.display_name || profile.full_name || profile.username || profile.user_id;
         const username = profile.username ? `@${profile.username}` : "";
+        const showName = selectedId ? false : showUsername;
         const initials = String(display || "?")
           .trim()
           .slice(0, 2)
@@ -1925,7 +1926,7 @@
             }
             <div class="balance-transfer-meta">
               <div class="balance-transfer-name">${display}</div>
-              ${showUsername ? `<div class="balance-transfer-username">${username}</div>` : ""}
+              ${showName ? `<div class="balance-transfer-username">${username}</div>` : ""}
             </div>
             <button class="btn pill balance-transfer-select" type="button">${selected ? "Выбран" : "Выбрать"}</button>
           </div>

@@ -6706,6 +6706,7 @@ body.pin-lock {
 
 .balance-manage-transfer {
   width: 100%;
+  display: block;
 }
 
 .balance-manage-btn:hover {
