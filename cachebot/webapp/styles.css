@@ -6592,6 +6592,10 @@ body.pin-lock {
   background: linear-gradient(90deg, rgba(240, 160, 60, 0.18) 0%, rgba(240, 160, 60, 0) 70%);
 }
 
+.balance-transfer-user + .balance-transfer-user {
+  margin-top: 12px;
+}
+
 .balance-transfer-user.selected {
   font-weight: 700;
   border-color: rgba(240, 160, 60, 0.6);
@@ -6643,40 +6647,14 @@ body.pin-lock {
 .balance-transfer-cover input {
   width: 18px;
   height: 18px;
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 6px;
-  border: 2px solid rgba(240, 160, 60, 0.7);
-  background: transparent;
-  display: inline-grid;
-  place-content: center;
-}
-
-.balance-transfer-cover input::after {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border: solid #ffffff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  opacity: 0;
-}
-
-.balance-transfer-cover input:checked {
-  background: rgba(240, 160, 60, 0.2);
-  border-color: rgba(240, 160, 60, 0.9);
-}
-
-.balance-transfer-cover input:checked::after {
-  opacity: 1;
 }
 
 .balance-transfer-select {
   padding: 0 14px;
   height: 36px;
   font-size: 13px;
-  background: linear-gradient(135deg, rgba(240, 160, 60, 0.9), rgba(198, 120, 40, 0.9));
-  border: 1px solid rgba(240, 160, 60, 0.45);
+  background: linear-gradient(135deg, rgba(240, 178, 70, 0.95), rgba(198, 120, 40, 0.95));
+  border: 1px solid rgba(240, 178, 70, 0.55);
   color: #ffffff;
 }
 
