@@ -38,6 +38,7 @@ async def run_bot() -> None:
         default_rate=config.default_usd_rate,
         default_fee_percent=config.fee_percent,
         default_withdraw_fee_percent=config.withdraw_fee_percent,
+        default_transfer_fee_percent=config.transfer_fee_percent,
     )
     config.withdraw_fee_percent = await rate_provider.withdraw_fee_percent()
     crypto_pay = CryptoPayClient(config.crypto_pay_token)

@@ -115,7 +115,14 @@
   const balanceManageClose = document.getElementById("balanceManageClose");
   const balanceManageTopup = document.getElementById("balanceManageTopup");
   const balanceManageWithdraw = document.getElementById("balanceManageWithdraw");
+  const balanceManageTransfer = document.getElementById("balanceManageTransfer");
   const balanceManageForm = document.getElementById("balanceManageForm");
+  const balanceTransferPanel = document.getElementById("balanceTransferPanel");
+  const balanceTransferUsername = document.getElementById("balanceTransferUsername");
+  const balanceTransferMatch = document.getElementById("balanceTransferMatch");
+  const balanceTransferAmount = document.getElementById("balanceTransferAmount");
+  const balanceTransferCoverFee = document.getElementById("balanceTransferCoverFee");
+  const balanceTransferSubmit = document.getElementById("balanceTransferSubmit");
   const balanceManageAmount = document.getElementById("balanceManageAmount");
   const balanceManageSubmit = document.getElementById("balanceManageSubmit");
   const dealsCount = document.getElementById("dealsCount");
@@ -269,6 +276,7 @@
   const adminRate = document.getElementById("adminRate");
   const adminFee = document.getElementById("adminFee");
   const adminWithdrawFee = document.getElementById("adminWithdrawFee");
+  const adminTransferFee = document.getElementById("adminTransferFee");
   const adminSaveRates = document.getElementById("adminSaveRates");
   const adminModeratorUsername = document.getElementById("adminModeratorUsername");
   const adminAddModerator = document.getElementById("adminAddModerator");
@@ -1842,15 +1850,27 @@
   });
 
   let balanceManageMode = "topup";
+  let balanceTransferTarget = null;
 
   const setBalanceManageMode = (mode) => {
     const isSame = balanceManageMode === mode;
     balanceManageMode = mode;
     balanceManageTopup?.classList.toggle("active", mode === "topup");
     balanceManageWithdraw?.classList.toggle("active", mode === "withdraw");
+    balanceManageTransfer?.classList.toggle("active", mode === "transfer");
     if (balanceManageSubmit) {
       balanceManageSubmit.textContent = mode === "withdraw" ? "Вывести" : "Пополнить";
     }
+    if (mode === "transfer") {
+      balanceManageForm?.classList.remove("show");
+      if (isSame && balanceTransferPanel?.classList.contains("show")) {
+        balanceTransferPanel.classList.remove("show");
+        return;
+      }
+      balanceTransferPanel?.classList.add("show");
+      return;
+    }
+    balanceTransferPanel?.classList.remove("show");
     if (isSame && balanceManageForm?.classList.contains("show")) {
       balanceManageForm.classList.remove("show");
       return;
@@ -1861,14 +1881,115 @@
   balanceManageOpen?.addEventListener("click", () => {
     balanceManageModal?.classList.add("open");
     balanceManageForm?.classList.remove("show");
+    balanceTransferPanel?.classList.remove("show");
   });
 
   balanceManageTopup?.addEventListener("click", () => setBalanceManageMode("topup"));
   balanceManageWithdraw?.addEventListener("click", () => setBalanceManageMode("withdraw"));
+  balanceManageTransfer?.addEventListener("click", () => setBalanceManageMode("transfer"));
 
   balanceManageClose?.addEventListener("click", () => {
     balanceManageModal?.classList.remove("open");
     balanceManageForm?.classList.remove("show");
+    balanceTransferPanel?.classList.remove("show");
+  });
+
+  const renderTransferMatch = (profile) => {
+    if (!balanceTransferMatch) return;
+    if (!profile) {
+      balanceTransferMatch.classList.add("hidden");
+      balanceTransferMatch.innerHTML = "";
+      return;
+    }
+    const display = profile.display_name || profile.full_name || profile.username || profile.user_id;
+    balanceTransferMatch.classList.remove("hidden");
+    balanceTransferMatch.innerHTML = `
+      <div class="balance-transfer-user">
+        <span>${display}</span>
+        <button class="btn pill balance-transfer-select" type="button">Выбрать</button>
+      </div>
+    `;
+    balanceTransferMatch.querySelector("button")?.addEventListener("click", () => {
+      balanceTransferTarget = profile;
+      balanceTransferMatch.innerHTML = `
+        <div class="balance-transfer-user selected">
+          <span>Выбран: ${display}</span>
+        </div>
+      `;
+    });
+  };
+
+  const lookupTransferUser = async (query) => {
+    if (!state.initData) return;
+    if (!query) {
+      balanceTransferTarget = null;
+      renderTransferMatch(null);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/users/lookup?query=${encodeURIComponent(query)}`, {
+        headers: { "X-Telegram-Init-Data": state.initData },
+      });
+      if (!res.ok) {
+        renderTransferMatch(null);
+        return;
+      }
+      const payload = await res.json();
+      balanceTransferTarget = null;
+      renderTransferMatch(payload.profile);
+    } catch {
+      renderTransferMatch(null);
+    }
+  };
+
+  let transferLookupTimer = null;
+  balanceTransferUsername?.addEventListener("input", (event) => {
+    const value = event.target.value.trim();
+    if (transferLookupTimer) clearTimeout(transferLookupTimer);
+    transferLookupTimer = setTimeout(() => lookupTransferUser(value), 350);
+  });
+
+  balanceTransferSubmit?.addEventListener("click", async () => {
+    if (!state.initData) return;
+    if (!balanceTransferTarget?.user_id) {
+      log("Выберите получателя", "warn");
+      return;
+    }
+    const amount = Number(balanceTransferAmount?.value || 0);
+    if (!amount || amount <= 0) {
+      log("Введите сумму в USDT", "warn");
+      return;
+    }
+    const res = await fetch("/api/balance/transfer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Telegram-Init-Data": state.initData,
+      },
+      body: JSON.stringify({
+        recipient_id: balanceTransferTarget.user_id,
+        amount,
+        cover_fee: !!balanceTransferCoverFee?.checked,
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      log(`Ошибка API /api/balance/transfer: ${text}`, "error");
+      showNotice("Перевод не выполнен.");
+      return;
+    }
+    const payload = await res.json();
+    if (payload?.ok) {
+      balanceTransferAmount.value = "";
+      balanceTransferUsername.value = "";
+      balanceTransferCoverFee.checked = false;
+      balanceTransferTarget = null;
+      renderTransferMatch(null);
+      await loadBalance();
+      playSuccessAnimation();
+      log("Перевод выполнен.", "info");
+      balanceTransferPanel?.classList.remove("show");
+    }
   });
 
   balanceManageForm?.addEventListener("submit", async (event) => {
@@ -3349,6 +3470,9 @@
       adminRate.value = settings.usd_rate;
       adminFee.value = settings.fee_percent;
       adminWithdrawFee.value = settings.withdraw_fee_percent;
+      if (adminTransferFee) {
+        adminTransferFee.value = settings.transfer_fee_percent || "2.0";
+      }
     }
     if (adminAdminsCard) {
       adminAdminsCard.classList.toggle("is-hidden", !summary.can_manage_admins);
@@ -5978,6 +6102,7 @@
         usd_rate: adminRate.value,
         fee_percent: adminFee.value,
         withdraw_fee_percent: adminWithdrawFee.value,
+        transfer_fee_percent: adminTransferFee?.value,
       }),
     });
     if (payload?.ok) {
@@ -6768,6 +6893,8 @@
       let title = "Операция";
       if (item.kind === "topup") title = "Пополнение";
       if (item.kind === "withdraw") title = "Вывод";
+      if (item.kind === "transfer_out") title = "Перевод пользователю";
+      if (item.kind === "transfer_in") title = "Перевод от пользователя";
       if (item.kind === "deal" || item.kind === "dispute") {
         const dealId = item.meta?.public_id ? `#${item.meta.public_id}` : "";
         title = isPositive ? `Получены средства по сделке ${dealId}` : `Списание по сделке ${dealId}`;

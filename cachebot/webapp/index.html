@@ -248,6 +248,9 @@
                   <label>Комиссия на вывод (%)
                     <input id="adminWithdrawFee" type="number" step="0.01" />
                   </label>
+                  <label>Комиссия перевода (%)
+                    <input id="adminTransferFee" type="number" step="0.01" />
+                  </label>
                   <button id="adminSaveRates" class="btn primary admin-gradient-btn">Сохранить</button>
                 </div>
               </div>
@@ -894,14 +897,25 @@
             <button id="balanceManageClose" class="btn ghost">Закрыть</button>
           </div>
           <div class="modal-body">
-            <div class="modal-actions-row">
-              <button id="balanceManageTopup" class="btn pill balance-manage-btn" type="button">Пополнить</button>
-              <button id="balanceManageWithdraw" class="btn pill balance-manage-btn" type="button">Вывести</button>
-            </div>
+                <div class="modal-actions-row">
+                  <button id="balanceManageTopup" class="btn pill balance-manage-btn" type="button">Пополнить</button>
+                  <button id="balanceManageWithdraw" class="btn pill balance-manage-btn" type="button">Вывести</button>
+                  <button id="balanceManageTransfer" class="btn pill balance-manage-btn" type="button">Перевести</button>
+                </div>
             <form id="balanceManageForm" class="balance-manage-form">
               <input id="balanceManageAmount" type="number" step="0.001" min="0" placeholder="Сумма в USDT" />
               <button id="balanceManageSubmit" class="btn pill balance-manage-submit" type="submit">Пополнить</button>
             </form>
+            <div id="balanceTransferPanel" class="balance-manage-form balance-transfer-form">
+              <input id="balanceTransferUsername" type="text" placeholder="@username получателя" />
+              <div id="balanceTransferMatch" class="balance-transfer-match hidden"></div>
+              <label class="balance-transfer-cover">
+                <input id="balanceTransferCoverFee" type="checkbox" />
+                <span>Покрыть комиссию</span>
+              </label>
+              <input id="balanceTransferAmount" type="number" step="0.001" min="0" placeholder="Сумма в USDT" />
+              <button id="balanceTransferSubmit" class="btn pill balance-manage-submit" type="button">Перевести</button>
+            </div>
           </div>
         </div>
       </div>

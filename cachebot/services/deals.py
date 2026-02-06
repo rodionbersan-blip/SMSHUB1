@@ -721,6 +721,37 @@ class DealService:
             await self._persist()
             return self._balances[user_id]
 
+    async def transfer_balance(
+        self,
+        sender_id: int,
+        recipient_id: int,
+        *,
+        debit_amount: Decimal,
+        credit_amount: Decimal,
+        fee_percent: Decimal,
+    ) -> None:
+        if debit_amount <= 0 or credit_amount <= 0:
+            raise ValueError("Сумма должна быть больше нуля")
+        async with self._lock:
+            current = self._balances.get(sender_id, Decimal("0"))
+            if current < debit_amount:
+                raise ValueError("Недостаточно средств")
+            self._balances[sender_id] = current - debit_amount
+            self._credit_balance_locked(recipient_id, credit_amount)
+            meta_out = {
+                "to": recipient_id,
+                "fee_percent": str(fee_percent),
+                "credit": str(credit_amount),
+            }
+            meta_in = {
+                "from": sender_id,
+                "fee_percent": str(fee_percent),
+                "debit": str(debit_amount),
+            }
+            self._record_event_locked(sender_id, -debit_amount, "transfer_out", meta_out)
+            self._record_event_locked(recipient_id, credit_amount, "transfer_in", meta_in)
+            await self._persist()
+
     async def deposit_balance(
         self,
         user_id: int,

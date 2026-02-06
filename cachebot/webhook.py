@@ -47,6 +47,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/balance/history", _api_balance_history)
     app.router.add_post("/api/balance/topup", _api_balance_topup)
     app.router.add_post("/api/balance/withdraw", _api_balance_withdraw)
+    app.router.add_post("/api/balance/transfer", _api_balance_transfer)
+    app.router.add_get("/api/users/lookup", _api_users_lookup)
     app.router.add_get("/api/my-deals", _api_my_deals)
     app.router.add_post("/api/deals", _api_create_deal)
     app.router.add_get("/api/deals/{deal_id}", _api_deal_detail)
@@ -528,6 +530,21 @@ async def _api_balance_topup(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "invoice_id": invoice.invoice_id, "pay_url": invoice.pay_url})
 
 
+async def _api_users_lookup(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    query = (request.query.get("query") or "").strip()
+    if not query:
+        raise web.HTTPBadRequest(text="Нужно указать запрос")
+    profile = await deps.user_service.profile_by_username(query)
+    if not profile:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    if profile.user_id == user_id:
+        raise web.HTTPBadRequest(text="Нельзя выбрать себя")
+    payload = _profile_payload(profile, request=request, include_private=True)
+    return web.json_response({"ok": True, "profile": payload})
+
+
 async def _api_balance_withdraw(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     user, user_id = await _require_user(request)
@@ -563,6 +580,70 @@ async def _api_balance_withdraw(request: web.Request) -> web.Response:
             "fee": str(fee),
             "total": str(total),
             "username": user.get("username") or "",
+        }
+    )
+
+
+async def _api_balance_transfer(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    recipient_id = body.get("recipient_id")
+    cover_fee = bool(body.get("cover_fee"))
+    try:
+        amount = Decimal(str(body.get("amount")))
+    except (InvalidOperation, TypeError):
+        raise web.HTTPBadRequest(text="Некорректная сумма")
+    if amount <= 0:
+        raise web.HTTPBadRequest(text="Сумма должна быть больше нуля")
+    if not recipient_id or not str(recipient_id).isdigit():
+        raise web.HTTPBadRequest(text="Некорректный получатель")
+    recipient_id = int(recipient_id)
+    if recipient_id == user_id:
+        raise web.HTTPBadRequest(text="Нельзя переводить себе")
+    recipient_profile = await deps.user_service.profile_of(recipient_id)
+    if not recipient_profile:
+        raise web.HTTPNotFound(text="Пользователь не найден")
+    fee_percent = await deps.rate_provider.transfer_fee_percent()
+    fee = (amount * fee_percent / Decimal("100")).quantize(Decimal("0.00000001"))
+    if cover_fee:
+        debit_amount = amount + fee
+        credit_amount = amount
+    else:
+        debit_amount = amount
+        credit_amount = amount - fee
+    if credit_amount <= 0:
+        raise web.HTTPBadRequest(text="Сумма после комиссии слишком мала")
+    try:
+        await deps.deal_service.transfer_balance(
+            user_id,
+            recipient_id,
+            debit_amount=debit_amount,
+            credit_amount=credit_amount,
+            fee_percent=fee_percent,
+        )
+    except ValueError as exc:
+        raise web.HTTPBadRequest(text=str(exc))
+    sender_profile = await deps.user_service.profile_of(user_id)
+    sender_name = (
+        sender_profile.display_name
+        or sender_profile.full_name
+        or sender_profile.username
+        or str(user_id)
+    )
+    bot = request.app.get("bot")
+    if bot:
+        text = f"💸 Пользователь {sender_name} отправил вам {credit_amount:.2f} USDT."
+        await bot.send_message(recipient_id, text)
+    return web.json_response(
+        {
+            "ok": True,
+            "debited": str(debit_amount),
+            "credited": str(credit_amount),
+            "fee_percent": str(fee_percent),
         }
     )
 
@@ -1770,12 +1851,14 @@ async def _api_admin_settings(request: web.Request) -> web.Response:
         raise web.HTTPForbidden(text="Нет доступа")
     rate = await deps.rate_provider.snapshot()
     withdraw_fee = await deps.rate_provider.withdraw_fee_percent()
+    transfer_fee = await deps.rate_provider.transfer_fee_percent()
     return web.json_response(
         {
             "ok": True,
             "usd_rate": str(rate.usd_rate),
             "fee_percent": str(rate.fee_percent),
             "withdraw_fee_percent": str(withdraw_fee),
+            "transfer_fee_percent": str(transfer_fee),
         }
     )
 
@@ -1792,13 +1875,17 @@ async def _api_admin_settings_update(request: web.Request) -> web.Response:
     usd_rate = body.get("usd_rate")
     fee_percent = body.get("fee_percent")
     withdraw_fee = body.get("withdraw_fee_percent")
+    transfer_fee = body.get("transfer_fee_percent")
     rate_value = _parse_optional_decimal(usd_rate)
     fee_value = _parse_optional_decimal(fee_percent)
     withdraw_value = _parse_optional_decimal(withdraw_fee)
+    transfer_value = _parse_optional_decimal(transfer_fee)
     if rate_value is not None or fee_value is not None:
         await deps.rate_provider.set_rate(rate_value, fee_value)
     if withdraw_value is not None:
         await deps.rate_provider.set_withdraw_fee_percent(withdraw_value)
+    if transfer_value is not None:
+        await deps.rate_provider.set_transfer_fee_percent(transfer_value)
     return await _api_admin_settings(request)
 
 

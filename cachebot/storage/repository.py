@@ -22,12 +22,14 @@ class RateSettings:
     usd_rate: Decimal
     fee_percent: Decimal
     withdraw_fee_percent: Decimal
+    transfer_fee_percent: Decimal = Decimal("2.0")
 
     def to_dict(self) -> dict[str, str]:
         return {
             "usd_rate": str(self.usd_rate),
             "fee_percent": str(self.fee_percent),
             "withdraw_fee_percent": str(self.withdraw_fee_percent),
+            "transfer_fee_percent": str(self.transfer_fee_percent),
         }
 
     @classmethod
@@ -36,6 +38,7 @@ class RateSettings:
             usd_rate=Decimal(data["usd_rate"]),
             fee_percent=Decimal(data["fee_percent"]),
             withdraw_fee_percent=Decimal(data.get("withdraw_fee_percent", "2.5")),
+            transfer_fee_percent=Decimal(data.get("transfer_fee_percent", "2.0")),
         )
 
 

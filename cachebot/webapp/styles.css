@@ -6534,6 +6534,10 @@ body.pin-lock {
   max-height: 120px;
 }
 
+.balance-transfer-form.show {
+  max-height: 220px;
+}
+
 .balance-manage-form input {
   background: rgba(12, 18, 28, 0.5);
   border: 1px solid rgba(120, 180, 255, 0.2);
@@ -6544,6 +6548,54 @@ body.pin-lock {
 }
 
 :root[data-theme="light"] .balance-manage-form input {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(120, 140, 200, 0.3);
+  color: #1b1e28;
+}
+
+.balance-transfer-match {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(20, 28, 42, 0.4);
+  border: 1px solid rgba(120, 180, 255, 0.2);
+  color: var(--text);
+}
+
+.balance-transfer-match.hidden {
+  display: none;
+}
+
+.balance-transfer-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.balance-transfer-user.selected {
+  font-weight: 700;
+}
+
+.balance-transfer-cover {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.balance-transfer-cover input {
+  width: 16px;
+  height: 16px;
+}
+
+.balance-transfer-select {
+  padding: 0 14px;
+  height: 36px;
+  font-size: 13px;
+}
+
+:root[data-theme="light"] .balance-transfer-match {
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(120, 140, 200, 0.3);
   color: #1b1e28;

@@ -15,14 +15,16 @@ class RateProvider:
         default_rate: Decimal,
         default_fee_percent: Decimal,
         default_withdraw_fee_percent: Decimal,
+        default_transfer_fee_percent: Decimal,
     ) -> None:
         self._repository = repository
         state = repository.snapshot()
         settings = state.settings or RateSettings(
-            default_rate, default_fee_percent, default_withdraw_fee_percent
+            default_rate, default_fee_percent, default_withdraw_fee_percent, default_transfer_fee_percent
         )
         self._snapshot = RateSnapshot(settings.usd_rate, settings.fee_percent)
         self._withdraw_fee_percent = settings.withdraw_fee_percent
+        self._transfer_fee_percent = settings.transfer_fee_percent
         self._lock = asyncio.Lock()
 
     async def set_rate(self, usd_rate: Decimal | None = None, fee_percent: Decimal | None = None) -> RateSnapshot:
@@ -31,7 +33,7 @@ class RateProvider:
             fee = fee_percent if fee_percent is not None else self._snapshot.fee_percent
             self._snapshot = RateSnapshot(rate, fee)
             await self._repository.persist_settings(
-                RateSettings(rate, fee, self._withdraw_fee_percent)
+                RateSettings(rate, fee, self._withdraw_fee_percent, self._transfer_fee_percent)
             )
             return self._snapshot
 
@@ -47,6 +49,28 @@ class RateProvider:
         async with self._lock:
             self._withdraw_fee_percent = value
             await self._repository.persist_settings(
-                RateSettings(self._snapshot.usd_rate, self._snapshot.fee_percent, value)
+                RateSettings(
+                    self._snapshot.usd_rate,
+                    self._snapshot.fee_percent,
+                    value,
+                    self._transfer_fee_percent,
+                )
             )
             return self._withdraw_fee_percent
+
+    async def transfer_fee_percent(self) -> Decimal:
+        async with self._lock:
+            return self._transfer_fee_percent
+
+    async def set_transfer_fee_percent(self, value: Decimal) -> Decimal:
+        async with self._lock:
+            self._transfer_fee_percent = value
+            await self._repository.persist_settings(
+                RateSettings(
+                    self._snapshot.usd_rate,
+                    self._snapshot.fee_percent,
+                    self._withdraw_fee_percent,
+                    value,
+                )
+            )
+            return self._transfer_fee_percent
