@@ -6659,15 +6659,15 @@ body.pin-lock {
   padding: 0 14px;
   height: 36px;
   font-size: 13px;
-  background: linear-gradient(135deg, rgba(240, 178, 70, 0.95), rgba(198, 120, 40, 0.95));
-  border: 1px solid rgba(240, 178, 70, 0.55);
+  background: linear-gradient(135deg, rgba(245, 185, 80, 0.98), rgba(200, 120, 35, 0.98));
+  border: none;
   color: #ffffff;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .balance-transfer-user.selected .balance-transfer-select {
   background: linear-gradient(135deg, rgba(90, 160, 255, 0.9), rgba(108, 78, 200, 0.9));
-  border-color: rgba(90, 140, 220, 0.55);
+  border: none;
   color: #ffffff;
 }
 
