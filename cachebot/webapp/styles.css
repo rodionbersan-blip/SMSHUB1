@@ -3846,7 +3846,7 @@ body.modal-open #app {
 }
 
 #balanceManageModal .modal-card {
-  max-height: calc(100dvh - 90px);
+  max-height: calc(100dvh - 120px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -6663,7 +6663,7 @@ body.pin-lock {
   border: none !important;
   box-shadow: none !important;
   outline: none !important;
-  color: #ffffff;
+  color: #ffffff !important;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
