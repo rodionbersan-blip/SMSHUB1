@@ -5098,15 +5098,17 @@ body.modal-open #app {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 6px;
+  padding: 6px 6px 2px;
 }
 
 .qr-view img {
-  width: min(360px, 86vw);
+  width: min(520px, 92vw);
+  max-height: min(52vh, 520px);
   height: auto;
-  border-radius: 18px;
-  background: #ffffff;
-  padding: 10px;
+  object-fit: contain;
+  border-radius: 16px;
+  background: transparent;
+  padding: 0;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
 }
 
@@ -5683,6 +5685,17 @@ body.modal-open #app {
   height: 40px;
   font-size: 13px;
   padding: 0 10px;
+}
+
+/* QR view: remove hover/active glow/highlight on iOS */
+#qrViewModal .modal-actions-row .btn:hover,
+#qrViewModal .modal-actions-row .btn:active,
+#qrViewModal .modal-actions-row .btn:focus,
+#qrViewModal .modal-actions-row .btn:focus-visible {
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+  outline: none !important;
 }
 
 .modal-actions-row .balance-manage-transfer {
