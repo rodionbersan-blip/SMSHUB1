@@ -2650,7 +2650,7 @@
     const selectedBanks = new Set(ad.banks?.length === 1 ? [ad.banks[0]] : []);
     const bankChoices = document.createElement("div");
     bankChoices.className = "p2p-bank-choices";
-    const bankChoiceState = { lastPointerAt: 0 };
+    const bankChoiceState = { lastTapAt: 0 };
     if (ad.banks && ad.banks.length > 1) {
       ad.banks.forEach((bank) => {
         const bankBtn = document.createElement("button");
@@ -2672,21 +2672,15 @@
             el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
           });
         };
-        bankBtn.addEventListener("pointerdown", (e) => {
-          bankChoiceState.lastPointerAt = Date.now();
-          e.preventDefault();
+        const onTap = () => {
+          const now = Date.now();
+          if (now - bankChoiceState.lastTapAt < 350) return;
+          bankChoiceState.lastTapAt = now;
           toggleBank();
-        });
-        bankBtn.addEventListener("touchstart", (e) => {
-          bankChoiceState.lastPointerAt = Date.now();
-          e.preventDefault();
-          toggleBank();
-        }, { passive: false });
-        bankBtn.addEventListener("click", (e) => {
-          if (Date.now() - bankChoiceState.lastPointerAt < 500) return;
-          e.preventDefault();
-          toggleBank();
-        });
+        };
+        bankBtn.addEventListener("pointerup", onTap);
+        bankBtn.addEventListener("touchend", onTap);
+        bankBtn.addEventListener("click", onTap);
         bankChoices.appendChild(bankBtn);
       });
     }
@@ -4155,7 +4149,7 @@
       label.textContent = "Выберите банкомат:";
       const options = document.createElement("div");
       options.className = "deal-bank-options";
-      const selectionState = { lastPointerAt: 0 };
+      const selectionState = { lastTapAt: 0 };
       deal.qr_bank_options.forEach((bank) => {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -4185,23 +4179,16 @@
             acceptBtn.disabled = false;
           }
         };
-        // iOS Telegram WebView sometimes delays "click" styling until focus changes.
-        // Apply selection on pointerdown/touchstart, and ignore the subsequent click.
-        btn.addEventListener("pointerdown", (e) => {
-          selectionState.lastPointerAt = Date.now();
-          e.preventDefault();
+        const onTap = () => {
+          const now = Date.now();
+          if (now - selectionState.lastTapAt < 350) return;
+          selectionState.lastTapAt = now;
           applySelection();
-        });
-        btn.addEventListener("touchstart", (e) => {
-          selectionState.lastPointerAt = Date.now();
-          e.preventDefault();
-          applySelection();
-        }, { passive: false });
-        btn.addEventListener("click", (e) => {
-          if (Date.now() - selectionState.lastPointerAt < 500) return;
-          e.preventDefault();
-          applySelection();
-        });
+        };
+        // Telegram iOS WebView can be flaky with click; handle touch/pointer too.
+        btn.addEventListener("pointerup", onTap);
+        btn.addEventListener("touchend", onTap);
+        btn.addEventListener("click", onTap);
         options.appendChild(btn);
       });
       bankRow.appendChild(label);
