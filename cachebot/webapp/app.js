@@ -4135,6 +4135,7 @@
       const bankRow = document.createElement("div");
       bankRow.className = "deal-detail-row bank-select-row";
       const label = document.createElement("span");
+      label.className = "deal-bank-label";
       label.textContent = "Выберите банкомат:";
       const options = document.createElement("div");
       options.className = "deal-bank-options";

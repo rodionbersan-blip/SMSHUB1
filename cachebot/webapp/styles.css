@@ -2469,21 +2469,23 @@ body.modal-open #app {
 }
 
 .bank-select-row {
+  flex-direction: column;
   align-items: center;
   gap: 10px;
-  justify-content: flex-start;
+  justify-content: center;
+  text-align: center;
+}
+
+.deal-bank-label {
+  width: 100%;
+  text-align: center;
 }
 
 .deal-bank-options {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.deal-bank-options::-webkit-scrollbar {
-  display: none;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .p2p-bank-btn {
@@ -2500,8 +2502,8 @@ body.modal-open #app {
 }
 
 .deal-bank-options .p2p-bank-btn {
-  flex: 0 0 auto;
-  min-width: 110px;
+  width: 100%;
+  min-width: 0;
 }
 
 .p2p-bank-btn:disabled {
