@@ -2468,6 +2468,24 @@ body.modal-open #app {
   gap: 8px;
 }
 
+.bank-select-row {
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.deal-bank-options {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.deal-bank-options::-webkit-scrollbar {
+  display: none;
+}
+
 .p2p-bank-btn {
   flex: 1 1 0;
   height: 38px;
@@ -2479,6 +2497,18 @@ body.modal-open #app {
   justify-content: center;
   gap: 8px;
   font-weight: 600;
+}
+
+.deal-bank-options .p2p-bank-btn {
+  flex: 0 0 auto;
+  min-width: 110px;
+}
+
+.p2p-bank-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
 }
 
 .p2p-bank-btn.active {

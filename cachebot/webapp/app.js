@@ -4125,7 +4125,7 @@
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>
     `;
-    if (deal.actions?.select_bank && Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length) {
+    if (Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length) {
       const bankRow = document.createElement("div");
       bankRow.className = "deal-detail-row bank-select-row";
       const label = document.createElement("span");
@@ -4136,12 +4136,19 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn pill p2p-bank-btn";
+        if (deal.atm_bank && deal.atm_bank === bank) {
+          btn.classList.add("active");
+        }
+        if (!deal.actions?.select_bank) {
+          btn.disabled = true;
+        }
         const icon = bankIcon(bank);
         const name = bankLabel(bank);
         btn.innerHTML = icon
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${name}</span>`
           : name;
         btn.addEventListener("click", async () => {
+          if (!deal.actions?.select_bank) return;
           const payload = await fetchJson(`/api/deals/${deal.id}/bank`, {
             method: "POST",
             body: JSON.stringify({ bank }),
