@@ -2647,7 +2647,7 @@
     const btn = document.createElement("button");
     btn.className = "btn primary";
     btn.textContent = ad.side === "sell" ? "Купить" : "Продать";
-    let selectedBanks = ad.banks?.length === 1 ? [ad.banks[0]] : [];
+    const selectedBanks = new Set(ad.banks?.length === 1 ? [ad.banks[0]] : []);
     const bankChoices = document.createElement("div");
     bankChoices.className = "p2p-bank-choices";
     if (ad.banks && ad.banks.length > 1) {
@@ -2662,17 +2662,21 @@
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span>`
           : label;
         bankBtn.addEventListener("click", () => {
-          bankBtn.classList.toggle("active");
-          selectedBanks = Array.from(
-            bankChoices.querySelectorAll(".p2p-bank-btn.active")
-          ).map((el) => el.dataset.bank);
+          if (selectedBanks.has(bank)) {
+            selectedBanks.delete(bank);
+          } else {
+            selectedBanks.add(bank);
+          }
+          bankChoices.querySelectorAll(".p2p-bank-btn").forEach((el) => {
+            el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
+          });
         });
         bankChoices.appendChild(bankBtn);
       });
     }
-    if (selectedBanks.length && bankChoices.children.length) {
+    if (selectedBanks.size && bankChoices.children.length) {
       bankChoices.querySelectorAll(".p2p-bank-btn").forEach((el) => {
-        el.classList.toggle("active", selectedBanks.includes(el.dataset.bank));
+        el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
       });
     }
     const parseRub = (value) => {
@@ -2718,7 +2722,7 @@
       const confirmBtn = document.createElement("button");
       confirmBtn.className = "btn primary";
       confirmBtn.textContent = "Предложить сделку";
-      if (ad.banks && ad.banks.length > 1 && !selectedBanks.length) {
+      if (ad.banks && ad.banks.length > 1 && !selectedBanks.size) {
         confirmBtn.disabled = true;
       }
       const cancelBtn = document.createElement("button");
@@ -2731,11 +2735,11 @@
       });
       if (ad.banks && ad.banks.length > 1) {
         bankChoices.addEventListener("click", () => {
-          confirmBtn.disabled = !selectedBanks.length;
+          confirmBtn.disabled = !selectedBanks.size;
         });
       }
       confirmBtn.addEventListener("click", async () => {
-        if (ad.banks && ad.banks.length > 1 && !selectedBanks.length) {
+        if (ad.banks && ad.banks.length > 1 && !selectedBanks.size) {
           showNotice("Выберите банкомат");
           return;
         }
@@ -2753,7 +2757,7 @@
             body: JSON.stringify({
               rub_amount: rub,
               bank: "",
-              banks: selectedBanks,
+              banks: Array.from(selectedBanks),
             }),
           });
           if (!res.ok) {
