@@ -1131,6 +1131,10 @@ body.modal-open #app {
   font-weight: 500;
 }
 
+#userBadge {
+  display: none;
+}
+
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
