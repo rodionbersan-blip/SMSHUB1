@@ -4916,6 +4916,7 @@ body.modal-open #app {
   gap: 4px;
   max-width: 86%;
   width: fit-content;
+  min-width: 140px;
   padding: 10px 12px;
   border-radius: 22px;
   background: var(--card-contrast);
