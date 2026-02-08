@@ -454,6 +454,7 @@
     profileModeration: null,
     moderationAction: null,
     moderationAdsCounts: null,
+    chatRenderSig: {},
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -5100,6 +5101,15 @@
     const payload = await fetchJson(`/api/deals/${dealId}/chat`);
     if (!payload?.ok) return;
     const messages = payload.messages || [];
+    // Avoid re-rendering the whole chat if nothing changed; it causes scroll jitter on iOS.
+    const last = messages.length ? messages[messages.length - 1] : null;
+    const sig = `${messages.length}|${last?.id || last?.message_id || last?.created_at || ""}`;
+    const skipIfUnchanged = options.skipIfUnchanged !== false;
+    state.chatRenderSig = state.chatRenderSig || {};
+    if (skipIfUnchanged && state.chatRenderSig[dealId] === sig) {
+      return messages;
+    }
+    state.chatRenderSig[dealId] = sig;
     renderChatMessages(messages, { keepPosition: options.keepPosition !== false });
     return messages;
   };
@@ -5192,7 +5202,7 @@
     const hasSavedScroll = Boolean(state.chatScrollPos?.[deal.id]);
     state.chatOpeningPreferSavedScroll = hasSavedScroll;
     state.chatForceBottomOnce = !hasSavedScroll;
-    const messages = await loadChatMessages(deal.id, { keepPosition: false });
+    const messages = await loadChatMessages(deal.id, { keepPosition: false, skipIfUnchanged: false });
     const lastMessage = Array.isArray(messages) && messages.length ? messages[messages.length - 1] : null;
     if (lastMessage?.created_at) {
       markChatRead(deal.id, lastMessage.created_at);
