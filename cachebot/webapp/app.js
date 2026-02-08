@@ -5070,7 +5070,12 @@
       const nextScrollHeight = chatList.scrollHeight;
       chatList.scrollTop = prevScrollTop + (nextScrollHeight - prevScrollHeight);
     } else {
-      chatList.scrollTop = chatList.scrollHeight;
+      // If we are opening chat and have a saved scroll position, don't force-scroll to bottom.
+      if (!state.chatOpeningPreferSavedScroll) {
+        chatList.scrollTop = chatList.scrollHeight;
+      } else {
+        chatList.scrollTop = 0;
+      }
     }
 
     // When opening chat, images can load after render and push scroll down.
@@ -5157,14 +5162,14 @@
     };
 
     // iOS: apply after layout settles
-    const okNow = tryRestore();
+    tryRestore();
     requestAnimationFrame(() => {
       tryRestore();
     });
     setTimeout(() => {
       tryRestore();
     }, 120);
-    return okNow;
+    return true;
   };
 
   const scrollChatToBottomSoon = () => {
@@ -5185,6 +5190,7 @@
     // Open first so scrollHeight is correct (iOS WebView keeps it at 0 while hidden).
     chatModal.classList.add("open");
     const hasSavedScroll = Boolean(state.chatScrollPos?.[deal.id]);
+    state.chatOpeningPreferSavedScroll = hasSavedScroll;
     state.chatForceBottomOnce = !hasSavedScroll;
     const messages = await loadChatMessages(deal.id, { keepPosition: false });
     const lastMessage = Array.isArray(messages) && messages.length ? messages[messages.length - 1] : null;
@@ -5206,11 +5212,13 @@
     const chatBtn = dealModalActions?.querySelector(".deal-chat-btn");
     chatBtn?.classList.remove("has-badge");
     quickDealsBtn?.classList.add("dimmed");
-    const restored = restoreChatScrollPosition(deal.id);
-    if (!restored) {
+    if (hasSavedScroll) {
+      restoreChatScrollPosition(deal.id);
+    } else {
       scrollChatToBottomSoon();
     }
     state.chatForceBottomOnce = false;
+    state.chatOpeningPreferSavedScroll = false;
   };
 
   const updateChatFileHint = () => {
