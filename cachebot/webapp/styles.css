@@ -159,8 +159,8 @@ h2 {
 .profile-admin-badge::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 18%;
+  right: 18%;
   height: 1px;
   background: linear-gradient(90deg, transparent, #f2d37a 30%, #f9f2c0 50%, #c8951b 70%, transparent);
   opacity: 0.9;
