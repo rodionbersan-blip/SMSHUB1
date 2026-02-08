@@ -2519,6 +2519,13 @@ body.modal-open #app {
   transform: translateY(-1px);
 }
 
+.p2p-bank-choices .p2p-bank-btn.active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 10px 22px rgba(77, 163, 255, 0.35);
+}
+
 .p2p-bank-logo {
   width: 18px;
   height: 18px;

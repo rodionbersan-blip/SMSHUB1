@@ -4099,6 +4099,8 @@
     startDisputeAutoRefresh(dispute.id);
   };
 
+  const dealBankSelections = new Map();
+
   const renderDealModal = (deal) => {
     dealModalTitle.textContent = `Сделка #${deal.public_id}`;
     const counterparty =
@@ -4136,7 +4138,10 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn pill p2p-bank-btn";
-        if (deal.atm_bank && deal.atm_bank === bank) {
+        btn.dataset.bank = bank;
+        const pendingBank = dealBankSelections.get(deal.id);
+        const isSelected = (pendingBank || deal.atm_bank) === bank;
+        if (isSelected) {
           btn.classList.add("active");
         }
         if (!deal.actions?.select_bank) {
@@ -4147,15 +4152,16 @@
         btn.innerHTML = icon
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${name}</span>`
           : name;
-        btn.addEventListener("click", async () => {
+        btn.addEventListener("click", () => {
           if (!deal.actions?.select_bank) return;
-          const payload = await fetchJson(`/api/deals/${deal.id}/bank`, {
-            method: "POST",
-            body: JSON.stringify({ bank }),
+          dealBankSelections.set(deal.id, bank);
+          options.querySelectorAll(".p2p-bank-btn").forEach((el) => {
+            el.classList.toggle("active", el.dataset.bank === bank);
           });
-          if (!payload?.ok) return;
-          maybeRenderDealModal(payload.deal);
-          await loadDeals();
+          const acceptBtn = dealModalActions.querySelector(".deal-accept-btn");
+          if (acceptBtn) {
+            acceptBtn.disabled = false;
+          }
         });
         options.appendChild(btn);
       });
@@ -4251,10 +4257,33 @@
     const isCompleted = deal.status === "completed";
     const needsBankChoice =
       actions.select_bank && Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length;
-    if (!isCompleted && actions.accept_offer && !needsBankChoice) {
-      addAction(topRow, "Принять", () => dealAction("accept", deal.id), false, "", {
-        className: "deal-accept-btn",
-      });
+    if (!isCompleted && actions.accept_offer) {
+      const acceptBtn = addAction(
+        topRow,
+        "Принять",
+        async () => {
+          const pendingBank = dealBankSelections.get(deal.id);
+          const chosenBank = pendingBank || deal.atm_bank;
+          if (needsBankChoice) {
+            if (!chosenBank) {
+              showSystemMessage("Выберите банкомат");
+              return;
+            }
+            const payload = await fetchJson(`/api/deals/${deal.id}/bank`, {
+              method: "POST",
+              body: JSON.stringify({ bank: chosenBank }),
+            });
+            if (!payload?.ok) return;
+          }
+          await dealAction("accept", deal.id);
+        },
+        false,
+        "",
+        { className: "deal-accept-btn" }
+      );
+      if (needsBankChoice && !(dealBankSelections.get(deal.id) || deal.atm_bank)) {
+        acceptBtn.disabled = true;
+      }
     }
     if (!isCompleted && actions.decline_offer) {
       addAction(topRow, "Отменить", () => dealAction("decline", deal.id), false, "", {
