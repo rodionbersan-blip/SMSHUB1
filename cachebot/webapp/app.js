@@ -2650,6 +2650,7 @@
     const selectedBanks = new Set(ad.banks?.length === 1 ? [ad.banks[0]] : []);
     const bankChoices = document.createElement("div");
     bankChoices.className = "p2p-bank-choices";
+    const bankChoiceState = { lastPointerAt: 0 };
     if (ad.banks && ad.banks.length > 1) {
       ad.banks.forEach((bank) => {
         const bankBtn = document.createElement("button");
@@ -2661,7 +2662,7 @@
         bankBtn.innerHTML = icon
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span>`
           : label;
-        bankBtn.addEventListener("click", () => {
+        const toggleBank = () => {
           if (selectedBanks.has(bank)) {
             selectedBanks.delete(bank);
           } else {
@@ -2670,6 +2671,21 @@
           bankChoices.querySelectorAll(".p2p-bank-btn").forEach((el) => {
             el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
           });
+        };
+        bankBtn.addEventListener("pointerdown", (e) => {
+          bankChoiceState.lastPointerAt = Date.now();
+          e.preventDefault();
+          toggleBank();
+        });
+        bankBtn.addEventListener("touchstart", (e) => {
+          bankChoiceState.lastPointerAt = Date.now();
+          e.preventDefault();
+          toggleBank();
+        }, { passive: false });
+        bankBtn.addEventListener("click", (e) => {
+          if (Date.now() - bankChoiceState.lastPointerAt < 500) return;
+          e.preventDefault();
+          toggleBank();
         });
         bankChoices.appendChild(bankBtn);
       });
@@ -4139,6 +4155,7 @@
       label.textContent = "Выберите банкомат:";
       const options = document.createElement("div");
       options.className = "deal-bank-options";
+      const selectionState = { lastPointerAt: 0 };
       deal.qr_bank_options.forEach((bank) => {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -4157,7 +4174,7 @@
         btn.innerHTML = icon
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${name}</span>`
           : name;
-        btn.addEventListener("click", () => {
+        const applySelection = () => {
           if (!deal.actions?.select_bank) return;
           dealBankSelections.set(deal.id, bank);
           options.querySelectorAll(".p2p-bank-btn").forEach((el) => {
@@ -4167,6 +4184,23 @@
           if (acceptBtn) {
             acceptBtn.disabled = false;
           }
+        };
+        // iOS Telegram WebView sometimes delays "click" styling until focus changes.
+        // Apply selection on pointerdown/touchstart, and ignore the subsequent click.
+        btn.addEventListener("pointerdown", (e) => {
+          selectionState.lastPointerAt = Date.now();
+          e.preventDefault();
+          applySelection();
+        });
+        btn.addEventListener("touchstart", (e) => {
+          selectionState.lastPointerAt = Date.now();
+          e.preventDefault();
+          applySelection();
+        }, { passive: false });
+        btn.addEventListener("click", (e) => {
+          if (Date.now() - selectionState.lastPointerAt < 500) return;
+          e.preventDefault();
+          applySelection();
         });
         options.appendChild(btn);
       });
