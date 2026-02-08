@@ -2662,16 +2662,17 @@
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span>`
           : label;
         bankBtn.addEventListener("click", () => {
-          if (selectedBanks.includes(bank)) {
-            selectedBanks = selectedBanks.filter((item) => item !== bank);
-          } else {
-            selectedBanks = [...selectedBanks, bank];
-          }
-          bankChoices.querySelectorAll(".p2p-bank-btn").forEach((el) => {
-            el.classList.toggle("active", selectedBanks.includes(el.dataset.bank));
-          });
+          bankBtn.classList.toggle("active");
+          selectedBanks = Array.from(
+            bankChoices.querySelectorAll(".p2p-bank-btn.active")
+          ).map((el) => el.dataset.bank);
         });
         bankChoices.appendChild(bankBtn);
+      });
+    }
+    if (selectedBanks.length && bankChoices.children.length) {
+      bankChoices.querySelectorAll(".p2p-bank-btn").forEach((el) => {
+        el.classList.toggle("active", selectedBanks.includes(el.dataset.bank));
       });
     }
     const parseRub = (value) => {
