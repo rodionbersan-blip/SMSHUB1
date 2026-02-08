@@ -58,6 +58,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/deals/{deal_id}/decline", _api_deal_decline)
     app.router.add_post("/api/deals/{deal_id}/buyer-ready", _api_deal_buyer_ready)
     app.router.add_post("/api/deals/{deal_id}/seller-ready", _api_deal_seller_ready)
+    app.router.add_post("/api/deals/{deal_id}/bank", _api_deal_choose_bank)
     app.router.add_post("/api/deals/{deal_id}/confirm-buyer", _api_deal_confirm_buyer)
     app.router.add_post("/api/deals/{deal_id}/confirm-seller", _api_deal_confirm_seller)
     app.router.add_post("/api/deals/{deal_id}/buyer-proof", _api_deal_buyer_proof)
@@ -857,6 +858,25 @@ async def _api_deal_seller_ready(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "deal": payload})
 
 
+async def _api_deal_choose_bank(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    bank = (body.get("bank") or "").strip()
+    if not bank:
+        raise web.HTTPBadRequest(text="Выберите банкомат")
+    try:
+        deal = await deps.deal_service.choose_p2p_bank(deal_id, user_id, bank)
+    except (PermissionError, ValueError) as exc:
+        raise web.HTTPBadRequest(text=str(exc))
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
+    return web.json_response({"ok": True, "deal": payload})
+
+
 async def _api_deal_confirm_buyer(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
@@ -1481,12 +1501,17 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
     except (InvalidOperation, TypeError):
         raise web.HTTPBadRequest(text="Некорректная сумма")
     bank = (body.get("bank") or "").strip()
+    banks = list(body.get("banks") or [])
     if rub_amount < ad.min_rub or rub_amount > ad.max_rub:
         raise web.HTTPBadRequest(text="Сумма должна быть в пределах лимитов объявления")
     if ad.banks:
-        if not bank:
+        if banks:
+            banks = [item for item in banks if item in ad.banks]
+            if not banks:
+                raise web.HTTPBadRequest(text="Некорректный банкомат")
+        if not banks and not bank:
             raise web.HTTPBadRequest(text="Выберите банкомат")
-        if bank not in ad.banks:
+        if bank and bank not in ad.banks:
             raise web.HTTPBadRequest(text="Некорректный банкомат")
     base_usdt = rub_amount / ad.price_rub
     if ad.side == AdvertSide.SELL:
@@ -1506,7 +1531,8 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
             initiator_id=user_id,
             usd_amount=rub_amount,
             rate=ad.price_rub,
-            atm_bank=bank if ad.banks else None,
+            atm_bank=bank if ad.banks and not banks else None,
+            bank_options=banks if banks else None,
             advert_id=ad.id,
             comment=ad.terms,
         )
@@ -3363,6 +3389,7 @@ async def _deal_payload(
         "rate": str(deal.rate),
         "created_at": deal.created_at.isoformat(),
         "atm_bank": deal.atm_bank,
+        "qr_bank_options": list(deal.qr_bank_options or []),
         "counterparty": _profile_payload(counterparty, request=request, include_private=False),
         "is_p2p": deal.is_p2p,
         "buyer_cash_confirmed": deal.buyer_cash_confirmed,
@@ -3436,6 +3463,12 @@ def _deal_actions(deal, user_id: int) -> dict[str, bool]:
     )
     can_accept_offer = bool(deal.status.value == "pending" and is_recipient)
     can_decline_offer = bool(deal.status.value == "pending" and (is_recipient or is_initiator))
+    can_select_bank = bool(
+        deal.status.value == "pending"
+        and is_recipient
+        and bool(deal.qr_bank_options)
+        and not deal.atm_bank
+    )
     can_buyer_ready = bool(is_buyer and deal.qr_stage.value == "awaiting_buyer_ready")
     can_seller_ready = bool(is_seller and deal.qr_stage.value == "awaiting_seller_attach")
     can_confirm_buyer = bool(is_buyer and deal.status.value == "paid")
@@ -3451,6 +3484,7 @@ def _deal_actions(deal, user_id: int) -> dict[str, bool]:
         "cancel": can_cancel,
         "accept_offer": can_accept_offer,
         "decline_offer": can_decline_offer,
+        "select_bank": can_select_bank,
         "buyer_ready": can_buyer_ready,
         "seller_ready": can_seller_ready,
         "confirm_buyer": can_confirm_buyer,

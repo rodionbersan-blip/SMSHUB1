@@ -2647,7 +2647,7 @@
     const btn = document.createElement("button");
     btn.className = "btn primary";
     btn.textContent = ad.side === "sell" ? "Купить" : "Продать";
-    let selectedBank = ad.banks?.length === 1 ? ad.banks[0] : "";
+    let selectedBanks = ad.banks?.length === 1 ? [ad.banks[0]] : [];
     const bankChoices = document.createElement("div");
     bankChoices.className = "p2p-bank-choices";
     if (ad.banks && ad.banks.length > 1) {
@@ -2662,9 +2662,13 @@
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span>`
           : label;
         bankBtn.addEventListener("click", () => {
-          selectedBank = bank;
+          if (selectedBanks.includes(bank)) {
+            selectedBanks = selectedBanks.filter((item) => item !== bank);
+          } else {
+            selectedBanks = [...selectedBanks, bank];
+          }
           bankChoices.querySelectorAll(".p2p-bank-btn").forEach((el) => {
-            el.classList.toggle("active", el.dataset.bank === bank);
+            el.classList.toggle("active", selectedBanks.includes(el.dataset.bank));
           });
         });
         bankChoices.appendChild(bankBtn);
@@ -2713,7 +2717,7 @@
       const confirmBtn = document.createElement("button");
       confirmBtn.className = "btn primary";
       confirmBtn.textContent = "Предложить сделку";
-      if (ad.banks && ad.banks.length > 1 && !selectedBank) {
+      if (ad.banks && ad.banks.length > 1 && !selectedBanks.length) {
         confirmBtn.disabled = true;
       }
       const cancelBtn = document.createElement("button");
@@ -2726,11 +2730,11 @@
       });
       if (ad.banks && ad.banks.length > 1) {
         bankChoices.addEventListener("click", () => {
-          confirmBtn.disabled = !selectedBank;
+          confirmBtn.disabled = !selectedBanks.length;
         });
       }
       confirmBtn.addEventListener("click", async () => {
-        if (ad.banks && ad.banks.length > 1 && !selectedBank) {
+        if (ad.banks && ad.banks.length > 1 && !selectedBanks.length) {
           showNotice("Выберите банкомат");
           return;
         }
@@ -2745,7 +2749,11 @@
               "Content-Type": "application/json",
               "X-Telegram-Init-Data": state.initData,
             },
-            body: JSON.stringify({ rub_amount: rub, bank: selectedBank }),
+            body: JSON.stringify({
+              rub_amount: rub,
+              bank: selectedBanks.length === 1 ? selectedBanks[0] : "",
+              banks: selectedBanks,
+            }),
           });
           if (!res.ok) {
             let message = "Не удалось создать сделку.";
@@ -4116,6 +4124,37 @@
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>
     `;
+    if (deal.actions?.select_bank && Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length) {
+      const bankRow = document.createElement("div");
+      bankRow.className = "deal-detail-row bank-select-row";
+      const label = document.createElement("span");
+      label.textContent = "Выберите банкомат:";
+      const options = document.createElement("div");
+      options.className = "deal-bank-options";
+      deal.qr_bank_options.forEach((bank) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn pill p2p-bank-btn";
+        const icon = bankIcon(bank);
+        const name = bankLabel(bank);
+        btn.innerHTML = icon
+          ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${name}</span>`
+          : name;
+        btn.addEventListener("click", async () => {
+          const payload = await fetchJson(`/api/deals/${deal.id}/bank`, {
+            method: "POST",
+            body: JSON.stringify({ bank }),
+          });
+          if (!payload?.ok) return;
+          maybeRenderDealModal(payload.deal);
+          await loadDeals();
+        });
+        options.appendChild(btn);
+      });
+      bankRow.appendChild(label);
+      bankRow.appendChild(options);
+      dealModalBody.appendChild(bankRow);
+    }
     if (deal.status === "completed" && deal.review) {
       const review = document.createElement("div");
       review.className = "deal-review-block has-label";

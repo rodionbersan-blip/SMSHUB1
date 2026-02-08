@@ -126,6 +126,7 @@ class DealService:
         usd_amount: Decimal,
         rate: Decimal,
         atm_bank: str | None = None,
+        bank_options: list[str] | None = None,
         advert_id: str | None = None,
         comment: str | None = None,
     ) -> Deal:
@@ -169,6 +170,8 @@ class DealService:
             deal.dispute_notified = False
             self._deals[deal.id] = deal
             self._reset_qr_locked(deal)
+            if bank_options:
+                deal.qr_bank_options = list(bank_options)
             await self._persist()
         return deal
 
@@ -181,6 +184,8 @@ class DealService:
                 raise PermissionError("Нельзя принять собственное предложение")
             if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
                 raise PermissionError("Нет доступа")
+            if deal.qr_bank_options and not deal.atm_bank:
+                raise ValueError("Сначала выберите банкомат")
             now = datetime.now(timezone.utc)
             if deal.offer_expires_at and deal.offer_expires_at <= now:
                 raise ValueError("Предложение истекло")
@@ -199,6 +204,25 @@ class DealService:
             deal.dispute_notified = False
             self._reset_qr_locked(deal)
             deal.qr_stage = QrStage.AWAITING_SELLER_ATTACH
+            self._deals[deal.id] = deal
+            await self._persist()
+            return deal
+
+    async def choose_p2p_bank(self, deal_id: str, actor_id: int, bank: str) -> Deal:
+        async with self._lock:
+            deal = self._ensure_deal(deal_id)
+            if deal.status != DealStatus.PENDING:
+                raise ValueError("Предложение уже обработано")
+            if deal.offer_initiator_id == actor_id:
+                raise PermissionError("Нельзя выбрать банк для своего предложения")
+            if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
+                raise PermissionError("Нет доступа")
+            if not deal.qr_bank_options:
+                raise ValueError("Банкоматы не заданы")
+            if bank not in deal.qr_bank_options:
+                raise ValueError("Некорректный банкомат")
+            deal.atm_bank = bank
+            deal.qr_bank_options = []
             self._deals[deal.id] = deal
             await self._persist()
             return deal
