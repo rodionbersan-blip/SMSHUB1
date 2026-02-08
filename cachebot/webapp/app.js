@@ -4110,7 +4110,7 @@
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       alert.textContent =
-        "Как будете готовы отправить QR\nНажмите Готов отправить!";
+        "Как будете готовы отправить QR\nНажмите «Готов отправить»";
       dealModalBody.appendChild(alert);
     }
     if (deal.status === "paid" && deal.qr_stage === "awaiting_seller_attach" && deal.role === "buyer") {
@@ -4142,7 +4142,7 @@
       const alert = document.createElement("div");
       alert.className = "deal-alert";
       if (deal.buyer_cash_confirmed) {
-        alert.innerHTML = "✅ Покупатель подтвердил снятие.<br>🧮 Пересчитай и жми <b>Получил нал</b>";
+        alert.innerHTML = "✅ Покупатель подтвердил снятие.<br>🧮 Пересчитай и жми \"Получил нал\"";
       } else {
         alert.textContent = "✅ QR прикреплен и отправлен в чат.";
       }

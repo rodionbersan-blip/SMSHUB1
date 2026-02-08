@@ -5884,7 +5884,9 @@ body.modal-open #app {
   color: #ffffff;
 }
 .system-notice-rate textarea {
-  width: 100%;
+  width: calc(100% - 12px);
+  margin: 0 auto;
+  display: block;
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 10px 12px;
