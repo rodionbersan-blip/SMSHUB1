@@ -2533,7 +2533,7 @@ body.modal-open #app {
   color: var(--text);
   border-color: rgba(255, 170, 64, 0.95);
   box-shadow: 0 0 0 2px rgba(255, 170, 64, 0.22);
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .p2p-bank-choices .p2p-bank-btn.active {
