@@ -4825,6 +4825,10 @@ body.modal-open #app {
   min-height: 46px;
 }
 
+:root #disputeEvidenceModal .deal-proof-actions .btn {
+  min-height: 46px;
+}
+
 :root[data-theme="dark"] #disputeOpenModal .btn.pill,
 :root[data-theme="dark"] #disputeEvidenceModal .btn.pill {
   background: rgba(77, 163, 255, 0.12);
@@ -4836,12 +4840,19 @@ body.modal-open #app {
 }
 
 :root[data-theme="dark"] #disputeOpenModal .btn.pill:hover,
-:root[data-theme="dark"] #disputeEvidenceModal .btn.pill:hover,
 :root[data-theme="dark"] #disputeOpenModal .btn.pill:active,
 :root[data-theme="dark"] #disputeEvidenceModal .btn.pill:active {
   background: rgba(77, 163, 255, 0.16);
   color: #8cc3ff;
   box-shadow: inset 0 0 0 1px rgba(77, 163, 255, 0.14);
+}
+
+/* Evidence modal: keep "Выбрать видео" stable (no highlight) */
+:root[data-theme="dark"] #disputeEvidenceModal .btn.pill:hover,
+:root[data-theme="dark"] #disputeEvidenceModal .btn.pill:active {
+  background: rgba(77, 163, 255, 0.12);
+  color: #6fb1ff;
+  box-shadow: inset 0 0 0 1px rgba(77, 163, 255, 0.12);
 }
 
 :root[data-theme="light"] #disputeOpenModal .deal-proof-title {
