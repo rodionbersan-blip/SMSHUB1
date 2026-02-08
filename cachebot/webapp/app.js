@@ -2670,20 +2670,36 @@
         bankChoices.appendChild(bankBtn);
       });
     }
+    const parseRub = (value) => {
+      if (value === null || value === undefined) return NaN;
+      if (typeof value === "number") return value;
+      const cleaned = String(value).replace(/,/g, ".").replace(/[^\d.]/g, "");
+      return Number(cleaned);
+    };
+    const validateRubAmount = () => {
+      const rub = parseRub(input.value);
+      if (!rub || rub <= 0) return { ok: false, message: "Введите сумму в RUB" };
+      const minRub = parseRub(ad.min_rub ?? ad.min_amount ?? ad.min ?? ad.limit_min);
+      const maxRub = parseRub(ad.max_rub ?? ad.max_amount ?? ad.max ?? ad.limit_max);
+      if (Number.isFinite(minRub) && minRub > 0 && rub < minRub) {
+        return { ok: false, message: `Сумма меньше лимита: от ₽${formatAmount(minRub, 0)}` };
+      }
+      if (Number.isFinite(maxRub) && maxRub > 0 && rub > maxRub) {
+        return { ok: false, message: `Сумма больше лимита: до ₽${formatAmount(maxRub, 0)}` };
+      }
+      return { ok: true, value: rub };
+    };
+    input.addEventListener("input", () => {
+      const validation = validateRubAmount();
+      btn.disabled = input.value ? !validation.ok : false;
+    });
     btn.addEventListener("click", async () => {
-      const rub = Number(input.value);
-      if (!rub || rub <= 0) {
-        log("Введите сумму в RUB", "warn");
+      const validation = validateRubAmount();
+      if (!validation.ok) {
+        showNotice(validation.message);
         return;
       }
-      if (Number.isFinite(ad.min_rub) && rub < Number(ad.min_rub)) {
-        showNotice(`Сумма меньше лимита: от ₽${formatAmount(ad.min_rub, 0)}`);
-        return;
-      }
-      if (Number.isFinite(ad.max_rub) && rub > Number(ad.max_rub)) {
-        showNotice(`Сумма больше лимита: до ₽${formatAmount(ad.max_rub, 0)}`);
-        return;
-      }
+      const rub = validation.value;
       p2pModalActions.innerHTML = "";
       if (ad.banks && ad.banks.length > 1) {
         const bankTitle = document.createElement("div");
