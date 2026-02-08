@@ -5042,6 +5042,7 @@ body.modal-open #app {
   background: rgba(10, 12, 18, 0.8);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  z-index: 200;
   padding: calc(16px + env(safe-area-inset-top, 0px))
     calc(16px + env(safe-area-inset-right, 0px))
     calc(16px + env(safe-area-inset-bottom, 0px))
@@ -5049,7 +5050,7 @@ body.modal-open #app {
 }
 
 #videoModal {
-  z-index: 90;
+  z-index: 200;
 }
 
 .image-modal-card {
