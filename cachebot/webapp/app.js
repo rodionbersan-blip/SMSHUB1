@@ -4846,6 +4846,13 @@
       chatList.appendChild(systemItem);
     }
     let moderatorNoticeShown = false;
+    const selfProfile = state.profileData || {};
+    const selfName =
+      selfProfile.display_name ||
+      selfProfile.full_name ||
+      selfProfile.username ||
+      state.user?.username ||
+      "";
     (messages || []).forEach((msg) => {
       const isDispute =
         state.activeDeal &&
@@ -4893,10 +4900,13 @@
       const fileName = (msg.file_name || "").toLowerCase();
       const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileName);
       if (msg.file_url && !msg.system) {
-        const label = document.createElement("div");
-        label.className = "chat-file-label";
-        label.textContent = isImage ? "📎 Фото" : "📎 Файл";
-        item.appendChild(label);
+        // For file messages we show the sender label (nickname) instead of a file-type label.
+        if (isSelf) {
+          const label = document.createElement("div");
+          label.className = "chat-system-label chat-user-label";
+          label.textContent = senderName || selfName || "Вы";
+          item.appendChild(label);
+        }
       }
       if (msg.text) {
         const text = document.createElement("div");
