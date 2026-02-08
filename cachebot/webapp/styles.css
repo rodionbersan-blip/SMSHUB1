@@ -1153,7 +1153,7 @@ body.modal-open #app {
   box-shadow: none;
 }
 
-.profile-hero > div {
+.profile-hero > div:not(.profile-avatar-large) {
   flex: 1;
   text-align: center;
 }
@@ -1170,6 +1170,7 @@ body.modal-open #app {
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   overflow: hidden;
+  flex: 0 0 40px;
   background: var(--accent);
   color: #ffffff;
   display: flex;
