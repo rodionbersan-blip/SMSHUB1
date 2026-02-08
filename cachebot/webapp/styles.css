@@ -442,6 +442,20 @@ body.modal-open #app {
   box-shadow: 0 10px 18px rgba(77, 163, 255, 0.18);
 }
 
+:root[data-theme="light"] .modal-card.glass .p2p-bank-btn {
+  background: rgba(15, 17, 21, 0.06);
+  border: 1px solid rgba(15, 17, 21, 0.14);
+  color: rgba(15, 17, 21, 0.88);
+  box-shadow: none;
+}
+
+:root[data-theme="light"] .modal-card.glass .p2p-bank-btn.active {
+  background: rgba(255, 170, 64, 0.16);
+  border-color: rgba(255, 170, 64, 0.95);
+  color: rgba(15, 17, 21, 0.95);
+  box-shadow: 0 0 0 2px rgba(255, 170, 64, 0.25);
+}
+
 :root[data-theme="light"] .modal-card.glass .btn.pill:hover {
   background: linear-gradient(135deg, rgba(120, 186, 255, 0.55), rgba(120, 186, 255, 0.3));
   border-color: rgba(77, 163, 255, 0.6);
@@ -2492,9 +2506,9 @@ body.modal-open #app {
 .p2p-bank-btn {
   flex: 1 1 0;
   height: 38px;
-  border: 1px solid rgba(77, 163, 255, 0.35);
-  background: rgba(77, 163, 255, 0.12);
-  color: var(--accent);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2515,18 +2529,18 @@ body.modal-open #app {
 }
 
 .p2p-bank-btn.active {
-  background: var(--accent);
-  color: #ffffff;
-  border-color: var(--accent);
-  box-shadow: 0 10px 22px rgba(77, 163, 255, 0.35);
+  background: rgba(255, 170, 64, 0.12);
+  color: var(--text);
+  border-color: rgba(255, 170, 64, 0.95);
+  box-shadow: 0 0 0 2px rgba(255, 170, 64, 0.22);
   transform: translateY(-1px);
 }
 
 .p2p-bank-choices .p2p-bank-btn.active {
-  background: var(--accent);
-  color: #ffffff;
-  border-color: var(--accent);
-  box-shadow: 0 10px 22px rgba(77, 163, 255, 0.35);
+  background: rgba(255, 170, 64, 0.12);
+  color: var(--text);
+  border-color: rgba(255, 170, 64, 0.95);
+  box-shadow: 0 0 0 2px rgba(255, 170, 64, 0.22);
 }
 
 .p2p-bank-logo {
