@@ -4465,6 +4465,7 @@
       return;
     }
     state.activeDealSnapshot = snapshot;
+    state.activeDeal = deal;
     renderDealModal(deal);
   };
 
@@ -4846,7 +4847,10 @@
     const prevScrollTop = chatList.scrollTop;
     const prevScrollHeight = chatList.scrollHeight;
     chatList.innerHTML = "";
-    if (!messages || !messages.length) {
+    const showDisputeHint =
+      state.activeDeal &&
+      (state.activeDeal.status === "dispute" || state.activeDeal.dispute_opened_at);
+    if (showDisputeHint && (!messages || !messages.length)) {
       const systemItem = document.createElement("div");
       systemItem.className = "chat-message system";
       const label = document.createElement("div");
