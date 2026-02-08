@@ -5098,12 +5098,13 @@ body.modal-open #app {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 6px 6px 2px;
+  padding: 10px 12px 6px;
 }
 
 .qr-view img {
-  width: min(520px, 92vw);
-  max-height: min(52vh, 520px);
+  display: block;
+  width: min(440px, 86vw);
+  max-height: min(46vh, 440px);
   height: auto;
   object-fit: contain;
   border-radius: 16px;

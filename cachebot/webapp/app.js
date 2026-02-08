@@ -5049,6 +5049,23 @@
     } else {
       chatList.scrollTop = chatList.scrollHeight;
     }
+
+    // When opening chat, images can load after render and push scroll down.
+    // Keep the view pinned to the bottom once (iOS WebView needs this).
+    if (state.chatForceBottomOnce) {
+      const imgs = chatList.querySelectorAll("img.chat-image");
+      imgs.forEach((img) => {
+        img.addEventListener(
+          "load",
+          () => {
+            try {
+              chatList.scrollTop = chatList.scrollHeight;
+            } catch {}
+          },
+          { once: true }
+        );
+      });
+    }
   };
 
   const loadChatMessages = async (dealId, options = {}) => {
@@ -5059,12 +5076,29 @@
     return messages;
   };
 
+  const scrollChatToBottom = () => {
+    if (!chatList) return;
+    chatList.scrollTop = chatList.scrollHeight;
+  };
+
+  const scrollChatToBottomSoon = () => {
+    // iOS WebView: layout and image decode happen after we set .open.
+    // Run a few times to reliably land on the last message.
+    requestAnimationFrame(scrollChatToBottom);
+    setTimeout(scrollChatToBottom, 0);
+    setTimeout(scrollChatToBottom, 80);
+    setTimeout(scrollChatToBottom, 180);
+  };
+
   const openDealChat = async (deal) => {
     if (!chatModal) return;
     state.activeChatDealId = deal.id;
     if (chatModalTitle) {
       chatModalTitle.textContent = `Чат сделки #${deal.public_id}`;
     }
+    // Open first so scrollHeight is correct (iOS WebView keeps it at 0 while hidden).
+    chatModal.classList.add("open");
+    state.chatForceBottomOnce = true;
     const messages = await loadChatMessages(deal.id, { keepPosition: false });
     const lastMessage = Array.isArray(messages) && messages.length ? messages[messages.length - 1] : null;
     if (lastMessage?.created_at) {
@@ -5085,7 +5119,10 @@
     const chatBtn = dealModalActions?.querySelector(".deal-chat-btn");
     chatBtn?.classList.remove("has-badge");
     quickDealsBtn?.classList.add("dimmed");
-    chatModal.classList.add("open");
+    if (state.chatForceBottomOnce) {
+      scrollChatToBottomSoon();
+      state.chatForceBottomOnce = false;
+    }
   };
 
   const updateChatFileHint = () => {
