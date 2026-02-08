@@ -4914,7 +4914,7 @@ body.modal-open #app {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 78%;
+  max-width: 86%;
   width: fit-content;
   padding: 10px 12px;
   border-radius: 22px;
@@ -4950,7 +4950,7 @@ body.modal-open #app {
   font-size: 10px;
   color: var(--muted);
   align-self: flex-end;
-  margin-top: -2px;
+  margin-top: 2px;
 }
 
 .chat-file {
