@@ -2752,7 +2752,7 @@
             },
             body: JSON.stringify({
               rub_amount: rub,
-              bank: selectedBanks.length === 1 ? selectedBanks[0] : "",
+              bank: "",
               banks: selectedBanks,
             }),
           });
@@ -4242,7 +4242,9 @@
       return btn;
     };
     const isCompleted = deal.status === "completed";
-    if (!isCompleted && actions.accept_offer) {
+    const needsBankChoice =
+      actions.select_bank && Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length;
+    if (!isCompleted && actions.accept_offer && !needsBankChoice) {
       addAction(topRow, "Принять", () => dealAction("accept", deal.id), false, "", {
         className: "deal-accept-btn",
       });

@@ -1509,10 +1509,11 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
             banks = [item for item in banks if item in ad.banks]
             if not banks:
                 raise web.HTTPBadRequest(text="Некорректный банкомат")
-        if not banks and not bank:
-            raise web.HTTPBadRequest(text="Выберите банкомат")
-        if bank and bank not in ad.banks:
-            raise web.HTTPBadRequest(text="Некорректный банкомат")
+        else:
+            if not bank:
+                raise web.HTTPBadRequest(text="Выберите банкомат")
+            if bank not in ad.banks:
+                raise web.HTTPBadRequest(text="Некорректный банкомат")
     base_usdt = rub_amount / ad.price_rub
     if ad.side == AdvertSide.SELL:
         seller_id = ad.owner_id
@@ -1531,7 +1532,7 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
             initiator_id=user_id,
             usd_amount=rub_amount,
             rate=ad.price_rub,
-            atm_bank=bank if ad.banks and not banks else None,
+            atm_bank=None if banks else (bank if ad.banks else None),
             bank_options=banks if banks else None,
             advert_id=ad.id,
             comment=ad.terms,
