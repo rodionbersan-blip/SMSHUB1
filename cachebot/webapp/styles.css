@@ -4914,6 +4914,7 @@ body.modal-open #app {
   flex-direction: column;
   gap: 4px;
   max-width: 78%;
+  width: fit-content;
   padding: 10px 12px;
   border-radius: 22px;
   background: var(--card-contrast);
@@ -4926,6 +4927,7 @@ body.modal-open #app {
   align-self: flex-end;
   background: rgba(77, 163, 255, 0.16);
   border-color: rgba(77, 163, 255, 0.3);
+  margin-left: auto;
 }
 
 .chat-message.mod {
@@ -4947,6 +4949,7 @@ body.modal-open #app {
   font-size: 10px;
   color: var(--muted);
   text-align: right;
+  margin-top: -2px;
 }
 
 .chat-file {
