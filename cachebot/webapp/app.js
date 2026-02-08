@@ -4351,14 +4351,16 @@
         className: "deal-chat-btn",
       });
     }
-    if (
+    const isSellerQrAttachStage =
       !isCompleted &&
       deal.status === "paid" &&
       deal.role === "seller" &&
-      ["awaiting_seller_photo", "ready"].includes(deal.qr_stage)
+      ["awaiting_seller_photo", "ready"].includes(deal.qr_stage);
+    if (
+      isSellerQrAttachStage
     ) {
       addAction(
-        bottomRow,
+        topRow,
         "Прикрепить QR",
         () => uploadQrForDeal(deal.id),
         false,
