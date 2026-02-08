@@ -1158,9 +1158,15 @@ body.modal-open #app {
   text-align: left;
 }
 
-.profile-hero #profileDisplayName,
-.profile-hero #profileAdminBadge {
+.profile-hero #profileDisplayName {
   width: 100%;
+  text-align: left;
+  padding-left: 12px;
+  transform: none;
+}
+
+.profile-hero #profileAdminBadge {
+  width: fit-content;
   text-align: left;
   padding-left: 12px;
   transform: none;
