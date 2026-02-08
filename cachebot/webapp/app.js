@@ -461,6 +461,7 @@
   const chatUnreadStorageKey = "dealChatUnreadCounts";
   const chatSeenStorageKey = "dealChatLastSeenAt";
   const supportSeenStorageKey = "supportChatLastSeenAt";
+  const chatScrollStorageKey = "dealChatScrollPos";
   const pendingReadStorageKey = "dealPendingRead";
   const systemNoticeStorageKey = "systemNotifications";
   const dealStatusStorageKey = "dealStatusMap";
@@ -540,6 +541,26 @@
   };
   state.chatUnreadCounts = loadChatUnreadCounts();
   state.chatLastSeenAt = loadChatSeen();
+
+  const loadChatScrollPos = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(chatScrollStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const persistChatScrollPos = () => {
+    try {
+      window.localStorage.setItem(
+        chatScrollStorageKey,
+        JSON.stringify(state.chatScrollPos || {})
+      );
+    } catch {}
+  };
+
+  state.chatScrollPos = loadChatScrollPos();
 
   const loadSupportSeen = () => {
     try {
@@ -4984,6 +5005,8 @@
       item.className = `chat-message ${isSelf ? "self" : ""} ${
         msg.system ? "system" : ""
       }`.trim();
+      // Used for restoring scroll position after closing/reopening chat.
+      item.dataset.messageId = msg.id || msg.message_id || msg.created_at || "";
       if (isMod) {
         item.classList.add("mod");
       }
@@ -5081,6 +5104,69 @@
     chatList.scrollTop = chatList.scrollHeight;
   };
 
+  const saveChatScrollPosition = (dealId) => {
+    if (!dealId || !chatList) return;
+    const children = Array.from(chatList.children || []);
+    const scrollTop = chatList.scrollTop;
+    let anchorId = null;
+    let anchorOffset = 0;
+    for (const el of children) {
+      if (!(el instanceof HTMLElement)) continue;
+      if (!el.classList.contains("chat-message")) continue;
+      const top = el.offsetTop;
+      if (top + el.offsetHeight >= scrollTop) {
+        anchorId = el.dataset.messageId || null;
+        anchorOffset = scrollTop - top;
+        break;
+      }
+    }
+    const maxScroll = Math.max(1, chatList.scrollHeight - chatList.clientHeight);
+    const ratio = Math.max(0, Math.min(1, scrollTop / maxScroll));
+    state.chatScrollPos = state.chatScrollPos || {};
+    state.chatScrollPos[dealId] = {
+      anchorId,
+      anchorOffset,
+      ratio,
+      updatedAt: Date.now(),
+    };
+    persistChatScrollPos();
+  };
+
+  const restoreChatScrollPosition = (dealId) => {
+    if (!dealId || !chatList) return false;
+    const saved = state.chatScrollPos?.[dealId];
+    if (!saved) return false;
+
+    const tryRestore = () => {
+      if (saved.anchorId) {
+        const el = chatList.querySelector(
+          `.chat-message[data-message-id="${CSS.escape(String(saved.anchorId))}"]`
+        );
+        if (el && el instanceof HTMLElement) {
+          chatList.scrollTop = el.offsetTop + (Number(saved.anchorOffset) || 0);
+          return true;
+        }
+      }
+      const ratio = Number(saved.ratio);
+      if (Number.isFinite(ratio)) {
+        const maxScroll = Math.max(0, chatList.scrollHeight - chatList.clientHeight);
+        chatList.scrollTop = Math.round(maxScroll * Math.max(0, Math.min(1, ratio)));
+        return true;
+      }
+      return false;
+    };
+
+    // iOS: apply after layout settles
+    const okNow = tryRestore();
+    requestAnimationFrame(() => {
+      tryRestore();
+    });
+    setTimeout(() => {
+      tryRestore();
+    }, 120);
+    return okNow;
+  };
+
   const scrollChatToBottomSoon = () => {
     // iOS WebView: layout and image decode happen after we set .open.
     // Run a few times to reliably land on the last message.
@@ -5098,7 +5184,8 @@
     }
     // Open first so scrollHeight is correct (iOS WebView keeps it at 0 while hidden).
     chatModal.classList.add("open");
-    state.chatForceBottomOnce = true;
+    const hasSavedScroll = Boolean(state.chatScrollPos?.[deal.id]);
+    state.chatForceBottomOnce = !hasSavedScroll;
     const messages = await loadChatMessages(deal.id, { keepPosition: false });
     const lastMessage = Array.isArray(messages) && messages.length ? messages[messages.length - 1] : null;
     if (lastMessage?.created_at) {
@@ -5119,10 +5206,11 @@
     const chatBtn = dealModalActions?.querySelector(".deal-chat-btn");
     chatBtn?.classList.remove("has-badge");
     quickDealsBtn?.classList.add("dimmed");
-    if (state.chatForceBottomOnce) {
+    const restored = restoreChatScrollPosition(deal.id);
+    if (!restored) {
       scrollChatToBottomSoon();
-      state.chatForceBottomOnce = false;
     }
+    state.chatForceBottomOnce = false;
   };
 
   const updateChatFileHint = () => {
@@ -5921,6 +6009,9 @@
   });
 
   chatModalClose?.addEventListener("click", () => {
+    if (state.activeChatDealId) {
+      saveChatScrollPosition(state.activeChatDealId);
+    }
     chatModal?.classList.remove("open");
     quickDealsBtn?.classList.remove("dimmed");
   });
@@ -6004,6 +6095,21 @@
       showNotice(`Ошибка: ${err.message}`);
     }
   });
+
+  // Persist chat scroll position while scrolling (throttled).
+  let chatScrollSaveTimer = null;
+  chatList?.addEventListener(
+    "scroll",
+    () => {
+      if (!state.activeChatDealId || !chatModal?.classList.contains("open")) return;
+      if (chatScrollSaveTimer) return;
+      chatScrollSaveTimer = setTimeout(() => {
+        chatScrollSaveTimer = null;
+        saveChatScrollPosition(state.activeChatDealId);
+      }, 250);
+    },
+    { passive: true }
+  );
 
   const openImageModal = (src, alt = "Фото") => {
     if (!imageModal || !imageModalImg) return;

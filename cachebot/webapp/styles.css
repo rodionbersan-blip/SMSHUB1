@@ -5103,8 +5103,8 @@ body.modal-open #app {
 
 .qr-view img {
   display: block;
-  width: min(440px, 86vw);
-  max-height: min(46vh, 440px);
+  width: min(360px, 80vw);
+  max-height: min(40vh, 360px);
   height: auto;
   object-fit: contain;
   border-radius: 16px;
