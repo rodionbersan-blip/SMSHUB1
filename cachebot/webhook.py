@@ -1148,31 +1148,39 @@ async def _api_deal_chat_list(request: web.Request) -> web.Response:
         deal_id, user_id, include_all=include_all
     )
     admin_ids = set(deps.config.admin_ids or [])
-    admin_profiles: dict[int, dict[str, Any] | None] = {}
+    sender_profiles: dict[int, dict[str, Any] | None] = {}
     for msg in messages:
-        if msg.sender_id in admin_ids and msg.sender_id not in admin_profiles:
+        if msg.system:
+            continue
+        if msg.sender_id not in sender_profiles:
             profile = await deps.user_service.profile_of(msg.sender_id)
-            admin_profiles[msg.sender_id] = _profile_payload(
-                profile, request=request, include_private=True
+            sender_profiles[msg.sender_id] = _profile_payload(
+                profile, request=request, include_private=False
             )
+    dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
     payload = []
     for msg in messages:
-        label = None
-        if msg.sender_id in admin_ids and not msg.system:
-            dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
-            profile = admin_profiles.get(msg.sender_id) or {}
-            name = (
-                profile.get("display_name")
-                or profile.get("full_name")
-                or profile.get("username")
-                or msg.sender_id
-            )
-            if dispute_any and dispute_any.assigned_to == msg.sender_id:
-                label = f"Модератор {name}"
+        is_admin = bool(msg.sender_id in admin_ids)
+        profile = sender_profiles.get(msg.sender_id) or {}
+        name = (
+            profile.get("display_name")
+            or profile.get("full_name")
+            or profile.get("username")
+            or msg.sender_id
+        )
+        is_moderator = bool(
+            is_admin
+            and not msg.system
+            and dispute_any
+            and deal.status.value == "dispute"
+            and dispute_any.assigned_to == msg.sender_id
+        )
         payload.append(
             {
                 **msg.to_dict(),
-                "sender_label": label,
+                "sender_name": name if not msg.system else None,
+                "sender_is_admin": is_admin,
+                "sender_is_moderator": is_moderator,
                 "file_url": _chat_file_url(request, msg) if msg.file_path else None,
             }
         )

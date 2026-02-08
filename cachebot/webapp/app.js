@@ -4847,19 +4847,25 @@
     }
     let moderatorNoticeShown = false;
     (messages || []).forEach((msg) => {
-      const isModerator = Boolean(msg.sender_label);
-      if (isModerator && !moderatorNoticeShown) {
+      const isDispute =
+        state.activeDeal &&
+        (state.activeDeal.status === "dispute" || state.activeDeal.dispute_opened_at);
+      const senderName =
+        msg.sender_name || msg.sender_label || msg.sender_username || msg.sender_id || "";
+      const isMod = Boolean(isDispute && msg.sender_is_moderator);
+      if (isMod && !moderatorNoticeShown) {
         const notice = document.createElement("div");
         notice.className = "chat-join-notice";
-        notice.textContent = `Модератор ${msg.sender_label} подключился к чату`;
+        notice.textContent = `Модератор ${senderName} подключился к чату`;
         chatList.appendChild(notice);
         moderatorNoticeShown = true;
       }
       const item = document.createElement("div");
-      item.className = `chat-message ${isSelfSender(msg.sender_id) ? "self" : ""} ${
+      const isSelf = isSelfSender(msg.sender_id);
+      item.className = `chat-message ${isSelf ? "self" : ""} ${
         msg.system ? "system" : ""
       }`.trim();
-      if (isModerator) {
+      if (isMod) {
         item.classList.add("mod");
       }
       if (msg.system) {
@@ -4867,10 +4873,21 @@
         label.className = "chat-system-label chat-bc-label";
         label.textContent = "BC Cash";
         item.appendChild(label);
-      } else if (msg.sender_label) {
+      } else if (!isSelf && senderName) {
         const label = document.createElement("div");
-        label.className = "chat-system-label chat-mod-label";
-        label.textContent = msg.sender_label;
+        label.className = "chat-system-label";
+        if (msg.sender_is_admin) {
+          if (isMod) {
+            label.classList.add("chat-mod-label-dispute");
+            label.textContent = `Модератор ${senderName}`;
+          } else {
+            label.classList.add("chat-admin-label");
+            label.textContent = senderName;
+          }
+        } else {
+          label.classList.add("chat-user-label");
+          label.textContent = senderName;
+        }
         item.appendChild(label);
       }
       const fileName = (msg.file_name || "").toLowerCase();

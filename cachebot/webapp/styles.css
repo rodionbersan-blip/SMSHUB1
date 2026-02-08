@@ -5033,6 +5033,18 @@ body.modal-open #app {
   color: #ff4d4f;
 }
 
+.chat-admin-label {
+  color: #4da3ff;
+}
+
+.chat-mod-label-dispute {
+  color: #ffb14a;
+}
+
+.chat-user-label {
+  color: var(--muted);
+}
+
 .chat-message.system {
   align-self: flex-start;
   text-align: left;
