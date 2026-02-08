@@ -4944,8 +4944,9 @@ body.modal-open #app {
 }
 
 .chat-meta {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--muted);
+  text-align: right;
 }
 
 .chat-file {
@@ -5018,7 +5019,7 @@ body.modal-open #app {
 }
 
 .chat-system-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--muted);
   font-weight: 600;
   text-transform: uppercase;

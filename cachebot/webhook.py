@@ -1211,7 +1211,8 @@ async def _api_deal_chat_send(request: web.Request) -> web.Response:
         file_name=None,
     )
     is_moderator = user_id in set(deps.config.admin_ids or []) or await deps.user_service.is_moderator(user_id)
-    if is_moderator:
+    dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
+    if is_moderator and dispute_any and deal.status.value == "dispute":
         with suppress(Exception):
             notice = f"⚠️ Модератор написал в чате сделки #{deal.public_id}.\nОткройте приложение."
             if deal.seller_id and deal.seller_id != user_id:
@@ -1220,7 +1221,6 @@ async def _api_deal_chat_send(request: web.Request) -> web.Response:
                 await request.app["bot"].send_message(deal.buyer_id, notice)
     sender_label = None
     if user_id in set(deps.config.admin_ids or []):
-        dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
         profile = await deps.user_service.profile_of(user_id)
         data = _profile_payload(profile, request=request, include_private=True) or {}
         name = data.get("display_name") or data.get("full_name") or data.get("username") or user_id
@@ -1266,7 +1266,8 @@ async def _api_deal_chat_send_file(request: web.Request) -> web.Response:
         file_name=filename,
     )
     is_moderator = user_id in set(deps.config.admin_ids or []) or await deps.user_service.is_moderator(user_id)
-    if is_moderator:
+    dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
+    if is_moderator and dispute_any and deal.status.value == "dispute":
         with suppress(Exception):
             notice = f"⚠️ Модератор отправил файл в чате сделки #{deal.public_id}.\nОткройте приложение."
             if deal.seller_id and deal.seller_id != user_id:
@@ -1275,7 +1276,6 @@ async def _api_deal_chat_send_file(request: web.Request) -> web.Response:
                 await request.app["bot"].send_message(deal.buyer_id, notice)
     sender_label = None
     if user_id in set(deps.config.admin_ids or []):
-        dispute_any = await deps.dispute_service.dispute_any_for_deal(deal_id)
         profile = await deps.user_service.profile_of(user_id)
         data = _profile_payload(profile, request=request, include_private=True) or {}
         name = data.get("display_name") or data.get("full_name") or data.get("username") or user_id

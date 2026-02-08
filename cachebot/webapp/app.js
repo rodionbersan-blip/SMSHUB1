@@ -4923,7 +4923,8 @@
       }
       const meta = document.createElement("div");
       meta.className = "chat-meta";
-      meta.textContent = formatDate(msg.created_at);
+      // Show only time in chat corner.
+      meta.textContent = formatTime(msg.created_at);
       item.appendChild(meta);
       chatList.appendChild(item);
     });
