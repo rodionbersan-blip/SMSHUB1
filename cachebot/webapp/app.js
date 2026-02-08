@@ -4454,6 +4454,12 @@
         bottomRow.remove();
       }
     }
+    if (topRow.childElementCount === 1) {
+      topRow.classList.add("single");
+    }
+    if (bottomRow.childElementCount === 1) {
+      bottomRow.classList.add("single");
+    }
     if (!bottomRow.childElementCount) {
       bottomRow.remove();
     }
@@ -4497,7 +4503,7 @@
       if (!file) return;
       const form = new FormData();
       form.append("file", file, file.name || "qr.png");
-      showNotice("Загружаем QR...");
+      if (centerNotice) centerNotice.classList.remove("show");
       try {
         const res = await fetch(`/api/deals/${dealId}/qr`, {
           method: "POST",

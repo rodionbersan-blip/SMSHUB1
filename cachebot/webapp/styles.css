@@ -5663,6 +5663,10 @@ body.modal-open #app {
   gap: 10px;
 }
 
+.modal-actions-row.single {
+  grid-template-columns: 1fr;
+}
+
 .modal-actions-bottom {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -5673,6 +5677,12 @@ body.modal-open #app {
 
 .modal-actions-row .btn {
   width: 100%;
+}
+
+#qrViewModal .modal-actions-row .btn {
+  height: 40px;
+  font-size: 13px;
+  padding: 0 10px;
 }
 
 .modal-actions-row .balance-manage-transfer {
