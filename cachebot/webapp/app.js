@@ -2690,8 +2690,7 @@
       return { ok: true, value: rub };
     };
     input.addEventListener("input", () => {
-      const validation = validateRubAmount();
-      btn.disabled = input.value ? !validation.ok : false;
+      btn.disabled = false;
     });
     btn.addEventListener("click", async () => {
       const validation = validateRubAmount();
