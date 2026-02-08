@@ -133,7 +133,7 @@ h2 {
 
 .profile-admin-badge {
   margin-top: 6px;
-  padding: 6px 0;
+  padding: 4px 0;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -167,11 +167,11 @@ h2 {
 }
 
 .profile-admin-badge::before {
-  top: -2px;
+  top: -1px;
 }
 
 .profile-admin-badge::after {
-  bottom: -2px;
+  bottom: -1px;
 }
 
 :root[data-theme="light"] .profile-admin-badge::before,
@@ -1151,6 +1151,17 @@ body.modal-open #app {
   padding: 16px;
   margin-bottom: 16px;
   box-shadow: none;
+}
+
+.profile-hero > div {
+  flex: 1;
+  text-align: center;
+}
+
+.profile-hero #profileDisplayName,
+.profile-hero #profileAdminBadge {
+  width: 100%;
+  text-align: center;
 }
 
 .profile-avatar-large {
