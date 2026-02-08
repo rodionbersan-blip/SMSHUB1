@@ -2298,39 +2298,28 @@
     state.unreadDeals = pendingSet;
     persistUnreadDeals();
     const unreadDealIds = new Set(pendingSet);
-    const chatUnreadCounts = state.chatUnreadCounts || {};
-    const chatSeen = state.chatLastSeenAt || {};
+    // Recompute unread state deterministically from timestamps to avoid "phantom" unread after restart.
+    const chatUnreadCounts = {};
+    const chatSeen = { ...(state.chatLastSeenAt || {}) };
+    const chatRead = state.chatLastRead || {};
     deals.forEach((deal) => {
       if (isFinalStatus(deal.status)) return;
       if (!deal.chat_last_at) return;
       if (deal.chat_last_sender_id && isSelfSender(deal.chat_last_sender_id)) return;
-      const lastSeen = chatSeen[deal.id];
-      if (chatModal?.classList.contains("open") && state.activeChatDealId === deal.id) {
-        // If the chat is currently open, treat incoming messages as read immediately.
-        chatSeen[deal.id] = deal.chat_last_at;
-        chatUnreadCounts[deal.id] = 0;
-        return;
+      const lastRead = chatRead[deal.id] || chatSeen[deal.id] || null;
+      const isOpen = chatModal?.classList.contains("open") && state.activeChatDealId === deal.id;
+      const unread =
+        !isOpen &&
+        (!lastRead || (parseTime(deal.chat_last_at) || 0) > (parseTime(lastRead) || 0));
+      chatUnreadCounts[deal.id] = unread ? 1 : 0;
+      if (isOpen) {
+        // Keep read markers in sync while the chat is open.
+        markChatRead(deal.id, deal.chat_last_at);
       }
-      if (!lastSeen) {
-        chatSeen[deal.id] = deal.chat_last_at;
-        chatUnreadCounts[deal.id] = (chatUnreadCounts[deal.id] || 0) + 1;
-        return;
-      }
-      if (deal.chat_last_at !== lastSeen) {
-        chatUnreadCounts[deal.id] = (chatUnreadCounts[deal.id] || 0) + 1;
-        chatSeen[deal.id] = deal.chat_last_at;
-      }
+      if (unread) unreadDealIds.add(deal.id);
     });
     state.chatUnreadCounts = chatUnreadCounts;
-    state.chatLastSeenAt = chatSeen;
     persistChatUnreadCounts();
-    persistChatSeen();
-    deals.forEach((deal) => {
-      if (isFinalStatus(deal.status)) return;
-      if (isChatUnread(deal)) {
-        unreadDealIds.add(deal.id);
-      }
-    });
     state.unreadDealIds = unreadDealIds;
     if (quickDealsCount) {
       quickDealsCount.textContent = activeCount > 9 ? "9+" : `${activeCount}`;
@@ -2353,9 +2342,46 @@
   };
 
   const parseTime = (value) => {
-    if (!value) return null;
-    const ms = Date.parse(value);
-    return Number.isNaN(ms) ? null : ms;
+    if (value === null || value === undefined || value === "") return null;
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (value instanceof Date) return value.getTime();
+    const str = String(value).trim();
+    if (!str) return null;
+
+    // iOS WebView is picky about non-ISO timestamps (e.g. "YYYY-MM-DD HH:mm:ss").
+    // Normalize common backend formats to avoid "phantom unread" after reload.
+    let ms = Date.parse(str);
+    if (!Number.isNaN(ms)) return ms;
+
+    // "2026-02-08 21:39:00" or "2026-02-08T21:39:00"
+    let m = str.match(
+      /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/
+    );
+    if (m) {
+      const y = Number(m[1]);
+      const mo = Number(m[2]) - 1;
+      const d = Number(m[3]);
+      const h = Number(m[4]);
+      const mi = Number(m[5]);
+      const s = Number(m[6] || 0);
+      return new Date(y, mo, d, h, mi, s).getTime();
+    }
+
+    // "08.02.2026, 21:39" (fallback)
+    m = str.match(
+      /^(\d{2})\.(\d{2})\.(\d{4}),?\s*(\d{2}):(\d{2})(?::(\d{2}))?$/
+    );
+    if (m) {
+      const d = Number(m[1]);
+      const mo = Number(m[2]) - 1;
+      const y = Number(m[3]);
+      const h = Number(m[4]);
+      const mi = Number(m[5]);
+      const s = Number(m[6] || 0);
+      return new Date(y, mo, d, h, mi, s).getTime();
+    }
+
+    return null;
   };
 
   const isSelfSender = (senderId) => {
@@ -2374,12 +2400,12 @@
 
   const markChatRead = (dealId, isoValue) => {
     if (!dealId) return;
-    const value = isoValue || new Date().toISOString();
+    const valueMs = parseTime(isoValue) || Date.now();
     state.chatLastRead = state.chatLastRead || {};
-    state.chatLastRead[dealId] = value;
+    state.chatLastRead[dealId] = valueMs;
     persistChatRead();
     state.chatLastSeenAt = state.chatLastSeenAt || {};
-    state.chatLastSeenAt[dealId] = value;
+    state.chatLastSeenAt[dealId] = valueMs;
     persistChatSeen();
     state.chatUnreadCounts = state.chatUnreadCounts || {};
     state.chatUnreadCounts[dealId] = 0;
