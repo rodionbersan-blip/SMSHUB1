@@ -1534,6 +1534,7 @@
     if (deal.status === "paid") {
       if (deal.qr_stage === "awaiting_buyer_ready") return "Ожидаем готовность";
       if (deal.qr_stage === "awaiting_seller_photo") return "Прикрепление QR";
+      if (deal.qr_stage === "awaiting_buyer_scan") return "Сканирование QR";
       if (deal.qr_stage === "ready") return "Выдача наличных";
       return "Отправка QR";
     }
@@ -4236,6 +4237,18 @@
       alert.textContent = "📎 Прикрепите QR по кнопке ниже.";
       dealModalBody.appendChild(alert);
     }
+    if (deal.status === "paid" && deal.qr_stage === "awaiting_buyer_scan" && deal.role === "seller") {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent = "✅ QR прикреплен.\nОжидаем, пока покупатель отсканирует QR.";
+      dealModalBody.appendChild(alert);
+    }
+    if (deal.status === "paid" && deal.qr_stage === "awaiting_buyer_scan" && deal.role === "buyer") {
+      const alert = document.createElement("div");
+      alert.className = "deal-alert";
+      alert.textContent = "📷 QR готов.\nНажмите «Посмотреть QR».";
+      dealModalBody.appendChild(alert);
+    }
     if (deal.status === "paid" && deal.qr_stage === "ready" && deal.role === "seller") {
       const alert = document.createElement("div");
       alert.className = "deal-alert";
@@ -4345,17 +4358,20 @@
       ["reserved", "paid", "dispute"].includes(deal.status)
     ) {
       const hasUnread = isChatUnread(deal);
-      addAction(topRow, "Открыть чат", () => openDealChat(deal), false, "", {
+      const chatBtn = addAction(topRow, "Открыть чат", () => openDealChat(deal), false, "", {
         badge: hasUnread,
         badgeClass: "dot",
         className: "deal-chat-btn",
       });
+      if (deal.status === "paid" && deal.role === "seller" && deal.qr_stage === "awaiting_buyer_scan") {
+        chatBtn.classList.add("full-row", "expand");
+      }
     }
     const isSellerQrAttachStage =
       !isCompleted &&
       deal.status === "paid" &&
       deal.role === "seller" &&
-      ["awaiting_seller_photo", "ready"].includes(deal.qr_stage);
+      deal.qr_stage === "awaiting_seller_photo";
     if (
       isSellerQrAttachStage
     ) {
@@ -4411,6 +4427,16 @@
         false,
         "",
         { className: "deal-cancel-btn" }
+      );
+    }
+    if (!isCompleted && actions.view_qr && deal.role === "buyer" && deal.qr_stage === "awaiting_buyer_scan") {
+      addAction(
+        topRow,
+        "Посмотреть QR",
+        () => openQrView(deal),
+        false,
+        "",
+        { className: "deal-qr-btn" }
       );
     }
     if (deal.status === "completed" && !deal.reviewed) {
@@ -4737,6 +4763,59 @@
       }
     );
   };
+
+  const qrViewModal = document.getElementById("qrViewModal");
+  const qrViewImg = document.getElementById("qrViewImg");
+  const qrViewClose = document.getElementById("qrViewClose");
+  const qrViewScanned = document.getElementById("qrViewScanned");
+  const qrViewNew = document.getElementById("qrViewNew");
+  let qrViewDealId = null;
+
+  const closeQrView = () => {
+    qrViewDealId = null;
+    if (qrViewImg) qrViewImg.src = "";
+    qrViewModal?.classList.remove("open");
+  };
+
+  qrViewClose?.addEventListener("click", closeQrView);
+
+  const openQrView = (deal) => {
+    if (!qrViewModal || !qrViewImg) return;
+    if (!deal?.qr_file_url) {
+      showNotice("QR не найден");
+      return;
+    }
+    qrViewDealId = deal.id;
+    qrViewImg.src = deal.qr_file_url;
+    qrViewModal.classList.add("open");
+  };
+
+  qrViewScanned?.addEventListener("click", async () => {
+    if (!qrViewDealId) return;
+    const payload = await fetchJson(`/api/deals/${qrViewDealId}/qr-scanned`, {
+      method: "POST",
+      body: "{}",
+    });
+    if (payload?.ok) {
+      closeQrView();
+      maybeRenderDealModal(payload.deal);
+      await loadDeals();
+    }
+  });
+
+  qrViewNew?.addEventListener("click", async () => {
+    if (!qrViewDealId) return;
+    const payload = await fetchJson(`/api/deals/${qrViewDealId}/qr-new`, {
+      method: "POST",
+      body: "{}",
+    });
+    if (payload?.ok) {
+      closeQrView();
+      maybeRenderDealModal(payload.deal);
+      await loadDeals();
+      showNotice("Запросили новый QR");
+    }
+  });
 
   const uploadDisputeEvidence = async (disputeId) => {
     openDisputeEvidenceModal(disputeId);

@@ -682,10 +682,11 @@ class DealService:
             deal = self._ensure_deal(deal_id)
             if deal.seller_id != seller_id:
                 raise PermissionError("Нет доступа к сделке")
-            if deal.qr_stage not in {QrStage.AWAITING_SELLER_PHOTO, QrStage.READY}:
+            if deal.qr_stage not in {QrStage.AWAITING_SELLER_PHOTO}:
                 raise ValueError("Сейчас не требуется отправлять QR")
             deal.qr_photo_id = file_id
-            deal.qr_stage = QrStage.READY
+            deal.qr_scanned = False
+            deal.qr_stage = QrStage.AWAITING_BUYER_SCAN
             self._deals[deal.id] = deal
             await self._persist()
             return deal
@@ -695,10 +696,42 @@ class DealService:
             deal = self._ensure_deal(deal_id)
             if deal.seller_id != seller_id:
                 raise PermissionError("Нет доступа к сделке")
-            if deal.qr_stage not in {QrStage.AWAITING_SELLER_PHOTO, QrStage.READY}:
+            if deal.qr_stage not in {QrStage.AWAITING_SELLER_PHOTO}:
                 raise ValueError("Сейчас не требуется отправлять QR")
             deal.qr_photo_id = f"web:{file_name}"
+            deal.qr_scanned = False
+            deal.qr_stage = QrStage.AWAITING_BUYER_SCAN
+            self._deals[deal.id] = deal
+            await self._persist()
+            return deal
+
+    async def buyer_scanned_qr(self, deal_id: str, buyer_id: int) -> Deal:
+        async with self._lock:
+            deal = self._ensure_deal(deal_id)
+            if deal.buyer_id != buyer_id:
+                raise PermissionError("Нет доступа к сделке")
+            if deal.status != DealStatus.PAID:
+                raise ValueError("QR можно подтвердить только после оплаты")
+            if deal.qr_stage != QrStage.AWAITING_BUYER_SCAN:
+                raise ValueError("Сейчас не требуется подтверждать сканирование")
+            deal.qr_scanned = True
             deal.qr_stage = QrStage.READY
+            self._deals[deal.id] = deal
+            await self._persist()
+            return deal
+
+    async def buyer_request_new_qr(self, deal_id: str, buyer_id: int) -> Deal:
+        async with self._lock:
+            deal = self._ensure_deal(deal_id)
+            if deal.buyer_id != buyer_id:
+                raise PermissionError("Нет доступа к сделке")
+            if deal.status != DealStatus.PAID:
+                raise ValueError("Новый QR можно запросить только после оплаты")
+            if deal.qr_stage != QrStage.AWAITING_BUYER_SCAN:
+                raise ValueError("Сейчас нельзя запросить новый QR")
+            deal.qr_photo_id = None
+            deal.qr_scanned = False
+            deal.qr_stage = QrStage.AWAITING_SELLER_PHOTO
             self._deals[deal.id] = deal
             await self._persist()
             return deal

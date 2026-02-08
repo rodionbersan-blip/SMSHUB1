@@ -24,6 +24,7 @@ class QrStage(str, Enum):
     AWAITING_SELLER_ATTACH = "awaiting_seller_attach"
     AWAITING_BUYER_READY = "awaiting_buyer_ready"
     AWAITING_SELLER_PHOTO = "awaiting_seller_photo"
+    AWAITING_BUYER_SCAN = "awaiting_buyer_scan"
     READY = "ready"
 
 
@@ -50,6 +51,7 @@ class Deal:
     qr_stage: QrStage = QrStage.IDLE
     qr_bank_options: list[str] = field(default_factory=list)
     qr_photo_id: str | None = None
+    qr_scanned: bool = False
     buyer_cash_confirmed: bool = False
     seller_cash_confirmed: bool = False
     payout_completed: bool = False
@@ -90,6 +92,7 @@ class Deal:
             "qr_stage": self.qr_stage.value,
             "qr_bank_options": self.qr_bank_options,
             "qr_photo_id": self.qr_photo_id,
+            "qr_scanned": self.qr_scanned,
             "buyer_cash_confirmed": self.buyer_cash_confirmed,
             "seller_cash_confirmed": self.seller_cash_confirmed,
             "payout_completed": self.payout_completed,
@@ -134,6 +137,7 @@ class Deal:
             qr_stage=QrStage(data.get("qr_stage") or QrStage.IDLE.value),
             qr_bank_options=list(data.get("qr_bank_options") or []),
             qr_photo_id=data.get("qr_photo_id"),
+            qr_scanned=bool(data.get("qr_scanned")),
             buyer_cash_confirmed=bool(data.get("buyer_cash_confirmed")),
             seller_cash_confirmed=bool(data.get("seller_cash_confirmed")),
             payout_completed=bool(data.get("payout_completed")),

@@ -5093,6 +5093,23 @@ body.modal-open #app {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
+.qr-view {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 6px;
+}
+
+.qr-view img {
+  width: min(360px, 86vw);
+  height: auto;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 10px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+}
+
 .video-modal-card {
   width: min(520px, 92vw);
   height: auto;
@@ -5660,6 +5677,20 @@ body.modal-open #app {
 
 .modal-actions-row .balance-manage-transfer {
   grid-column: 1 / -1;
+}
+
+.modal-actions-row .full-row {
+  grid-column: 1 / -1;
+}
+
+.modal-actions-row .full-row.expand {
+  animation: btn-expand 0.22s ease-out;
+  transform-origin: center;
+}
+
+@keyframes btn-expand {
+  from { transform: scaleX(0.96); }
+  to { transform: scaleX(1); }
 }
 
 .dispute-resolve-row {

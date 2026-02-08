@@ -65,6 +65,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/deals/{deal_id}/open-dispute", _api_deal_open_dispute)
     app.router.add_post("/api/deals/{deal_id}/qr", _api_deal_upload_qr)
     app.router.add_post("/api/deals/{deal_id}/qr-text", _api_deal_upload_qr_text)
+    app.router.add_post("/api/deals/{deal_id}/qr-scanned", _api_deal_qr_scanned)
+    app.router.add_post("/api/deals/{deal_id}/qr-new", _api_deal_qr_request_new)
     app.router.add_get("/api/deals/{deal_id}/chat", _api_deal_chat_list)
     app.router.add_post("/api/deals/{deal_id}/chat", _api_deal_chat_send)
     app.router.add_post("/api/deals/{deal_id}/chat/file", _api_deal_chat_send_file)
@@ -1130,6 +1132,58 @@ async def _api_deal_upload_qr_text(request: web.Request) -> web.Response:
         "file_url": _chat_file_url(request, msg),
     }
     return web.json_response({"ok": True, "message": payload})
+
+
+async def _api_deal_qr_scanned(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    try:
+        deal = await deps.deal_service.buyer_scanned_qr(deal_id, user_id)
+    except (PermissionError, ValueError) as exc:
+        raise web.HTTPBadRequest(text=str(exc))
+    await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=0,
+        text="Покупатель отсканировал QR.",
+        file_path=None,
+        file_name=None,
+        system=True,
+    )
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
+    return web.json_response({"ok": True, "deal": payload})
+
+
+async def _api_deal_qr_request_new(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    deal_id = request.match_info["deal_id"]
+    deal = await deps.deal_service.get_deal(deal_id)
+    if not deal:
+        raise web.HTTPNotFound(text="Сделка не найдена")
+    try:
+        deal = await deps.deal_service.buyer_request_new_qr(deal_id, user_id)
+    except (PermissionError, ValueError) as exc:
+        raise web.HTTPBadRequest(text=str(exc))
+    await deps.chat_service.add_message(
+        deal_id=deal_id,
+        sender_id=0,
+        text="Покупатель запросил новый QR.",
+        file_path=None,
+        file_name=None,
+        system=True,
+    )
+    if deal.seller_id:
+        with suppress(Exception):
+            await request.app["bot"].send_message(
+                deal.seller_id,
+                f"⚠️ Покупатель запросил новый QR по сделке #{deal.public_id}.\nПрикрепите QR заново в приложении.",
+            )
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
+    return web.json_response({"ok": True, "deal": payload})
 
 
 async def _api_deal_chat_list(request: web.Request) -> web.Response:
@@ -3179,6 +3233,18 @@ def _chat_file_url(request: web.Request, msg) -> str | None:
     )
 
 
+def _deal_qr_url(request: web.Request, deal) -> str | None:
+    qr_id = getattr(deal, "qr_photo_id", None)
+    if not qr_id or not isinstance(qr_id, str) or not qr_id.startswith("web:"):
+        return None
+    filename = qr_id.split(":", 1)[1]
+    query = {}
+    init_data = request.headers.get("X-Telegram-Init-Data")
+    if init_data:
+        query["initData"] = init_data
+    return str(request.url.with_path(f"/api/chat-files/{deal.id}/{filename}").with_query(query))
+
+
 def _avatar_url(request: web.Request, profile) -> str | None:
     if not profile or not getattr(profile, "avatar_path", None):
         return None
@@ -3409,6 +3475,7 @@ async def _deal_payload(
         "created_at": deal.created_at.isoformat(),
         "atm_bank": deal.atm_bank,
         "qr_bank_options": list(deal.qr_bank_options or []),
+        "qr_file_url": _deal_qr_url(request, deal) if request else None,
         "counterparty": _profile_payload(counterparty, request=request, include_private=False),
         "is_p2p": deal.is_p2p,
         "buyer_cash_confirmed": deal.buyer_cash_confirmed,
@@ -3499,6 +3566,14 @@ def _deal_actions(deal, user_id: int) -> dict[str, bool]:
         and deal.dispute_available_at
         and deal.dispute_available_at <= datetime.now(timezone.utc)
     )
+    can_view_qr = bool(
+        is_buyer
+        and deal.status.value == "paid"
+        and deal.qr_stage.value == "awaiting_buyer_scan"
+        and bool(deal.qr_photo_id)
+    )
+    can_request_new_qr = can_view_qr
+    can_mark_scanned = can_view_qr
     return {
         "cancel": can_cancel,
         "accept_offer": can_accept_offer,
@@ -3509,4 +3584,7 @@ def _deal_actions(deal, user_id: int) -> dict[str, bool]:
         "confirm_buyer": can_confirm_buyer,
         "confirm_seller": can_confirm_seller,
         "open_dispute": can_open_dispute,
+        "view_qr": can_view_qr,
+        "request_new_qr": can_request_new_qr,
+        "mark_qr_scanned": can_mark_scanned,
     }
