@@ -2676,6 +2676,14 @@
         log("Введите сумму в RUB", "warn");
         return;
       }
+      if (Number.isFinite(ad.min_rub) && rub < Number(ad.min_rub)) {
+        showNotice(`Сумма меньше лимита: от ₽${formatAmount(ad.min_rub, 0)}`);
+        return;
+      }
+      if (Number.isFinite(ad.max_rub) && rub > Number(ad.max_rub)) {
+        showNotice(`Сумма больше лимита: до ₽${formatAmount(ad.max_rub, 0)}`);
+        return;
+      }
       p2pModalActions.innerHTML = "";
       if (ad.banks && ad.banks.length > 1) {
         const bankTitle = document.createElement("div");
