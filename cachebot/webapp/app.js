@@ -4141,7 +4141,7 @@
         <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
       </div>
     `;
-    if (Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length) {
+    if (deal.actions?.select_bank && Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length) {
       const bankRow = document.createElement("div");
       bankRow.className = "deal-detail-row bank-select-row";
       const label = document.createElement("span");
@@ -4160,16 +4160,12 @@
         if (isSelected) {
           btn.classList.add("active");
         }
-        if (!deal.actions?.select_bank) {
-          btn.disabled = true;
-        }
         const icon = bankIcon(bank);
         const name = bankLabel(bank);
         btn.innerHTML = icon
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${name}</span>`
           : name;
         const applySelection = () => {
-          if (!deal.actions?.select_bank) return;
           dealBankSelections.set(deal.id, bank);
           options.querySelectorAll(".p2p-bank-btn").forEach((el) => {
             el.classList.toggle("active", el.dataset.bank === bank);
