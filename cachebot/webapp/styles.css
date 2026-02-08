@@ -4917,7 +4917,9 @@ body.modal-open #app {
   max-width: 86%;
   width: fit-content;
   min-width: 140px;
-  padding: 10px 12px;
+  position: relative;
+  padding: 10px 12px 20px;
+  padding-right: 52px;
   border-radius: 22px;
   background: var(--card-contrast);
   border: 1px solid var(--card-contrast-border);
@@ -4950,8 +4952,12 @@ body.modal-open #app {
 .chat-meta {
   font-size: 10px;
   color: var(--muted);
-  align-self: flex-end;
-  margin-top: 2px;
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  margin: 0;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .chat-file {
