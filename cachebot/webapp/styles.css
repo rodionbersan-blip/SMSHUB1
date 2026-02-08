@@ -5113,6 +5113,13 @@ body.modal-open #app {
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
 }
 
+@media (max-width: 480px) {
+  /* iOS WebView sometimes visually centers this slightly to the right. */
+  .qr-view img {
+    transform: translateX(-6px);
+  }
+}
+
 .video-modal-card {
   width: min(520px, 92vw);
   height: auto;
