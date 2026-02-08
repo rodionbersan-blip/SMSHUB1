@@ -4899,15 +4899,8 @@
       }
       const fileName = (msg.file_name || "").toLowerCase();
       const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileName);
-      if (msg.file_url && !msg.system) {
-        // For file messages we show the sender label (nickname) instead of a file-type label.
-        if (isSelf) {
-          const label = document.createElement("div");
-          label.className = "chat-system-label chat-user-label";
-          label.textContent = senderName || selfName || "Вы";
-          item.appendChild(label);
-        }
-      }
+      // For file messages: no "📎 Фото/Файл" label.
+      // Sender nickname is shown only for incoming messages (handled above).
       if (msg.text) {
         const text = document.createElement("div");
         text.textContent = msg.text;
