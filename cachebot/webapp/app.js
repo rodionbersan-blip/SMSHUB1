@@ -2305,6 +2305,12 @@
       if (!deal.chat_last_at) return;
       if (deal.chat_last_sender_id && isSelfSender(deal.chat_last_sender_id)) return;
       const lastSeen = chatSeen[deal.id];
+      if (chatModal?.classList.contains("open") && state.activeChatDealId === deal.id) {
+        // If the chat is currently open, treat incoming messages as read immediately.
+        chatSeen[deal.id] = deal.chat_last_at;
+        chatUnreadCounts[deal.id] = 0;
+        return;
+      }
       if (!lastSeen) {
         chatSeen[deal.id] = deal.chat_last_at;
         chatUnreadCounts[deal.id] = (chatUnreadCounts[deal.id] || 0) + 1;
@@ -2313,13 +2319,6 @@
       if (deal.chat_last_at !== lastSeen) {
         chatUnreadCounts[deal.id] = (chatUnreadCounts[deal.id] || 0) + 1;
         chatSeen[deal.id] = deal.chat_last_at;
-        if (chatModal?.classList.contains("open") && state.activeChatDealId === deal.id) {
-          try {
-            tg?.HapticFeedback?.notificationOccurred("success");
-          } catch {
-            // ignore haptics errors
-          }
-        }
       }
     });
     state.chatUnreadCounts = chatUnreadCounts;
@@ -5172,7 +5171,11 @@
           }
         }
         if (state.activeChatDealId && chatModal?.classList.contains("open")) {
-          await loadChatMessages(state.activeChatDealId);
+          const msgs = await loadChatMessages(state.activeChatDealId);
+          const last = Array.isArray(msgs) && msgs.length ? msgs[msgs.length - 1] : null;
+          if (last?.created_at) {
+            markChatRead(state.activeChatDealId, last.created_at);
+          }
         }
       } finally {
         state.livePollInFlight = false;
