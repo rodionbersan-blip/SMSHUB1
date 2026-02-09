@@ -5107,7 +5107,7 @@
       // Used for restoring scroll position after closing/reopening chat.
       item.dataset.messageId = msg.id || msg.message_id || msg.created_at || "";
       if (isMod) {
-        item.classList.add("mod");
+        item.classList.add(isSelf ? "mod-self" : "mod");
       }
       if (msg.system) {
         const label = document.createElement("div");
