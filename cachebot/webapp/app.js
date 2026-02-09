@@ -1575,6 +1575,7 @@
     if (deal.status === "completed") return "status-ok";
     if (deal.status === "canceled") return "status-bad";
     if (deal.status === "expired") return "status-warn";
+    if (deal.status === "dispute") return "status-warn";
     return "";
   };
 
