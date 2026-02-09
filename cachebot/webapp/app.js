@@ -3945,29 +3945,6 @@
     const payload = await fetchJson(`/api/disputes/${disputeId}`);
     if (!payload?.ok) return;
     const dispute = payload.dispute;
-    const escapeHtml = (value) =>
-      String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-    const formatDisputeReason = (value) => {
-      const str = String(value ?? "").trim();
-      if (!str) return "—";
-      const lower = str.toLowerCase();
-      // Backend may store "Другая причина: <text>". In UI we show only the actual reason text.
-      if (lower.startsWith("другая причина")) {
-        const colon = str.indexOf(":");
-        if (colon >= 0) {
-          const rest = str.slice(colon + 1).trim();
-          return rest || "Другая причина";
-        }
-        return "Другая причина";
-      }
-      return str;
-    };
     const canManage = !!dispute.can_manage;
     state.activeDisputeId = dispute.id;
     p2pModalTitle.textContent = `Спор по сделке #${dispute.deal.public_id}`;
@@ -3990,7 +3967,6 @@
     const baseUsdtAmount = dispute.deal?.rate
       ? Number(dispute.deal.usd_amount || 0) / Number(dispute.deal.rate || 1)
       : Number(dispute.deal.usdt_amount || 0);
-    const disputeReasonText = formatDisputeReason(dispute.reason);
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>
         <span class="dispute-party">
@@ -4005,7 +3981,7 @@
         </span>
       </div>
       <div class="deal-detail-row"><span>Открыл:</span>${openerName}</div>
-      <div class="deal-detail-row"><span>Причина:</span>${escapeHtml(disputeReasonText)}</div>
+      <div class="deal-detail-row"><span>Причина:</span>${dispute.reason}</div>
       <div class="deal-detail-row"><span>Открыт:</span>${formatDate(dispute.opened_at)}</div>
       <div class="deal-detail-row"><span>Сумма:</span>${formatAmount(baseUsdtAmount, 3)} USDT${
         canManage && dispute.deal?.rate
