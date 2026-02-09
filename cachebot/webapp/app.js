@@ -190,6 +190,7 @@
   const quickDealsCount = document.getElementById("quickDealsCount");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
   const quickDealsList = document.getElementById("quickDealsList");
+  const quickDisputesSection = document.getElementById("quickDisputesSection");
   const quickDisputesList = document.getElementById("quickDisputesList");
   const systemNotice = document.getElementById("systemNotice");
   const systemNoticeTitle = document.getElementById("systemNoticeTitle");
@@ -2504,9 +2505,10 @@
     const disputes = Array.isArray(state.assignedDisputes) ? state.assignedDisputes : [];
     quickDisputesList.innerHTML = "";
     if (!disputes.length) {
-      quickDisputesList.innerHTML = '<div class="deal-empty">Активных споров нет.</div>';
+      if (quickDisputesSection) quickDisputesSection.style.display = "none";
       return;
     }
+    if (quickDisputesSection) quickDisputesSection.style.display = "";
     disputes.forEach((item) => {
       const row = document.createElement("div");
       row.className = "quick-deal-item";
