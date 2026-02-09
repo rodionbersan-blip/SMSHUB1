@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BC Cash - Примеры компонентов</title>
+  <link rel="stylesheet" href="styles-improved.css">
+  <style>
+    body {
+      padding: 40px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .demo-section {
+      margin-bottom: 60px;
+      padding: 30px;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .demo-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .demo-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .code-block {
+      background: var(--bg-tertiary);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin-top: 12px;
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header с переключателем темы -->
+  <header class="topbar" style="position: static; margin-bottom: 40px;">
+    <div class="brand">
+      <img class="brand-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 50'%3E%3Ctext x='10' y='35' font-family='Arial' font-size='32' font-weight='bold' fill='%231d9bf0'%3EBC Cash%3C/text%3E%3C/svg%3E" alt="BC Cash">
+    </div>
+    <div class="topbar-actions">
+      <button id="themeToggle" class="theme-switch" type="button" aria-pressed="false">
+        <span class="theme-switch-track">
+          <span class="theme-switch-thumb">
+            <span class="theme-switch-icon">☀️</span>
+          </span>
+        </span>
+        <span class="theme-switch-label">Светлая</span>
+      </button>
+      <button class="profile-chip">
+        <span class="profile-avatar">BC</span>
+        <span class="profile-name">Демо Аккаунт</span>
+      </button>
+    </div>
+  </header>
+
+  <h1 style="text-align: center; margin-bottom: 40px; font-size: 36px;">
+    🎨 Примеры улучшенных компонентов
+  </h1>
+
+  <!-- Кнопки -->
+  <div class="demo-section">
+    <h2 class="demo-title">🔘 Кнопки</h2>
+    
+    <span class="demo-label">Основные варианты:</span>
+    <div class="demo-row">
+      <button class="btn primary">Primary</button>
+      <button class="btn success">Success</button>
+      <button class="btn danger">Danger</button>
+      <button class="btn warning">Warning</button>
+      <button class="btn ghost">Ghost</button>
+    </div>
+
+    <span class="demo-label">Градиентные кнопки:</span>
+    <div class="demo-row">
+      <button class="btn gradient-primary">Gradient Primary</button>
+      <button class="btn gradient-success">Gradient Success</button>
+      <button class="btn gradient-premium">Gradient Premium</button>
+    </div>
+
+    <span class="demo-label">Pill кнопки:</span>
+    <div class="demo-row">
+      <button class="btn pill">Pill Default</button>
+      <button class="btn pill active">Pill Active</button>
+    </div>
+
+    <span class="demo-label">Размеры:</span>
+    <div class="demo-row">
+      <button class="btn primary small">Small</button>
+      <button class="btn primary">Default</button>
+      <button class="btn primary large">Large</button>
+    </div>
+
+    <span class="demo-label">С иконками:</span>
+    <div class="demo-row">
+      <button class="btn primary">✨ Создать сделку</button>
+      <button class="btn success">✅ Подтвердить</button>
+      <button class="btn danger">❌ Отменить</button>
+    </div>
+
+    <div class="code-block">
+&lt;button class="btn primary"&gt;Primary&lt;/button&gt;
+&lt;button class="btn gradient-success"&gt;Gradient Success&lt;/button&gt;
+&lt;button class="btn pill active"&gt;Active Pill&lt;/button&gt;
+    </div>
+  </div>
+
+  <!-- Бейджи -->
+  <div class="demo-section">
+    <h2 class="demo-title">🏷️ Бейджи</h2>
+    
+    <div class="demo-row">
+      <span class="badge">Default</span>
+      <span class="badge success">Success</span>
+      <span class="badge warning">Warning</span>
+      <span class="badge danger">Danger</span>
+    </div>
+
+    <div class="code-block">
+&lt;span class="badge"&gt;Default&lt;/span&gt;
+&lt;span class="badge success"&gt;Success&lt;/span&gt;
+    </div>
+  </div>
+
+  <!-- Карточки -->
+  <div class="demo-section">
+    <h2 class="demo-title">🃏 Карточки</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+      <div class="card">
+        <h3>Обычная карточка</h3>
+        <p class="text-muted">Базовая карточка с hover эффектом</p>
+      </div>
+
+      <div class="card card-elevated">
+        <h3>Приподнятая карточка</h3>
+        <p class="text-muted">Больше тени для акцента</p>
+      </div>
+
+      <div class="card card-glass">
+        <h3>Glass карточка</h3>
+        <p class="text-muted">С эффектом размытого стекла</p>
+      </div>
+    </div>
+
+    <div class="code-block" style="margin-top: 20px;">
+&lt;div class="card"&gt;
+  &lt;h3&gt;Заголовок&lt;/h3&gt;
+  &lt;p&gt;Контент&lt;/p&gt;
+&lt;/div&gt;
+    </div>
+  </div>
+
+  <!-- Табы навигации -->
+  <div class="demo-section">
+    <h2 class="demo-title">📑 Навигационные табы</h2>
+    
+    <nav class="tabs">
+      <button class="tab nav-btn with-icon active">
+        <span class="nav-icon">📊</span>
+        P2P
+      </button>
+      <button class="tab nav-btn with-icon">
+        <span class="nav-icon">💼</span>
+        Сделки
+      </button>
+      <button class="tab nav-btn with-icon">
+        <span class="nav-icon">💬</span>
+        Помощь
+      </button>
+      <button class="tab nav-btn with-icon">
+        <span class="nav-icon">⚙️</span>
+        Настройки
+      </button>
+    </nav>
+
+    <div class="code-block">
+&lt;nav class="tabs"&gt;
+  &lt;button class="tab nav-btn with-icon active"&gt;
+    &lt;span class="nav-icon"&gt;📊&lt;/span&gt;
+    P2P
+  &lt;/button&gt;
+&lt;/nav&gt;
+    </div>
+  </div>
+
+  <!-- Формы -->
+  <div class="demo-section">
+    <h2 class="demo-title">📝 Формы</h2>
+    
+    <div style="max-width: 500px;">
+      <div style="margin-bottom: 20px;">
+        <label class="demo-label" for="demo-input">Текстовое поле</label>
+        <input id="demo-input" type="text" placeholder="Введите текст...">
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label class="demo-label" for="demo-textarea">Текстовая область</label>
+        <textarea id="demo-textarea" rows="4" placeholder="Введите сообщение..."></textarea>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label class="demo-label" for="demo-select">Выпадающий список</label>
+        <select id="demo-select">
+          <option>Выберите опцию</option>
+          <option>Опция 1</option>
+          <option>Опция 2</option>
+          <option>Опция 3</option>
+        </select>
+      </div>
+
+      <button class="btn primary">Отправить</button>
+    </div>
+
+    <div class="code-block">
+&lt;input type="text" placeholder="Введите текст..."&gt;
+&lt;textarea rows="4" placeholder="Сообщение..."&gt;&lt;/textarea&gt;
+    </div>
+  </div>
+
+  <!-- Профиль карточка -->
+  <div class="demo-section">
+    <h2 class="demo-title">👤 Карточка профиля</h2>
+    
+    <div class="card card-glass animate-slide-up" style="max-width: 400px;">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="profile-avatar" style="width: 60px; height: 60px; font-size: 24px;">BC</div>
+        <div>
+          <h3 class="font-bold" style="margin: 0;">Иван Иванов</h3>
+          <p class="text-muted text-small" style="margin: 4px 0 0 0;">@ivan_crypto</p>
+        </div>
+      </div>
+      
+      <div class="flex gap-1 mb-3">
+        <span class="badge success">Мерчант</span>
+        <span class="badge">127 сделок</span>
+        <span class="badge">98% ✅</span>
+      </div>
+
+      <p class="text-muted text-small mb-3">
+        Надежный трейдер с опытом работы более 2 лет. Быстрые переводы и честные условия.
+      </p>
+
+      <div class="flex gap-1">
+        <button class="btn gradient-premium" style="flex: 1;">💬 Написать</button>
+        <button class="btn ghost">📊 Статистика</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Анимации -->
+  <div class="demo-section">
+    <h2 class="demo-title">✨ Анимации</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+      <div class="card animate-fade-in" style="text-align: center;">
+        <h4>Fade In</h4>
+        <p class="text-muted text-small">animate-fade-in</p>
+      </div>
+
+      <div class="card animate-slide-up" style="text-align: center;">
+        <h4>Slide Up</h4>
+        <p class="text-muted text-small">animate-slide-up</p>
+      </div>
+
+      <div class="card animate-scale-in" style="text-align: center;">
+        <h4>Scale In</h4>
+        <p class="text-muted text-small">animate-scale-in</p>
+      </div>
+
+      <div class="card animate-pulse" style="text-align: center;">
+        <h4>Pulse</h4>
+        <p class="text-muted text-small">animate-pulse</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+&lt;div class="card animate-fade-in"&gt;...&lt;/div&gt;
+&lt;div class="card animate-slide-up"&gt;...&lt;/div&gt;
+    </div>
+  </div>
+
+  <!-- Утилиты -->
+  <div class="demo-section">
+    <h2 class="demo-title">🛠️ Утилитарные классы</h2>
+    
+    <div class="card mb-2">
+      <h4>Отступы</h4>
+      <div class="mt-2 mb-2">
+        <code class="text-small">mt-1, mt-2, mt-3, mt-4</code> - margin-top
+      </div>
+      <div class="mb-2">
+        <code class="text-small">mb-1, mb-2, mb-3, mb-4</code> - margin-bottom
+      </div>
+    </div>
+
+    <div class="card mb-2">
+      <h4>Текст</h4>
+      <p class="text-center">Центрированный текст (text-center)</p>
+      <p class="text-muted">Приглушенный текст (text-muted)</p>
+      <p class="text-small">Маленький текст (text-small)</p>
+      <p class="font-bold">Жирный текст (font-bold)</p>
+    </div>
+
+    <div class="card">
+      <h4>Flexbox</h4>
+      <div class="flex items-center justify-between gap-2 mt-2">
+        <span class="badge">Элемент 1</span>
+        <span class="badge success">Элемент 2</span>
+        <span class="badge danger">Элемент 3</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Сложный пример -->
+  <div class="demo-section">
+    <h2 class="demo-title">🎯 Комплексный пример</h2>
+    
+    <div class="card card-glass">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="font-bold" style="margin: 0;">Активная сделка #12345</h3>
+          <p class="text-muted text-small" style="margin: 4px 0 0 0;">Создана 5 минут назад</p>
+        </div>
+        <span class="badge success">Активна</span>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px; padding: 16px;">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-muted">Сумма USDT:</span>
+          <span class="font-bold">100.00 USDT</span>
+        </div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-muted">Курс:</span>
+          <span class="font-bold">91.50 ₽</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-muted">Получите:</span>
+          <span class="font-bold" style="color: var(--success);">9,150.00 ₽</span>
+        </div>
+      </div>
+
+      <div class="flex gap-1">
+        <button class="btn gradient-success" style="flex: 1;">✅ Подтвердить оплату</button>
+        <button class="btn danger">❌ Отменить</button>
+        <button class="btn ghost">💬 Чат</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Подвал -->
+  <div style="text-align: center; margin-top: 60px; padding: 30px; border-top: 2px solid var(--border);">
+    <h3 class="mb-2">🎨 BC Cash Design System</h3>
+    <p class="text-muted">Современный UI/UX для P2P платформы</p>
+    <div class="flex items-center justify-center gap-1 mt-3">
+      <span class="badge">Glassmorphism</span>
+      <span class="badge success">Адаптивный</span>
+      <span class="badge warning">Темная тема</span>
+    </div>
+  </div>
+
+  <script>
+    // Переключатель темы
+    const themeToggle = document.getElementById('themeToggle');
+    const root = document.documentElement;
+    
+    // Проверка сохраненной темы
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    root.setAttribute('data-theme', savedTheme);
+    updateThemeToggle(savedTheme);
+    
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = root.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      
+      root.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeToggle(newTheme);
+    });
+    
+    function updateThemeToggle(theme) {
+      const icon = themeToggle.querySelector('.theme-switch-icon');
+      const label = themeToggle.querySelector('.theme-switch-label');
+      
+      if (theme === 'dark') {
+        icon.textContent = '🌙';
+        label.textContent = 'Темная';
+        themeToggle.setAttribute('aria-pressed', 'true');
+      } else {
+        icon.textContent = '☀️';
+        label.textContent = 'Светлая';
+        themeToggle.setAttribute('aria-pressed', 'false');
+      }
+    }
+  </script>
+
+</body>
+</html>
