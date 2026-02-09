@@ -3222,13 +3222,32 @@
       disputesList.innerHTML = "<div class=\"deal-empty\">Открытых споров нет.</div>";
       return;
     }
+    const now = Date.now();
     disputes.forEach((item) => {
+      let statusText = item.assigned_to ? "В&nbsp;работе" : "Новый";
+      let statusClass = "";
+      if (!item.assigned_to) {
+        const openedMs = parseTime(item.opened_at);
+        const minutes = openedMs ? Math.max(0, (now - openedMs) / 60000) : null;
+        if (minutes !== null) {
+          if (minutes < 20) {
+            statusText = "Новый";
+            statusClass = "status-ok";
+          } else if (minutes < 60) {
+            statusText = "Ожидает";
+            statusClass = "status-warn";
+          } else {
+            statusText = "Срочно!";
+            statusClass = "status-bad";
+          }
+        }
+      }
       const row = document.createElement("div");
       row.className = "deal-item";
       row.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">Спор #${item.id.slice(0, 6)} • Сделка #${item.public_id}</div>
-          <div class="deal-status">${item.assigned_to ? "В&nbsp;работе" : "Новый"}</div>
+          <div class="deal-status ${statusClass}">${statusText}</div>
         </div>
         <div class="deal-row">Причина: ${item.reason || "—"}</div>
         <div class="deal-row">Открыт: ${formatDate(item.opened_at)}</div>
