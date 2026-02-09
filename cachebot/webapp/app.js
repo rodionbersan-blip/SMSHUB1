@@ -5082,6 +5082,16 @@
       const senderName =
         msg.sender_name || msg.sender_label || msg.sender_username || msg.sender_id || "";
       const isMod = Boolean(isDispute && msg.sender_is_moderator);
+      const isJoinNotice =
+        typeof msg.text === "string" && /подключен к чату/i.test(msg.text);
+      if (isJoinNotice) {
+        const notice = document.createElement("div");
+        notice.className = "chat-join-notice";
+        notice.textContent = msg.text;
+        chatList.appendChild(notice);
+        moderatorNoticeShown = true;
+        return;
+      }
       if (isMod && !moderatorNoticeShown) {
         const notice = document.createElement("div");
         notice.className = "chat-join-notice";

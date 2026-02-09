@@ -4977,9 +4977,9 @@ body.modal-open #app {
 .chat-join-notice {
   align-self: center;
   text-align: center;
-  color: #ffb14a;
+  color: #ff4d4f;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 14px;
   padding: 6px 10px;
   background: transparent;
 }
