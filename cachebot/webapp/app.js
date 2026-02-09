@@ -4151,7 +4151,7 @@
     p2pModalActions.innerHTML = "";
     if (dispute.deal) {
       const chatBtn = document.createElement("button");
-      chatBtn.className = "btn";
+      chatBtn.className = "btn deal-chat-btn";
       chatBtn.textContent = "Чат сделки";
       chatBtn.addEventListener("click", () => openDealChat(dispute.deal));
       p2pModalActions.appendChild(chatBtn);
@@ -4182,7 +4182,7 @@
       sellerName.className = "dispute-resolve-name";
       sellerName.textContent = seller || "Продавец";
       const sellerMax = document.createElement("button");
-      sellerMax.className = "btn pill";
+      sellerMax.className = "btn pill dispute-max-btn";
       sellerMax.textContent = "Макс";
       sellerMax.addEventListener("click", () => {
         const other = Number((buyerInput.value || "").replace(",", ".")) || 0;
@@ -4202,7 +4202,7 @@
       buyerName.className = "dispute-resolve-name";
       buyerName.textContent = buyer || "Мерчант";
       const buyerMax = document.createElement("button");
-      buyerMax.className = "btn pill";
+      buyerMax.className = "btn pill dispute-max-btn";
       buyerMax.textContent = "Макс";
       buyerMax.addEventListener("click", () => {
         const other = Number((sellerInput.value || "").replace(",", ".")) || 0;
@@ -4214,7 +4214,7 @@
       buyerRow.appendChild(buyerName);
 
       const resolve = document.createElement("button");
-      resolve.className = "btn";
+      resolve.className = "btn dispute-close-btn";
       resolve.textContent = "Закрыть спор";
       resolve.addEventListener("click", async () => {
         const sellerAmount = Number((sellerInput.value || "").replace(",", ".")) || 0;

@@ -5701,6 +5701,7 @@ body.modal-open #app {
   height: 28px;
   padding: 0 10px;
   font-size: 12px;
+  border-radius: 999px;
 }
 
 .modal-actions {
@@ -5708,6 +5709,14 @@ body.modal-open #app {
   flex-direction: column;
   gap: 10px;
   margin-top: 16px;
+}
+
+.modal-actions .deal-chat-btn {
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #4fa2ff 0%, #4b5bff 100%);
+  color: #fff;
+  border: none;
 }
 
 .modal-actions-row {
@@ -5779,21 +5788,35 @@ body.modal-open #app {
   height: 40px;
 }
 
+.dispute-resolve-row .btn.pill {
+  background: linear-gradient(135deg, #ffb24a 0%, #f08a24 100%);
+  color: #fff;
+  border: none;
+}
+
 .dispute-resolve-name {
   font-size: 12px;
   font-weight: 600;
   color: var(--text);
   padding: 6px 10px;
   border-radius: 12px;
-  background: rgba(77, 163, 255, 0.12);
-  border: 1px solid rgba(77, 163, 255, 0.35);
+  background: rgba(255, 167, 66, 0.12);
+  border: 1px solid rgba(255, 167, 66, 0.55);
   white-space: nowrap;
 }
 
 :root[data-theme="light"] .dispute-resolve-name {
   color: #0f1115;
-  background: rgba(77, 163, 255, 0.18);
-  border-color: rgba(77, 163, 255, 0.4);
+  background: rgba(255, 167, 66, 0.2);
+  border-color: rgba(255, 167, 66, 0.7);
+}
+
+.modal-actions .dispute-close-btn {
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff5a5a 0%, #e53935 100%);
+  color: #fff;
+  border: none;
 }
 
 .deal-chat-btn {
