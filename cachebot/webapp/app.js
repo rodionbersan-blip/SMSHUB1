@@ -3288,7 +3288,6 @@
           <div class="deal-id">Спор #${item.id.slice(0, 6)} • Сделка #${item.public_id}</div>
           <div class="deal-status ${statusClass}">${statusText}</div>
         </div>
-        <div class="deal-row">Причина: ${item.reason || "—"}</div>
         <div class="deal-row">Открыт: ${formatDate(item.opened_at)}</div>
       `;
       row.addEventListener("click", () => openDispute(item.id));
