@@ -5704,6 +5704,59 @@ body.modal-open #app {
   border-radius: 999px;
 }
 
+.online-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9aa3b2;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.online-indicator.online-green .online-dot {
+  background: #2ecc71;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
+}
+
+.online-indicator.online-yellow .online-dot {
+  background: #f6c344;
+  box-shadow: 0 0 6px rgba(246, 195, 68, 0.6);
+}
+
+.online-indicator.online-red .online-dot {
+  background: #ff5a5a;
+  box-shadow: 0 0 6px rgba(255, 90, 90, 0.6);
+}
+
+.online-tooltip {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(17, 19, 24, 0.92);
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.online-indicator:hover .online-tooltip,
+.online-indicator.show .online-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
 .modal-actions {
   display: flex;
   flex-direction: column;

@@ -1536,6 +1536,66 @@
     return dt.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
   };
 
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  const getOnlineInfo = (lastSeenAt) => {
+    if (!lastSeenAt) return null;
+    const last = new Date(lastSeenAt);
+    if (Number.isNaN(last.getTime())) return null;
+    const now = new Date();
+    const diffMs = Math.max(0, now.getTime() - last.getTime());
+    const diffMin = diffMs / 60000;
+    if (diffMin <= 5) {
+      return { cls: "online-green", text: "В сети" };
+    }
+    if (diffMin <= 30) {
+      return { cls: "online-yellow", text: "Был в сети: недавно" };
+    }
+    if (diffMin <= 60) {
+      return { cls: "online-red", text: "Был в сети: более 30 минут назад" };
+    }
+    const sameDay =
+      now.getFullYear() === last.getFullYear() &&
+      now.getMonth() === last.getMonth() &&
+      now.getDate() === last.getDate();
+    if (sameDay) {
+      return { cls: "online-red", text: "Был в сети: Сегодня" };
+    }
+    const diffDays = diffMin / 1440;
+    if (diffDays <= 7) {
+      return { cls: "online-red", text: "Был в сети: На этой неделе" };
+    }
+    return { cls: "online-red", text: "Был в сети: Более часа назад" };
+  };
+
+  const renderOnlineIndicator = (profile) => {
+    const info = getOnlineInfo(profile?.last_seen_at);
+    if (!info) return "";
+    const safeText = escapeHtml(info.text);
+    return `
+      <span class="online-indicator ${info.cls}" data-online-text="${safeText}">
+        <span class="online-dot" aria-hidden="true"></span>
+        <span class="online-tooltip">${safeText}</span>
+      </span>
+    `;
+  };
+
+  const wireOnlineIndicators = (root) => {
+    if (!root) return;
+    root.querySelectorAll(".online-indicator").forEach((el) => {
+      el.addEventListener("click", () => {
+        el.classList.add("show");
+        window.setTimeout(() => el.classList.remove("show"), 3000);
+      });
+    });
+  };
+
   const formatReviewDate = (iso) => {
     if (!iso) return "—";
     const dt = new Date(iso);
@@ -4005,14 +4065,6 @@
     const payload = await fetchJson(`/api/disputes/${disputeId}`);
     if (!payload?.ok) return;
     const dispute = payload.dispute;
-    const escapeHtml = (value) =>
-      String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
     const formatDisputeReason = (value) => {
       const str = String(value ?? "").trim();
       if (!str) return "—";
@@ -4051,16 +4103,20 @@
       ? Number(dispute.deal.usd_amount || 0) / Number(dispute.deal.rate || 1)
       : Number(dispute.deal.usdt_amount || 0);
     const disputeReasonText = formatDisputeReason(dispute.reason);
+    const sellerOnline = renderOnlineIndicator(dispute.seller);
+    const buyerOnline = renderOnlineIndicator(dispute.buyer);
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>
         <span class="dispute-party">
           <button class="link-btn" data-user="${dispute.seller?.user_id || ""}">${seller}</button>
+          ${sellerOnline}
           <button class="btn pill tg-profile-btn" data-username="${dispute.seller?.username || ""}">Профиль TG</button>
         </span>
       </div>
       <div class="deal-detail-row"><span>Мерчант:</span>
         <span class="dispute-party">
           <button class="link-btn" data-user="${dispute.buyer?.user_id || ""}">${buyer}</button>
+          ${buyerOnline}
           <button class="btn pill tg-profile-btn" data-username="${dispute.buyer?.username || ""}">Профиль TG</button>
         </span>
       </div>
@@ -4126,6 +4182,7 @@
     commentRow.appendChild(commentLabel);
     commentRow.appendChild(commentButtons);
     p2pModalBody.appendChild(commentRow);
+    wireOnlineIndicators(p2pModalBody);
     p2pModalBody.querySelectorAll(".link-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-user");
@@ -4219,6 +4276,12 @@
       resolve.addEventListener("click", async () => {
         const sellerAmount = Number((sellerInput.value || "").replace(",", ".")) || 0;
         const buyerAmount = Number((buyerInput.value || "").replace(",", ".")) || 0;
+        const round3 = (value) => Math.round(value * 1000) / 1000;
+        const total = sellerAmount + buyerAmount;
+        if (!Number.isFinite(total) || total <= 0 || round3(total) !== round3(baseTotal)) {
+          showNotice("Нужно распределить всю сумму спора.");
+          return;
+        }
         if (!disputeResolveModal || !disputeResolveInfo) return;
         const sellerName = seller || "Продавцу";
         const buyerName = buyer || "Мерчанту";
@@ -4255,6 +4318,7 @@
       deal.counterparty?.username ||
       "—";
     const roleLabel = deal.role === "seller" ? "Продавец" : "Покупатель";
+    const counterpartyOnline = renderOnlineIndicator(deal.counterparty);
     dealModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Роль:</span>${roleLabel}</div>
       <div class="deal-detail-row"><span>Статус:</span>${statusLabel(deal)}</div>
@@ -4270,9 +4334,13 @@
           : label;
       })() : "—"}</div>
       <div class="deal-detail-row"><span>Контрагент:</span>
-        <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
+        <span class="dispute-party">
+          <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
+          ${counterpartyOnline}
+        </span>
       </div>
     `;
+    wireOnlineIndicators(dealModalBody);
     if (deal.actions?.select_bank && Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length) {
       const bankRow = document.createElement("div");
       bankRow.className = "deal-detail-row bank-select-row";
