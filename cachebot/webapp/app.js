@@ -4811,7 +4811,14 @@
     }
     const draft = state.disputeOpenDraft;
     if (!draft?.file) {
-      showNotice("Прикрепите видео с банкомата");
+      showSystemNotice(
+        {
+          key: `dispute-video-required-${dealId}`,
+          message: "Для открытия спора нужно прикрепить видео с банкомата.",
+          type: "info",
+        },
+        { autoClose: true }
+      );
       return;
     }
     if (disputeVideoName) {
