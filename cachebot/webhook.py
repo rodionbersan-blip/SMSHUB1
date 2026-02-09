@@ -2847,9 +2847,6 @@ async def _api_reviews_add(request: web.Request) -> web.Response:
         raise web.HTTPNotFound(text="Сделка не найдена")
     if deal.status != DealStatus.COMPLETED:
         raise web.HTTPBadRequest(text="Сделка не завершена")
-    dispute_any = await deps.dispute_service.dispute_any_for_deal(deal.id)
-    if dispute_any and dispute_any.resolved:
-        raise web.HTTPBadRequest(text="Сделка закрыта спором и не может быть оценена")
     if user_id not in {deal.seller_id, deal.buyer_id}:
         raise web.HTTPForbidden(text="Нет доступа")
     target_id = deal.buyer_id if user_id == deal.seller_id else deal.seller_id

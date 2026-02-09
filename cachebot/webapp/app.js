@@ -2128,7 +2128,7 @@
       const item = document.createElement("div");
       item.className = "deal-item";
       const reviewBadge =
-        deal.status === "completed" && !deal.reviewed && !deal.dispute_resolution
+        deal.status === "completed" && !deal.reviewed
           ? '<span class="deal-review-badge">Оставьте отзыв</span>'
           : "";
       item.innerHTML = `
@@ -2200,12 +2200,7 @@
       const prev = previousStatusMap[deal.id];
       const dealLabel = `#${deal.public_id || deal.id}`;
       const completedKey = `${deal.id}:completed`;
-      if (
-        deal.status === "completed" &&
-        !deal.reviewed &&
-        !deal.dispute_resolution &&
-        !state.completedNotified?.[completedKey]
-      ) {
+      if (deal.status === "completed" && !deal.reviewed && !state.completedNotified?.[completedKey]) {
         pushSystemNotification({
           key: completedKey,
           message: `Сделка ${dealLabel} завершена.`,
@@ -2216,7 +2211,7 @@
         });
         state.completedNotified[completedKey] = true;
       } else if ((prev && prev !== deal.status) || (!prev && deal.status === "completed")) {
-        if (deal.status === "completed" && !deal.reviewed && !deal.dispute_resolution) {
+        if (deal.status === "completed" && !deal.reviewed) {
           pushSystemNotification({
             key: completedKey,
             message: `Сделка ${dealLabel} завершена.`,
@@ -4565,7 +4560,7 @@
         { className: "deal-qr-btn" }
       );
     }
-    if (deal.status === "completed" && !deal.reviewed && !deal.dispute_resolution) {
+    if (deal.status === "completed" && !deal.reviewed) {
       addAction(
         bottomRow,
         "Оценить сделку",
