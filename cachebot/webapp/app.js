@@ -190,7 +190,6 @@
   const quickDealsCount = document.getElementById("quickDealsCount");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
   const quickDealsList = document.getElementById("quickDealsList");
-  const quickDisputesList = document.getElementById("quickDisputesList");
   const systemNotice = document.getElementById("systemNotice");
   const systemNoticeTitle = document.getElementById("systemNoticeTitle");
   const systemNoticeList = document.getElementById("systemNoticeList");
@@ -456,8 +455,6 @@
     moderationAction: null,
     moderationAdsCounts: null,
     chatRenderSig: {},
-    disputesPollAt: 0,
-    assignedDisputes: [],
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -2491,34 +2488,6 @@
         openDealModal(deal.id);
       });
       quickDealsList.appendChild(row);
-    });
-  };
-
-  const renderQuickDisputes = () => {
-    if (!quickDisputesList) return;
-    const disputes = Array.isArray(state.assignedDisputes) ? state.assignedDisputes : [];
-    quickDisputesList.innerHTML = "";
-    if (!disputes.length) {
-      quickDisputesList.innerHTML = '<div class="deal-empty">Активных споров нет.</div>';
-      return;
-    }
-    disputes.forEach((item) => {
-      const row = document.createElement("div");
-      row.className = "quick-deal-item";
-      const title = `Спор • Сделка #${item.public_id || "—"}`;
-      const reason = item.reason ? `Причина: ${item.reason}` : "Причина: —";
-      row.innerHTML = `
-        <div class="quick-deal-info">
-          <div class="quick-deal-id">${title}</div>
-          <div class="quick-deal-meta">${reason}</div>
-        </div>
-        <div class="quick-deal-status status-warn">Спор</div>
-      `;
-      row.addEventListener("click", () => {
-        quickDealsPanel?.classList.remove("open");
-        if (item.id) openDispute(item.id);
-      });
-      quickDisputesList.appendChild(row);
     });
   };
 
@@ -5416,24 +5385,6 @@
       try {
         await loadDeals();
         await loadBalance();
-        // Keep moderator's "active disputes" in sync (low frequency).
-        if (state.canManageDisputes && Date.now() - (state.disputesPollAt || 0) > 3000) {
-          state.disputesPollAt = Date.now();
-          try {
-            const payload = await fetchJson("/api/disputes");
-            if (payload?.ok) {
-              const all = payload.disputes || [];
-              state.assignedDisputes = (all || []).filter(
-                (d) => d.assigned_to && Number(d.assigned_to) === Number(state.userId)
-              );
-              if (quickDealsPanel?.classList.contains("open")) {
-                renderQuickDisputes();
-              }
-            }
-          } catch {
-            // ignore disputes refresh errors
-          }
-        }
         if (Date.now() - (state.supportPollAt || 0) > 3000) {
           state.supportPollAt = Date.now();
           await refreshSupportBadge();
@@ -5770,7 +5721,6 @@
       return;
     }
     renderQuickDeals();
-    renderQuickDisputes();
     setQuickDealsOpen(true);
   });
 

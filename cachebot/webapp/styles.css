@@ -4969,19 +4969,18 @@ body.modal-open #app {
 }
 
 .chat-message.mod {
-  border-color: rgba(255, 177, 74, 0.35);
-  background: rgba(255, 177, 74, 0.06);
-  color: var(--text);
+  border-color: rgba(255, 77, 79, 0.55);
+  background: rgba(255, 77, 79, 0.08);
+  color: #ff4d4f;
 }
 
 .chat-join-notice {
   align-self: center;
   text-align: center;
-  color: #ffb14a;
+  color: #ff4d4f;
   font-weight: 700;
   font-size: 12px;
-  padding: 6px 10px;
-  background: transparent;
+  padding: 4px 8px;
 }
 
 .chat-meta {
@@ -6549,19 +6548,6 @@ body.pin-lock {
 .quick-deals-title {
   font-size: 16px;
   font-weight: 600;
-}
-
-.quick-deals-subtitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-  opacity: 0.9;
-}
-
-.quick-deals-divider {
-  height: 1px;
-  background: var(--quick-deals-border);
-  margin: 12px 0 10px;
 }
 
 .quick-deals-list {
