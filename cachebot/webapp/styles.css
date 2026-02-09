@@ -5745,7 +5745,10 @@ body.modal-open #app {
   font-size: 11px;
   padding: 4px 8px;
   border-radius: 8px;
-  white-space: nowrap;
+  max-width: min(220px, 70vw);
+  white-space: normal;
+  word-break: break-word;
+  text-align: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
