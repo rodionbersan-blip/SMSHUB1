@@ -3265,6 +3265,9 @@
     disputes.forEach((item) => {
       let statusText = item.assigned_to ? "В&nbsp;работе" : "Новый";
       let statusClass = "";
+      if (item.assigned_to) {
+        statusClass = "status-ok";
+      }
       if (!item.assigned_to) {
         const openedMs = parseTime(item.opened_at);
         const minutes = openedMs ? Math.max(0, (now - openedMs) / 60000) : null;
