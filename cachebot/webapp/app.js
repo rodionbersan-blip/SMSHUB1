@@ -1861,11 +1861,8 @@
     state.profileData = profile || null;
     state.userId = profile?.user_id ?? null;
     const display = profileDisplayLabel(profile);
-    const onlineHtml = renderOnlineIndicator(profile);
     if (profileName) profileName.textContent = display;
-    if (profileDisplayName) {
-      profileDisplayName.innerHTML = `${escapeHtml(display)}${onlineHtml}`;
-    }
+    if (profileDisplayName) profileDisplayName.textContent = display;
     if (profileUsername) {
       profileUsername.textContent = "";
       profileUsername.style.display = "none";
@@ -1929,16 +1926,12 @@
     if (profileBalanceReserved) {
       profileBalanceReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
     }
-    if (profileQuickName) {
-      profileQuickName.innerHTML = `${escapeHtml(display)}${onlineHtml}`;
-    }
     if (profileQuickBalance) {
       profileQuickBalance.textContent = `${formatAmount(available, 2)} USDT`;
     }
     if (profileQuickReserved) {
       profileQuickReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
     }
-    wireOnlineIndicators(profileModal);
   };
 
   profileWithdraw?.addEventListener("click", () => {
@@ -2684,7 +2677,6 @@
     const profile = data.profile || {};
     const stats = data.stats || {};
     const display = profile.display_name || "Без имени";
-    const onlineHtml = renderOnlineIndicator(profile);
     const registered = profile.registered_at ? formatDate(profile.registered_at) : "—";
     const adminBadge = data.is_admin ? '<div class="profile-admin-badge">Администратор</div>' : "";
     userModalTitle.textContent = "Профиль";
@@ -2692,7 +2684,7 @@
       <div class="profile-hero">
         <div class="profile-avatar-large" id="userModalAvatar">BC</div>
         <div>
-          <div class="profile-value">${escapeHtml(display)}${onlineHtml}</div>
+          <div class="profile-value">${display}</div>
           <div class="profile-muted">Регистрация: ${registered}</div>
           ${adminBadge}
         </div>
@@ -2706,7 +2698,6 @@
     `;
     const avatarNode = userModalBody.querySelector("#userModalAvatar");
     setAvatarNode(avatarNode, display, profile.avatar_url);
-    wireOnlineIndicators(userModalBody);
     userModal.classList.add("open");
     if (userModalReviews) {
       userModalReviews.onclick = async () => {
