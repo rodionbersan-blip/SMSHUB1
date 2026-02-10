@@ -4192,6 +4192,7 @@
       dispute.deal?.payer_name ||
       (dispute.deal?.paid_by_role === "seller" ? seller : "") ||
       (dispute.deal?.paid_by_role === "buyer" ? buyer : "") ||
+      (dispute.deal?.balance_reserved ? seller : buyer) ||
       "—";
     const comments = [];
     if (dispute.comment) {
