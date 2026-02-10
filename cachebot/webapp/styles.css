@@ -5333,11 +5333,13 @@ body.modal-open #app {
 }
 
 #supportChatModal .modal-card {
-  width: min(92vw, 720px);
+  width: min(96vw, 780px);
   height: calc(100dvh - 48px);
   display: flex;
   flex-direction: column;
-  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px) + 36px);
+  padding-bottom: 0;
+  border: none;
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.35);
 }
 
 #supportChatModal .modal-body {
@@ -5346,7 +5348,8 @@ body.modal-open #app {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  --support-chat-footer-height: 240px;
+  padding-bottom: 0;
+  --support-chat-footer-height: 260px;
 }
 
 #supportChatModal .chat-list {
