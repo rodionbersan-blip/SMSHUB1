@@ -784,7 +784,7 @@
     systemNotice.classList.add("show");
     clearSystemNoticeTimer();
     if (autoClose) {
-      const timeoutMs = item?.type === "dispute_resolved" ? 3000 : 4000;
+      const timeoutMs = item?.type === "dispute_resolved" ? 7000 : 4000;
       state.systemNoticeTimer = window.setTimeout(() => {
         if (item?.key) {
           state.systemNotifications = (state.systemNotifications || []).filter(

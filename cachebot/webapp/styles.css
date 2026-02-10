@@ -6132,6 +6132,10 @@ body.modal-open #app {
   transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease;
 }
 
+.system-notice-actions.hidden {
+  display: none;
+}
+
 .system-notice-actions.is-collapsed {
   opacity: 0;
   transform: translateY(-6px);
