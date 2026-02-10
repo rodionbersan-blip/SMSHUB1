@@ -4217,7 +4217,7 @@
           <button class="btn pill tg-profile-btn" data-username="${dispute.seller?.username || ""}">Профиль TG</button>
         </span>
       </div>
-      <div class="deal-detail-row"><span>Мерчант:</span>
+      <div class="deal-detail-row"><span>Покупатель:</span>
         <span class="dispute-party">
           <button class="link-btn" data-user="${dispute.buyer?.user_id || ""}">${buyer}</button>
           ${buyerOnline}
