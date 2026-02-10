@@ -5333,12 +5333,13 @@ body.modal-open #app {
 }
 
 #supportChatModal .modal-card {
-  width: min(96vw, 780px);
+  width: min(98vw, 820px);
   height: calc(100dvh - 48px);
   display: flex;
   flex-direction: column;
-  padding-bottom: 0;
+  padding: 0;
   border: none;
+  overflow: hidden;
   box-shadow: 0 20px 46px rgba(0, 0, 0, 0.35);
 }
 
@@ -5348,8 +5349,8 @@ body.modal-open #app {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  padding-bottom: 0;
-  --support-chat-footer-height: 260px;
+  padding: 20px 20px 0;
+  --support-chat-footer-height: 220px;
 }
 
 #supportChatModal .chat-list {
@@ -5357,6 +5358,21 @@ body.modal-open #app {
   max-height: none;
   padding-bottom: var(--support-chat-footer-height);
   overflow-y: auto;
+  position: relative;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 90px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 14px,
+    #000 calc(100% - 90px),
+    transparent 100%
+  );
 }
 
 #supportChatModal .modal-header {
@@ -5365,6 +5381,7 @@ body.modal-open #app {
   z-index: 3;
   background: transparent;
   backdrop-filter: none;
+  padding: 20px 20px 0;
 }
 
 #supportChatModal .support-chat-footer {
@@ -5376,7 +5393,8 @@ body.modal-open #app {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px));
+  padding: 0 20px 20px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
   background: transparent;
 }
 
