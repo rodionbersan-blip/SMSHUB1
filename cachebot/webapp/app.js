@@ -1591,33 +1591,9 @@
     root.querySelectorAll(".online-indicator").forEach((el) => {
       el.addEventListener("click", () => {
         el.classList.add("show");
-        if (el._onlineTimer) {
-          window.clearTimeout(el._onlineTimer);
-        }
-        el._onlineTimer = window.setTimeout(() => {
-          el.classList.remove("show");
-          el._onlineTimer = null;
-        }, 3000);
+        window.setTimeout(() => el.classList.remove("show"), 3000);
       });
     });
-  };
-
-  const attachOnlineIndicator = (container, profile) => {
-    if (!container) return;
-    container.querySelector(".online-indicator")?.remove();
-    const info = getOnlineInfo(profile?.last_seen_at);
-    if (!info) return;
-    const wrap = document.createElement("span");
-    wrap.className = `online-indicator ${info.cls}`;
-    const dot = document.createElement("span");
-    dot.className = "online-dot";
-    const tip = document.createElement("span");
-    tip.className = "online-tooltip";
-    tip.textContent = info.text;
-    wrap.appendChild(dot);
-    wrap.appendChild(tip);
-    container.appendChild(wrap);
-    wireOnlineIndicators(container);
   };
 
   const formatReviewDate = (iso) => {
@@ -1886,10 +1862,7 @@
     state.userId = profile?.user_id ?? null;
     const display = profileDisplayLabel(profile);
     if (profileName) profileName.textContent = display;
-    if (profileDisplayName) {
-      profileDisplayName.textContent = display;
-      attachOnlineIndicator(profileDisplayName, profile);
-    }
+    if (profileDisplayName) profileDisplayName.textContent = display;
     if (profileUsername) {
       profileUsername.textContent = "";
       profileUsername.style.display = "none";
@@ -1952,10 +1925,6 @@
     }
     if (profileBalanceReserved) {
       profileBalanceReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
-    }
-    if (profileQuickName) {
-      profileQuickName.textContent = display;
-      attachOnlineIndicator(profileQuickName, profile);
     }
     if (profileQuickBalance) {
       profileQuickBalance.textContent = `${formatAmount(available, 2)} USDT`;
@@ -2715,7 +2684,7 @@
       <div class="profile-hero">
         <div class="profile-avatar-large" id="userModalAvatar">BC</div>
         <div>
-          <div class="profile-value" id="userModalName">—</div>
+          <div class="profile-value">${display}</div>
           <div class="profile-muted">Регистрация: ${registered}</div>
           ${adminBadge}
         </div>
@@ -2728,11 +2697,6 @@
       </div>
     `;
     const avatarNode = userModalBody.querySelector("#userModalAvatar");
-    const nameNode = userModalBody.querySelector("#userModalName");
-    if (nameNode) {
-      nameNode.textContent = display;
-      attachOnlineIndicator(nameNode, profile);
-    }
     setAvatarNode(avatarNode, display, profile.avatar_url);
     userModal.classList.add("open");
     if (userModalReviews) {
@@ -4139,16 +4103,20 @@
       ? Number(dispute.deal.usd_amount || 0) / Number(dispute.deal.rate || 1)
       : Number(dispute.deal.usdt_amount || 0);
     const disputeReasonText = formatDisputeReason(dispute.reason);
+    const sellerOnline = renderOnlineIndicator(dispute.seller);
+    const buyerOnline = renderOnlineIndicator(dispute.buyer);
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>
         <span class="dispute-party">
           <button class="link-btn" data-user="${dispute.seller?.user_id || ""}">${seller}</button>
+          ${sellerOnline}
           <button class="btn pill tg-profile-btn" data-username="${dispute.seller?.username || ""}">Профиль TG</button>
         </span>
       </div>
       <div class="deal-detail-row"><span>Мерчант:</span>
         <span class="dispute-party">
           <button class="link-btn" data-user="${dispute.buyer?.user_id || ""}">${buyer}</button>
+          ${buyerOnline}
           <button class="btn pill tg-profile-btn" data-username="${dispute.buyer?.username || ""}">Профиль TG</button>
         </span>
       </div>
@@ -4214,6 +4182,7 @@
     commentRow.appendChild(commentLabel);
     commentRow.appendChild(commentButtons);
     p2pModalBody.appendChild(commentRow);
+    wireOnlineIndicators(p2pModalBody);
     p2pModalBody.querySelectorAll(".link-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-user");
@@ -4349,6 +4318,7 @@
       deal.counterparty?.username ||
       "—";
     const roleLabel = deal.role === "seller" ? "Продавец" : "Покупатель";
+    const counterpartyOnline = renderOnlineIndicator(deal.counterparty);
     dealModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Роль:</span>${roleLabel}</div>
       <div class="deal-detail-row"><span>Статус:</span>${statusLabel(deal)}</div>
@@ -4366,9 +4336,11 @@
       <div class="deal-detail-row"><span>Контрагент:</span>
         <span class="dispute-party">
           <button class="link owner-link" data-owner="${deal.counterparty?.user_id || ""}">${counterparty}</button>
+          ${counterpartyOnline}
         </span>
       </div>
     `;
+    wireOnlineIndicators(dealModalBody);
     if (deal.actions?.select_bank && Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length) {
       const bankRow = document.createElement("div");
       bankRow.className = "deal-detail-row bank-select-row";
