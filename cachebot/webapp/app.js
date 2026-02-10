@@ -3459,6 +3459,12 @@
       moderationUserHandle.dataset.userId = profile?.user_id ? String(profile.user_id) : "";
       moderationUserHandle.classList.remove("is-clickable");
     }
+    if (moderationUserTitle) {
+      moderationUserTitle.querySelector(".online-indicator")?.remove();
+      attachOnlineIndicator(moderationUserTitle, {
+        last_seen_at: profile?.last_seen_at,
+      });
+    }
     if (moderationUserTgBtn) {
       moderationUserTgBtn.style.display = username && username !== "—" ? "" : "none";
     }
@@ -3832,6 +3838,12 @@
         const text = document.createElement("div");
         text.className = "admin-person-text";
         text.innerHTML = `<div class="name">${name}</div>`;
+        const nameEl = text.querySelector(".name");
+        if (nameEl) {
+          attachOnlineIndicator(nameEl, {
+            last_seen_at: mod.profile?.last_seen_at ?? mod.last_seen_at,
+          });
+        }
         btn.appendChild(avatar);
         btn.appendChild(text);
         btn.addEventListener("click", () => openModeratorProfile(mod.user_id));
@@ -3869,6 +3881,12 @@
         const text = document.createElement("div");
         text.className = "admin-person-text";
         text.innerHTML = `<div class="name">${name}</div>`;
+        const nameEl = text.querySelector(".name");
+        if (nameEl) {
+          attachOnlineIndicator(nameEl, {
+            last_seen_at: merchant.profile?.last_seen_at ?? merchant.last_seen_at,
+          });
+        }
         pill.appendChild(avatar);
         pill.appendChild(text);
         pill.addEventListener("click", () => openMerchantProfile(merchant.user_id));
@@ -3903,6 +3921,12 @@
         const text = document.createElement("div");
         text.className = "admin-person-text";
         text.innerHTML = `<div class="name">${name}</div>`;
+        const nameEl = text.querySelector(".name");
+        if (nameEl) {
+          attachOnlineIndicator(nameEl, {
+            last_seen_at: admin.profile?.last_seen_at ?? admin.last_seen_at,
+          });
+        }
         btn.appendChild(avatar);
         btn.appendChild(text);
         btn.addEventListener("click", () => openAdminProfile(admin.user_id));
