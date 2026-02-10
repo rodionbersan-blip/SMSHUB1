@@ -5892,7 +5892,7 @@ body.modal-open #app {
   background: linear-gradient(135deg, #ff6b6b 0%, #d93c3c 100%);
   color: #fff;
   border: none;
-  box-shadow: 0 10px 20px rgba(217, 60, 60, 0.25);
+  box-shadow: none;
 }
 
 #disputeResolveModal .dispute-cancel-btn:hover,
