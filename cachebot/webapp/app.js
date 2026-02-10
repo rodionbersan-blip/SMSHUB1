@@ -4183,6 +4183,16 @@
     const sellerUsername = dispute.seller?.username ? `@${dispute.seller.username}` : "—";
     const buyerUsername = dispute.buyer?.username ? `@${dispute.buyer.username}` : "—";
     const openerName = dispute.opened_by_name || "—";
+    const paidBy =
+      dispute.paid_by_name ||
+      dispute.paid_by ||
+      dispute.payer_name ||
+      dispute.deal?.paid_by_name ||
+      dispute.deal?.paid_by ||
+      dispute.deal?.payer_name ||
+      (dispute.deal?.paid_by_role === "seller" ? seller : "") ||
+      (dispute.deal?.paid_by_role === "buyer" ? buyer : "") ||
+      "—";
     const comments = [];
     if (dispute.comment) {
       comments.push({ author: openerName, text: dispute.comment });
@@ -4213,7 +4223,16 @@
           <button class="btn pill tg-profile-btn" data-username="${dispute.buyer?.username || ""}">Профиль TG</button>
         </span>
       </div>
-      <div class="deal-detail-row"><span>Открыл:</span>${openerName}</div>
+      <div class="dispute-meta-row">
+        <div class="dispute-meta-pill">
+          <span>Оплачено:</span>
+          <strong>${paidBy}</strong>
+        </div>
+        <div class="dispute-meta-pill">
+          <span>Открыл:</span>
+          <strong>${openerName}</strong>
+        </div>
+      </div>
       <div class="deal-detail-row"><span>Причина:</span>${escapeHtml(disputeReasonText)}</div>
       <div class="deal-detail-row"><span>Открыт:</span>${formatDate(dispute.opened_at)}</div>
       <div class="deal-detail-row"><span>Сумма:</span>${formatAmount(baseUsdtAmount, 3)} USDT${
