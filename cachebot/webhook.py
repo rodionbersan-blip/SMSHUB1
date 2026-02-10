@@ -1729,6 +1729,11 @@ async def _api_dispute_detail(request: web.Request) -> web.Response:
         "opened_by_name": _display_name(opener, dispute.opened_by),
         "assigned_to": dispute.assigned_to,
         "can_manage": can_manage,
+        "paid_by_role": "seller" if deal.balance_reserved else ("buyer" if deal.buyer_id else None),
+        "paid_by_user_id": deal.seller_id if deal.balance_reserved else deal.buyer_id,
+        "paid_by_name": _display_name(seller, deal.seller_id)
+        if deal.balance_reserved
+        else _display_name(buyer, deal.buyer_id),
         "messages": [
             {
                 "author_id": msg.author_id,
