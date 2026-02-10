@@ -1634,6 +1634,16 @@
       el.addEventListener("click", showOnce);
       el.addEventListener("touchstart", showOnce, { passive: true });
       el.addEventListener("pointerdown", showOnce);
+      if (!el._onlineOutsideListener) {
+        const hideOnOutside = (event) => {
+          if (!el.classList.contains("show")) return;
+          if (el.contains(event.target)) return;
+          el.classList.remove("show");
+        };
+        document.addEventListener("click", hideOnOutside);
+        document.addEventListener("touchstart", hideOnOutside, { passive: true });
+        el._onlineOutsideListener = true;
+      }
     });
   };
 
