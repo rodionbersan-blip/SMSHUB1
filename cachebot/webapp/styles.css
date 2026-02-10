@@ -5364,7 +5364,7 @@ body.modal-open #app {
 #supportChatModal .chat-file-hint,
 #supportChatModal .modal-actions-bottom {
   position: sticky;
-  bottom: 12px;
+  bottom: 0;
   z-index: 2;
   background: transparent;
   backdrop-filter: none;
