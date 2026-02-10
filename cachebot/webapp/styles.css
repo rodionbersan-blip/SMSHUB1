@@ -5334,13 +5334,14 @@ body.modal-open #app {
 
 #supportChatModal .modal-card {
   width: min(98vw, 820px);
-  height: calc(100dvh - 48px);
+  height: calc(var(--vvh, 100dvh) - 48px);
   display: flex;
   flex-direction: column;
   padding: 0;
   border: none;
   overflow: hidden;
   box-shadow: 0 20px 46px rgba(0, 0, 0, 0.35);
+  transition: height 0.22s ease;
 }
 
 #supportChatModal .modal-body {

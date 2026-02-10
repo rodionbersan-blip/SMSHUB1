@@ -5848,6 +5848,20 @@
     }
   };
 
+  const updateViewportHeightVar = () => {
+    const vv = window.visualViewport;
+    if (!vv || !vv.height) return;
+    document.documentElement.style.setProperty("--vvh", `${vv.height}px`);
+  };
+
+  const bindViewportHeight = () => {
+    if (window._vvhBound) return;
+    window._vvhBound = true;
+    updateViewportHeightVar();
+    window.visualViewport?.addEventListener("resize", updateViewportHeightVar);
+    window.addEventListener("orientationchange", updateViewportHeightVar);
+  };
+
   const openDealModal = async (dealId) => {
     const payload = await fetchJson(`/api/deals/${dealId}`);
     if (!payload?.ok) return;
@@ -6643,6 +6657,7 @@
   };
 
   bindPressFeedback();
+  bindViewportHeight();
 
   dealModalClose?.addEventListener("click", () => {
     dealModal.classList.remove("open");
@@ -7416,6 +7431,8 @@
   supportInfoClose?.addEventListener("click", () => supportInfoModal?.classList.remove("open"));
   supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
   supportChatFile?.addEventListener("change", updateSupportChatFileHint);
+  supportChatInput?.addEventListener("focus", updateViewportHeightVar);
+  supportChatInput?.addEventListener("blur", updateViewportHeightVar);
   const setSupportReason = (value) => {
     if (supportReasonType) supportReasonType.value = value;
     const needsTarget = value === "moderator" || value === "user";
