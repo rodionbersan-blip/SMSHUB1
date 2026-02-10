@@ -5895,8 +5895,17 @@ body.modal-open #app {
   box-shadow: 0 10px 20px rgba(217, 60, 60, 0.25);
 }
 
-#disputeResolveModal .dispute-cancel-btn:hover {
-  filter: brightness(1.03);
+#disputeResolveModal .dispute-cancel-btn:hover,
+#disputeResolveModal .dispute-cancel-btn:active,
+#disputeResolveModal .dispute-cancel-btn:focus,
+#disputeResolveModal .dispute-cancel-btn:focus-visible,
+#disputeResolveModal .dispute-close-btn:hover,
+#disputeResolveModal .dispute-close-btn:active,
+#disputeResolveModal .dispute-close-btn:focus,
+#disputeResolveModal .dispute-close-btn:focus-visible {
+  filter: none;
+  box-shadow: none;
+  transform: none;
 }
 
 .deal-chat-btn {
