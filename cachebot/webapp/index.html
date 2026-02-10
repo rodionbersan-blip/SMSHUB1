@@ -845,18 +845,20 @@
         </div>
         <div class="modal-body">
           <div id="supportChatList" class="chat-list"></div>
-          <form id="supportChatForm" class="chat-form">
-            <input id="supportChatInput" type="text" placeholder="Сообщение" />
-            <label class="btn pill chat-attach">
-              📎
-              <input id="supportChatFile" type="file" />
-            </label>
-            <button id="supportChatSend" class="btn primary" type="submit">Отправить</button>
-          </form>
-          <div id="supportChatFileHint" class="chat-file-hint" aria-live="polite"></div>
-          <div class="modal-actions-row modal-actions-bottom">
-            <button id="supportAssignBtn" class="btn">Взять в работу</button>
-            <button id="supportCloseBtn" class="btn danger">Закрыть чат</button>
+          <div class="support-chat-footer">
+            <form id="supportChatForm" class="chat-form">
+              <input id="supportChatInput" type="text" placeholder="Сообщение" />
+              <label class="btn pill chat-attach">
+                📎
+                <input id="supportChatFile" type="file" />
+              </label>
+              <button id="supportChatSend" class="btn primary" type="submit">Отправить</button>
+            </form>
+            <div id="supportChatFileHint" class="chat-file-hint" aria-live="polite"></div>
+            <div class="modal-actions-row modal-actions-bottom">
+              <button id="supportAssignBtn" class="btn">Взять в работу</button>
+              <button id="supportCloseBtn" class="btn danger">Закрыть чат</button>
+            </div>
           </div>
         </div>
       </div>

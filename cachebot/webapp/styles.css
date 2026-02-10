@@ -5344,12 +5344,15 @@ body.modal-open #app {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 }
 
 #supportChatModal .chat-list {
   flex: 1 1 auto;
   max-height: none;
-  padding-bottom: 260px;
+  padding-bottom: var(--support-chat-footer-height, 200px);
+  overflow-y: auto;
 }
 
 #supportChatModal .modal-header {
@@ -5360,14 +5363,17 @@ body.modal-open #app {
   backdrop-filter: none;
 }
 
-#supportChatModal .chat-form,
-#supportChatModal .chat-file-hint,
-#supportChatModal .modal-actions-bottom {
-  position: sticky;
-  bottom: calc(env(safe-area-inset-bottom, 0px));
+#supportChatModal .support-chat-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px));
   background: transparent;
-  backdrop-filter: none;
 }
 
 
