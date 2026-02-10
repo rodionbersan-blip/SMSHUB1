@@ -1574,12 +1574,13 @@
     return { cls: "online-red", text: "Был в сети: Более часа назад" };
   };
 
-  const renderOnlineIndicator = (profile) => {
+  const renderOnlineIndicator = (profile, options = {}) => {
     const info = getOnlineInfo(profile?.last_seen_at);
     if (!info) return "";
     const safeText = escapeHtml(info.text);
+    const alignClass = options.align === "left" ? "align-left" : "";
     return `
-      <span class="online-indicator ${info.cls}" data-online-text="${safeText}">
+      <span class="online-indicator ${info.cls} ${alignClass}" data-online-text="${safeText}">
         <span class="online-dot" aria-hidden="true"></span>
         <span class="online-tooltip">${safeText}</span>
       </span>
@@ -1591,7 +1592,13 @@
     root.querySelectorAll(".online-indicator").forEach((el) => {
       el.addEventListener("click", () => {
         el.classList.add("show");
-        window.setTimeout(() => el.classList.remove("show"), 3000);
+        if (el._onlineTimer) {
+          window.clearTimeout(el._onlineTimer);
+        }
+        el._onlineTimer = window.setTimeout(() => {
+          el.classList.remove("show");
+          el._onlineTimer = null;
+        }, 3000);
       });
     });
   };
@@ -1861,8 +1868,12 @@
     state.profileData = profile || null;
     state.userId = profile?.user_id ?? null;
     const display = profileDisplayLabel(profile);
+    const onlineHtml = renderOnlineIndicator(profile);
     if (profileName) profileName.textContent = display;
-    if (profileDisplayName) profileDisplayName.textContent = display;
+    if (profileDisplayName) {
+      profileDisplayName.innerHTML = `${escapeHtml(display)}${onlineHtml}`;
+      wireOnlineIndicators(profileDisplayName.parentElement);
+    }
     if (profileUsername) {
       profileUsername.textContent = "";
       profileUsername.style.display = "none";
@@ -1925,6 +1936,10 @@
     }
     if (profileBalanceReserved) {
       profileBalanceReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
+    }
+    if (profileQuickName) {
+      profileQuickName.innerHTML = `${escapeHtml(display)}${onlineHtml}`;
+      wireOnlineIndicators(profileQuickName.parentElement);
     }
     if (profileQuickBalance) {
       profileQuickBalance.textContent = `${formatAmount(available, 2)} USDT`;
@@ -2677,6 +2692,7 @@
     const profile = data.profile || {};
     const stats = data.stats || {};
     const display = profile.display_name || "Без имени";
+    const onlineHtml = renderOnlineIndicator(profile);
     const registered = profile.registered_at ? formatDate(profile.registered_at) : "—";
     const adminBadge = data.is_admin ? '<div class="profile-admin-badge">Администратор</div>' : "";
     userModalTitle.textContent = "Профиль";
@@ -2684,7 +2700,7 @@
       <div class="profile-hero">
         <div class="profile-avatar-large" id="userModalAvatar">BC</div>
         <div>
-          <div class="profile-value">${display}</div>
+          <div class="profile-value">${escapeHtml(display)}${onlineHtml}</div>
           <div class="profile-muted">Регистрация: ${registered}</div>
           ${adminBadge}
         </div>
@@ -2698,6 +2714,7 @@
     `;
     const avatarNode = userModalBody.querySelector("#userModalAvatar");
     setAvatarNode(avatarNode, display, profile.avatar_url);
+    wireOnlineIndicators(userModalBody);
     userModal.classList.add("open");
     if (userModalReviews) {
       userModalReviews.onclick = async () => {
@@ -4318,7 +4335,7 @@
       deal.counterparty?.username ||
       "—";
     const roleLabel = deal.role === "seller" ? "Продавец" : "Покупатель";
-    const counterpartyOnline = renderOnlineIndicator(deal.counterparty);
+    const counterpartyOnline = renderOnlineIndicator(deal.counterparty, { align: "left" });
     dealModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Роль:</span>${roleLabel}</div>
       <div class="deal-detail-row"><span>Статус:</span>${statusLabel(deal)}</div>
