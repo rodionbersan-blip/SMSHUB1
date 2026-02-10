@@ -5748,27 +5748,13 @@ body.modal-open #app {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s ease, transform 0.12s ease;
-  will-change: opacity, transform;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .online-indicator:hover .online-tooltip,
 .online-indicator.show .online-tooltip {
   opacity: 1;
   transform: translateX(-50%) translateY(-4px);
-}
-
-.online-indicator.align-left .online-tooltip {
-  left: auto;
-  right: -8px;
-  transform: translateX(0);
-  text-align: left;
-  white-space: nowrap;
-}
-
-.online-indicator.align-left:hover .online-tooltip,
-.online-indicator.align-left.show .online-tooltip {
-  transform: translateX(0) translateY(-4px);
 }
 
 .modal-actions {
