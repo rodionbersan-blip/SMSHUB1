@@ -339,6 +339,15 @@
   const supportReason = document.getElementById("supportReason");
   const supportReasonRow = document.getElementById("supportReasonRow");
   const supportCreateBtn = document.getElementById("supportCreateBtn");
+  const supportInfoModal = document.getElementById("supportInfoModal");
+  const supportInfoClose = document.getElementById("supportInfoClose");
+  const supportInfoAvatar = document.getElementById("supportInfoAvatar");
+  const supportInfoName = document.getElementById("supportInfoName");
+  const supportInfoMeta = document.getElementById("supportInfoMeta");
+  const supportInfoReason = document.getElementById("supportInfoReason");
+  const supportInfoSubject = document.getElementById("supportInfoSubject");
+  const supportInfoOpened = document.getElementById("supportInfoOpened");
+  const supportInfoAssignBtn = document.getElementById("supportInfoAssignBtn");
   const supportChatModal = document.getElementById("supportChatModal");
   const supportChatClose = document.getElementById("supportChatClose");
   const supportChatTitle = document.getElementById("supportChatTitle");
@@ -1551,6 +1560,28 @@
     if (!iso) return "—";
     const dt = new Date(iso);
     return dt.toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" });
+  };
+
+  const pluralRu = (value, one, few, many) => {
+    const n = Math.abs(Number(value) || 0) % 100;
+    const n1 = n % 10;
+    if (n >= 11 && n <= 19) return many;
+    if (n1 === 1) return one;
+    if (n1 >= 2 && n1 <= 4) return few;
+    return many;
+  };
+
+  const formatElapsedSince = (iso) => {
+    const openedMs = parseTime(iso);
+    if (!openedMs) return "—";
+    const diffMinutes = Math.max(0, Math.floor((Date.now() - openedMs) / 60000));
+    if (diffMinutes < 60) {
+      const label = pluralRu(diffMinutes, "минута", "минуты", "минут");
+      return `${diffMinutes} ${label} назад`;
+    }
+    const hours = Math.floor(diffMinutes / 60);
+    const label = pluralRu(hours, "час", "часа", "часов");
+    return `${hours} ${label} назад`;
   };
 
   const profileDisplayLabel = (profile) =>
@@ -3254,12 +3285,32 @@
       if (!ticket.complaint_type) reasonParts.push("Обращение");
       if (ticket.target_name) reasonParts.push(ticket.target_name);
       const reasonLabel = reasonParts.join(" • ");
-      const status =
-        ticket.status === "in_progress"
-          ? "В работе"
-          : ticket.status === "open"
-          ? "Новый"
-          : "Закрыт";
+      const statusInfo = (() => {
+        if (ticket.status === "in_progress") {
+          return { text: "В работе", cls: "status-ok" };
+        }
+        if (ticket.status === "closed") {
+          return { text: "Закрыт", cls: "" };
+        }
+        if (ticket.status === "open") {
+          const openedMs =
+            parseTime(ticket.created_at) ||
+            parseTime(ticket.opened_at) ||
+            parseTime(ticket.updated_at);
+          const minutes = openedMs ? Math.max(0, (Date.now() - openedMs) / 60000) : null;
+          if (minutes === null) {
+            return { text: "Новый", cls: "status-ok" };
+          }
+          if (minutes < 20) {
+            return { text: "Новый", cls: "status-ok" };
+          }
+          if (minutes < 60) {
+            return { text: "Ожидает", cls: "status-warn" };
+          }
+          return { text: "Срочно!", cls: "status-bad" };
+        }
+        return { text: "Новый", cls: "status-ok" };
+      })();
       const assignedLabel =
         payload.can_manage && ticket.assigned_to && Number(ticket.assigned_to) === Number(state.userId)
           ? "<span class=\"support-assigned\">Закреплен за мной</span>"
@@ -3267,7 +3318,7 @@
       row.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">${who}</div>
-          <div class="deal-status">${status}</div>
+          <div class="deal-status ${statusInfo.cls}">${statusInfo.text}</div>
         </div>
         <div class="deal-row">${reasonLabel}</div>
         <div class="deal-row">${ticket.subject || ""} ${assignedLabel}</div>
@@ -3279,7 +3330,13 @@
         badge.textContent = "1";
         row.appendChild(badge);
       }
-      row.addEventListener("click", () => openSupportChat(ticket.id, payload.can_manage));
+      row.addEventListener("click", () => {
+        if (payload.can_manage) {
+          openSupportInfo(ticket.id, payload.can_manage);
+        } else {
+          openSupportChat(ticket.id, payload.can_manage);
+        }
+      });
       supportList.appendChild(row);
     });
     setSupportBadge(hasUnread);
@@ -3413,6 +3470,63 @@
       await openSupportChat(ticketId, canManage);
     };
     supportChatModal.classList.add("open");
+  };
+
+  const buildSupportReasonLabel = (ticket) => {
+    const reasonParts = [];
+    if (ticket?.complaint_type === "moderator") reasonParts.push("Жалоба на модератора");
+    if (ticket?.complaint_type === "user") reasonParts.push("Жалоба на пользователя");
+    if (ticket?.complaint_type === "other") reasonParts.push("Другая причина");
+    if (!ticket?.complaint_type) reasonParts.push("Обращение");
+    if (ticket?.target_name) reasonParts.push(ticket.target_name);
+    return reasonParts.join(" • ") || "—";
+  };
+
+  const openSupportInfo = async (ticketId, canManage) => {
+    if (!supportInfoModal) return;
+    const payload = await fetchJson(`/api/support/tickets/${ticketId}`);
+    if (!payload?.ok) return;
+    const ticket = payload.ticket || {};
+    const user = payload.user || {};
+    const display =
+      user.display_name ||
+      user.full_name ||
+      user.username ||
+      (ticket.user_name ? String(ticket.user_name) : "Пользователь");
+    if (supportInfoName) supportInfoName.textContent = display;
+    if (supportInfoMeta) {
+      supportInfoMeta.textContent = user.username ? `@${user.username}` : "—";
+    }
+    setAvatarNode(supportInfoAvatar, display, user.avatar_url);
+    if (supportInfoReason) supportInfoReason.textContent = buildSupportReasonLabel(ticket);
+    if (supportInfoSubject) supportInfoSubject.textContent = ticket.subject || "—";
+    if (supportInfoOpened) {
+      supportInfoOpened.textContent = formatElapsedSince(ticket.created_at || ticket.opened_at);
+    }
+
+    if (supportInfoAssignBtn) {
+      const assignedTo = ticket.assigned_to;
+      const isSelfAssigned = assignedTo && Number(assignedTo) === Number(state.userId);
+      const canAssign = canManage && (!assignedTo || isSelfAssigned);
+      supportInfoAssignBtn.style.display = canManage ? "" : "none";
+      supportInfoAssignBtn.disabled = !canAssign;
+      supportInfoAssignBtn.textContent = assignedTo
+        ? isSelfAssigned
+          ? "Открыть чат"
+          : "В работе"
+        : "Взять в работу";
+      supportInfoAssignBtn.onclick = async () => {
+        if (!canAssign) return;
+        if (!isSelfAssigned) {
+          await fetchJson(`/api/support/tickets/${ticketId}/assign`, { method: "POST", body: "{}" });
+          await loadSupport();
+        }
+        supportInfoModal.classList.remove("open");
+        await openSupportChat(ticketId, canManage);
+      };
+    }
+
+    supportInfoModal.classList.add("open");
   };
 
   const loadDisputes = async () => {
@@ -7134,6 +7248,7 @@
     supportTargetName.value = "";
     supportReason.value = "";
   });
+  supportInfoClose?.addEventListener("click", () => supportInfoModal?.classList.remove("open"));
   supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
   const setSupportReason = (value) => {
     if (supportReasonType) supportReasonType.value = value;

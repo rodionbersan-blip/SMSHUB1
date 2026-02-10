@@ -1843,7 +1843,7 @@ async def _api_dispute_resolve(request: web.Request) -> web.Response:
         seller_amount_text = f"{seller_amount.quantize(Decimal('0.001')):f}"
         buyer_amount_text = f"{buyer_amount.quantize(Decimal('0.001')):f}"
         winner_is_seller = seller_amount >= buyer_amount
-        winner_name = seller_name if winner_is_seller else buyer_name
+        winner_role_label = "Продавца" if winner_is_seller else "Покупателя"
         if deal.seller_id:
             if seller_amount > 0:
                 await request.app["bot"].send_message(
@@ -1854,8 +1854,8 @@ async def _api_dispute_resolve(request: web.Request) -> web.Response:
             else:
                 await request.app["bot"].send_message(
                     deal.seller_id,
-                    f"Сделка #{deal.public_id} была закрыта в пользу {winner_name}.\n"
-                    f"Средства отправлены {winner_name}.",
+                    f"Сделка #{deal.public_id} была закрыта в пользу {winner_role_label}.\n"
+                    f"Средства отправлены обратно.",
                 )
         if deal.buyer_id:
             if buyer_amount > 0:
@@ -1867,8 +1867,8 @@ async def _api_dispute_resolve(request: web.Request) -> web.Response:
             else:
                 await request.app["bot"].send_message(
                     deal.buyer_id,
-                    f"Сделка #{deal.public_id} была закрыта в пользу {winner_name}.\n"
-                    f"Средства отправлены {winner_name}.",
+                    f"Сделка #{deal.public_id} была закрыта в пользу {winner_role_label}.\n"
+                    f"Средства отправлены обратно.",
                 )
     with suppress(Exception):
         await deps.chat_service.purge_chat(deal.id)

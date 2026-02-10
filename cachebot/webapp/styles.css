@@ -3842,6 +3842,77 @@ body.modal-open #app {
   font-weight: 600;
 }
 
+.support-info-card {
+  max-width: 440px;
+}
+
+.support-info-body {
+  display: grid;
+  gap: 14px;
+}
+
+.support-info-head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.support-info-avatar {
+  background: rgba(46, 204, 113, 0.2);
+}
+
+.support-info-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.support-info-grid {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.support-info-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.support-info-row span:last-child {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.support-info-actions {
+  justify-content: flex-end;
+}
+
+.support-info-assign-btn {
+  background: linear-gradient(135deg, #3bcf7a, #2aa866);
+  color: #ffffff;
+  border: 0;
+}
+
+.support-info-assign-btn:hover {
+  background: linear-gradient(135deg, #48d786, #33b372);
+  color: #ffffff;
+}
+
+.support-info-assign-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.support-info-assign-btn:disabled:hover {
+  background: linear-gradient(135deg, #3bcf7a, #2aa866);
+}
+
 .support-reason-group {
   display: grid;
   gap: 6px;
