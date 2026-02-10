@@ -1586,12 +1586,38 @@
     `;
   };
 
+  const attachOnlineIndicator = (container, profile) => {
+    try {
+      if (!container) return;
+      container.querySelector(".online-indicator")?.remove();
+      const info = getOnlineInfo(profile?.last_seen_at);
+      if (!info) return;
+      const wrap = document.createElement("span");
+      wrap.className = `online-indicator ${info.cls}`;
+      const dot = document.createElement("span");
+      dot.className = "online-dot";
+      const tip = document.createElement("span");
+      tip.className = "online-tooltip";
+      tip.textContent = info.text;
+      wrap.appendChild(dot);
+      wrap.appendChild(tip);
+      container.appendChild(wrap);
+      wireOnlineIndicators(container);
+    } catch {}
+  };
+
   const wireOnlineIndicators = (root) => {
     if (!root) return;
     root.querySelectorAll(".online-indicator").forEach((el) => {
       el.addEventListener("click", () => {
         el.classList.add("show");
-        window.setTimeout(() => el.classList.remove("show"), 3000);
+        if (el._onlineTimer) {
+          window.clearTimeout(el._onlineTimer);
+        }
+        el._onlineTimer = window.setTimeout(() => {
+          el.classList.remove("show");
+          el._onlineTimer = null;
+        }, 3000);
       });
     });
   };
@@ -1854,63 +1880,70 @@
   };
 
   const loadProfile = async () => {
-    const payload = await fetchJson("/api/profile");
-    if (!payload?.ok) return;
-    const { data } = payload;
-    const profile = data?.profile;
-    state.profileData = profile || null;
-    state.userId = profile?.user_id ?? null;
-    const display = profileDisplayLabel(profile);
-    if (profileName) profileName.textContent = display;
-    if (profileDisplayName) profileDisplayName.textContent = display;
-    if (profileUsername) {
-      profileUsername.textContent = "";
-      profileUsername.style.display = "none";
-    }
-    profileRegistered.textContent = profile?.registered_at
-      ? `Регистрация: ${formatDate(profile.registered_at)}`
-      : "Регистрация: —";
-    if (profileAdminBadge) {
-      profileAdminBadge.classList.toggle("is-hidden", !data?.is_admin);
-    }
-    const isMerchant = data?.role === "buyer";
-    if (profileRoleCard) {
-      profileRoleCard.style.display = isMerchant ? "" : "none";
-    }
-    if (profileRole) {
-      profileRole.textContent = isMerchant ? "Мерчант" : "";
-    }
-    if (profileMerchantSince) {
-      profileMerchantSince.textContent = isMerchant && data?.merchant_since
-        ? `Мерчант с: ${formatDate(data.merchant_since)}`
-        : "";
-    }
-    const stats = data?.stats || {};
-    state.profileModeration = data?.moderation || null;
-    if (profileStatus) {
-      const moderation = state.profileModeration || {};
-      const banned = !!moderation.banned;
-      const dealsBlocked = !!moderation.deals_blocked;
-      const statusParts = [];
-      if (banned) {
-        statusParts.push("Профиль заблокирован");
-      } else if (dealsBlocked) {
-        statusParts.push("Сделки отключены");
+    try {
+      const payload = await fetchJson("/api/profile");
+      if (!payload?.ok) return;
+      const { data } = payload;
+      const profile = data?.profile;
+      state.profileData = profile || null;
+      state.userId = profile?.user_id ?? null;
+      const display = profileDisplayLabel(profile);
+      if (profileName) profileName.textContent = display;
+      if (profileDisplayName) {
+        profileDisplayName.textContent = display;
+        attachOnlineIndicator(profileDisplayName, profile);
       }
-      profileStatus.textContent = statusParts.join(" • ");
-      profileStatus.classList.toggle("alert", banned || dealsBlocked);
-      profileStatus.classList.toggle("is-hidden", !statusParts.length);
+      if (profileUsername) {
+        profileUsername.textContent = "";
+        profileUsername.style.display = "none";
+      }
+      profileRegistered.textContent = profile?.registered_at
+        ? `Регистрация: ${formatDate(profile.registered_at)}`
+        : "Регистрация: —";
+      if (profileAdminBadge) {
+        profileAdminBadge.classList.toggle("is-hidden", !data?.is_admin);
+      }
+      const isMerchant = data?.role === "buyer";
+      if (profileRoleCard) {
+        profileRoleCard.style.display = isMerchant ? "" : "none";
+      }
+      if (profileRole) {
+        profileRole.textContent = isMerchant ? "Мерчант" : "";
+      }
+      if (profileMerchantSince) {
+        profileMerchantSince.textContent = isMerchant && data?.merchant_since
+          ? `Мерчант с: ${formatDate(data.merchant_since)}`
+          : "";
+      }
+      const stats = data?.stats || {};
+      state.profileModeration = data?.moderation || null;
+      if (profileStatus) {
+        const moderation = state.profileModeration || {};
+        const banned = !!moderation.banned;
+        const dealsBlocked = !!moderation.deals_blocked;
+        const statusParts = [];
+        if (banned) {
+          statusParts.push("Профиль заблокирован");
+        } else if (dealsBlocked) {
+          statusParts.push("Сделки отключены");
+        }
+        profileStatus.textContent = statusParts.join(" • ");
+        profileStatus.classList.toggle("alert", banned || dealsBlocked);
+        profileStatus.classList.toggle("is-hidden", !statusParts.length);
+      }
+      state.profileStats = {
+        total_deals: stats.total_deals ?? 0,
+        success_percent: stats.success_percent ?? 0,
+        fail_percent: stats.fail_percent ?? 0,
+        reviews_count: stats.reviews_count ?? 0,
+      };
+      applyProfileStats(state.profileStats);
+      setAvatarNode(profileAvatar, display, profile?.avatar_url);
+      setAvatarNode(profileAvatarLarge, display, profile?.avatar_url);
+      updateSettingsNicknameState();
+    } catch (err) {
+      log(`Профиль: ${err?.message || err}`, "error");
     }
-    state.profileStats = {
-      total_deals: stats.total_deals ?? 0,
-      success_percent: stats.success_percent ?? 0,
-      fail_percent: stats.fail_percent ?? 0,
-      reviews_count: stats.reviews_count ?? 0,
-    };
-    applyProfileStats(state.profileStats);
-    setAvatarNode(profileAvatar, display, profile?.avatar_url);
-    setAvatarNode(profileAvatarLarge, display, profile?.avatar_url);
-    updateSettingsNicknameState();
   };
 
   const loadBalance = async () => {
@@ -2684,7 +2717,7 @@
       <div class="profile-hero">
         <div class="profile-avatar-large" id="userModalAvatar">BC</div>
         <div>
-          <div class="profile-value">${display}</div>
+          <div class="profile-value" id="userModalName">—</div>
           <div class="profile-muted">Регистрация: ${registered}</div>
           ${adminBadge}
         </div>
@@ -2697,6 +2730,11 @@
       </div>
     `;
     const avatarNode = userModalBody.querySelector("#userModalAvatar");
+    const nameNode = userModalBody.querySelector("#userModalName");
+    if (nameNode) {
+      nameNode.textContent = display;
+      attachOnlineIndicator(nameNode, profile);
+    }
     setAvatarNode(avatarNode, display, profile.avatar_url);
     userModal.classList.add("open");
     if (userModalReviews) {
@@ -7327,6 +7365,7 @@
   profileQuick?.addEventListener("click", () => {
     const display = userBadge.textContent || "—";
     profileQuickName.textContent = display;
+    attachOnlineIndicator(profileQuickName, state.profileData);
     const quickRole = state.user?.role === "buyer" ? "Мерчант" : "";
     profileQuickUsername.textContent = quickRole;
     profileQuickUsername.style.display = quickRole ? "" : "none";
