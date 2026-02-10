@@ -3830,7 +3830,7 @@ body.modal-open #app {
 
 #supportChatForm {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) 44px auto;
+  grid-template-columns: minmax(0, 1fr) 44px 96px;
   gap: 8px;
   align-items: center;
   width: 100%;
