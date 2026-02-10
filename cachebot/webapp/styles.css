@@ -5750,11 +5750,19 @@ body.modal-open #app {
   pointer-events: none;
   transition: opacity 0.12s ease;
   will-change: opacity;
+  max-width: 260px;
 }
 
 .online-indicator:hover .online-tooltip,
 .online-indicator.show .online-tooltip {
   opacity: 1;
+}
+
+.online-indicator.align-left .online-tooltip {
+  left: auto;
+  right: 100%;
+  margin-right: 8px;
+  transform: translateX(0);
 }
 
 .modal-actions {

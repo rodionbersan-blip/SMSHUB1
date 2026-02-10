@@ -1560,12 +1560,23 @@
     if (diffMin <= 60) {
       return { cls: "online-red", text: "Был в сети: более 30 минут назад" };
     }
+    if (diffMin <= 240) {
+      return { cls: "online-red", text: "Был в сети: Более часа назад" };
+    }
     const sameDay =
       now.getFullYear() === last.getFullYear() &&
       now.getMonth() === last.getMonth() &&
       now.getDate() === last.getDate();
     if (sameDay) {
       return { cls: "online-red", text: "Был в сети: Сегодня" };
+    }
+    const yesterday = new Date(now.getTime() - 86400000);
+    const isYesterday =
+      yesterday.getFullYear() === last.getFullYear() &&
+      yesterday.getMonth() === last.getMonth() &&
+      yesterday.getDate() === last.getDate();
+    if (isYesterday) {
+      return { cls: "online-red", text: "Был в сети: вчера" };
     }
     const diffDays = diffMin / 1440;
     if (diffDays <= 7) {
@@ -1574,12 +1585,13 @@
     return { cls: "online-red", text: "Был в сети: Более часа назад" };
   };
 
-  const renderOnlineIndicator = (profile) => {
+  const renderOnlineIndicator = (profile, options = {}) => {
     const info = getOnlineInfo(profile?.last_seen_at);
     if (!info) return "";
     const safeText = escapeHtml(info.text);
+    const alignClass = options.align === "left" ? "align-left" : "";
     return `
-      <span class="online-indicator ${info.cls}" data-online-text="${safeText}">
+      <span class="online-indicator ${info.cls} ${alignClass}" data-online-text="${safeText}">
         <span class="online-dot" aria-hidden="true"></span>
         <span class="online-tooltip">${safeText}</span>
       </span>
@@ -1609,7 +1621,7 @@
   const wireOnlineIndicators = (root) => {
     if (!root) return;
     root.querySelectorAll(".online-indicator").forEach((el) => {
-      el.addEventListener("click", () => {
+      const showOnce = () => {
         el.classList.add("show");
         if (el._onlineTimer) {
           window.clearTimeout(el._onlineTimer);
@@ -1618,7 +1630,10 @@
           el.classList.remove("show");
           el._onlineTimer = null;
         }, 3000);
-      });
+      };
+      el.addEventListener("click", showOnce);
+      el.addEventListener("touchstart", showOnce, { passive: true });
+      el.addEventListener("pointerdown", showOnce);
     });
   };
 
@@ -4141,8 +4156,8 @@
       ? Number(dispute.deal.usd_amount || 0) / Number(dispute.deal.rate || 1)
       : Number(dispute.deal.usdt_amount || 0);
     const disputeReasonText = formatDisputeReason(dispute.reason);
-    const sellerOnline = renderOnlineIndicator(dispute.seller);
-    const buyerOnline = renderOnlineIndicator(dispute.buyer);
+    const sellerOnline = renderOnlineIndicator(dispute.seller, { align: "left" });
+    const buyerOnline = renderOnlineIndicator(dispute.buyer, { align: "left" });
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Продавец:</span>
         <span class="dispute-party">
@@ -4356,7 +4371,7 @@
       deal.counterparty?.username ||
       "—";
     const roleLabel = deal.role === "seller" ? "Продавец" : "Покупатель";
-    const counterpartyOnline = renderOnlineIndicator(deal.counterparty);
+    const counterpartyOnline = renderOnlineIndicator(deal.counterparty, { align: "left" });
     dealModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Роль:</span>${roleLabel}</div>
       <div class="deal-detail-row"><span>Статус:</span>${statusLabel(deal)}</div>
