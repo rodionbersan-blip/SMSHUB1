@@ -1574,31 +1574,16 @@
     return { cls: "online-red", text: "Был в сети: Более часа назад" };
   };
 
-  const buildOnlineIndicator = (profile, options = {}) => {
+  const renderOnlineIndicator = (profile) => {
     const info = getOnlineInfo(profile?.last_seen_at);
-    if (!info) return null;
-    const alignClass = options.align === "left" ? "align-left" : "";
-    const wrap = document.createElement("span");
-    wrap.className = `online-indicator ${info.cls} ${alignClass}`.trim();
-    const dot = document.createElement("span");
-    dot.className = "online-dot";
-    const tip = document.createElement("span");
-    tip.className = "online-tooltip";
-    tip.textContent = info.text;
-    wrap.appendChild(dot);
-    wrap.appendChild(tip);
-    return wrap;
-  };
-
-  const attachOnlineIndicator = (container, profile, options = {}) => {
-    try {
-      if (!container) return;
-      container.querySelector(".online-indicator")?.remove();
-      const el = buildOnlineIndicator(profile, options);
-      if (!el) return;
-      container.appendChild(el);
-      wireOnlineIndicators(container);
-    } catch {}
+    if (!info) return "";
+    const safeText = escapeHtml(info.text);
+    return `
+      <span class="online-indicator ${info.cls}" data-online-text="${safeText}">
+        <span class="online-dot" aria-hidden="true"></span>
+        <span class="online-tooltip">${safeText}</span>
+      </span>
+    `;
   };
 
   const wireOnlineIndicators = (root) => {
@@ -1606,13 +1591,7 @@
     root.querySelectorAll(".online-indicator").forEach((el) => {
       el.addEventListener("click", () => {
         el.classList.add("show");
-        if (el._onlineTimer) {
-          window.clearTimeout(el._onlineTimer);
-        }
-        el._onlineTimer = window.setTimeout(() => {
-          el.classList.remove("show");
-          el._onlineTimer = null;
-        }, 3000);
+        window.setTimeout(() => el.classList.remove("show"), 3000);
       });
     });
   };
@@ -1883,10 +1862,7 @@
     state.userId = profile?.user_id ?? null;
     const display = profileDisplayLabel(profile);
     if (profileName) profileName.textContent = display;
-    if (profileDisplayName) {
-      profileDisplayName.textContent = display;
-      attachOnlineIndicator(profileDisplayName, profile);
-    }
+    if (profileDisplayName) profileDisplayName.textContent = display;
     if (profileUsername) {
       profileUsername.textContent = "";
       profileUsername.style.display = "none";
@@ -1949,10 +1925,6 @@
     }
     if (profileBalanceReserved) {
       profileBalanceReserved.textContent = `В резерве: ${formatAmount(reserved, 2)} USDT`;
-    }
-    if (profileQuickName) {
-      profileQuickName.textContent = display;
-      attachOnlineIndicator(profileQuickName, profile);
     }
     if (profileQuickBalance) {
       profileQuickBalance.textContent = `${formatAmount(available, 2)} USDT`;
@@ -2712,7 +2684,7 @@
       <div class="profile-hero">
         <div class="profile-avatar-large" id="userModalAvatar">BC</div>
         <div>
-          <div class="profile-value" id="userModalName">—</div>
+          <div class="profile-value">${display}</div>
           <div class="profile-muted">Регистрация: ${registered}</div>
           ${adminBadge}
         </div>
@@ -2725,11 +2697,6 @@
       </div>
     `;
     const avatarNode = userModalBody.querySelector("#userModalAvatar");
-    const nameNode = userModalBody.querySelector("#userModalName");
-    if (nameNode) {
-      nameNode.textContent = display;
-      attachOnlineIndicator(nameNode, profile);
-    }
     setAvatarNode(avatarNode, display, profile.avatar_url);
     userModal.classList.add("open");
     if (userModalReviews) {
@@ -2810,13 +2777,6 @@
       <div class="deal-detail-row"><span>Срок оплаты:</span>15 мин</div>
       <div class="deal-detail-row"><span>Условия сделки:</span>${ad.terms || "—"}</div>
     `;
-    const disputeParties = p2pModalBody.querySelectorAll(".dispute-party");
-    if (disputeParties[0]) {
-      attachOnlineIndicator(disputeParties[0], dispute.seller, { align: "left" });
-    }
-    if (disputeParties[1]) {
-      attachOnlineIndicator(disputeParties[1], dispute.buyer, { align: "left" });
-    }
     p2pModalActions.innerHTML = "";
     if (isOwner) {
       const editBtn = document.createElement("button");
@@ -4380,8 +4340,6 @@
         </span>
       </div>
     `;
-    const counterpartyWrap = dealModalBody.querySelector(".deal-detail-row .dispute-party");
-    attachOnlineIndicator(counterpartyWrap, deal.counterparty, { align: "left" });
     wireOnlineIndicators(dealModalBody);
     if (deal.actions?.select_bank && Array.isArray(deal.qr_bank_options) && deal.qr_bank_options.length) {
       const bankRow = document.createElement("div");
