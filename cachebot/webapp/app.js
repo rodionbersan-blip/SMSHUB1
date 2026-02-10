@@ -739,6 +739,7 @@
     if (!systemNotice) return;
     systemNotice.classList.remove("show");
     clearSystemNoticeTimer();
+    systemNotice.querySelector(".system-notice-card")?.classList.remove("dismiss");
   };
 
   const dismissSystemNotice = () => {
@@ -757,6 +758,8 @@
     if (!systemNotice || !systemNoticeList) return;
     state.systemNoticeActive = item;
     systemNotice.dataset.type = item?.type || "";
+    const systemNoticeCard = systemNotice.querySelector(".system-notice-card");
+    systemNoticeCard?.classList.remove("dismiss");
     systemNoticeTitle.textContent = "Уведомление";
     systemNoticeList.innerHTML = "";
     const row = document.createElement("div");
@@ -829,6 +832,46 @@
     }
   };
 
+  const initSystemNoticeSwipe = () => {
+    if (!systemNotice) return;
+    const card = systemNotice.querySelector(".system-notice-card");
+    if (!card || card._swipeBound) return;
+    let startY = 0;
+    let currentY = 0;
+    let active = false;
+
+    const onStart = (event) => {
+      if (!systemNotice.classList.contains("show")) return;
+      active = true;
+      startY = event.touches ? event.touches[0].clientY : event.clientY;
+      currentY = startY;
+    };
+
+    const onMove = (event) => {
+      if (!active) return;
+      currentY = event.touches ? event.touches[0].clientY : event.clientY;
+    };
+
+    const onEnd = () => {
+      if (!active) return;
+      active = false;
+      const delta = startY - currentY;
+      if (delta > 60) {
+        card.classList.add("dismiss");
+        window.setTimeout(() => {
+          dismissSystemNotice();
+        }, 200);
+      }
+    };
+
+    card.addEventListener("touchstart", onStart, { passive: true });
+    card.addEventListener("touchmove", onMove, { passive: true });
+    card.addEventListener("touchend", onEnd);
+    card.addEventListener("pointerdown", onStart);
+    card.addEventListener("pointerup", onEnd);
+    card._swipeBound = true;
+  };
+
   const pushSystemNotification = (entry) => {
     if (!entry?.message) return;
     const noticeKey = entry.key || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -861,6 +904,7 @@
   };
 
   renderSystemNotifications();
+  initSystemNoticeSwipe();
 
   const log = (message, type = "info") => {
     if (!logEl) return;

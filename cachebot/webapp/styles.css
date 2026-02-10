@@ -6090,6 +6090,12 @@ body.modal-open #app {
   box-shadow: 0 20px 46px rgba(0, 0, 0, 0.4);
   display: grid;
   gap: 10px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.system-notice-card.dismiss {
+  opacity: 0;
+  transform: translateY(-16px);
 }
 
 :root[data-theme="light"] .system-notice-card {
