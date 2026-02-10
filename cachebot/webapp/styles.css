@@ -3829,16 +3829,16 @@ body.modal-open #app {
 }
 
 #supportChatForm {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) 44px auto;
   gap: 8px;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
 }
 
 #supportChatForm input {
-  flex: 1 1 auto;
-}
-
-#supportChatForm {
-  grid-template-columns: minmax(0, 0.8fr) 44px auto;
+  min-width: 0;
 }
 
 .support-assigned {
