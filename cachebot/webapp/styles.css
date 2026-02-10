@@ -3837,6 +3837,10 @@ body.modal-open #app {
   flex: 1 1 auto;
 }
 
+#supportChatForm {
+  grid-template-columns: minmax(0, 0.8fr) 44px auto;
+}
+
 .support-assigned {
   color: #ff9e4a;
   font-weight: 600;
@@ -3858,8 +3862,39 @@ body.modal-open #app {
   gap: 12px;
 }
 
+.support-info-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.support-info-name-row .profile-title {
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+:root[data-theme="light"] .support-info-name-row .profile-title {
+  color: #0f1623;
+}
+
 .support-info-avatar {
   background: rgba(46, 204, 113, 0.2);
+}
+
+.support-info-online {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+}
+
+.support-info-online .online-indicator {
+  margin-left: 0;
+}
+
+.support-info-online .online-dot {
+  width: 10px;
+  height: 10px;
 }
 
 .support-info-meta {
@@ -3882,6 +3917,14 @@ body.modal-open #app {
   gap: 10px;
   font-size: 13px;
   color: var(--muted);
+}
+
+.support-info-row.is-single {
+  grid-template-columns: 1fr;
+}
+
+.support-info-row.is-single span:first-child {
+  display: none;
 }
 
 .support-info-row span:last-child {
@@ -5089,7 +5132,7 @@ body.modal-open #app {
 
 .chat-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px minmax(120px, 36%);
+  grid-template-columns: minmax(0, 1fr) 44px auto;
   gap: 8px;
   margin-top: 12px;
   align-items: center;
@@ -5123,6 +5166,24 @@ body.modal-open #app {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0 16px;
+  min-width: 110px;
+}
+
+@media (min-width: 900px) {
+  .chat-form {
+    grid-template-columns: minmax(0, 1fr) 44px 140px;
+    max-width: 560px;
+  }
+
+  .chat-form .btn.primary {
+    min-width: 140px;
+  }
+
+  #supportChatForm {
+    grid-template-columns: minmax(0, 0.8fr) 44px 140px;
+    max-width: 560px;
+  }
 }
 
 .chat-file-hint {
@@ -5269,6 +5330,25 @@ body.modal-open #app {
   display: flex;
   flex-direction: column;
   padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px) + 36px);
+}
+
+#supportChatModal .modal-card {
+  width: min(92vw, 720px);
+  height: calc(100dvh - 48px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px) + 36px);
+}
+
+#supportChatModal .modal-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#supportChatModal .chat-list {
+  flex: 1 1 auto;
+  max-height: none;
 }
 
 #chatModal {

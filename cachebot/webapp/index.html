@@ -805,14 +805,21 @@
           <div class="support-info-head">
             <div class="profile-avatar-large support-info-avatar" id="supportInfoAvatar">—</div>
             <div>
-              <div class="profile-title" id="supportInfoName">—</div>
+              <div class="support-info-name-row">
+                <div class="profile-title" id="supportInfoName">—</div>
+                <div class="support-info-online" id="supportInfoOnline"></div>
+              </div>
               <div class="support-info-meta" id="supportInfoMeta">—</div>
             </div>
           </div>
           <div class="support-info-grid">
-            <div class="support-info-row">
+            <div class="support-info-row" id="supportInfoReasonRow">
               <span>Причина</span>
               <span id="supportInfoReason">—</span>
+            </div>
+            <div class="support-info-row">
+              <span>Сообщений</span>
+              <span id="supportInfoMessages">—</span>
             </div>
             <div class="support-info-row">
               <span>Описание</span>
@@ -840,8 +847,13 @@
           <div id="supportChatList" class="chat-list"></div>
           <form id="supportChatForm" class="chat-form">
             <input id="supportChatInput" type="text" placeholder="Сообщение" />
-            <button id="supportChatSend" class="btn pill" type="submit">Отправить</button>
+            <label class="btn pill chat-attach">
+              📎
+              <input id="supportChatFile" type="file" />
+            </label>
+            <button id="supportChatSend" class="btn primary" type="submit">Отправить</button>
           </form>
+          <div id="supportChatFileHint" class="chat-file-hint" aria-live="polite"></div>
           <div class="modal-actions-row modal-actions-bottom">
             <button id="supportAssignBtn" class="btn">Взять в работу</button>
             <button id="supportCloseBtn" class="btn danger">Закрыть чат</button>

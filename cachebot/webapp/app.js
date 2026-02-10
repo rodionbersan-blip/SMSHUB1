@@ -342,9 +342,12 @@
   const supportInfoModal = document.getElementById("supportInfoModal");
   const supportInfoClose = document.getElementById("supportInfoClose");
   const supportInfoAvatar = document.getElementById("supportInfoAvatar");
+  const supportInfoOnline = document.getElementById("supportInfoOnline");
   const supportInfoName = document.getElementById("supportInfoName");
   const supportInfoMeta = document.getElementById("supportInfoMeta");
   const supportInfoReason = document.getElementById("supportInfoReason");
+  const supportInfoReasonRow = document.getElementById("supportInfoReasonRow");
+  const supportInfoMessages = document.getElementById("supportInfoMessages");
   const supportInfoSubject = document.getElementById("supportInfoSubject");
   const supportInfoOpened = document.getElementById("supportInfoOpened");
   const supportInfoAssignBtn = document.getElementById("supportInfoAssignBtn");
@@ -354,6 +357,8 @@
   const supportChatList = document.getElementById("supportChatList");
   const supportChatForm = document.getElementById("supportChatForm");
   const supportChatInput = document.getElementById("supportChatInput");
+  const supportChatFile = document.getElementById("supportChatFile");
+  const supportChatFileHint = document.getElementById("supportChatFileHint");
   const supportAssignBtn = document.getElementById("supportAssignBtn");
   const supportCloseBtn = document.getElementById("supportCloseBtn");
   const supportNavBtn = document.querySelector('.nav-btn[data-view="support"]');
@@ -475,6 +480,7 @@
   const chatUnreadStorageKey = "dealChatUnreadCounts";
   const chatSeenStorageKey = "dealChatLastSeenAt";
   const supportSeenStorageKey = "supportChatLastSeenAt";
+  const supportAssignedStorageKey = "supportChatAssignedSeen";
   const chatScrollStorageKey = "dealChatScrollPos";
   const pendingReadStorageKey = "dealPendingRead";
   const systemNoticeStorageKey = "systemNotifications";
@@ -594,6 +600,24 @@
     } catch {}
   };
 
+  const loadSupportAssignedSeen = () => {
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(supportAssignedStorageKey) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const persistSupportAssignedSeen = () => {
+    try {
+      window.localStorage.setItem(
+        supportAssignedStorageKey,
+        JSON.stringify(state.supportAssignedSeen || {})
+      );
+    } catch {}
+  };
+
   const setSupportBadge = (hasUnread) => {
     if (!supportNavBtn) return;
     const existing = supportNavBtn.querySelector(".btn-badge");
@@ -611,6 +635,7 @@
   };
 
   state.supportLastSeen = loadSupportSeen();
+  state.supportAssignedSeen = loadSupportAssignedSeen();
   const loadPendingRead = () => {
     try {
       const raw = JSON.parse(window.localStorage.getItem(pendingReadStorageKey) || "{}");
@@ -1695,6 +1720,7 @@
 
   const wireOnlineIndicators = (root) => {
     if (!root) return;
+    const canHover = window.matchMedia && window.matchMedia("(hover: hover)").matches;
     if (!window._onlineTooltipGlobalListeners) {
       const hideAll = (event) => {
         document.querySelectorAll(".online-indicator.show").forEach((node) => {
@@ -1702,8 +1728,10 @@
           node.classList.remove("show");
         });
       };
-      document.addEventListener("click", hideAll);
-      document.addEventListener("touchstart", hideAll, { passive: true });
+      if (!canHover) {
+        document.addEventListener("click", hideAll);
+        document.addEventListener("touchstart", hideAll, { passive: true });
+      }
       window._onlineTooltipGlobalListeners = true;
     }
     root.querySelectorAll(".online-indicator").forEach((el) => {
@@ -1714,6 +1742,16 @@
         window.requestAnimationFrame(() => {
           el.classList.add("show");
         });
+      };
+      if (canHover) {
+        el.addEventListener("mouseenter", showOnce);
+        el.addEventListener("mouseleave", () => {
+          el.classList.remove("show");
+        });
+        return;
+      }
+      const showWithTimeout = () => {
+        showOnce();
         if (el._onlineTimer) {
           window.clearTimeout(el._onlineTimer);
         }
@@ -1722,9 +1760,9 @@
           el._onlineTimer = null;
         }, 3000);
       };
-      el.addEventListener("click", showOnce);
-      el.addEventListener("touchstart", showOnce, { passive: true });
-      el.addEventListener("pointerdown", showOnce);
+      el.addEventListener("click", showWithTimeout);
+      el.addEventListener("touchstart", showWithTimeout, { passive: true });
+      el.addEventListener("pointerdown", showWithTimeout);
     });
   };
 
@@ -3268,12 +3306,20 @@
       const lastMessageAt = ticket.last_message_at || ticket.updated_at || "";
       const lastMessageAuthorId = ticket.last_message_author_id;
       const lastSeen = state.supportLastSeen?.[ticket.id];
+      const assignedTo = ticket.assigned_to;
+      const isAssignedToSelf = assignedTo && Number(assignedTo) === Number(state.userId);
+      const shouldNotify = !payload.can_manage || isAssignedToSelf;
+      const assignedNotify =
+        !payload.can_manage &&
+        ticket.assigned_to &&
+        !state.supportAssignedSeen?.[ticket.id];
       const isUnread =
+        shouldNotify &&
         lastMessageAt &&
         lastMessageAuthorId &&
         !isSelfSender(lastMessageAuthorId) &&
         lastSeen !== lastMessageAt;
-      if (isUnread) hasUnread = true;
+      if (isUnread || assignedNotify) hasUnread = true;
       if (!supportList) return;
       const row = document.createElement("div");
       row.className = "deal-item";
@@ -3321,13 +3367,12 @@
           <div class="deal-status ${statusInfo.cls}">${statusInfo.text}</div>
         </div>
         <div class="deal-row">${reasonLabel}</div>
-        <div class="deal-row">${ticket.subject || ""} ${assignedLabel}</div>
+        <div class="deal-row">${assignedLabel}</div>
       `;
-      if (isUnread) {
+      if (isUnread || assignedNotify) {
         row.classList.add("has-badge");
         const badge = document.createElement("span");
-        badge.className = "btn-badge";
-        badge.textContent = "1";
+        badge.className = "btn-badge dot";
         row.appendChild(badge);
       }
       row.addEventListener("click", () => {
@@ -3362,17 +3407,25 @@
       const lastMessageAt = ticket.last_message_at || ticket.updated_at || "";
       const lastMessageAuthorId = ticket.last_message_author_id;
       const lastSeen = state.supportLastSeen?.[ticket.id];
+      const assignedTo = ticket.assigned_to;
+      const isAssignedToSelf = assignedTo && Number(assignedTo) === Number(state.userId);
+      const shouldNotify = !payload.can_manage || isAssignedToSelf;
+      const assignedNotify =
+        !payload.can_manage &&
+        ticket.assigned_to &&
+        !state.supportAssignedSeen?.[ticket.id];
       const isUnread =
+        shouldNotify &&
         lastMessageAt &&
         lastMessageAuthorId &&
         !isSelfSender(lastMessageAuthorId) &&
         lastSeen !== lastMessageAt;
-      if (isUnread) hasUnread = true;
+      if (isUnread || assignedNotify) hasUnread = true;
     });
     setSupportBadge(hasUnread);
   };
 
-  const openSupportChat = async (ticketId, canManage) => {
+  const openSupportChat = async (ticketId, canManage, options = {}) => {
     if (!supportChatModal || !supportChatList) return;
     const payload = await fetchJson(`/api/support/tickets/${ticketId}`);
     if (!payload?.ok) return;
@@ -3393,6 +3446,12 @@
       payload.user?.username ||
       `Чат #${ticketId}`;
     if (supportChatTitle) supportChatTitle.textContent = title;
+    const assignedModName =
+      payload.ticket?.assigned_moderator_name ||
+      payload.ticket?.moderator_name ||
+      (payload.ticket?.assigned_to && Number(payload.ticket.assigned_to) === Number(state.userId)
+        ? state.user?.display_name || state.user?.full_name || state.user?.username
+        : "");
     let moderatorNoticeShown = false;
     (payload.messages || []).forEach((msg) => {
       const isModerator = msg.author_role === "moderator";
@@ -3407,6 +3466,9 @@
       const row = document.createElement("div");
       const isSelf = Number(msg.author_id) === Number(state.userId);
       row.className = `chat-message ${isSelf ? "self" : ""}`.trim();
+      if (isModerator) {
+        row.classList.add(isSelf ? "mod-self" : "mod");
+      }
       const label = document.createElement("div");
       if (isModerator) {
         label.className = "chat-system-label chat-mod-label";
@@ -3417,11 +3479,55 @@
         label.textContent = msg.author_name;
         row.appendChild(label);
       }
-      const text = document.createElement("div");
-      text.textContent = msg.text;
-      row.appendChild(text);
+      if (msg.text) {
+        const text = document.createElement("div");
+        text.textContent = msg.text;
+        row.appendChild(text);
+      }
+      const fileName = (msg.file_name || "").toLowerCase();
+      const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileName);
+      if (msg.file_url) {
+        if (isImage) {
+          const img = document.createElement("img");
+          img.src = msg.file_url;
+          img.alt = msg.file_name || "Фото";
+          img.className = "chat-image";
+          img.addEventListener("click", () => openImageModal(msg.file_url, img.alt));
+          row.appendChild(img);
+        } else {
+          const link = document.createElement("a");
+          link.href = msg.file_url;
+          link.target = "_blank";
+          link.rel = "noopener";
+          link.className = "chat-file";
+          link.textContent = msg.file_name || "Файл";
+          row.appendChild(link);
+        }
+      }
       supportChatList.appendChild(row);
     });
+    if (!moderatorNoticeShown && payload.ticket?.assigned_to && assignedModName) {
+      const notice = document.createElement("div");
+      notice.className = "chat-join-notice";
+      const userName =
+        payload.user?.display_name || payload.user?.full_name || payload.user?.username || "";
+      notice.textContent = userName
+        ? `Модератор ${assignedModName} подключился к чату с пользователем ${userName}`
+        : `Модератор ${assignedModName} подключился к чату`;
+      supportChatList.appendChild(notice);
+      moderatorNoticeShown = true;
+    }
+    if (!moderatorNoticeShown && options.forceModeratorNotice) {
+      const notice = document.createElement("div");
+      notice.className = "chat-join-notice";
+      const userName =
+        payload.user?.display_name || payload.user?.full_name || payload.user?.username || "";
+      const modName = assignedModName || "Модератор";
+      notice.textContent = userName
+        ? `${modName} подключился к чату с пользователем ${userName}`
+        : `${modName} подключился к чату`;
+      supportChatList.appendChild(notice);
+    }
     if (Array.isArray(payload.messages) && payload.messages.length) {
       const lastMsg = payload.messages[payload.messages.length - 1];
       if (lastMsg?.created_at) {
@@ -3429,6 +3535,11 @@
         state.supportLastSeen[ticketId] = lastMsg.created_at;
         persistSupportSeen();
       }
+    }
+    if (!canManage && payload.ticket?.assigned_to) {
+      state.supportAssignedSeen = state.supportAssignedSeen || {};
+      state.supportAssignedSeen[ticketId] = payload.ticket.assigned_to;
+      persistSupportAssignedSeen();
     }
     setSupportBadge(false);
     const assignedTo = payload.ticket?.assigned_to;
@@ -3461,15 +3572,37 @@
     supportChatForm.onsubmit = async (event) => {
       event.preventDefault();
       const text = supportChatInput.value.trim();
-      if (!text) return;
-      await fetchJson(`/api/support/tickets/${ticketId}/messages`, {
-        method: "POST",
-        body: JSON.stringify({ text }),
-      });
+      const file = supportChatFile?.files?.[0] || null;
+      if (!text && !file) return;
+      if (file) {
+        const form = new FormData();
+        form.append("file", file);
+        if (text) {
+          form.append("text", text);
+        }
+        const res = await fetch(`/api/support/tickets/${ticketId}/messages/file`, {
+          method: "POST",
+          headers: { "X-Telegram-Init-Data": state.initData || "" },
+          body: form,
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          showNotice(errText || "Не удалось отправить файл");
+          return;
+        }
+      } else {
+        await fetchJson(`/api/support/tickets/${ticketId}/messages`, {
+          method: "POST",
+          body: JSON.stringify({ text }),
+        });
+      }
       supportChatInput.value = "";
+      if (supportChatFile) supportChatFile.value = "";
+      updateSupportChatFileHint();
       await openSupportChat(ticketId, canManage);
     };
     supportChatModal.classList.add("open");
+    updateSupportChatFileHint();
   };
 
   const buildSupportReasonLabel = (ticket) => {
@@ -3498,10 +3631,28 @@
       supportInfoMeta.textContent = user.username ? `@${user.username}` : "—";
     }
     setAvatarNode(supportInfoAvatar, display, user.avatar_url);
-    if (supportInfoReason) supportInfoReason.textContent = buildSupportReasonLabel(ticket);
-    if (supportInfoSubject) supportInfoSubject.textContent = ticket.subject || "—";
+    if (supportInfoOnline) {
+      supportInfoOnline.innerHTML = "";
+      attachOnlineIndicator(supportInfoOnline, user);
+    }
+    const isOtherReason = ticket.complaint_type === "other";
+    if (supportInfoReason) {
+      supportInfoReason.textContent = isOtherReason ? "Другая причина" : buildSupportReasonLabel(ticket);
+    }
+    if (supportInfoReasonRow) {
+      supportInfoReasonRow.classList.toggle("is-single", isOtherReason);
+      const labelNode = supportInfoReasonRow.querySelector("span");
+      if (labelNode) labelNode.textContent = isOtherReason ? "" : "Причина";
+    }
     if (supportInfoOpened) {
       supportInfoOpened.textContent = formatElapsedSince(ticket.created_at || ticket.opened_at);
+    }
+    if (supportInfoSubject) {
+      supportInfoSubject.textContent = ticket.subject || "—";
+    }
+    if (supportInfoMessages) {
+      const count = Array.isArray(payload.messages) ? payload.messages.length : 0;
+      supportInfoMessages.textContent = `${count}`;
     }
 
     if (supportInfoAssignBtn) {
@@ -3522,7 +3673,9 @@
           await loadSupport();
         }
         supportInfoModal.classList.remove("open");
-        await openSupportChat(ticketId, canManage);
+        window.setTimeout(() => {
+          openSupportChat(ticketId, canManage, { forceModeratorNotice: true });
+        }, 160);
       };
     }
 
@@ -5683,6 +5836,18 @@
     }
   };
 
+  const updateSupportChatFileHint = () => {
+    if (!supportChatFileHint) return;
+    const file = supportChatFile?.files?.[0];
+    if (file) {
+      supportChatFileHint.textContent = `📎 ${file.name}`;
+      supportChatFileHint.classList.add("show");
+    } else {
+      supportChatFileHint.textContent = "";
+      supportChatFileHint.classList.remove("show");
+    }
+  };
+
   const openDealModal = async (dealId) => {
     const payload = await fetchJson(`/api/deals/${dealId}`);
     if (!payload?.ok) return;
@@ -7250,6 +7415,7 @@
   });
   supportInfoClose?.addEventListener("click", () => supportInfoModal?.classList.remove("open"));
   supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
+  supportChatFile?.addEventListener("change", updateSupportChatFileHint);
   const setSupportReason = (value) => {
     if (supportReasonType) supportReasonType.value = value;
     const needsTarget = value === "moderator" || value === "user";

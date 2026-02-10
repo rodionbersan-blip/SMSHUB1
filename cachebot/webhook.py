@@ -114,8 +114,12 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/support/tickets", _api_support_create_ticket)
     app.router.add_get("/api/support/tickets/{ticket_id}", _api_support_ticket_detail)
     app.router.add_post("/api/support/tickets/{ticket_id}/messages", _api_support_ticket_message)
+    app.router.add_post(
+        "/api/support/tickets/{ticket_id}/messages/file", _api_support_ticket_message_file
+    )
     app.router.add_post("/api/support/tickets/{ticket_id}/assign", _api_support_ticket_assign)
     app.router.add_post("/api/support/tickets/{ticket_id}/close", _api_support_ticket_close)
+    app.router.add_get("/api/support-files/{ticket_id}/{filename}", _api_support_file)
     app.router.add_get("/api/reviews", _api_reviews_list)
     app.router.add_post("/api/reviews", _api_reviews_add)
     app.router.add_get("/api/summary", _api_summary)
@@ -2682,11 +2686,25 @@ async def _api_support_ticket_detail(request: web.Request) -> web.Response:
                 or (f"ID {msg.author_id}" if msg.author_id else "")
             ),
             "text": msg.text,
+            "file_name": msg.file_name,
+            "file_url": _support_chat_file_url(request, msg) if msg.file_path else None,
             "created_at": msg.created_at,
         }
         for msg in messages
     ]
     profile = await deps.user_service.profile_of(ticket.user_id)
+    moderator_profile = None
+    if ticket.assigned_to:
+        moderator_profile = await deps.user_service.profile_of(ticket.assigned_to)
+    assigned_moderator_name = (
+        ticket.moderator_name
+        or (
+            moderator_profile.display_name
+            if moderator_profile and moderator_profile.display_name
+            else (moderator_profile.full_name if moderator_profile else None)
+        )
+        or (moderator_profile.username if moderator_profile else None)
+    )
     return web.json_response(
         {
             "ok": True,
@@ -2695,6 +2713,7 @@ async def _api_support_ticket_detail(request: web.Request) -> web.Response:
                 "user_id": ticket.user_id,
                 "subject": ticket.subject,
                 "moderator_name": ticket.moderator_name,
+                "assigned_moderator_name": assigned_moderator_name,
                 "complaint_type": ticket.complaint_type,
                 "target_name": ticket.target_name,
                 "status": ticket.status,
@@ -2731,6 +2750,55 @@ async def _api_support_ticket_message(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "message_id": msg.id})
 
 
+async def _api_support_ticket_message_file(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    ticket_id = int(request.match_info["ticket_id"])
+    ticket = await deps.support_service.get_ticket(ticket_id)
+    if not ticket:
+        raise web.HTTPNotFound(text="Чат не найден")
+    can_manage = await _has_moderation_access(user_id, deps)
+    if not can_manage and ticket.user_id != user_id:
+        raise web.HTTPForbidden(text="Нет доступа")
+    reader = await request.multipart()
+    field = await reader.next()
+    if not field or field.name != "file":
+        raise web.HTTPBadRequest(text="Файл не найден")
+    filename = Path(field.filename or "file").name
+    chat_dir = _support_chat_dir(deps) / str(ticket_id)
+    chat_dir.mkdir(parents=True, exist_ok=True)
+    file_path = chat_dir / filename
+    with file_path.open("wb") as handle:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            handle.write(chunk)
+    text_field = await reader.next()
+    text = None
+    if text_field and text_field.name == "text":
+        raw = await text_field.text()
+        text = raw.strip() if raw else None
+    role = "moderator" if can_manage else "user"
+    msg = await deps.support_service.add_message(
+        ticket_id, user_id, role, text, file_name=filename, file_path=str(file_path)
+    )
+    profile = await deps.user_service.profile_of(user_id)
+    data = _profile_payload(profile, request=request, include_private=False) or {}
+    name = data.get("display_name") or data.get("full_name") or data.get("username") or user_id
+    payload = {
+        "id": msg.id,
+        "author_id": msg.author_id,
+        "author_role": msg.author_role,
+        "author_name": name,
+        "text": msg.text,
+        "file_name": msg.file_name,
+        "file_url": _support_chat_file_url(request, msg),
+        "created_at": msg.created_at,
+    }
+    return web.json_response({"ok": True, "message": payload})
+
+
 async def _api_support_ticket_assign(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
@@ -2740,7 +2808,14 @@ async def _api_support_ticket_assign(request: web.Request) -> web.Response:
     ticket = await deps.support_service.get_ticket(ticket_id)
     if not ticket:
         raise web.HTTPNotFound(text="Чат не найден")
-    await deps.support_service.assign(ticket_id, user_id)
+    profile = await deps.user_service.profile_of(user_id)
+    moderator_name = (
+        (profile.display_name if profile and profile.display_name else None)
+        or (profile.full_name if profile else None)
+        or (profile.username if profile else None)
+        or str(user_id)
+    )
+    await deps.support_service.assign(ticket_id, user_id, moderator_name)
     return web.json_response({"ok": True})
 
 
@@ -2763,6 +2838,24 @@ async def _api_support_ticket_close(request: web.Request) -> web.Response:
             raise web.HTTPForbidden(text="Можно закрыть через 24 часа")
     await deps.support_service.close(ticket_id)
     return web.json_response({"ok": True})
+
+
+async def _api_support_file(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    ticket_id = int(request.match_info["ticket_id"])
+    filename = request.match_info["filename"]
+    ticket = await deps.support_service.get_ticket(ticket_id)
+    if not ticket:
+        raise web.HTTPNotFound(text="Чат не найден")
+    can_manage = await _has_moderation_access(user_id, deps)
+    if not can_manage and ticket.user_id != user_id:
+        raise web.HTTPForbidden(text="Нет доступа")
+    chat_dir = _support_chat_dir(deps).resolve()
+    path = (chat_dir / str(ticket_id) / filename).resolve()
+    if chat_dir not in path.parents or not path.exists():
+        raise web.HTTPNotFound()
+    return web.FileResponse(path)
 
 
 async def _api_reviews_list(request: web.Request) -> web.Response:
@@ -3109,6 +3202,10 @@ def _chat_dir(deps: AppDeps) -> Path:
     return Path(deps.config.storage_path).parent / "chat"
 
 
+def _support_chat_dir(deps: AppDeps) -> Path:
+    return Path(deps.config.storage_path).parent / "support-chat"
+
+
 def _qr_logo_path() -> Path:
     return Path(__file__).resolve().parents[1] / "bc-logo.png"
 
@@ -3238,6 +3335,18 @@ def _chat_file_url(request: web.Request, msg) -> str | None:
         query["initData"] = init_data
     return str(
         request.url.with_path(f"/api/chat-files/{msg.deal_id}/{msg.file_name}").with_query(query)
+    )
+
+
+def _support_chat_file_url(request: web.Request, msg) -> str | None:
+    if not msg.file_path or not msg.file_name:
+        return None
+    query = {}
+    init_data = request.headers.get("X-Telegram-Init-Data")
+    if init_data:
+        query["initData"] = init_data
+    return str(
+        request.url.with_path(f"/api/support-files/{msg.ticket_id}/{msg.file_name}").with_query(query)
     )
 
 

@@ -33,6 +33,8 @@ class SupportMessage:
     author_role: str
     text: str
     created_at: str
+    file_name: str | None = None
+    file_path: str | None = None
 
 
 class SupportService:
@@ -77,6 +79,8 @@ class SupportService:
                     author_id INTEGER NOT NULL,
                     author_role TEXT NOT NULL,
                     text TEXT NOT NULL,
+                    file_name TEXT,
+                    file_path TEXT,
                     created_at TEXT NOT NULL
                 )
                 """
@@ -99,6 +103,14 @@ class SupportService:
                 pass
             try:
                 conn.execute("ALTER TABLE support_tickets ADD COLUMN last_message_author_role TEXT")
+            except sqlite3.OperationalError:
+                pass
+            try:
+                conn.execute("ALTER TABLE support_messages ADD COLUMN file_name TEXT")
+            except sqlite3.OperationalError:
+                pass
+            try:
+                conn.execute("ALTER TABLE support_messages ADD COLUMN file_path TEXT")
             except sqlite3.OperationalError:
                 pass
             conn.commit()
@@ -181,7 +193,16 @@ class SupportService:
                     conn.close()
             return await asyncio.to_thread(_run)
 
-    async def add_message(self, ticket_id: int, author_id: int, author_role: str, text: str) -> SupportMessage:
+    async def add_message(
+        self,
+        ticket_id: int,
+        author_id: int,
+        author_role: str,
+        text: str | None,
+        *,
+        file_name: str | None = None,
+        file_path: str | None = None,
+    ) -> SupportMessage:
         async with self._lock:
             now = datetime.now(timezone.utc).isoformat()
             def _run() -> SupportMessage:
@@ -189,10 +210,10 @@ class SupportService:
                 try:
                     cur = conn.execute(
                         """
-                        INSERT INTO support_messages (ticket_id, author_id, author_role, text, created_at)
-                        VALUES (?, ?, ?, ?, ?)
+                        INSERT INTO support_messages (ticket_id, author_id, author_role, text, file_name, file_path, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                         """,
-                        (ticket_id, author_id, author_role, text, now),
+                        (ticket_id, author_id, author_role, text or "", file_name, file_path, now),
                     )
                     conn.execute(
                         "UPDATE support_tickets SET updated_at = ? WHERE id = ?",
@@ -213,15 +234,19 @@ class SupportService:
                     conn.close()
             return await asyncio.to_thread(_run)
 
-    async def assign(self, ticket_id: int, moderator_id: int) -> None:
+    async def assign(self, ticket_id: int, moderator_id: int, moderator_name: str | None = None) -> None:
         async with self._lock:
             now = datetime.now(timezone.utc).isoformat()
             def _run() -> None:
                 conn = self._connect()
                 try:
                     conn.execute(
-                        "UPDATE support_tickets SET assigned_to = ?, status = 'in_progress', updated_at = ? WHERE id = ?",
-                        (moderator_id, now, ticket_id),
+                        """
+                        UPDATE support_tickets
+                        SET assigned_to = ?, moderator_name = ?, status = 'in_progress', updated_at = ?
+                        WHERE id = ?
+                        """,
+                        (moderator_id, moderator_name, now, ticket_id),
                     )
                     conn.commit()
                 finally:
