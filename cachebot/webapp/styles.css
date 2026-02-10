@@ -5349,7 +5349,7 @@ body.modal-open #app {
 #supportChatModal .chat-list {
   flex: 1 1 auto;
   max-height: none;
-  padding-bottom: 220px;
+  padding-bottom: 260px;
 }
 
 #supportChatModal .modal-header {
@@ -5364,7 +5364,7 @@ body.modal-open #app {
 #supportChatModal .chat-file-hint,
 #supportChatModal .modal-actions-bottom {
   position: sticky;
-  bottom: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px));
   z-index: 2;
   background: transparent;
   backdrop-filter: none;
