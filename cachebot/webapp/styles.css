@@ -5346,12 +5346,13 @@ body.modal-open #app {
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  --support-chat-footer-height: 240px;
 }
 
 #supportChatModal .chat-list {
   flex: 1 1 auto;
   max-height: none;
-  padding-bottom: var(--support-chat-footer-height, 200px);
+  padding-bottom: var(--support-chat-footer-height);
   overflow-y: auto;
 }
 
