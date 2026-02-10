@@ -739,7 +739,6 @@
     if (!systemNotice) return;
     systemNotice.classList.remove("show");
     clearSystemNoticeTimer();
-    systemNotice.querySelector(".system-notice-card")?.classList.remove("dismiss");
   };
 
   const dismissSystemNotice = () => {
@@ -758,8 +757,6 @@
     if (!systemNotice || !systemNoticeList) return;
     state.systemNoticeActive = item;
     systemNotice.dataset.type = item?.type || "";
-    const systemNoticeCard = systemNotice.querySelector(".system-notice-card");
-    systemNoticeCard?.classList.remove("dismiss");
     systemNoticeTitle.textContent = "Уведомление";
     systemNoticeList.innerHTML = "";
     const row = document.createElement("div");
@@ -787,7 +784,7 @@
     systemNotice.classList.add("show");
     clearSystemNoticeTimer();
     if (autoClose) {
-      const timeoutMs = item?.type === "dispute_resolved" ? 7000 : 4000;
+      const timeoutMs = item?.type === "dispute_resolved" ? 3000 : 4000;
       state.systemNoticeTimer = window.setTimeout(() => {
         if (item?.key) {
           state.systemNotifications = (state.systemNotifications || []).filter(
@@ -864,7 +861,6 @@
   };
 
   renderSystemNotifications();
-  initSystemNoticeSwipe();
 
   const log = (message, type = "info") => {
     if (!logEl) return;
@@ -5995,46 +5991,6 @@
     state.systemNoticeActive = null;
     hideSystemNotice();
     renderSystemNotifications();
-  };
-
-  const initSystemNoticeSwipe = () => {
-    if (!systemNotice) return;
-    const card = systemNotice.querySelector(".system-notice-card");
-    if (!card || card._swipeBound) return;
-    let startY = 0;
-    let currentY = 0;
-    let active = false;
-
-    const onStart = (event) => {
-      if (!systemNotice.classList.contains("show")) return;
-      active = true;
-      startY = event.touches ? event.touches[0].clientY : event.clientY;
-      currentY = startY;
-    };
-
-    const onMove = (event) => {
-      if (!active) return;
-      currentY = event.touches ? event.touches[0].clientY : event.clientY;
-    };
-
-    const onEnd = () => {
-      if (!active) return;
-      active = false;
-      const delta = startY - currentY;
-      if (delta > 60) {
-        card.classList.add("dismiss");
-        window.setTimeout(() => {
-          dismissSystemNotice();
-        }, 200);
-      }
-    };
-
-    card.addEventListener("touchstart", onStart, { passive: true });
-    card.addEventListener("touchmove", onMove, { passive: true });
-    card.addEventListener("touchend", onEnd);
-    card.addEventListener("pointerdown", onStart);
-    card.addEventListener("pointerup", onEnd);
-    card._swipeBound = true;
   };
 
   systemNoticeRate?.addEventListener("click", (event) => {
