@@ -5349,32 +5349,27 @@ body.modal-open #app {
 #supportChatModal .chat-list {
   flex: 1 1 auto;
   max-height: none;
-  padding-bottom: 160px;
+  padding-bottom: 220px;
 }
 
 #supportChatModal .modal-header {
   position: sticky;
   top: 0;
   z-index: 3;
-  background: inherit;
-  backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: none;
 }
 
 #supportChatModal .chat-form,
 #supportChatModal .chat-file-hint,
 #supportChatModal .modal-actions-bottom {
   position: sticky;
-  bottom: 0;
+  bottom: 12px;
   z-index: 2;
-  background: rgba(18, 22, 30, 0.92);
-  backdrop-filter: blur(12px);
+  background: transparent;
+  backdrop-filter: none;
 }
 
-:root[data-theme="light"] #supportChatModal .chat-form,
-:root[data-theme="light"] #supportChatModal .chat-file-hint,
-:root[data-theme="light"] #supportChatModal .modal-actions-bottom {
-  background: rgba(255, 255, 255, 0.92);
-}
 
 #supportChatModal .chat-file-hint {
   padding-bottom: 6px;
