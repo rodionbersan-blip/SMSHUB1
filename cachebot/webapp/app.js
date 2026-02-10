@@ -1620,9 +1620,25 @@
 
   const wireOnlineIndicators = (root) => {
     if (!root) return;
+    if (!window._onlineTooltipGlobalListeners) {
+      const hideAll = (event) => {
+        document.querySelectorAll(".online-indicator.show").forEach((node) => {
+          if (event && node.contains(event.target)) return;
+          node.classList.remove("show");
+        });
+      };
+      document.addEventListener("click", hideAll);
+      document.addEventListener("touchstart", hideAll, { passive: true });
+      window._onlineTooltipGlobalListeners = true;
+    }
     root.querySelectorAll(".online-indicator").forEach((el) => {
       const showOnce = () => {
-        el.classList.add("show");
+        document.querySelectorAll(".online-indicator.show").forEach((node) => {
+          if (node !== el) node.classList.remove("show");
+        });
+        window.requestAnimationFrame(() => {
+          el.classList.add("show");
+        });
         if (el._onlineTimer) {
           window.clearTimeout(el._onlineTimer);
         }
@@ -1634,16 +1650,6 @@
       el.addEventListener("click", showOnce);
       el.addEventListener("touchstart", showOnce, { passive: true });
       el.addEventListener("pointerdown", showOnce);
-      if (!el._onlineOutsideListener) {
-        const hideOnOutside = (event) => {
-          if (!el.classList.contains("show")) return;
-          if (el.contains(event.target)) return;
-          el.classList.remove("show");
-        };
-        document.addEventListener("click", hideOnOutside);
-        document.addEventListener("touchstart", hideOnOutside, { passive: true });
-        el._onlineOutsideListener = true;
-      }
     });
   };
 

@@ -5739,7 +5739,7 @@ body.modal-open #app {
   position: absolute;
   top: -28px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(6px);
   background: rgba(17, 19, 24, 0.92);
   color: #fff;
   font-size: 11px;
@@ -5748,21 +5748,27 @@ body.modal-open #app {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s ease;
-  will-change: opacity;
+  transition: opacity 0.16s ease, transform 0.2s ease;
+  will-change: opacity, transform;
   max-width: 260px;
 }
 
 .online-indicator:hover .online-tooltip,
 .online-indicator.show .online-tooltip {
   opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .online-indicator.align-left .online-tooltip {
   left: auto;
   right: 100%;
   margin-right: 8px;
-  transform: translateX(0);
+  transform: translateX(0) translateY(6px);
+}
+
+.online-indicator.align-left:hover .online-tooltip,
+.online-indicator.align-left.show .online-tooltip {
+  transform: translateX(0) translateY(0);
 }
 
 .modal-actions {
