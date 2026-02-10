@@ -5748,13 +5748,21 @@ body.modal-open #app {
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity 0.12s ease;
+  will-change: opacity;
 }
 
 .online-indicator:hover .online-tooltip,
 .online-indicator.show .online-tooltip {
   opacity: 1;
-  transform: translateX(-50%) translateY(-4px);
+}
+
+.online-indicator.align-left .online-tooltip {
+  left: auto;
+  right: 100%;
+  margin-right: 8px;
+  text-align: left;
+  transform: translateX(0);
 }
 
 .modal-actions {
