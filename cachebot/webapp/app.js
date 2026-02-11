@@ -7431,14 +7431,14 @@
   supportInfoClose?.addEventListener("click", () => supportInfoModal?.classList.remove("open"));
   supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
   supportChatFile?.addEventListener("change", updateSupportChatFileHint);
-  supportChatInput?.addEventListener("focus", () => {
-    document.documentElement.classList.add("keyboard-open");
+  const forceViewportUpdate = () => {
     updateViewportHeightVar();
-  });
-  supportChatInput?.addEventListener("blur", () => {
-    document.documentElement.classList.remove("keyboard-open");
-    updateViewportHeightVar();
-  });
+    window.requestAnimationFrame(updateViewportHeightVar);
+  };
+  supportChatInput?.addEventListener("focus", forceViewportUpdate);
+  supportChatInput?.addEventListener("blur", forceViewportUpdate);
+  supportChatInput?.addEventListener("input", forceViewportUpdate);
+  supportChatInput?.addEventListener("touchstart", forceViewportUpdate, { passive: true });
   const setSupportReason = (value) => {
     if (supportReasonType) supportReasonType.value = value;
     const needsTarget = value === "moderator" || value === "user";

@@ -5341,10 +5341,6 @@ body.modal-open #app {
   border: none;
   overflow: hidden;
   box-shadow: 0 20px 46px rgba(0, 0, 0, 0.35);
-  transition: height 0.22s ease;
-}
-
-:root.keyboard-open #supportChatModal .modal-card {
   transition: none;
 }
 
