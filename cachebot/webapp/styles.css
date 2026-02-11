@@ -5344,6 +5344,10 @@ body.modal-open #app {
   transition: height 0.22s ease;
 }
 
+:root.keyboard-open #supportChatModal .modal-card {
+  transition: none;
+}
+
 #supportChatModal .modal-body {
   flex: 1 1 auto;
   display: flex;
