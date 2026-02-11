@@ -5351,7 +5351,7 @@ body.modal-open #app {
   position: relative;
   overflow: hidden;
   padding: 20px 20px 0;
-  --support-chat-footer-height: 200px;
+  --support-chat-footer-height: 240px;
 }
 
 #supportChatModal .chat-list {
@@ -5367,14 +5367,14 @@ body.modal-open #app {
     to bottom,
     transparent 0,
     #000 6px,
-    #000 calc(100% - 70px),
+    #000 calc(100% - 140px),
     transparent 100%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
     #000 6px,
-    #000 calc(100% - 70px),
+    #000 calc(100% - 140px),
     transparent 100%
   );
 }
@@ -5410,8 +5410,8 @@ body.modal-open #app {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 0 20px 4px;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px));
+  padding: 0 20px 0;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) - 6px);
   background: transparent;
 }
 
