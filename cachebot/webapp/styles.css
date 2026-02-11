@@ -5334,7 +5334,7 @@ body.modal-open #app {
 
 #supportChatModal .modal-card {
   width: min(98vw, 820px);
-  height: calc(var(--vvh, 100dvh) - 2px);
+  height: calc(var(--vvh, 100dvh) - 30px);
   display: flex;
   flex-direction: column;
   padding: 0;
