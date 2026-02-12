@@ -5366,6 +5366,8 @@ body.modal-open #app {
   padding-right: 8px;
   scrollbar-gutter: stable;
   scroll-padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
@@ -5380,6 +5382,11 @@ body.modal-open #app {
     #000 calc(100% - 140px),
     transparent 100%
   );
+}
+
+#supportChatModal .chat-list::before {
+  content: "";
+  flex: 1 0 auto;
 }
 
 #supportChatModal .chat-list::-webkit-scrollbar {
