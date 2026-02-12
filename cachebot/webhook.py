@@ -2631,6 +2631,7 @@ async def _api_support_tickets(request: web.Request) -> web.Response:
 async def _api_support_create_ticket(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
+    bot = request.app["bot"]
     try:
         body = await request.json()
     except Exception:
@@ -2644,6 +2645,14 @@ async def _api_support_create_ticket(request: web.Request) -> web.Response:
     ticket = await deps.support_service.create_ticket(
         user_id, subject, moderator_name, complaint_type, target_name
     )
+    try:
+        await bot.send_message(
+            user_id,
+            f"🆕 Открыт новый чат поддержки #{ticket.id}.\n"
+            "Ожидайте подключения модератора.",
+        )
+    except Exception:
+        logger.exception("Failed to notify user about support ticket %s", ticket.id)
     return web.json_response({"ok": True, "ticket_id": ticket.id})
 
 
@@ -2810,6 +2819,7 @@ async def _api_support_ticket_message_file(request: web.Request) -> web.Response
 async def _api_support_ticket_assign(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
+    bot = request.app["bot"]
     if not await _has_moderation_access(user_id, deps):
         raise web.HTTPForbidden(text="Нет доступа")
     ticket_id = int(request.match_info["ticket_id"])
@@ -2826,6 +2836,14 @@ async def _api_support_ticket_assign(request: web.Request) -> web.Response:
         or str(user_id)
     )
     await deps.support_service.assign(ticket_id, user_id, moderator_name)
+    try:
+        await bot.send_message(
+            ticket.user_id,
+            f"👮 Модератор {moderator_name} подключен к чату #{ticket.id}.\n"
+            "Ожидайте решения вопроса.",
+        )
+    except Exception:
+        logger.exception("Failed to notify user about moderator assignment for ticket %s", ticket.id)
     return web.json_response({"ok": True})
 
 
