@@ -3537,7 +3537,25 @@
       (payload.ticket?.assigned_to && Number(payload.ticket.assigned_to) === Number(state.userId)
         ? state.user?.display_name || state.user?.full_name || state.user?.username
         : "");
+    const buildModeratorNoticeText = (modName) => {
+      const userName =
+        payload.user?.display_name || payload.user?.full_name || payload.user?.username || "";
+      return userName
+        ? `Модератор ${modName} подключился к чату с пользователем ${userName}`
+        : `Модератор ${modName} подключился к чату`;
+    };
     let moderatorNoticeShown = false;
+    const hasModeratorMessage = (payload.messages || []).some(
+      (msg) => msg.author_role === "moderator"
+    );
+    if (!hasModeratorMessage && (assignedModName || options.forceModeratorNotice)) {
+      const notice = document.createElement("div");
+      notice.className = "chat-join-notice";
+      const modName = assignedModName || "Модератор";
+      notice.textContent = buildModeratorNoticeText(modName);
+      supportChatList.appendChild(notice);
+      moderatorNoticeShown = true;
+    }
     (payload.messages || []).forEach((msg) => {
       if (
         msg.author_role === "system" &&
@@ -3602,8 +3620,8 @@
       if (isModerator && !moderatorNoticeShown) {
         const notice = document.createElement("div");
         notice.className = "chat-join-notice";
-        const modName = msg.author_name || msg.author_id || "";
-        notice.textContent = `Модератор ${modName} подключился к чату`;
+        const modName = msg.author_name || msg.author_id || assignedModName || "Модератор";
+        notice.textContent = buildModeratorNoticeText(modName);
         supportChatList.appendChild(notice);
         moderatorNoticeShown = true;
       }
@@ -3650,28 +3668,6 @@
       }
       supportChatList.appendChild(row);
     });
-    if (!moderatorNoticeShown && payload.ticket?.assigned_to && assignedModName) {
-      const notice = document.createElement("div");
-      notice.className = "chat-join-notice";
-      const userName =
-        payload.user?.display_name || payload.user?.full_name || payload.user?.username || "";
-      notice.textContent = userName
-        ? `Модератор ${assignedModName} подключился к чату с пользователем ${userName}`
-        : `Модератор ${assignedModName} подключился к чату`;
-      supportChatList.appendChild(notice);
-      moderatorNoticeShown = true;
-    }
-    if (!moderatorNoticeShown && options.forceModeratorNotice) {
-      const notice = document.createElement("div");
-      notice.className = "chat-join-notice";
-      const userName =
-        payload.user?.display_name || payload.user?.full_name || payload.user?.username || "";
-      const modName = assignedModName || "Модератор";
-      notice.textContent = userName
-        ? `${modName} подключился к чату с пользователем ${userName}`
-        : `${modName} подключился к чату`;
-      supportChatList.appendChild(notice);
-    }
     if (Array.isArray(payload.messages) && payload.messages.length) {
       const lastMsg = payload.messages[payload.messages.length - 1];
       if (lastMsg?.created_at) {
