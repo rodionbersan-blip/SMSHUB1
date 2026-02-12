@@ -536,11 +536,14 @@ class DealService:
 
     async def reserved_deals_with_invoices(self) -> List[Deal]:
         async with self._lock:
-            return [
+            deals = list(self._deals.values())
+        return await asyncio.to_thread(
+            lambda: [
                 deal
-                for deal in self._deals.values()
+                for deal in deals
                 if deal.status == DealStatus.RESERVED and deal.invoice_id
             ]
+        )
 
     async def balance_of(self, user_id: int) -> Decimal:
         async with self._lock:
