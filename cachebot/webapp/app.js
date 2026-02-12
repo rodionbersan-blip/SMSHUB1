@@ -3682,6 +3682,8 @@
       } else {
         supportChatList.scrollTop = prevScrollTop;
       }
+    } else {
+      supportChatList.scrollTop = supportChatList.scrollHeight;
     }
   };
 
