@@ -149,6 +149,20 @@ class SupportService:
                     conn.close()
             return await asyncio.to_thread(_run)
 
+    async def has_open_ticket(self, user_id: int) -> bool:
+        async with self._lock:
+            def _run() -> bool:
+                conn = self._connect()
+                try:
+                    row = conn.execute(
+                        "SELECT id FROM support_tickets WHERE user_id = ? AND status != 'closed' LIMIT 1",
+                        (user_id,),
+                    ).fetchone()
+                    return bool(row)
+                finally:
+                    conn.close()
+            return await asyncio.to_thread(_run)
+
     async def list_tickets(self, *, user_id: int | None, include_all: bool) -> List[SupportTicket]:
         async with self._lock:
             def _run() -> List[SupportTicket]:

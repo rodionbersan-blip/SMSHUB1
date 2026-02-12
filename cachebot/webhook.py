@@ -2640,6 +2640,8 @@ async def _api_support_create_ticket(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
     bot = request.app["bot"]
+    if await deps.support_service.has_open_ticket(user_id):
+        raise web.HTTPBadRequest(text="У вас уже есть активный чат поддержки")
     try:
         body = await request.json()
     except Exception:

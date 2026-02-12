@@ -3310,6 +3310,9 @@
     if (!payload?.ok) return;
     const tickets = payload.tickets || [];
     let hasUnread = false;
+    if (supportNewBtn && !payload.can_manage) {
+      supportNewBtn.classList.toggle("support-new-hidden", tickets.length > 0);
+    }
     if (supportList) {
       supportList.innerHTML = "";
       supportEmpty?.classList.toggle("is-hidden", tickets.length > 0);
@@ -3317,6 +3320,9 @@
     if (!tickets.length) {
       setSupportBadge(false);
       return;
+    }
+    if (supportList && !payload.can_manage) {
+      supportList.classList.add("support-list-show");
     }
     tickets.forEach((ticket) => {
       const lastMessageAt = ticket.last_message_at || ticket.updated_at || "";
@@ -7666,6 +7672,9 @@
     supportTargetRow?.classList.add("is-hidden");
     supportNewModal.classList.remove("open");
     await loadSupport();
+    if (payload.ticket_id) {
+      openSupportChat(payload.ticket_id, false, { forceModeratorNotice: true });
+    }
   });
 
   reviewsOpen?.addEventListener("click", async () => {
