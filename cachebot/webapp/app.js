@@ -351,6 +351,7 @@
   const supportInfoSubject = document.getElementById("supportInfoSubject");
   const supportInfoOpened = document.getElementById("supportInfoOpened");
   const supportInfoAssignBtn = document.getElementById("supportInfoAssignBtn");
+  const supportInfoCloseBtn = document.getElementById("supportInfoCloseBtn");
   const supportChatModal = document.getElementById("supportChatModal");
   const supportChatClose = document.getElementById("supportChatClose");
   const supportChatTitle = document.getElementById("supportChatTitle");
@@ -361,6 +362,9 @@
   const supportChatFileHint = document.getElementById("supportChatFileHint");
   const supportAssignBtn = document.getElementById("supportAssignBtn");
   const supportCloseBtn = document.getElementById("supportCloseBtn");
+  const supportCloseConfirmModal = document.getElementById("supportCloseConfirmModal");
+  const supportCloseConfirmYes = document.getElementById("supportCloseConfirmYes");
+  const supportCloseConfirmNo = document.getElementById("supportCloseConfirmNo");
   const supportNavBtn = document.querySelector('.nav-btn[data-view="support"]');
   const systemPanel = document.getElementById("systemPanel");
   const reviewsOpen = document.getElementById("reviewsOpen");
@@ -3437,6 +3441,9 @@
     setSupportBadge(hasUnread);
   };
 
+  const SUPPORT_CLOSE_REQUEST_PREFIX = "__close_request__:";
+  const SUPPORT_CLOSE_RESPONSE_PREFIX = "__close_response__:";
+
   const stopSupportChatPolling = () => {
     if (state.supportChatTimer) {
       window.clearInterval(state.supportChatTimer);
@@ -3462,8 +3469,36 @@
     }, 1500);
   };
 
+  const requestSupportClose = async (ticketId) => {
+    const res = await fetchJson(`/api/support/tickets/${ticketId}/close-request`, {
+      method: "POST",
+      body: "{}",
+    });
+    if (!res?.ok) {
+      showNotice(res?.error || "Не удалось запросить закрытие");
+      return;
+    }
+    await openSupportChat(ticketId, state.activeSupportCanManage, { keepScroll: true });
+  };
+
+  const openSupportCloseConfirm = (ticketId) => {
+    if (!supportCloseConfirmModal) return;
+    supportCloseConfirmModal.classList.add("open");
+    const handleYes = async () => {
+      supportCloseConfirmModal.classList.remove("open");
+      await requestSupportClose(ticketId);
+    };
+    const handleNo = () => {
+      supportCloseConfirmModal.classList.remove("open");
+    };
+    if (supportCloseConfirmYes) supportCloseConfirmYes.onclick = handleYes;
+    if (supportCloseConfirmNo) supportCloseConfirmNo.onclick = handleNo;
+  };
+
   const renderSupportChat = (payload, ticketId, canManage, options = {}) => {
     if (!supportChatModal || !supportChatList) return;
+    const ticketOwnerId = payload?.ticket?.user_id;
+    const isTicketOwner = ticketOwnerId && Number(ticketOwnerId) === Number(state.userId);
     const keepScroll = options.keepScroll === true;
     const prevScrollTop = supportChatList.scrollTop;
     const prevScrollHeight = supportChatList.scrollHeight;
@@ -3494,6 +3529,65 @@
         : "");
     let moderatorNoticeShown = false;
     (payload.messages || []).forEach((msg) => {
+      if (
+        msg.author_role === "system" &&
+        typeof msg.text === "string" &&
+        msg.text.startsWith(SUPPORT_CLOSE_REQUEST_PREFIX)
+      ) {
+        const moderatorName = msg.text.slice(SUPPORT_CLOSE_REQUEST_PREFIX.length).trim() || "Модератор";
+        const row = document.createElement("div");
+        row.className = "chat-message system support-close-request";
+        const text = document.createElement("div");
+        text.textContent = `Модератор ${moderatorName} подтвердил закрытие чата.\nВаша проблема решена?`;
+        row.appendChild(text);
+        if (isTicketOwner) {
+          const actions = document.createElement("div");
+          actions.className = "support-close-actions";
+          const yesBtn = document.createElement("button");
+          yesBtn.className = "btn support-yes";
+          yesBtn.type = "button";
+          yesBtn.textContent = "Да";
+          const noBtn = document.createElement("button");
+          noBtn.className = "btn support-no";
+          noBtn.type = "button";
+          noBtn.textContent = "Нет";
+          yesBtn.onclick = async () => {
+            await fetchJson(`/api/support/tickets/${ticketId}/close-response`, {
+              method: "POST",
+              body: JSON.stringify({ confirm: true }),
+            });
+            supportChatModal.classList.remove("open");
+            state.activeSupportTicketId = null;
+            state.activeSupportCanManage = false;
+            stopSupportChatPolling();
+            await loadSupport();
+          };
+          noBtn.onclick = async () => {
+            await fetchJson(`/api/support/tickets/${ticketId}/close-response`, {
+              method: "POST",
+              body: JSON.stringify({ confirm: false }),
+            });
+            await openSupportChat(ticketId, canManage, { keepScroll: true });
+          };
+          actions.appendChild(yesBtn);
+          actions.appendChild(noBtn);
+          row.appendChild(actions);
+        }
+        supportChatList.appendChild(row);
+        return;
+      }
+      if (
+        msg.author_role === "system" &&
+        typeof msg.text === "string" &&
+        msg.text.startsWith(SUPPORT_CLOSE_RESPONSE_PREFIX)
+      ) {
+        const result = msg.text.slice(SUPPORT_CLOSE_RESPONSE_PREFIX.length).trim();
+        const row = document.createElement("div");
+        row.className = "chat-join-notice";
+        row.textContent = result === "no" ? "Пользователь отказался закрывать чат" : "Пользователь подтвердил закрытие";
+        supportChatList.appendChild(row);
+        return;
+      }
       const isModerator = msg.author_role === "moderator";
       if (isModerator && !moderatorNoticeShown) {
         const notice = document.createElement("div");
@@ -3619,6 +3713,10 @@
       supportAssignBtn.style.display = "none";
     };
     supportCloseBtn.onclick = async () => {
+      if (canManage) {
+        openSupportCloseConfirm(ticketId);
+        return;
+      }
       await fetchJson(`/api/support/tickets/${ticketId}/close`, { method: "POST", body: "{}" });
       supportChatModal.classList.remove("open");
       state.activeSupportTicketId = null;
@@ -3736,6 +3834,15 @@
         window.setTimeout(() => {
           openSupportChat(ticketId, canManage, { forceModeratorNotice: true });
         }, 160);
+      };
+    }
+    if (supportInfoCloseBtn) {
+      const assignedTo = ticket.assigned_to;
+      const isSelfAssigned = assignedTo && Number(assignedTo) === Number(state.userId);
+      supportInfoCloseBtn.style.display = canManage && isSelfAssigned ? "" : "none";
+      supportInfoCloseBtn.onclick = () => {
+        supportInfoModal.classList.remove("open");
+        openSupportCloseConfirm(ticketId);
       };
     }
 

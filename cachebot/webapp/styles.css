@@ -5424,12 +5424,60 @@ body.modal-open #app {
   grid-column: 1 / -1;
   grid-row: 2 / 3;
   width: 100%;
-  padding: 6px 12px;
-  min-height: 32px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  min-height: 24px;
+  height: 24px;
+  border-radius: 999px;
   border: 0;
   background: linear-gradient(90deg, #ff5f5f 0%, #ff2d55 100%);
   color: #ffffff;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.support-info-close-btn {
+  border-radius: 999px;
+  border: 0;
+  padding: 6px 14px;
+  background: linear-gradient(90deg, #ff5f5f 0%, #ff2d55 100%);
+  color: #ffffff;
+}
+
+.support-close-confirm-text {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.support-close-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.support-close-request {
+  max-width: 92%;
+}
+
+.support-close-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.support-close-actions .btn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 0;
+  color: #ffffff;
+}
+
+.support-close-actions .btn.support-yes {
+  background: linear-gradient(135deg, #2ecc71, #1fa75b);
+}
+
+.support-close-actions .btn.support-no {
+  background: linear-gradient(135deg, #ff5a5a, #e54848);
 }
 
 #supportChatModal .support-chat-footer {

@@ -26,6 +26,8 @@ from cachebot.constants import BANK_OPTIONS
 from cachebot.models.user import UserRole
 
 logger = logging.getLogger(__name__)
+SUPPORT_CLOSE_REQUEST_PREFIX = "__close_request__:"
+SUPPORT_CLOSE_RESPONSE_PREFIX = "__close_response__:"
 
 
 def create_app(bot, deps: AppDeps) -> web.Application:
@@ -118,6 +120,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
         "/api/support/tickets/{ticket_id}/messages/file", _api_support_ticket_message_file
     )
     app.router.add_post("/api/support/tickets/{ticket_id}/assign", _api_support_ticket_assign)
+    app.router.add_post("/api/support/tickets/{ticket_id}/close-request", _api_support_ticket_close_request)
+    app.router.add_post("/api/support/tickets/{ticket_id}/close-response", _api_support_ticket_close_response)
     app.router.add_post("/api/support/tickets/{ticket_id}/close", _api_support_ticket_close)
     app.router.add_get("/api/support-files/{ticket_id}/{filename}", _api_support_file)
     app.router.add_get("/api/reviews", _api_reviews_list)
@@ -2845,6 +2849,69 @@ async def _api_support_ticket_assign(request: web.Request) -> web.Response:
     except Exception:
         logger.exception("Failed to notify user about moderator assignment for ticket %s", ticket.id)
     return web.json_response({"ok": True})
+
+
+async def _api_support_ticket_close_request(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    if not await _has_moderation_access(user_id, deps):
+        raise web.HTTPForbidden(text="Нет доступа")
+    ticket_id = int(request.match_info["ticket_id"])
+    ticket = await deps.support_service.get_ticket(ticket_id)
+    if not ticket:
+        raise web.HTTPNotFound(text="Чат не найден")
+    if ticket.assigned_to and int(ticket.assigned_to) != int(user_id):
+        raise web.HTTPForbidden(text="Чат уже в работе у другого модератора")
+    messages = await deps.support_service.list_messages(ticket_id)
+    last_request_index = -1
+    last_response_index = -1
+    for idx, msg in enumerate(messages):
+        if msg.text.startswith(SUPPORT_CLOSE_REQUEST_PREFIX):
+            last_request_index = idx
+        if msg.text.startswith(SUPPORT_CLOSE_RESPONSE_PREFIX):
+            last_response_index = idx
+    if last_request_index > last_response_index:
+        return web.json_response({"ok": True, "pending": True})
+    profile = await deps.user_service.profile_of(user_id)
+    moderator_name = (
+        (profile.display_name if profile and profile.display_name else None)
+        or (profile.full_name if profile else None)
+        or (profile.username if profile else None)
+        or str(user_id)
+    )
+    await deps.support_service.add_message(
+        ticket_id,
+        user_id,
+        "system",
+        f"{SUPPORT_CLOSE_REQUEST_PREFIX}{moderator_name}",
+    )
+    return web.json_response({"ok": True})
+
+
+async def _api_support_ticket_close_response(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    ticket_id = int(request.match_info["ticket_id"])
+    ticket = await deps.support_service.get_ticket(ticket_id)
+    if not ticket:
+        raise web.HTTPNotFound(text="Чат не найден")
+    if ticket.user_id != user_id:
+        raise web.HTTPForbidden(text="Нет доступа")
+    try:
+        body = await request.json()
+    except Exception:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    confirm = bool(body.get("confirm"))
+    if confirm:
+        await deps.support_service.close(ticket_id)
+        return web.json_response({"ok": True, "closed": True})
+    await deps.support_service.add_message(
+        ticket_id,
+        user_id,
+        "system",
+        f"{SUPPORT_CLOSE_RESPONSE_PREFIX}no",
+    )
+    return web.json_response({"ok": True, "closed": False})
 
 
 async def _api_support_ticket_close(request: web.Request) -> web.Response:
