@@ -5073,6 +5073,9 @@ body.modal-open #app {
   border: 1px solid var(--card-contrast-border);
   color: var(--text);
   font-size: 13px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .chat-message.self {
