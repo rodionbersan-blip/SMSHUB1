@@ -3482,11 +3482,20 @@
     showNotice("Запрос на закрытие отправлен");
   };
 
-  const openSupportCloseConfirm = (ticketId) => {
+  const openSupportCloseConfirm = (ticketId, mode = "moderator") => {
     if (!supportCloseConfirmModal) return;
     supportCloseConfirmModal.classList.add("open");
     const handleYes = async () => {
       supportCloseConfirmModal.classList.remove("open");
+      if (mode === "user") {
+        await fetchJson(`/api/support/tickets/${ticketId}/close`, { method: "POST", body: "{}" });
+        supportChatModal.classList.remove("open");
+        state.activeSupportTicketId = null;
+        state.activeSupportCanManage = false;
+        stopSupportChatPolling();
+        await loadSupport();
+        return;
+      }
       await requestSupportClose(ticketId);
     };
     const handleNo = () => {
@@ -3717,12 +3726,7 @@
     };
     supportCloseBtn.style.display = canManage ? "none" : "";
     supportCloseBtn.onclick = async () => {
-      await fetchJson(`/api/support/tickets/${ticketId}/close`, { method: "POST", body: "{}" });
-      supportChatModal.classList.remove("open");
-      state.activeSupportTicketId = null;
-      state.activeSupportCanManage = false;
-      stopSupportChatPolling();
-      await loadSupport();
+      openSupportCloseConfirm(ticketId, "user");
     };
     supportChatForm.onsubmit = async (event) => {
       event.preventDefault();
@@ -3854,7 +3858,7 @@
             .catch(() => showNotice("Не удалось закрыть чат"));
           return;
         }
-        openSupportCloseConfirm(ticketId);
+        openSupportCloseConfirm(ticketId, "moderator");
       };
     }
 
