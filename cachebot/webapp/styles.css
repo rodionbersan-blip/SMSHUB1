@@ -5399,9 +5399,37 @@ body.modal-open #app {
   position: sticky;
   top: 0;
   z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 8px 12px;
+  align-items: center;
   background: transparent;
   backdrop-filter: none;
   padding: 20px 20px 0;
+}
+
+#supportChatModal #supportChatTitle {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+#supportChatModal #supportChatClose {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  justify-self: end;
+}
+
+#supportChatModal .support-chat-close-btn {
+  grid-column: 1 / -1;
+  grid-row: 2 / 3;
+  width: 100%;
+  padding: 6px 12px;
+  min-height: 32px;
+  border-radius: 12px;
+  border: 0;
+  background: linear-gradient(90deg, #ff5f5f 0%, #ff2d55 100%);
+  color: #ffffff;
 }
 
 #supportChatModal .support-chat-footer {
