@@ -2582,6 +2582,10 @@ async def _api_admin_actions(request: web.Request) -> web.Response:
             title = f"{moderator} отключил сделки {target}"
         elif action == "unblock_deals":
             title = f"{moderator} включил сделки {target}"
+        elif action == "support_open":
+            title = f"{moderator} открыл чат поддержки с {target}"
+        elif action == "support_close":
+            title = f"{moderator} закрыл чат поддержки с {target}"
         output.append(
             {
                 "title": title,
@@ -2844,6 +2848,28 @@ async def _api_support_ticket_assign(request: web.Request) -> web.Response:
     )
     await deps.support_service.assign(ticket_id, user_id, moderator_name)
     try:
+        target_profile = await deps.user_service.profile_of(ticket.user_id)
+        target_name = (
+            target_profile.display_name
+            if target_profile and target_profile.display_name
+            else (target_profile.full_name if target_profile else None)
+            or (target_profile.username if target_profile else None)
+            or str(ticket.user_id)
+        )
+        await deps.user_service.log_admin_action(
+            {
+                "action": "support_open",
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "moderator_id": user_id,
+                "moderator_name": moderator_name,
+                "target_id": ticket.user_id,
+                "target_name": target_name,
+                "ticket_id": ticket.id,
+            }
+        )
+    except Exception:
+        logger.exception("Failed to log support open action for ticket %s", ticket.id)
+    try:
         await bot.send_message(
             ticket.user_id,
             f"👮 Модератор {moderator_name} подключен к чату #{ticket.id}.\n"
@@ -2907,6 +2933,37 @@ async def _api_support_ticket_close_response(request: web.Request) -> web.Respon
     confirm = bool(body.get("confirm"))
     if confirm:
         await deps.support_service.close(ticket_id)
+        if ticket.assigned_to:
+            try:
+                moderator_profile = await deps.user_service.profile_of(ticket.assigned_to)
+                moderator_name = (
+                    moderator_profile.display_name
+                    if moderator_profile and moderator_profile.display_name
+                    else (moderator_profile.full_name if moderator_profile else None)
+                    or (moderator_profile.username if moderator_profile else None)
+                    or str(ticket.assigned_to)
+                )
+                target_profile = await deps.user_service.profile_of(ticket.user_id)
+                target_name = (
+                    target_profile.display_name
+                    if target_profile and target_profile.display_name
+                    else (target_profile.full_name if target_profile else None)
+                    or (target_profile.username if target_profile else None)
+                    or str(ticket.user_id)
+                )
+                await deps.user_service.log_admin_action(
+                    {
+                        "action": "support_close",
+                        "ts": datetime.now(timezone.utc).isoformat(),
+                        "moderator_id": ticket.assigned_to,
+                        "moderator_name": moderator_name,
+                        "target_id": ticket.user_id,
+                        "target_name": target_name,
+                        "ticket_id": ticket.id,
+                    }
+                )
+            except Exception:
+                logger.exception("Failed to log support close action for ticket %s", ticket.id)
         return web.json_response({"ok": True, "closed": True})
     await deps.support_service.add_message(
         ticket_id,
@@ -2936,6 +2993,36 @@ async def _api_support_ticket_close(request: web.Request) -> web.Response:
             last_at = now
         if ticket.last_message_author_role != "user" and now - last_at >= timedelta(hours=24):
             await deps.support_service.close(ticket_id)
+            try:
+                moderator_profile = await deps.user_service.profile_of(user_id)
+                moderator_name = (
+                    moderator_profile.display_name
+                    if moderator_profile and moderator_profile.display_name
+                    else (moderator_profile.full_name if moderator_profile else None)
+                    or (moderator_profile.username if moderator_profile else None)
+                    or str(user_id)
+                )
+                target_profile = await deps.user_service.profile_of(ticket.user_id)
+                target_name = (
+                    target_profile.display_name
+                    if target_profile and target_profile.display_name
+                    else (target_profile.full_name if target_profile else None)
+                    or (target_profile.username if target_profile else None)
+                    or str(ticket.user_id)
+                )
+                await deps.user_service.log_admin_action(
+                    {
+                        "action": "support_close",
+                        "ts": datetime.now(timezone.utc).isoformat(),
+                        "moderator_id": user_id,
+                        "moderator_name": moderator_name,
+                        "target_id": ticket.user_id,
+                        "target_name": target_name,
+                        "ticket_id": ticket.id,
+                    }
+                )
+            except Exception:
+                logger.exception("Failed to log support close action for ticket %s", ticket.id)
             return web.json_response({"ok": True})
         try:
             created = datetime.fromisoformat(ticket.created_at.replace("Z", "+00:00"))
@@ -2944,6 +3031,37 @@ async def _api_support_ticket_close(request: web.Request) -> web.Response:
         if now - created < timedelta(hours=24):
             raise web.HTTPForbidden(text="Можно закрыть через 24 часа")
     await deps.support_service.close(ticket_id)
+    if can_manage and ticket.user_id != user_id:
+        try:
+            moderator_profile = await deps.user_service.profile_of(user_id)
+            moderator_name = (
+                moderator_profile.display_name
+                if moderator_profile and moderator_profile.display_name
+                else (moderator_profile.full_name if moderator_profile else None)
+                or (moderator_profile.username if moderator_profile else None)
+                or str(user_id)
+            )
+            target_profile = await deps.user_service.profile_of(ticket.user_id)
+            target_name = (
+                target_profile.display_name
+                if target_profile and target_profile.display_name
+                else (target_profile.full_name if target_profile else None)
+                or (target_profile.username if target_profile else None)
+                or str(ticket.user_id)
+            )
+            await deps.user_service.log_admin_action(
+                {
+                    "action": "support_close",
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "moderator_id": user_id,
+                    "moderator_name": moderator_name,
+                    "target_id": ticket.user_id,
+                    "target_name": target_name,
+                    "ticket_id": ticket.id,
+                }
+            )
+        except Exception:
+            logger.exception("Failed to log support close action for ticket %s", ticket.id)
     return web.json_response({"ok": True})
 
 
