@@ -168,6 +168,24 @@ class SupportService:
                     conn.close()
             return await asyncio.to_thread(_run)
 
+    async def list_inactive_tickets(self, cutoff_iso: str) -> List[SupportTicket]:
+        async with self._lock:
+            def _run() -> List[SupportTicket]:
+                conn = self._connect()
+                try:
+                    rows = conn.execute(
+                        """
+                        SELECT * FROM support_tickets
+                        WHERE status != 'closed'
+                          AND COALESCE(last_message_at, updated_at, created_at) <= ?
+                        """,
+                        (cutoff_iso,),
+                    ).fetchall()
+                    return [SupportTicket(**dict(row)) for row in rows]
+                finally:
+                    conn.close()
+            return await asyncio.to_thread(_run)
+
     async def get_ticket(self, ticket_id: int) -> SupportTicket | None:
         async with self._lock:
             def _run() -> SupportTicket | None:

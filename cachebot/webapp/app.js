@@ -3478,7 +3478,8 @@
       showNotice(res?.error || "Не удалось запросить закрытие");
       return;
     }
-    await openSupportChat(ticketId, state.activeSupportCanManage, { keepScroll: true });
+    await loadSupport();
+    showNotice("Запрос на закрытие отправлен");
   };
 
   const openSupportCloseConfirm = (ticketId) => {
@@ -3714,11 +3715,8 @@
       await loadSupport();
       supportAssignBtn.style.display = "none";
     };
+    supportCloseBtn.style.display = canManage ? "none" : "";
     supportCloseBtn.onclick = async () => {
-      if (canManage) {
-        openSupportCloseConfirm(ticketId);
-        return;
-      }
       await fetchJson(`/api/support/tickets/${ticketId}/close`, { method: "POST", body: "{}" });
       supportChatModal.classList.remove("open");
       state.activeSupportTicketId = null;
@@ -3842,8 +3840,20 @@
       const assignedTo = ticket.assigned_to;
       const isSelfAssigned = assignedTo && Number(assignedTo) === Number(state.userId);
       supportInfoCloseBtn.style.display = canManage && isSelfAssigned ? "" : "none";
+      const lastAtRaw = ticket.last_message_at || ticket.updated_at || ticket.created_at;
+      const lastAt = lastAtRaw ? new Date(lastAtRaw) : null;
+      const userSilentOverDay =
+        ticket.last_message_author_role !== "user" &&
+        lastAt &&
+        Date.now() - lastAt.getTime() >= 24 * 60 * 60 * 1000;
       supportInfoCloseBtn.onclick = () => {
         supportInfoModal.classList.remove("open");
+        if (userSilentOverDay) {
+          fetchJson(`/api/support/tickets/${ticketId}/close`, { method: "POST", body: "{}" })
+            .then(() => loadSupport())
+            .catch(() => showNotice("Не удалось закрыть чат"));
+          return;
+        }
         openSupportCloseConfirm(ticketId);
       };
     }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from aiogram import Bot
@@ -12,6 +13,7 @@ from cachebot.services.crypto_pay import CryptoPayClient
 from cachebot.services.deals import DealService
 from cachebot.services.adverts import AdvertService
 from cachebot.services.kb_client import KBClient
+from cachebot.services.support import SupportService
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +78,30 @@ async def invoice_watcher(
                 await handle_paid_invoice(deal, kb_client, bot)
         except Exception as exc:  # pragma: no cover
             logger.exception("Invoice watcher error: %s", exc)
+    await asyncio.sleep(interval)
+
+
+async def support_inactive_watcher(
+    support_service: SupportService,
+    bot: Bot,
+    interval: int = 300,
+) -> None:
+    while True:
+        try:
+            cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+            cutoff_iso = cutoff.isoformat()
+            inactive = await support_service.list_inactive_tickets(cutoff_iso)
+            for ticket in inactive:
+                try:
+                    await bot.send_message(
+                        ticket.user_id,
+                        "🕓 Чат поддержки закрыт автоматически из-за отсутствия активности 24 часа.",
+                    )
+                except Exception:
+                    pass
+                await support_service.close(ticket.id)
+        except Exception as exc:  # pragma: no cover
+            logger.exception("Support inactive watcher error: %s", exc)
         await asyncio.sleep(interval)
 
 

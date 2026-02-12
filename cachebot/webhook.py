@@ -2735,6 +2735,9 @@ async def _api_support_ticket_detail(request: web.Request) -> web.Response:
                 "target_name": ticket.target_name,
                 "status": ticket.status,
                 "assigned_to": ticket.assigned_to,
+                "last_message_at": ticket.last_message_at,
+                "last_message_author_id": ticket.last_message_author_id,
+                "last_message_author_role": ticket.last_message_author_role,
                 "created_at": ticket.created_at,
                 "updated_at": ticket.updated_at,
             },
@@ -2925,11 +2928,20 @@ async def _api_support_ticket_close(request: web.Request) -> web.Response:
     if ticket.user_id != user_id:
         if not can_manage:
             raise web.HTTPForbidden(text="Нет доступа")
+        now = datetime.now(timezone.utc)
+        last_raw = ticket.last_message_at or ticket.updated_at or ticket.created_at
+        try:
+            last_at = datetime.fromisoformat(last_raw.replace("Z", "+00:00"))
+        except Exception:
+            last_at = now
+        if ticket.last_message_author_role != "user" and now - last_at >= timedelta(hours=24):
+            await deps.support_service.close(ticket_id)
+            return web.json_response({"ok": True})
         try:
             created = datetime.fromisoformat(ticket.created_at.replace("Z", "+00:00"))
         except Exception:
-            created = datetime.now(timezone.utc)
-        if datetime.now(timezone.utc) - created < timedelta(hours=24):
+            created = now
+        if now - created < timedelta(hours=24):
             raise web.HTTPForbidden(text="Можно закрыть через 24 часа")
     await deps.support_service.close(ticket_id)
     return web.json_response({"ok": True})

@@ -18,7 +18,12 @@ from cachebot.services.kb_client import KBClient
 from cachebot.services.disputes import DisputeService
 from cachebot.services.rate_provider import RateProvider
 from cachebot.services.reviews import ReviewService
-from cachebot.services.scheduler import dispute_timer_watcher, expiry_watcher, invoice_watcher
+from cachebot.services.scheduler import (
+    dispute_timer_watcher,
+    expiry_watcher,
+    invoice_watcher,
+    support_inactive_watcher,
+)
 from cachebot.services.topups import TopupService
 from cachebot.services.users import UserService
 from cachebot.services.chats import ChatService
@@ -99,6 +104,7 @@ async def run_bot() -> None:
         )
     )
     dispute_task = asyncio.create_task(dispute_timer_watcher(deal_service, bot))
+    support_task = asyncio.create_task(support_inactive_watcher(support_service, bot))
 
     app = create_app(bot, get_deps())
     runner = web.AppRunner(app)
@@ -119,9 +125,15 @@ async def run_bot() -> None:
     try:
         await dp.start_polling(bot)
     finally:
-        for task in (expiry_task, invoice_task, dispute_task):
+        for task in (expiry_task, invoice_task, dispute_task, support_task):
             task.cancel()
-        await asyncio.gather(expiry_task, invoice_task, dispute_task, return_exceptions=True)
+        await asyncio.gather(
+            expiry_task,
+            invoice_task,
+            dispute_task,
+            support_task,
+            return_exceptions=True,
+        )
         with contextlib.suppress(Exception):
             await runner.cleanup()
         await crypto_pay.close()
