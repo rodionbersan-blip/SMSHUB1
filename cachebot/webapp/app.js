@@ -825,7 +825,7 @@
     systemNotice.classList.add("show");
     clearSystemNoticeTimer();
     if (autoClose) {
-      const timeoutMs = item?.type === "dispute_resolved" ? 7000 : 4000;
+      const timeoutMs = item?.type === "dispute_resolved" ? 7000 : 7000;
       state.systemNoticeTimer = window.setTimeout(() => {
         if (item?.key) {
           state.systemNotifications = (state.systemNotifications || []).filter(
@@ -916,6 +916,9 @@
     if ((state.systemNotifications || []).some((item) => item.key === noticeKey)) {
       return;
     }
+    if (entry?.type === "deal_completed" && state.completedNotified?.[noticeKey]) {
+      return;
+    }
     const payload = {
       ...entry,
       key: noticeKey,
@@ -925,6 +928,11 @@
     state.systemNotifications = next.slice(-6);
     persistSystemNotifications();
     showSystemNotice(payload, { autoClose: true });
+    if (payload.type === "deal_completed") {
+      state.completedNotified = state.completedNotified || {};
+      state.completedNotified[payload.key] = true;
+      persistCompletedNotified();
+    }
   };
 
   const clearDealAlerts = (dealId) => {
