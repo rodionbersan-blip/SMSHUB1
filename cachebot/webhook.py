@@ -2597,6 +2597,8 @@ async def _api_support_tickets(request: web.Request) -> web.Response:
     )
     payload = []
     for ticket in tickets:
+        if can_manage and ticket.assigned_to and int(ticket.assigned_to) != int(user_id):
+            continue
         profile = await deps.user_service.profile_of(ticket.user_id)
         name = (
             profile.display_name
@@ -2653,6 +2655,8 @@ async def _api_support_ticket_detail(request: web.Request) -> web.Response:
     if not ticket:
         raise web.HTTPNotFound(text="Чат не найден")
     can_manage = await _has_moderation_access(user_id, deps)
+    if can_manage and ticket.assigned_to and int(ticket.assigned_to) != int(user_id):
+        raise web.HTTPForbidden(text="Чат уже в работе у другого модератора")
     if not can_manage and ticket.user_id != user_id:
         raise web.HTTPForbidden(text="Нет доступа")
     messages = await deps.support_service.list_messages(ticket_id)
@@ -2736,6 +2740,8 @@ async def _api_support_ticket_message(request: web.Request) -> web.Response:
     if not ticket:
         raise web.HTTPNotFound(text="Чат не найден")
     can_manage = await _has_moderation_access(user_id, deps)
+    if can_manage and ticket.assigned_to and int(ticket.assigned_to) != int(user_id):
+        raise web.HTTPForbidden(text="Чат уже в работе у другого модератора")
     if not can_manage and ticket.user_id != user_id:
         raise web.HTTPForbidden(text="Нет доступа")
     try:
@@ -2758,6 +2764,8 @@ async def _api_support_ticket_message_file(request: web.Request) -> web.Response
     if not ticket:
         raise web.HTTPNotFound(text="Чат не найден")
     can_manage = await _has_moderation_access(user_id, deps)
+    if can_manage and ticket.assigned_to and int(ticket.assigned_to) != int(user_id):
+        raise web.HTTPForbidden(text="Чат уже в работе у другого модератора")
     if not can_manage and ticket.user_id != user_id:
         raise web.HTTPForbidden(text="Нет доступа")
     reader = await request.multipart()
@@ -2808,6 +2816,8 @@ async def _api_support_ticket_assign(request: web.Request) -> web.Response:
     ticket = await deps.support_service.get_ticket(ticket_id)
     if not ticket:
         raise web.HTTPNotFound(text="Чат не найден")
+    if ticket.assigned_to and int(ticket.assigned_to) != int(user_id):
+        raise web.HTTPForbidden(text="Чат уже закреплен за другим модератором")
     profile = await deps.user_service.profile_of(user_id)
     moderator_name = (
         (profile.display_name if profile and profile.display_name else None)
