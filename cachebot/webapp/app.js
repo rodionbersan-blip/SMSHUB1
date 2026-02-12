@@ -422,6 +422,10 @@
     chatInitDone: false,
     supportLastSeen: {},
     supportPollAt: 0,
+    supportChatTimer: null,
+    supportChatInFlight: false,
+    activeSupportTicketId: null,
+    activeSupportCanManage: false,
     pendingRead: {},
     systemNotifications: [],
     dealStatusMap: {},
@@ -3425,10 +3429,38 @@
     setSupportBadge(hasUnread);
   };
 
-  const openSupportChat = async (ticketId, canManage, options = {}) => {
+  const stopSupportChatPolling = () => {
+    if (state.supportChatTimer) {
+      window.clearInterval(state.supportChatTimer);
+      state.supportChatTimer = null;
+    }
+  };
+
+  const startSupportChatPolling = () => {
+    if (state.supportChatTimer) return;
+    state.supportChatTimer = window.setInterval(async () => {
+      if (!state.activeSupportTicketId || !supportChatModal?.classList.contains("open")) return;
+      if (state.supportChatInFlight) return;
+      state.supportChatInFlight = true;
+      try {
+        const payload = await fetchJson(`/api/support/tickets/${state.activeSupportTicketId}`);
+        if (!payload?.ok) return;
+        renderSupportChat(payload, state.activeSupportTicketId, state.activeSupportCanManage, {
+          keepScroll: true,
+        });
+      } finally {
+        state.supportChatInFlight = false;
+      }
+    }, 1500);
+  };
+
+  const renderSupportChat = (payload, ticketId, canManage, options = {}) => {
     if (!supportChatModal || !supportChatList) return;
-    const payload = await fetchJson(`/api/support/tickets/${ticketId}`);
-    if (!payload?.ok) return;
+    const keepScroll = options.keepScroll === true;
+    const prevScrollTop = supportChatList.scrollTop;
+    const prevScrollHeight = supportChatList.scrollHeight;
+    const wasAtBottom =
+      prevScrollHeight - supportChatList.scrollTop - supportChatList.clientHeight < 24;
     supportChatList.innerHTML = "";
     const hintRow = document.createElement("div");
     hintRow.className = "chat-message system";
@@ -3542,6 +3574,20 @@
       persistSupportAssignedSeen();
     }
     setSupportBadge(false);
+    if (keepScroll) {
+      if (wasAtBottom) {
+        supportChatList.scrollTop = supportChatList.scrollHeight;
+      } else {
+        supportChatList.scrollTop = prevScrollTop;
+      }
+    }
+  };
+
+  const openSupportChat = async (ticketId, canManage, options = {}) => {
+    if (!supportChatModal || !supportChatList) return;
+    const payload = await fetchJson(`/api/support/tickets/${ticketId}`);
+    if (!payload?.ok) return;
+    renderSupportChat(payload, ticketId, canManage, options);
     const assignedTo = payload.ticket?.assigned_to;
     const canAssign = canManage && (!assignedTo || Number(assignedTo) === Number(state.userId));
     supportAssignBtn.style.display = canAssign && !assignedTo ? "" : "none";
@@ -3567,6 +3613,9 @@
     supportCloseBtn.onclick = async () => {
       await fetchJson(`/api/support/tickets/${ticketId}/close`, { method: "POST", body: "{}" });
       supportChatModal.classList.remove("open");
+      state.activeSupportTicketId = null;
+      state.activeSupportCanManage = false;
+      stopSupportChatPolling();
       await loadSupport();
     };
     supportChatForm.onsubmit = async (event) => {
@@ -3601,8 +3650,11 @@
       updateSupportChatFileHint();
       await openSupportChat(ticketId, canManage);
     };
+    state.activeSupportTicketId = ticketId;
+    state.activeSupportCanManage = canManage;
     supportChatModal.classList.add("open");
     updateSupportChatFileHint();
+    startSupportChatPolling();
   };
 
   const buildSupportReasonLabel = (ticket) => {
@@ -7429,7 +7481,12 @@
     supportReason.value = "";
   });
   supportInfoClose?.addEventListener("click", () => supportInfoModal?.classList.remove("open"));
-  supportChatClose?.addEventListener("click", () => supportChatModal?.classList.remove("open"));
+  supportChatClose?.addEventListener("click", () => {
+    supportChatModal?.classList.remove("open");
+    state.activeSupportTicketId = null;
+    state.activeSupportCanManage = false;
+    stopSupportChatPolling();
+  });
   supportChatFile?.addEventListener("change", updateSupportChatFileHint);
   const forceViewportUpdate = () => {
     updateViewportHeightVar();
