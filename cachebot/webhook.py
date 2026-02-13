@@ -76,7 +76,6 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/p2p/summary", _api_p2p_summary)
     app.router.add_get("/api/rate", _api_rate)
     app.router.add_get("/api/merchant/ads", _api_merchant_ads)
-    app.router.add_get("/api/merchant/my-ads", _api_merchant_my_ads)
     app.router.add_post("/api/merchant/ads/{ad_id}/take", _api_merchant_take)
     app.router.add_get("/api/p2p/banks", _api_p2p_banks)
     app.router.add_get("/api/p2p/ads", _api_p2p_public_ads)
@@ -1500,16 +1499,6 @@ async def _api_merchant_ads(request: web.Request) -> web.Response:
         if not await deps.user_service.can_trade(ad.owner_id):
             continue
         payload.append(await _ad_payload(deps, ad, include_owner=True, request=request))
-    return web.json_response({"ok": True, "ads": payload})
-
-
-async def _api_merchant_my_ads(request: web.Request) -> web.Response:
-    deps: AppDeps = request.app["deps"]
-    _, user_id = await _require_user(request)
-    ads = await deps.advert_service.list_user_merchant_ads(user_id)
-    payload = []
-    for ad in ads:
-        payload.append(await _ad_payload(deps, ad, include_owner=False, request=request))
     return web.json_response({"ok": True, "ads": payload})
 
 
