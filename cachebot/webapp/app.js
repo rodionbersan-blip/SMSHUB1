@@ -207,6 +207,8 @@
   const p2pList = document.getElementById("p2pList");
   const p2pTradingBadge = document.getElementById("p2pTradingBadge");
   const p2pTradingToggle = document.getElementById("p2pTradingToggle");
+  const p2pMerchantBtn = document.getElementById("p2pMerchantBtn");
+  const p2pMerchantBadge = document.getElementById("p2pMerchantBadge");
   const p2pBuyBtn = document.getElementById("p2pBuyBtn");
   const p2pSellBtn = document.getElementById("p2pSellBtn");
   const p2pMyAdsBtn = document.getElementById("p2pMyAdsBtn");
@@ -481,6 +483,7 @@
     chatRenderSig: {},
     disputesPollAt: 0,
     assignedDisputes: [],
+    isMerchant: false,
   };
 
   const unreadStorageKey = "quickDealsUnread";
@@ -2064,6 +2067,7 @@
         profileAdminBadge.classList.toggle("is-hidden", !data?.is_admin);
       }
       const isMerchant = data?.role === "buyer";
+      state.isMerchant = isMerchant;
       if (profileRoleCard) {
         profileRoleCard.style.display = isMerchant ? "" : "none";
       }
@@ -2074,6 +2078,9 @@
         profileMerchantSince.textContent = isMerchant && data?.merchant_since
           ? `Мерчант с: ${formatDate(data.merchant_since)}`
           : "";
+      }
+      if (p2pMerchantBtn) {
+        p2pMerchantBtn.style.display = isMerchant ? "" : "none";
       }
       const stats = data?.stats || {};
       state.profileModeration = data?.moderation || null;
@@ -2535,6 +2542,13 @@
     dealsCount.textContent = `${deals.length}`;
     const desiredPage = state.dealsPage ?? 0;
     state.deals = deals;
+    const merchantCount = deals.filter((deal) => deal?.actions?.accept_offer).length;
+    if (p2pMerchantBadge) {
+      p2pMerchantBadge.textContent = `${merchantCount}`;
+    }
+    if (p2pMerchantBtn) {
+      p2pMerchantBtn.style.display = state.isMerchant ? "" : "none";
+    }
     const totalPages = Math.max(1, Math.ceil(deals.length / 5));
     state.dealsPage = Math.max(0, Math.min(desiredPage, totalPages - 1));
     syncUnreadDeals(deals);
@@ -7368,6 +7382,11 @@
     p2pBuyBtn.classList.remove("primary");
     p2pSellBtn.classList.remove("primary");
     loadMyAds();
+  });
+
+  p2pMerchantBtn?.addEventListener("click", async () => {
+    setView("deals");
+    await loadDeals();
   });
 
   p2pCreateForm?.addEventListener("submit", async (event) => {

@@ -30,6 +30,7 @@ class MenuAction(str, Enum):
     SETTINGS_MERCHANT = "menu:settings:merchant"
     SETTINGS_SELLER = "menu:settings:seller"
     BALANCE = "menu:balance"
+    MERCHANT_SELL = "menu:merchant_sell"
     BACK = "menu:back"
 
 
@@ -59,19 +60,21 @@ def base_keyboard(
 def inline_menu(role: UserRole) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     if role == UserRole.SELLER:
+        builder.button(text="🤝 Продать мерчанту", callback_data=MenuAction.MERCHANT_SELL.value)
         builder.button(text="⚡️ Продать", callback_data=MenuAction.SELL.value)
         builder.button(text="💠 P2P", callback_data=MenuAction.P2P.value)
         builder.button(text="📂 Мои сделки", callback_data=MenuAction.MY_DEALS.value)
         builder.button(text="👤 Мой профиль", callback_data=MenuAction.PROFILE.value)
         builder.button(text="⚙️ Настройки", callback_data=MenuAction.SETTINGS.value)
         builder.button(text="💰 Баланс", callback_data=MenuAction.BALANCE.value)
-        builder.adjust(2, 2, 2)
+        builder.adjust(2, 2, 2, 1)
     else:
+        builder.button(text="🤝 Продать мерчанту", callback_data=MenuAction.MERCHANT_SELL.value)
         builder.button(text="📋 Купить", callback_data=MenuAction.OPEN_DEALS.value)
         builder.button(text="💠 P2P", callback_data=MenuAction.P2P.value)
         builder.button(text="📂 Мои сделки", callback_data=MenuAction.MY_DEALS.value)
         builder.button(text="👤 Мой профиль", callback_data=MenuAction.PROFILE.value)
         builder.button(text="⚙️ Настройки", callback_data=MenuAction.SETTINGS.value)
         builder.button(text="💰 Баланс", callback_data=MenuAction.BALANCE.value)
-        builder.adjust(2, 2, 2)
+        builder.adjust(2, 2, 2, 1)
     return builder.as_markup()

@@ -23,6 +23,7 @@ from cachebot.models.deal import Deal, DealStatus
 router = Router(name="p2p")
 
 P2P_MENU = "p2p:menu"
+P2P_MERCHANT_SELL = "p2p:merchant:sell"
 P2P_BUY = "p2p:buy"
 P2P_SELL = "p2p:sell"
 P2P_MY_DEALS = "p2p:mydeals"
@@ -443,6 +444,25 @@ async def send_p2p_my_deals(
 @router.callback_query(F.data == MenuAction.P2P.value)
 async def p2p_menu(callback: CallbackQuery, state: FSMContext) -> None:
     await _show_p2p_menu(callback, state=state)
+
+
+@router.callback_query(F.data == MenuAction.MERCHANT_SELL.value)
+async def merchant_sell_menu(callback: CallbackQuery, state: FSMContext) -> None:
+    deps = get_deps()
+    rate = await deps.rate_provider.snapshot()
+    await state.clear()
+    await state.set_state(P2PAdCreateState.choosing_side)
+    await state.update_data(back_action=P2P_MENU)
+    builder = InlineKeyboardBuilder()
+    builder.button(text="Купить", callback_data="p2p:create:buy")
+    builder.button(text="Продать", callback_data="p2p:create:sell")
+    builder.button(text="⬅️ Назад", callback_data=MenuAction.BACK.value)
+    builder.adjust(2, 1)
+    await callback.message.answer(
+        f"Курс: 1 USDT = {_format_decimal(rate.usd_rate)} RUB\nВыберите действие:",
+        reply_markup=builder.as_markup(),
+    )
+    await callback.answer()
     await callback.answer()
 
 
