@@ -2634,6 +2634,7 @@
       `;
       item.addEventListener("click", () => {
         if (isOwner) {
+          merchantDealsModal?.classList.remove("open");
           openMerchantAdInfo(ad);
         } else {
           openMerchantTakeInfo(ad);
@@ -3099,6 +3100,7 @@
 
   const openMerchantAdInfo = (ad) => {
     if (!ad) return;
+    merchantDealsModal?.classList.remove("open");
     p2pModalTitle.textContent = `Заявка #${ad.public_id}`;
     p2pModalBody.innerHTML = `
       <div class="deal-detail-row"><span>Сторона:</span>${ad.side === "sell" ? "Продажа" : "Покупка"}</div>
