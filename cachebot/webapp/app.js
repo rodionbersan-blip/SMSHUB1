@@ -2623,87 +2623,13 @@
       item.className = "deal-item";
       const sideLabel = ad.side === "sell" ? "продает" : "покупает";
       const usdtAmount = formatAmount(ad.total_usdt, 3);
-      const selectedBanks = new Set(ad.banks?.length === 1 ? [ad.banks[0]] : []);
       item.innerHTML = `
-        <div class="deal-header">
-          <div class="deal-id">Заявка #${ad.public_id}</div>
-          <div class="deal-status status-bad">Ожидает</div>
-        </div>
-        <div class="deal-row">${ownerName} ${sideLabel} ${usdtAmount} USDT</div>
+        <div class="deal-id">${ownerName} ${sideLabel} ${usdtAmount} USDT</div>
         <div class="deal-row">Сумма: ₽${formatAmount(ad.min_rub, 0)}</div>
-        ${
-          ad.banks?.length
-            ? `<div class="deal-row p2p-bank-choices" data-merchant-banks="${ad.id}"></div>`
-            : ""
-        }
         <div class="deal-row deal-row-meta">Создано: ${formatDate(ad.created_at)}</div>
-        <div class="deal-row">
-          <button class="btn primary" data-merchant-take="${ad.id}">Взять в работу</button>
-        </div>
+        <div class="deal-row deal-row-meta">Заявка #${ad.public_id}</div>
       `;
-      if (ad.banks && ad.banks.length) {
-        const banksRow = item.querySelector(`[data-merchant-banks="${ad.id}"]`);
-        const bankChoiceState = { lastTapAt: 0 };
-        ad.banks.forEach((bank) => {
-          const bankBtn = document.createElement("button");
-          bankBtn.type = "button";
-          bankBtn.className = "btn pill p2p-bank-btn";
-          bankBtn.dataset.bank = bank;
-          const icon = bankIcon(bank);
-          const label = bankLabel(bank);
-          bankBtn.innerHTML = icon
-            ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span>`
-            : label;
-          const toggleBank = () => {
-            if (selectedBanks.has(bank)) {
-              selectedBanks.delete(bank);
-            } else {
-              selectedBanks.add(bank);
-            }
-            banksRow?.querySelectorAll(".p2p-bank-btn").forEach((el) => {
-              el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
-            });
-          };
-          const onTap = () => {
-            const now = Date.now();
-            if (now - bankChoiceState.lastTapAt < 350) return;
-            bankChoiceState.lastTapAt = now;
-            toggleBank();
-          };
-          bankBtn.addEventListener("pointerup", onTap);
-          bankBtn.addEventListener("touchend", onTap);
-          bankBtn.addEventListener("click", onTap);
-          banksRow?.appendChild(bankBtn);
-        });
-        if (selectedBanks.size) {
-          banksRow?.querySelectorAll(".p2p-bank-btn").forEach((el) => {
-            el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
-          });
-        }
-      }
-      const takeBtn = item.querySelector("[data-merchant-take]");
-      takeBtn?.addEventListener("click", async (event) => {
-        event.stopPropagation();
-        if (ad.banks?.length && selectedBanks.size === 0) {
-          showNotice("Выберите банк");
-          return;
-        }
-        const bankPayload =
-          selectedBanks.size === 1
-            ? { bank: Array.from(selectedBanks)[0] }
-            : { banks: Array.from(selectedBanks) };
-        const payload = await fetchJson(`/api/merchant/ads/${ad.id}/take`, {
-          method: "POST",
-          body: JSON.stringify(bankPayload),
-        });
-        if (!payload?.ok) return;
-        merchantDealsModal?.classList.remove("open");
-        await loadDeals();
-        await loadMerchantAds();
-        if (payload.deal?.id) {
-          openDealModal(payload.deal.id);
-        }
-      });
+      item.addEventListener("click", () => openMerchantTakeInfo(ad));
       merchantDealsList.appendChild(item);
     });
   };
@@ -3203,6 +3129,99 @@
     });
     p2pModalActions.appendChild(editBtn);
     p2pModalActions.appendChild(cancelBtn);
+    p2pModal.classList.add("open");
+  };
+
+  const openMerchantTakeInfo = (ad) => {
+    if (!ad) return;
+    const owner = ad.owner || {};
+    const ownerName = owner.display_name || owner.full_name || owner.username || "—";
+    p2pModalTitle.textContent = `Заявка #${ad.public_id}`;
+    const sideLabel = ad.side === "sell" ? "продает" : "покупает";
+    p2pModalBody.innerHTML = `
+      <div class="deal-detail-row"><span>Пользователь:</span>${ownerName}</div>
+      <div class="deal-detail-row"><span>Сделка:</span>${sideLabel} ${formatAmount(
+        ad.total_usdt,
+        3
+      )} USDT</div>
+      <div class="deal-detail-row"><span>Сумма:</span>₽${formatAmount(ad.min_rub, 0)}</div>
+      <div class="deal-detail-row"><span>Курс:</span>1 USDT = ${formatAmount(ad.price_rub, 2)} RUB</div>
+      <div class="deal-detail-row"><span>Создано:</span>${formatDate(ad.created_at)}</div>
+    `;
+    const selectedBanks = new Set(ad.banks?.length === 1 ? [ad.banks[0]] : []);
+    if (ad.banks && ad.banks.length) {
+      const banksRow = document.createElement("div");
+      banksRow.className = "p2p-bank-choices";
+      const bankChoiceState = { lastTapAt: 0 };
+      ad.banks.forEach((bank) => {
+        const bankBtn = document.createElement("button");
+        bankBtn.type = "button";
+        bankBtn.className = "btn pill p2p-bank-btn";
+        bankBtn.dataset.bank = bank;
+        const icon = bankIcon(bank);
+        const label = bankLabel(bank);
+        bankBtn.innerHTML = icon
+          ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span>`
+          : label;
+        const toggleBank = () => {
+          if (selectedBanks.has(bank)) {
+            selectedBanks.delete(bank);
+          } else {
+            selectedBanks.add(bank);
+          }
+          banksRow.querySelectorAll(".p2p-bank-btn").forEach((el) => {
+            el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
+          });
+        };
+        const onTap = () => {
+          const now = Date.now();
+          if (now - bankChoiceState.lastTapAt < 350) return;
+          bankChoiceState.lastTapAt = now;
+          toggleBank();
+        };
+        bankBtn.addEventListener("pointerup", onTap);
+        bankBtn.addEventListener("touchend", onTap);
+        bankBtn.addEventListener("click", onTap);
+        banksRow.appendChild(bankBtn);
+      });
+      if (selectedBanks.size) {
+        banksRow.querySelectorAll(".p2p-bank-btn").forEach((el) => {
+          el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
+        });
+      }
+      const wrap = document.createElement("div");
+      wrap.className = "deal-detail-row";
+      wrap.innerHTML = "<span>Банки:</span>";
+      wrap.appendChild(banksRow);
+      p2pModalBody.appendChild(wrap);
+    }
+    p2pModalActions.innerHTML = "";
+    const takeBtn = document.createElement("button");
+    takeBtn.className = "btn primary";
+    takeBtn.textContent = "Взять в работу";
+    takeBtn.addEventListener("click", async () => {
+      if (ad.banks?.length && selectedBanks.size === 0) {
+        showNotice("Выберите банк");
+        return;
+      }
+      const bankPayload =
+        selectedBanks.size === 1
+          ? { bank: Array.from(selectedBanks)[0] }
+          : { banks: Array.from(selectedBanks) };
+      const payload = await fetchJson(`/api/merchant/ads/${ad.id}/take`, {
+        method: "POST",
+        body: JSON.stringify(bankPayload),
+      });
+      if (!payload?.ok) return;
+      p2pModal.classList.remove("open");
+      merchantDealsModal?.classList.remove("open");
+      await loadDeals();
+      await loadMerchantAds();
+      if (payload.deal?.id) {
+        openDealModal(payload.deal.id);
+      }
+    });
+    p2pModalActions.appendChild(takeBtn);
     p2pModal.classList.add("open");
   };
 
