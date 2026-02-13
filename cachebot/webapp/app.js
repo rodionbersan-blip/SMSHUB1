@@ -2858,9 +2858,7 @@
     const item = document.createElement("div");
     item.className = "deal-item";
     const sideLabel = ad.side === "sell" ? "Продажа" : "Покупка";
-    const limitMin = formatLimitK(ad.min_rub);
-    const limitMax = formatLimitK(ad.max_rub);
-    const limit = limitMin === limitMax ? limitMin : `${limitMin} - ${limitMax}`;
+    const totalRub = formatLimitK(ad.min_rub);
     const price = `${formatAmount(ad.price_rub, 0)}р`;
     const owner = ad.owner || {};
     const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id;
@@ -2883,7 +2881,7 @@
       const bankRow = isOwner && bankIcons ? `<div class="deal-row p2p-bank-logos">${bankIcons}</div>` : "";
       item.innerHTML = `
         <div class="deal-header">
-          <div class="deal-id">${price} • ${limit}</div>
+          <div class="deal-id">${price} • ${totalRub}</div>
           ${ownerId ? `<button class="btn p2p-owner-btn" data-owner="${ownerId}">${ownerName}</button>` : ""}
         </div>
         <div class="deal-row p2p-owner-row">
@@ -2912,7 +2910,7 @@
         ad.total_usdt,
         0
       )} USDT</div>
-        <div class="deal-row">Лимиты: ${limit}</div>
+      <div class="deal-row">Сумма: ${formatAmount(ad.min_rub, 0)}₽</div>
       `;
       item.addEventListener("click", () => openMyAd(ad.id));
     }
@@ -3053,7 +3051,7 @@
       </div>
       <div class="deal-detail-row"><span>Цена:</span>1 USDT = ${formatAmount(ad.price_rub, 0)} RUB</div>
       <div class="deal-detail-row"><span>Доступный объем:</span>${formatAmount(ad.remaining_usdt, 0)} USDT</div>
-      <div class="deal-detail-row"><span>Лимиты:</span>₽${formatAmount(ad.min_rub, 0)}-₽${formatAmount(ad.max_rub, 0)}</div>
+      <div class="deal-detail-row"><span>Сумма:</span>₽${formatAmount(ad.min_rub, 0)}</div>
       <div class="deal-detail-row"><span>Способ оплаты:</span>${(ad.banks || [])
         .map((bank) => bankLabel(bank))
         .join(", ") || "—"}</div>
@@ -3248,7 +3246,7 @@
       <div class="deal-detail-row"><span>Сторона:</span>${ad.side === "sell" ? "Продажа" : "Покупка"}</div>
       <div class="deal-detail-row"><span>Цена:</span>₽${formatAmount(ad.price_rub, 2)}/USDT</div>
       <div class="deal-detail-row"><span>Объём:</span>${formatAmount(ad.remaining_usdt)} / ${formatAmount(ad.total_usdt)} USDT</div>
-      <div class="deal-detail-row"><span>Лимиты:</span>₽${formatAmount(ad.min_rub, 2)}-₽${formatAmount(ad.max_rub, 2)}</div>
+      <div class="deal-detail-row"><span>Сумма:</span>₽${formatAmount(ad.min_rub, 2)}</div>
       <div class="deal-detail-row"><span>Банки:</span>${(ad.banks || [])
         .map((bank) => bankLabel(bank))
         .join(", ") || "—"}</div>
@@ -3260,8 +3258,8 @@
         <label>Объём (USDT)
           <input id="adEditVolume" type="number" step="0.001" value="${ad.total_usdt}" />
         </label>
-        <label>Лимиты (RUB)
-          <input id="adEditLimits" type="text" value="${ad.min_rub}-${ad.max_rub}" />
+        <label>Сумма (RUB)
+          <input id="adEditLimits" type="text" value="${ad.min_rub}" />
         </label>
         <label>Условия
           <textarea id="adEditTerms" rows="2">${ad.terms || ""}</textarea>
@@ -3302,11 +3300,9 @@
       const price = document.getElementById("adEditPrice").value;
       const volume = document.getElementById("adEditVolume").value;
       const limits = document.getElementById("adEditLimits").value;
-      const [minStr, maxStr] = (limits || "").split("-");
-      const min = Number(minStr);
-      const max = Number(maxStr);
-      if (!min || !max || min > max) {
-        log("Лимиты должны быть в формате 1000-10000", "warn");
+      const total = Number(limits);
+      if (!total || total <= 0) {
+        log("Введите сумму", "warn");
         return;
       }
       const banks = Array.from(
@@ -3318,8 +3314,8 @@
         body: JSON.stringify({
           price_rub: price,
           total_usdt: volume,
-          min_rub: min,
-          max_rub: max,
+          min_rub: total,
+          max_rub: total,
           banks,
           terms,
         }),
@@ -7410,7 +7406,7 @@
     });
   }
 
-  const computeMaxLimit = () => {
+  const computeTotalRub = () => {
     const volume = Number(p2pVolume?.value);
     const price = Number(p2pPrice?.value);
     if (!Number.isFinite(volume) || volume <= 0 || !Number.isFinite(price) || price <= 0) {
@@ -7419,37 +7415,17 @@
     return volume * price;
   };
 
-  const clampLimitsToMax = (maxLimit) => {
-    if (!p2pLimits?.value) return;
-    const [minStr, maxStr] = p2pLimits.value.split("-");
-    if (!minStr || !maxStr) return;
-    const min = Number(minStr);
-    const max = Number(maxStr);
-    if (!Number.isFinite(max)) return;
-    const capped = Math.floor(maxLimit);
-    if (max > capped) {
-      const safeMax = Number.isFinite(min) && min > capped ? min : capped;
-      p2pLimits.value = `${minStr}-${formatAmount(safeMax, 0)}`;
-    }
-  };
-
   const updateP2PLimitsState = () => {
     if (!p2pLimits) return;
-    const maxLimit = computeMaxLimit();
-    const enabled = maxLimit !== null;
-    p2pLimits.disabled = !enabled;
-    p2pLimits.placeholder = enabled ? "1000-10000" : "Введите объем и цену";
-    if (enabled) {
-      clampLimitsToMax(maxLimit);
-    }
+    const total = computeTotalRub();
+    const enabled = total !== null;
+    p2pLimits.disabled = true;
+    p2pLimits.placeholder = enabled ? "—" : "Введите объем и цену";
+    p2pLimits.value = enabled ? formatAmount(total, 0) : "";
   };
 
   p2pVolume?.addEventListener("input", updateP2PLimitsState);
   p2pPrice?.addEventListener("input", updateP2PLimitsState);
-  p2pLimits?.addEventListener("blur", () => {
-    const maxLimit = computeMaxLimit();
-    if (maxLimit !== null) clampLimitsToMax(maxLimit);
-  });
   updateP2PLimitsState();
 
   p2pTradingToggle?.addEventListener("click", async () => {
@@ -7494,19 +7470,13 @@
 
   p2pCreateForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const [minStr, maxStr] = (p2pLimits.value || "").split("-");
-    const min = Number(minStr);
-    let max = Number(maxStr);
-    const maxLimit = computeMaxLimit();
-    if (maxLimit !== null && Number.isFinite(max) && max > maxLimit) {
-      const capped = Math.floor(maxLimit);
-      max = Number.isFinite(min) && min > capped ? min : capped;
-      p2pLimits.value = `${minStr}-${formatAmount(max, 0)}`;
-    }
-    if (!min || !max || min > max) {
-      log("Лимиты должны быть в формате 1000-10000", "warn");
+    const totalRub = computeTotalRub();
+    if (!totalRub || totalRub <= 0) {
+      log("Введите объем и курс", "warn");
       return;
     }
+    const min = totalRub;
+    const max = totalRub;
     const banks = Array.from(p2pBanks.querySelectorAll("input:checked")).map((el) => el.value);
     const payload = await fetchJson("/api/p2p/ads", {
       method: "POST",
