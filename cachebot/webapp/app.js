@@ -98,6 +98,12 @@
   const themeToggle = document.getElementById("themeToggle");
   const navButtons = document.querySelectorAll(".nav-btn");
   const views = document.querySelectorAll(".view");
+  const merchantSellNav = document.getElementById("merchantSellNav");
+  const merchantSellModal = document.getElementById("merchantSellModal");
+  const merchantSellClose = document.getElementById("merchantSellClose");
+  const merchantSellRate = document.getElementById("merchantSellRate");
+  const merchantSellBuy = document.getElementById("merchantSellBuy");
+  const merchantSellSell = document.getElementById("merchantSellSell");
 
   const profileName = document.getElementById("profileName");
   const profileUsername = document.getElementById("profileUsername");
@@ -2922,6 +2928,22 @@
       p2pTradingToggle.classList.toggle("status-ok", payload.trading);
       p2pTradingToggle.classList.toggle("status-bad", !payload.trading);
     }
+  };
+
+  const loadMerchantRate = async () => {
+    if (!merchantSellRate) return;
+    const payload = await fetchJson("/api/rate");
+    if (!payload?.ok) return;
+    const rateValue = Number(payload.usd_rate || 0);
+    if (!Number.isFinite(rateValue) || rateValue <= 0) return;
+    merchantSellRate.textContent = `1 USDT = ${formatAmount(rateValue, 2)} RUB`;
+  };
+
+  const openMerchantSellModal = async () => {
+    if (!merchantSellModal) return;
+    setView("p2p");
+    merchantSellModal.classList.add("open");
+    await loadMerchantRate();
   };
 
   const loadPublicAds = async (side) => {
@@ -6498,7 +6520,12 @@
 
   navButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      setView(btn.dataset.view);
+      const viewId = btn.dataset.view;
+      if (viewId === "merchant-sell") {
+        openMerchantSellModal();
+        return;
+      }
+      setView(viewId);
     });
   });
 
@@ -6896,6 +6923,24 @@
 
   p2pCreateBtn?.addEventListener("click", () => {
     p2pCreateModal.classList.add("open");
+  });
+
+  merchantSellClose?.addEventListener("click", () => {
+    merchantSellModal?.classList.remove("open");
+  });
+
+  merchantSellBuy?.addEventListener("click", () => {
+    merchantSellModal?.classList.remove("open");
+    setView("p2p");
+    if (p2pSide) p2pSide.value = "buy";
+    p2pCreateModal?.classList.add("open");
+  });
+
+  merchantSellSell?.addEventListener("click", () => {
+    merchantSellModal?.classList.remove("open");
+    setView("p2p");
+    if (p2pSide) p2pSide.value = "sell";
+    p2pCreateModal?.classList.add("open");
   });
 
   chatForm?.addEventListener("submit", async (event) => {

@@ -908,6 +908,14 @@ body.modal-open #app {
   min-width: 0;
 }
 
+.nav-btn.merchant-sell-nav {
+  font-size: 12px;
+  line-height: 1.1;
+  white-space: normal;
+  padding: 8px 10px;
+  text-align: center;
+}
+
 .nav-btn.has-badge {
   position: relative;
 }

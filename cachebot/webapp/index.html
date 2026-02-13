@@ -42,19 +42,25 @@
           </span>
           P2P
         </button>
+        <button class="tab nav-btn with-icon merchant-sell-nav" data-view="merchant-sell" id="merchantSellNav">
+          <span class="nav-icon">
+            <img src="/app/assets/p2p-icon.png" alt="" />
+          </span>
+          Продать Мерчанту
+        </button>
         <button class="tab nav-btn with-icon" data-view="deals">
           <span class="nav-icon">
             <img src="/app/assets/deals-icon.png" alt="" />
           </span>
           Сделки
         </button>
+        <span class="tabs-break" aria-hidden="true"></span>
         <button class="tab nav-btn with-icon" data-view="support">
           <span class="nav-icon">
             <img src="/app/assets/support-icon.png?v=2" alt="" />
           </span>
           Помощь
         </button>
-        <span class="tabs-break" aria-hidden="true"></span>
         <button class="tab nav-btn with-icon" data-view="disputes" id="disputesTab">
           <span class="nav-icon">
             <img src="/app/assets/moderation-icon.png?v=1" alt="" />
@@ -608,6 +614,26 @@
             </label>
             <button type="submit" class="btn primary">Создать</button>
           </form>
+        </div>
+      </div>
+
+      <div class="modal" id="merchantSellModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Продать Мерчанту</div>
+            <button id="merchantSellClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div class="modal-body">
+            <div class="deal-detail-row">
+              <span>Курс:</span>
+              <span id="merchantSellRate">—</span>
+            </div>
+            <div class="deal-row muted">Курс фиксированный для всех пользователей.</div>
+          </div>
+          <div class="modal-actions">
+            <button id="merchantSellBuy" class="btn">Купить</button>
+            <button id="merchantSellSell" class="btn primary">Продать</button>
+          </div>
         </div>
       </div>
 

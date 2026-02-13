@@ -74,6 +74,7 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_post("/api/deals/{deal_id}/chat/file", _api_deal_chat_send_file)
     app.router.add_get("/api/chat-files/{deal_id}/{filename}", _api_chat_file)
     app.router.add_get("/api/p2p/summary", _api_p2p_summary)
+    app.router.add_get("/api/rate", _api_rate)
     app.router.add_get("/api/p2p/banks", _api_p2p_banks)
     app.router.add_get("/api/p2p/ads", _api_p2p_public_ads)
     app.router.add_get("/api/p2p/my-ads", _api_p2p_my_ads)
@@ -1384,6 +1385,13 @@ async def _api_p2p_summary(request: web.Request) -> web.Response:
     active, total = await deps.advert_service.counts_for_user(user_id)
     trading = await deps.advert_service.trading_enabled(user_id)
     return web.json_response({"ok": True, "active": active, "total": total, "trading": trading})
+
+
+async def _api_rate(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    await _require_user(request)
+    rate = await deps.rate_provider.snapshot()
+    return web.json_response({"ok": True, "usd_rate": str(rate.usd_rate)})
 
 
 async def _api_p2p_banks(_: web.Request) -> web.Response:
