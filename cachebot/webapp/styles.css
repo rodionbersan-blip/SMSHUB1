@@ -1808,6 +1808,15 @@ body.modal-open #app {
   text-align: center;
 }
 
+.deal-section-title {
+  margin: 10px 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(154, 176, 206, 0.9);
+}
+
 .deal-pagination {
   display: grid;
   grid-template-columns: 44px 1fr auto 44px;

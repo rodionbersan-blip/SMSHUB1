@@ -478,6 +478,7 @@
     merchantSellFlow: false,
     merchantAds: [],
     merchantPollAt: 0,
+    merchantMyAds: [],
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
@@ -2387,22 +2388,47 @@
 
   const renderDealsPage = () => {
     const deals = state.deals || [];
+    const merchantAds = state.merchantMyAds || [];
     const page = state.dealsPage || 0;
     const perPage = 5;
-    const totalPages = Math.max(1, Math.ceil(deals.length / perPage));
+    const combinedCount = deals.length + merchantAds.length;
+    const totalPages = Math.max(1, Math.ceil(combinedCount / perPage));
     const safePage = Math.max(0, Math.min(page, totalPages - 1));
     state.dealsPage = safePage;
     const start = safePage * perPage;
-    const chunk = deals.slice(start, start + perPage);
+    const combined = [
+      ...merchantAds.map((ad) => ({ kind: "merchant_ad", ad })),
+      ...deals.map((deal) => ({ kind: "deal", deal })),
+    ];
+    const chunk = combined.slice(start, start + perPage);
     dealsList.innerHTML = "";
-    if (!deals.length) {
+    if (!combined.length) {
       dealsList.innerHTML = "<div class=\"deal-empty\">Сделок пока нет.</div>";
       if (dealsPagination) {
         dealsPagination.innerHTML = "";
       }
       return;
     }
-    chunk.forEach((deal) => {
+    chunk.forEach((item) => {
+      if (item.kind === "merchant_ad") {
+        const ad = item.ad;
+        const row = document.createElement("div");
+        row.className = "deal-item";
+        row.innerHTML = `
+          <div class="deal-header">
+            <div class="deal-id">Заявка #${ad.public_id}</div>
+            <div class="deal-status status-bad">Ожидает мерчанта</div>
+          </div>
+          <div class="deal-row">Сумма: ₽${formatAmount(ad.min_rub, 0)} • 1 USDT = ${formatAmount(
+          ad.price_rub,
+          2
+        )} RUB</div>
+          <div class="deal-row deal-row-meta"><span>Дата: ${formatDate(ad.created_at)}</span></div>
+        `;
+        dealsList.appendChild(row);
+        return;
+      }
+      const deal = item.deal;
       const item = document.createElement("div");
       item.className = "deal-item";
       const reviewBadge =
@@ -2480,6 +2506,12 @@
     if (merchantDealsModal?.classList.contains("open")) {
       renderMerchantDealsList();
     }
+  };
+
+  const loadMerchantMyAds = async () => {
+    const payload = await fetchJson("/api/merchant/my-ads");
+    if (!payload?.ok) return;
+    state.merchantMyAds = payload.ads || [];
   };
 
   const loadDeals = async () => {
@@ -2570,7 +2602,9 @@
       state.chatInitDone = true;
       persistChatSeen();
     }
-    dealsCount.textContent = `${deals.length}`;
+    await loadMerchantMyAds();
+    const merchantCount = state.merchantMyAds?.length || 0;
+    dealsCount.textContent = `${deals.length + merchantCount}`;
     const desiredPage = state.dealsPage ?? 0;
     state.deals = deals;
     const totalPages = Math.max(1, Math.ceil(deals.length / 5));
@@ -3074,7 +3108,22 @@
       p2pList.innerHTML = "<div class=\"deal-empty\">Объявлений пока нет.</div>";
       return;
     }
-    state.myAds.forEach((ad) => p2pList.appendChild(renderP2PItem(ad, "my")));
+    const merchantAds = state.myAds.filter((ad) => ad.is_merchant);
+    const regularAds = state.myAds.filter((ad) => !ad.is_merchant);
+    if (merchantAds.length) {
+      const title = document.createElement("div");
+      title.className = "deal-section-title";
+      title.textContent = "Merchant";
+      p2pList.appendChild(title);
+      merchantAds.forEach((ad) => p2pList.appendChild(renderP2PItem(ad, "my")));
+    }
+    if (regularAds.length) {
+      const title = document.createElement("div");
+      title.className = "deal-section-title";
+      title.textContent = "P2P";
+      p2pList.appendChild(title);
+      regularAds.forEach((ad) => p2pList.appendChild(renderP2PItem(ad, "my")));
+    }
   };
 
   const openP2PAd = async (adId) => {
