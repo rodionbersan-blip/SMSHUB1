@@ -478,7 +478,6 @@
     merchantSellFlow: false,
     merchantAds: [],
     merchantPollAt: 0,
-    merchantMyAds: [],
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
@@ -2388,48 +2387,22 @@
 
   const renderDealsPage = () => {
     const deals = state.deals || [];
-    const merchantAds = state.merchantMyAds || [];
     const page = state.dealsPage || 0;
     const perPage = 5;
-    const combinedCount = deals.length + merchantAds.length;
-    const totalPages = Math.max(1, Math.ceil(combinedCount / perPage));
+    const totalPages = Math.max(1, Math.ceil(deals.length / perPage));
     const safePage = Math.max(0, Math.min(page, totalPages - 1));
     state.dealsPage = safePage;
     const start = safePage * perPage;
-    const combined = [
-      ...merchantAds.map((ad) => ({ kind: "merchant_ad", ad })),
-      ...deals.map((deal) => ({ kind: "deal", deal })),
-    ];
-    const chunk = combined.slice(start, start + perPage);
+    const chunk = deals.slice(start, start + perPage);
     dealsList.innerHTML = "";
-    if (!combined.length) {
+    if (!deals.length) {
       dealsList.innerHTML = "<div class=\"deal-empty\">Сделок пока нет.</div>";
       if (dealsPagination) {
         dealsPagination.innerHTML = "";
       }
       return;
     }
-    chunk.forEach((item) => {
-      if (item.kind === "merchant_ad") {
-        const ad = item.ad;
-        const row = document.createElement("div");
-        row.className = "deal-item";
-        row.innerHTML = `
-          <div class="deal-header">
-            <div class="deal-id">Заявка #${ad.public_id}</div>
-            <div class="deal-status status-bad">Ожидает мерчанта</div>
-          </div>
-          <div class="deal-row">Сумма: ₽${formatAmount(ad.min_rub, 0)} • 1 USDT = ${formatAmount(
-          ad.price_rub,
-          2
-        )} RUB</div>
-          <div class="deal-row deal-row-meta"><span>Дата: ${formatDate(ad.created_at)}</span></div>
-        `;
-        row.addEventListener("click", () => openMerchantAdInfo(ad));
-        dealsList.appendChild(row);
-        return;
-      }
-      const deal = item.deal;
+    chunk.forEach((deal) => {
       const item = document.createElement("div");
       item.className = "deal-item";
       const reviewBadge =
@@ -2507,12 +2480,6 @@
     if (merchantDealsModal?.classList.contains("open")) {
       renderMerchantDealsList();
     }
-  };
-
-  const loadMerchantMyAds = async () => {
-    const payload = await fetchJson("/api/merchant/my-ads");
-    if (!payload?.ok) return;
-    state.merchantMyAds = payload.ads || [];
   };
 
   const loadDeals = async () => {
@@ -2603,8 +2570,7 @@
       state.chatInitDone = true;
       persistChatSeen();
     }
-    await loadMerchantMyAds();
-    dealsCount.textContent = `${deals.length + (state.merchantMyAds?.length || 0)}`;
+    dealsCount.textContent = `${deals.length}`;
     const desiredPage = state.dealsPage ?? 0;
     state.deals = deals;
     const totalPages = Math.max(1, Math.ceil(deals.length / 5));
@@ -3311,24 +3277,6 @@
     if (ownerLink && ownerId) {
       ownerLink.addEventListener("click", () => openUserProfile(ownerId));
     }
-  };
-
-  const openMerchantAdInfo = (ad) => {
-    if (!ad) return;
-    const owner = ad.owner || {};
-    const ownerName = owner.display_name || owner.full_name || owner.username || "—";
-    p2pModalTitle.textContent = `Заявка #${ad.public_id}`;
-    p2pModalBody.innerHTML = `
-      <div class="deal-detail-row"><span>Пользователь:</span>${ownerName}</div>
-      <div class="deal-detail-row"><span>Сторона:</span>${ad.side === "sell" ? "Продажа" : "Покупка"}</div>
-      <div class="deal-detail-row"><span>Курс:</span>1 USDT = ${formatAmount(ad.price_rub, 2)} RUB</div>
-      <div class="deal-detail-row"><span>Сумма:</span>₽${formatAmount(ad.min_rub, 0)}</div>
-      <div class="deal-detail-row"><span>Объём:</span>${formatAmount(ad.total_usdt, 3)} USDT</div>
-      <div class="deal-detail-row"><span>Условия:</span>${ad.terms || "—"}</div>
-      <div class="deal-detail-row"><span>Статус:</span>Ожидает мерчанта</div>
-    `;
-    p2pModalActions.innerHTML = "";
-    p2pModal.classList.add("open");
   };
 
   const openMyAd = async (adId, fallbackAd = null) => {
