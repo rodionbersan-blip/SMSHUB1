@@ -3149,7 +3149,7 @@
       <div class="deal-detail-row"><span>Курс:</span>1 USDT = ${formatAmount(ad.price_rub, 2)} RUB</div>
       <div class="deal-detail-row"><span>Создано:</span>${formatDate(ad.created_at)}</div>
     `;
-    const selectedBanks = new Set(ad.banks?.length === 1 ? [ad.banks[0]] : []);
+    let selectedBank = ad.banks?.length === 1 ? ad.banks[0] : null;
     if (ad.banks && ad.banks.length) {
       const banksRow = document.createElement("div");
       banksRow.className = "p2p-bank-choices";
@@ -3165,13 +3165,9 @@
           ? `<img class="p2p-bank-logo" src="${icon}" alt="" onerror="this.remove()" /><span>${label}</span>`
           : label;
         const toggleBank = () => {
-          if (selectedBanks.has(bank)) {
-            selectedBanks.delete(bank);
-          } else {
-            selectedBanks.add(bank);
-          }
+          selectedBank = selectedBank === bank ? null : bank;
           banksRow.querySelectorAll(".p2p-bank-btn").forEach((el) => {
-            el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
+            el.classList.toggle("active", el.dataset.bank === selectedBank);
           });
         };
         const onTap = () => {
@@ -3185,9 +3181,9 @@
         bankBtn.addEventListener("click", onTap);
         banksRow.appendChild(bankBtn);
       });
-      if (selectedBanks.size) {
+      if (selectedBank) {
         banksRow.querySelectorAll(".p2p-bank-btn").forEach((el) => {
-          el.classList.toggle("active", selectedBanks.has(el.dataset.bank));
+          el.classList.toggle("active", el.dataset.bank === selectedBank);
         });
       }
       const wrap = document.createElement("div");
@@ -3201,14 +3197,11 @@
     takeBtn.className = "btn primary";
     takeBtn.textContent = "Взять в работу";
     takeBtn.addEventListener("click", async () => {
-      if (ad.banks?.length && selectedBanks.size === 0) {
+      if (ad.banks?.length && !selectedBank) {
         showNotice("Выберите банк");
         return;
       }
-      const bankPayload =
-        selectedBanks.size === 1
-          ? { bank: Array.from(selectedBanks)[0] }
-          : { banks: Array.from(selectedBanks) };
+      const bankPayload = selectedBank ? { bank: selectedBank } : {};
       const payload = await fetchJson(`/api/merchant/ads/${ad.id}/take`, {
         method: "POST",
         body: JSON.stringify(bankPayload),
