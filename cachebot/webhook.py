@@ -1447,10 +1447,17 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
     if not values:
         raise web.HTTPBadRequest(text="Некорректные значения")
     side, total_usdt, price_rub, min_rub, max_rub, banks, terms = values
+    is_merchant = bool(body.get("merchant"))
     existing_ads = await deps.advert_service.list_user_ads(user_id)
-    if any(ad.side == side for ad in existing_ads):
-        side_label = "покупки" if side == "buy" else "продажи" if side == "sell" else "покупки или продажи"
-        raise web.HTTPBadRequest(text=f"Объявление {side_label} уже создано")
+    if is_merchant:
+        if any(ad.is_merchant for ad in existing_ads):
+            raise web.HTTPBadRequest(text="Объявление для мерчанта уже создано")
+    else:
+        if any(ad.side == side and not ad.is_merchant for ad in existing_ads):
+            side_label = (
+                "покупки" if side == "buy" else "продажи" if side == "sell" else "покупки или продажи"
+            )
+            raise web.HTTPBadRequest(text=f"Объявление {side_label} уже создано")
     balance = await deps.deal_service.balance_of(user_id)
     if total_usdt > balance:
         raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
@@ -1464,6 +1471,7 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
         max_rub=max_rub,
         banks=banks,
         terms=terms,
+        is_merchant=is_merchant,
     )
     payload = await _ad_payload(deps, ad, include_owner=False, request=request)
     return web.json_response({"ok": True, "ad": payload})
@@ -3841,6 +3849,7 @@ async def _ad_payload(
         "banks": list(ad.banks),
         "terms": ad.terms,
         "active": ad.active,
+        "is_merchant": ad.is_merchant,
         "created_at": ad.created_at.isoformat(),
         "owner": _profile_payload(owner, request=request, include_private=False) if include_owner else None,
     }

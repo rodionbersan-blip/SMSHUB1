@@ -25,6 +25,7 @@ class Advert:
     banks: list[str]
     terms: str | None
     active: bool
+    is_merchant: bool
     created_at: datetime
     public_id: str
 
@@ -45,6 +46,7 @@ class Advert:
             "banks": list(self.banks),
             "terms": self.terms,
             "active": self.active,
+            "is_merchant": self.is_merchant,
             "created_at": self.created_at.isoformat(),
             "public_id": self.public_id,
         }
@@ -63,6 +65,7 @@ class Advert:
             banks=list(data.get("banks") or []),
             terms=data.get("terms"),
             active=bool(data.get("active", False)),
+            is_merchant=bool(data.get("is_merchant", False)),
             created_at=datetime.fromisoformat(data["created_at"]),
             public_id=data.get("public_id") or _fallback_public_id(data["id"]),
         )

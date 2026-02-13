@@ -7488,6 +7488,7 @@
         max_rub: max,
         banks,
         terms: p2pTerms.value,
+        merchant: state.merchantSellFlow,
       }),
     });
     if (!payload) {

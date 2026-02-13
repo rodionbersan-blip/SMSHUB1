@@ -57,6 +57,7 @@ class AdvertService:
         max_rub: Decimal,
         banks: List[str],
         terms: str | None,
+        is_merchant: bool = False,
     ) -> Advert:
         if total_usdt <= Decimal("0"):
             raise ValueError("Объём должен быть больше нуля")
@@ -77,6 +78,7 @@ class AdvertService:
                 banks=list(banks),
                 terms=terms,
                 active=False,
+                is_merchant=is_merchant,
                 created_at=datetime.now(timezone.utc),
                 public_id=self._next_public_id_locked(),
             )
