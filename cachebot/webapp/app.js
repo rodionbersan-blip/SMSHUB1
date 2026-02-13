@@ -476,6 +476,8 @@
     isMerchant: false,
     merchantDeals: [],
     merchantSellFlow: false,
+    merchantAds: [],
+    merchantPollAt: 0,
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
@@ -2082,6 +2084,9 @@
       if (p2pMerchantBtn) {
         p2pMerchantBtn.style.display = isMerchant ? "" : "none";
       }
+      if (isMerchant) {
+        loadMerchantAds();
+      }
       if (profileRoleCard) {
         profileRoleCard.style.display = isMerchant ? "" : "none";
       }
@@ -2462,6 +2467,21 @@
     }
   };
 
+  const loadMerchantAds = async () => {
+    if (!state.isMerchant) return;
+    const payload = await fetchJson("/api/merchant/ads");
+    if (!payload?.ok) return;
+    state.merchantAds = payload.ads || [];
+    if (p2pMerchantBadge) {
+      const count = state.merchantAds.length;
+      p2pMerchantBadge.textContent = `${count}`;
+      p2pMerchantBadge.style.display = count > 0 ? "inline-flex" : "none";
+    }
+    if (merchantDealsModal?.classList.contains("open")) {
+      renderMerchantDealsList();
+    }
+  };
+
   const loadDeals = async () => {
     const payload = await fetchJson("/api/my-deals");
     if (!payload?.ok) return;
@@ -2553,18 +2573,6 @@
     dealsCount.textContent = `${deals.length}`;
     const desiredPage = state.dealsPage ?? 0;
     state.deals = deals;
-    const merchantDeals = state.isMerchant
-      ? deals.filter((deal) => deal.is_p2p && deal.actions?.accept_offer)
-      : [];
-    state.merchantDeals = merchantDeals;
-    if (p2pMerchantBadge) {
-      const count = merchantDeals.length;
-      p2pMerchantBadge.textContent = `${count}`;
-      p2pMerchantBadge.style.display = count > 0 ? "inline-flex" : "none";
-    }
-    if (merchantDealsModal?.classList.contains("open")) {
-      renderMerchantDealsList();
-    }
     const totalPages = Math.max(1, Math.ceil(deals.length / 5));
     state.dealsPage = Math.max(0, Math.min(desiredPage, totalPages - 1));
     syncUnreadDeals(deals);
@@ -2594,28 +2602,46 @@
 
   const renderMerchantDealsList = () => {
     if (!merchantDealsList) return;
-    const deals = state.merchantDeals || [];
+    const ads = state.merchantAds || [];
     merchantDealsList.innerHTML = "";
-    if (!deals.length) {
-      merchantDealsList.innerHTML = "<div class=\"deal-empty\">Сделок пока нет.</div>";
+    if (!ads.length) {
+      merchantDealsList.innerHTML = "<div class=\"deal-empty\">Заявок пока нет.</div>";
       return;
     }
-    deals.forEach((deal) => {
+    ads.forEach((ad) => {
+      const owner = ad.owner || {};
+      const ownerName = owner.display_name || owner.full_name || owner.username || "—";
       const item = document.createElement("div");
       item.className = "deal-item";
       item.innerHTML = `
         <div class="deal-header">
-          <div class="deal-id">Сделка #${deal.public_id}</div>
-          <div class="deal-status ${statusClass(deal)}">${statusLabel(deal)}</div>
+          <div class="deal-id">Заявка #${ad.public_id}</div>
+          <div class="deal-status status-bad">Ожидает</div>
         </div>
-        <div class="deal-row">${formatAmount(deal.cash_rub, 2)}₽-${formatAmount(
-        deal.usdt_amount
-      )} USDT | 1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
-        <div class="deal-row deal-row-meta"><span>Дата: ${formatDate(deal.created_at)}</span></div>
+        <div class="deal-row">Сумма: ₽${formatAmount(ad.min_rub, 0)} • 1 USDT = ${formatAmount(
+        ad.price_rub,
+        2
+      )} RUB</div>
+        <div class="deal-row">Пользователь: ${ownerName}</div>
+        <div class="deal-row deal-row-meta">Создано: ${formatDate(ad.created_at)}</div>
+        <div class="deal-row">
+          <button class="btn primary" data-merchant-take="${ad.id}">Взять в работу</button>
+        </div>
       `;
-      item.addEventListener("click", () => {
-        openDealModal(deal.id);
+      const takeBtn = item.querySelector("[data-merchant-take]");
+      takeBtn?.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        const payload = await fetchJson(`/api/merchant/ads/${ad.id}/take`, {
+          method: "POST",
+          body: "{}",
+        });
+        if (!payload?.ok) return;
         merchantDealsModal?.classList.remove("open");
+        await loadDeals();
+        await loadMerchantAds();
+        if (payload.deal?.id) {
+          openDealModal(payload.deal.id);
+        }
       });
       merchantDealsList.appendChild(item);
     });
@@ -6289,6 +6315,10 @@
       try {
         await loadDeals();
         await loadBalance();
+        if (state.isMerchant && Date.now() - (state.merchantPollAt || 0) > 2000) {
+          state.merchantPollAt = Date.now();
+          await loadMerchantAds();
+        }
         // Keep moderator's "active disputes" in sync (low frequency).
         if (state.canManageDisputes && Date.now() - (state.disputesPollAt || 0) > 3000) {
           state.disputesPollAt = Date.now();
@@ -7525,6 +7555,7 @@
 
   p2pMerchantBtn?.addEventListener("click", () => {
     if (!state.isMerchant) return;
+    loadMerchantAds();
     renderMerchantDealsList();
     merchantDealsModal?.classList.add("open");
   });
@@ -7576,11 +7607,6 @@
       await loadMyAds();
       await loadP2PSummary();
       if (state.merchantSellFlow) {
-        pushSystemNotification({
-          key: `merchant-wait-${Date.now()}`,
-          message: "Сделка создана и ждет мерчанта.",
-          type: "merchant_wait",
-        });
         setView("merchant-sell");
         applyMerchantSellMode(false);
       }

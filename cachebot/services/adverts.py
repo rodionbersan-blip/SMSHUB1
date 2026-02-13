@@ -32,6 +32,8 @@ class AdvertService:
         async with self._lock:
             result = []
             for ad in self._adverts.values():
+                if ad.is_merchant:
+                    continue
                 if ad.side != side or not ad.active:
                     continue
                 if ad.remaining_usdt <= Decimal("0"):
@@ -39,6 +41,17 @@ class AdvertService:
                 if not self._trading_enabled.get(ad.owner_id, True):
                     continue
                 if exclude_user_id is not None and ad.owner_id == exclude_user_id:
+                    continue
+                result.append(ad)
+            return sorted(result, key=lambda ad: ad.created_at, reverse=True)
+
+    async def list_merchant_ads(self) -> List[Advert]:
+        async with self._lock:
+            result = []
+            for ad in self._adverts.values():
+                if not ad.is_merchant:
+                    continue
+                if ad.remaining_usdt <= Decimal("0"):
                     continue
                 result.append(ad)
             return sorted(result, key=lambda ad: ad.created_at, reverse=True)

@@ -75,6 +75,8 @@ def create_app(bot, deps: AppDeps) -> web.Application:
     app.router.add_get("/api/chat-files/{deal_id}/{filename}", _api_chat_file)
     app.router.add_get("/api/p2p/summary", _api_p2p_summary)
     app.router.add_get("/api/rate", _api_rate)
+    app.router.add_get("/api/merchant/ads", _api_merchant_ads)
+    app.router.add_post("/api/merchant/ads/{ad_id}/take", _api_merchant_take)
     app.router.add_get("/api/p2p/banks", _api_p2p_banks)
     app.router.add_get("/api/p2p/ads", _api_p2p_public_ads)
     app.router.add_get("/api/p2p/my-ads", _api_p2p_my_ads)
@@ -1473,8 +1475,76 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
         terms=terms,
         is_merchant=is_merchant,
     )
+    if is_merchant:
+        ad = await deps.advert_service.update_ad(ad.id, active=True)
+        bot = request.app.get("bot")
+        if bot:
+            try:
+                await bot.send_message(user_id, "✅ Сделка создана и ожидает мерчанта.")
+            except Exception:
+                pass
     payload = await _ad_payload(deps, ad, include_owner=False, request=request)
     return web.json_response({"ok": True, "ad": payload})
+
+
+async def _api_merchant_ads(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    role = await deps.user_service.role_of(user_id)
+    if role != UserRole.BUYER:
+        raise web.HTTPForbidden(text="Нет доступа")
+    ads = await deps.advert_service.list_merchant_ads()
+    payload = []
+    for ad in ads:
+        if not await deps.user_service.can_trade(ad.owner_id):
+            continue
+        payload.append(await _ad_payload(deps, ad, include_owner=True, request=request))
+    return web.json_response({"ok": True, "ads": payload})
+
+
+async def _api_merchant_take(request: web.Request) -> web.Response:
+    deps: AppDeps = request.app["deps"]
+    _, user_id = await _require_user(request)
+    role = await deps.user_service.role_of(user_id)
+    if role != UserRole.BUYER:
+        raise web.HTTPForbidden(text="Нет доступа")
+    ad_id = request.match_info["ad_id"]
+    ad = await deps.advert_service.get_ad(ad_id)
+    if not ad or not ad.is_merchant:
+        raise web.HTTPNotFound(text="Объявление недоступно")
+    if ad.owner_id == user_id:
+        raise web.HTTPBadRequest(text="Нельзя взять своё объявление")
+    if ad.remaining_usdt <= Decimal("0"):
+        raise web.HTTPBadRequest(text="Объявление недоступно")
+    rub_amount = ad.min_rub
+    base_usdt = rub_amount / ad.price_rub
+    if ad.side == AdvertSide.SELL:
+        seller_id = ad.owner_id
+        buyer_id = user_id
+    else:
+        seller_id = user_id
+        buyer_id = ad.owner_id
+    seller_balance = await deps.deal_service.balance_of(seller_id)
+    available = min(ad.remaining_usdt, seller_balance)
+    if base_usdt > available:
+        raise web.HTTPBadRequest(text="Недостаточно объёма")
+    try:
+        deal = await deps.deal_service.create_p2p_offer(
+            seller_id=seller_id,
+            buyer_id=buyer_id,
+            initiator_id=user_id,
+            usd_amount=rub_amount,
+            rate=ad.price_rub,
+            atm_bank=None,
+            bank_options=None,
+            advert_id=ad.id,
+            comment=ad.terms,
+        )
+        await deps.advert_service.reduce_volume(ad.id, base_usdt)
+    except Exception as exc:
+        raise web.HTTPBadRequest(text=f"Не удалось создать предложение: {exc}")
+    payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
+    return web.json_response({"ok": True, "deal": payload})
 
 
 async def _api_p2p_update_ad(request: web.Request) -> web.Response:
