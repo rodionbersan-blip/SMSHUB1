@@ -1707,32 +1707,6 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
-.p2p-merchant-btn {
-  margin-left: auto;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  backdrop-filter: blur(8px);
-  display: none;
-}
-
-.p2p-merchant-btn .btn-badge {
-  margin-left: 8px;
-  min-width: 22px;
-  height: 18px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: rgba(77, 163, 255, 0.2);
-  color: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-}
-
 .p2p-bank-logos {
   display: flex;
   align-items: center;
