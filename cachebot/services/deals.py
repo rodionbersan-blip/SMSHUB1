@@ -214,7 +214,7 @@ class DealService:
                 public_id=self._next_public_id_locked(),
                 is_p2p=True,
                 advert_id=advert_id,
-                balance_reserved=True,
+                balance_reserved=False,
                 atm_bank=atm_bank,
             )
             deal.dispute_available_at = now + self._payment_window
@@ -463,7 +463,7 @@ class DealService:
             was_paid = deal.status == DealStatus.PAID
             refund_amount: Decimal | None = None
             is_seller = actor_id == deal.seller_id
-            if is_seller and was_paid:
+            if is_seller and was_paid and deal.balance_reserved:
                 refund_amount = max(Decimal("0"), deal.usdt_amount - deal.fee_amount)
                 self._credit_balance_locked(actor_id, refund_amount)
             if deal.is_p2p and not was_paid and deal.balance_reserved:

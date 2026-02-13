@@ -31,7 +31,11 @@ class AdvertService:
     async def list_user_merchant_ads(self, user_id: int) -> List[Advert]:
         async with self._lock:
             return sorted(
-                (ad for ad in self._adverts.values() if ad.owner_id == user_id and ad.is_merchant),
+                (
+                    ad
+                    for ad in self._adverts.values()
+                    if ad.owner_id == user_id and ad.is_merchant and ad.remaining_usdt > 0
+                ),
                 key=lambda ad: ad.created_at,
                 reverse=True,
             )
