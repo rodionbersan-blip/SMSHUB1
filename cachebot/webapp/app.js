@@ -3354,6 +3354,12 @@
       if (ticket.target_name) reasonParts.push(ticket.target_name);
       const reasonLabel = reasonParts.join(" • ");
       const statusInfo = (() => {
+        if (!payload.can_manage) {
+          if (ticket.status === "in_progress") {
+            return { text: "В работе", cls: "status-warn" };
+          }
+          return { text: "Ожидает модератора", cls: "status-warn" };
+        }
         if (ticket.status === "in_progress") {
           return { text: "В работе", cls: "status-ok" };
         }
