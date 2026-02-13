@@ -1529,6 +1529,22 @@ async def _api_merchant_take(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Нельзя взять своё объявление")
     if ad.remaining_usdt <= Decimal("0"):
         raise web.HTTPBadRequest(text="Объявление недоступно")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    bank = (body.get("bank") or "").strip()
+    banks = list(body.get("banks") or [])
+    if ad.banks:
+        if banks:
+            banks = [item for item in banks if item in ad.banks]
+            if not banks:
+                raise web.HTTPBadRequest(text="Некорректный банк")
+        else:
+            if not bank:
+                raise web.HTTPBadRequest(text="Выберите банк")
+            if bank not in ad.banks:
+                raise web.HTTPBadRequest(text="Некорректный банк")
     rub_amount = ad.min_rub
     base_usdt = rub_amount / ad.price_rub
     if ad.side == AdvertSide.SELL:
@@ -1548,8 +1564,8 @@ async def _api_merchant_take(request: web.Request) -> web.Response:
             initiator_id=user_id,
             usd_amount=rub_amount,
             rate=ad.price_rub,
-            atm_bank=None,
-            bank_options=None,
+            atm_bank=None if banks else (bank if ad.banks else None),
+            bank_options=banks if banks else None,
             advert_id=ad.id,
             comment=ad.terms,
         )
