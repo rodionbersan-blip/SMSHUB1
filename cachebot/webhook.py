@@ -1429,6 +1429,8 @@ async def _api_p2p_my_ads(request: web.Request) -> web.Response:
     ads = await deps.advert_service.list_user_ads(user_id)
     payload = []
     for ad in ads:
+        if ad.is_merchant:
+            continue
         ad, available = await _ensure_ad_availability(deps, ad)
         payload.append(
             await _ad_payload(
