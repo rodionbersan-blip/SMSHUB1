@@ -3568,19 +3568,32 @@
       supportChatList.appendChild(notice);
       moderatorNoticeShown = true;
     }
-    (payload.messages || []).forEach((msg) => {
+    const closeResponses = (payload.messages || [])
+      .map((msg, idx) => ({ msg, idx }))
+      .filter(
+        ({ msg }) =>
+          msg.author_role === "system" &&
+          typeof msg.text === "string" &&
+          msg.text.startsWith(SUPPORT_CLOSE_RESPONSE_PREFIX)
+      );
+    (payload.messages || []).forEach((msg, idx) => {
       if (
         msg.author_role === "system" &&
         typeof msg.text === "string" &&
         msg.text.startsWith(SUPPORT_CLOSE_REQUEST_PREFIX)
       ) {
+        const decline = closeResponses.find(
+          ({ msg: res, idx: resIdx }) => resIdx > idx && res.text.trim() === `${SUPPORT_CLOSE_RESPONSE_PREFIX}no`
+        );
         const moderatorName = msg.text.slice(SUPPORT_CLOSE_REQUEST_PREFIX.length).trim() || "Модератор";
         const row = document.createElement("div");
         row.className = "chat-message system support-close-request";
         const text = document.createElement("div");
-        text.textContent = `Модератор ${moderatorName} подтвердил закрытие чата.\nВаша проблема решена?`;
+        text.textContent = decline
+          ? "Отказано"
+          : `Модератор ${moderatorName} подтвердил закрытие чата.\nВаша проблема решена?`;
         row.appendChild(text);
-        if (isTicketOwner) {
+        if (isTicketOwner && !decline) {
           const actions = document.createElement("div");
           actions.className = "support-close-actions";
           const yesBtn = document.createElement("button");
@@ -3622,6 +3635,9 @@
         msg.text.startsWith(SUPPORT_CLOSE_RESPONSE_PREFIX)
       ) {
         const result = msg.text.slice(SUPPORT_CLOSE_RESPONSE_PREFIX.length).trim();
+        if (!canManage) {
+          return;
+        }
         const row = document.createElement("div");
         row.className = "chat-join-notice";
         row.textContent = result === "no" ? "Пользователь отказался закрывать чат" : "Пользователь подтвердил закрытие";
