@@ -42,12 +42,6 @@
           </span>
           P2P
         </button>
-        <button class="tab nav-btn with-icon merchant-sell-nav" data-view="merchant-sell" id="merchantSellNav">
-          <span class="nav-icon">
-            <img src="/app/assets/p2p-icon.png" alt="" />
-          </span>
-          Продать Мерчанту
-        </button>
         <button class="tab nav-btn with-icon" data-view="deals">
           <span class="nav-icon">
             <img src="/app/assets/deals-icon.png" alt="" />
@@ -72,6 +66,12 @@
             <img src="/app/assets/admin-icon.png" alt="" />
           </span>
           Админ
+        </button>
+        <button class="tab nav-btn with-icon merchant-sell-nav" data-view="merchant-sell" id="merchantSellNav">
+          <span class="nav-icon">
+            <img src="/app/assets/p2p-icon.png" alt="" />
+          </span>
+          Продать Мерчанту
         </button>
       </nav>
 
@@ -135,8 +135,11 @@
 
       <section class="panel view" id="view-p2p">
         <div class="panel-header">
-          <h2>P2P Маркет</h2>
-          <span id="p2pTradingBadge" class="badge">—</span>
+          <div class="panel-title-row">
+            <h2>P2P Маркет</h2>
+            <span id="p2pTradingBadge" class="badge">—</span>
+          </div>
+          <button id="p2pMerchantBtn" class="btn p2p-merchant-btn">Сделки Мерчанта</button>
         </div>
         <div class="p2p-toolbar">
           <button id="p2pBuyBtn" class="btn primary">Купить</button>
@@ -148,6 +151,22 @@
           <button id="p2pTradingToggle" class="btn ghost">Торги: —</button>
         </div>
         <div id="p2pList" class="deal-list"></div>
+      </section>
+
+      <section class="panel view" id="view-merchant-sell">
+        <div class="panel-header">
+          <h2>Продать Мерчанту</h2>
+        </div>
+        <div class="panel-body merchant-sell-body">
+          <div class="merchant-sell-card">
+            <div class="merchant-sell-rate">Курс: <span id="merchantSellRate">—</span></div>
+            <div class="merchant-sell-note">Курс фиксированный для всех пользователей.</div>
+            <div class="merchant-sell-actions">
+              <button id="merchantSellBuy" class="btn">Купить</button>
+              <button id="merchantSellSell" class="btn primary">Продать</button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="panel view" id="view-support">
@@ -614,26 +633,6 @@
             </label>
             <button type="submit" class="btn primary">Создать</button>
           </form>
-        </div>
-      </div>
-
-      <div class="modal" id="merchantSellModal">
-        <div class="modal-card">
-          <div class="modal-header">
-            <div class="modal-title">Продать Мерчанту</div>
-            <button id="merchantSellClose" class="btn ghost">Закрыть</button>
-          </div>
-          <div class="modal-body">
-            <div class="deal-detail-row">
-              <span>Курс:</span>
-              <span id="merchantSellRate">—</span>
-            </div>
-            <div class="deal-row muted">Курс фиксированный для всех пользователей.</div>
-          </div>
-          <div class="modal-actions">
-            <button id="merchantSellBuy" class="btn">Купить</button>
-            <button id="merchantSellSell" class="btn primary">Продать</button>
-          </div>
         </div>
       </div>
 

@@ -1139,6 +1139,12 @@ body.modal-open #app {
   margin-bottom: 16px;
 }
 
+.panel-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .panel-header h2 {
   font-size: 21px;
   font-weight: 600;
@@ -1715,6 +1721,28 @@ body.modal-open #app {
   background: linear-gradient(135deg, rgba(214, 168, 72, 0.95), rgba(240, 202, 110, 0.95));
 }
 
+.p2p-merchant-btn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(28, 36, 52, 0.45);
+  border: 1px solid rgba(120, 180, 255, 0.2);
+  color: #d9ecff;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 8px 18px rgba(5, 12, 24, 0.25);
+}
+
+.p2p-merchant-btn:hover {
+  background: rgba(38, 48, 68, 0.65);
+  border-color: rgba(120, 180, 255, 0.35);
+}
+
 .p2p-bank-logos {
   display: flex;
   align-items: center;
@@ -1971,6 +1999,39 @@ body.modal-open #app {
 
 .p2p-actions {
   justify-content: space-between;
+}
+
+.merchant-sell-body {
+  display: flex;
+  justify-content: center;
+}
+
+.merchant-sell-card {
+  width: min(520px, 100%);
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(20, 26, 38, 0.65);
+  border: 1px solid rgba(120, 180, 255, 0.14);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.35);
+}
+
+.merchant-sell-rate {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e9f2ff;
+}
+
+.merchant-sell-note {
+  margin-top: 6px;
+  color: #9db2cb;
+  font-size: 13px;
+}
+
+.merchant-sell-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .p2p-toolbar {

@@ -99,8 +99,6 @@
   const navButtons = document.querySelectorAll(".nav-btn");
   const views = document.querySelectorAll(".view");
   const merchantSellNav = document.getElementById("merchantSellNav");
-  const merchantSellModal = document.getElementById("merchantSellModal");
-  const merchantSellClose = document.getElementById("merchantSellClose");
   const merchantSellRate = document.getElementById("merchantSellRate");
   const merchantSellBuy = document.getElementById("merchantSellBuy");
   const merchantSellSell = document.getElementById("merchantSellSell");
@@ -216,6 +214,7 @@
   const p2pBuyBtn = document.getElementById("p2pBuyBtn");
   const p2pSellBtn = document.getElementById("p2pSellBtn");
   const p2pMyAdsBtn = document.getElementById("p2pMyAdsBtn");
+  const p2pMerchantBtn = document.getElementById("p2pMerchantBtn");
   const p2pCreateBtn = document.getElementById("p2pCreateBtn");
   const p2pModal = document.getElementById("p2pModal");
   const p2pModalTitle = document.getElementById("p2pModalTitle");
@@ -468,6 +467,7 @@
     reviewsTargetUserId: null,
     canManageDisputes: false,
     profileData: null,
+    isMerchant: false,
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
@@ -2070,6 +2070,10 @@
         profileAdminBadge.classList.toggle("is-hidden", !data?.is_admin);
       }
       const isMerchant = data?.role === "buyer";
+      state.isMerchant = isMerchant;
+      if (p2pMerchantBtn) {
+        p2pMerchantBtn.style.display = isMerchant ? "" : "none";
+      }
       if (profileRoleCard) {
         profileRoleCard.style.display = isMerchant ? "" : "none";
       }
@@ -2939,13 +2943,6 @@
     merchantSellRate.textContent = `1 USDT = ${formatAmount(rateValue, 2)} RUB`;
   };
 
-  const openMerchantSellModal = async () => {
-    if (!merchantSellModal) return;
-    setView("p2p");
-    merchantSellModal.classList.add("open");
-    await loadMerchantRate();
-  };
-
   const loadPublicAds = async (side) => {
     const payload = await fetchJson(`/api/p2p/ads?side=${side}`);
     if (!payload?.ok) return;
@@ -3325,6 +3322,9 @@
     });
     if (viewId === "support") {
       loadSupport();
+    }
+    if (viewId === "merchant-sell") {
+      loadMerchantRate();
     }
   };
 
@@ -6520,12 +6520,7 @@
 
   navButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      const viewId = btn.dataset.view;
-      if (viewId === "merchant-sell") {
-        openMerchantSellModal();
-        return;
-      }
-      setView(viewId);
+      setView(btn.dataset.view);
     });
   });
 
@@ -6925,19 +6920,13 @@
     p2pCreateModal.classList.add("open");
   });
 
-  merchantSellClose?.addEventListener("click", () => {
-    merchantSellModal?.classList.remove("open");
-  });
-
   merchantSellBuy?.addEventListener("click", () => {
-    merchantSellModal?.classList.remove("open");
     setView("p2p");
     if (p2pSide) p2pSide.value = "buy";
     p2pCreateModal?.classList.add("open");
   });
 
   merchantSellSell?.addEventListener("click", () => {
-    merchantSellModal?.classList.remove("open");
     setView("p2p");
     if (p2pSide) p2pSide.value = "sell";
     p2pCreateModal?.classList.add("open");
@@ -7413,6 +7402,11 @@
     p2pBuyBtn.classList.remove("primary");
     p2pSellBtn.classList.remove("primary");
     loadMyAds();
+  });
+
+  p2pMerchantBtn?.addEventListener("click", async () => {
+    setView("deals");
+    await loadDeals();
   });
 
   p2pCreateForm?.addEventListener("submit", async (event) => {
