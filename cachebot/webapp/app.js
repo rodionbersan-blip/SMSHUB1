@@ -3134,6 +3134,7 @@
 
   const openMerchantTakeInfo = (ad) => {
     if (!ad) return;
+    merchantDealsModal?.classList.remove("open");
     const owner = ad.owner || {};
     const ownerName = owner.display_name || owner.full_name || owner.username || "—";
     p2pModalTitle.textContent = `Заявка #${ad.public_id}`;
