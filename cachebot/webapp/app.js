@@ -2621,16 +2621,15 @@
       const ownerName = owner.display_name || owner.full_name || owner.username || "—";
       const item = document.createElement("div");
       item.className = "deal-item";
+      const sideLabel = ad.side === "sell" ? "продает" : "покупает";
+      const usdtAmount = formatAmount(ad.total_usdt, 3);
       item.innerHTML = `
         <div class="deal-header">
           <div class="deal-id">Заявка #${ad.public_id}</div>
           <div class="deal-status status-bad">Ожидает</div>
         </div>
-        <div class="deal-row">Сумма: ₽${formatAmount(ad.min_rub, 0)} • 1 USDT = ${formatAmount(
-        ad.price_rub,
-        2
-      )} RUB</div>
-        <div class="deal-row">Пользователь: ${ownerName}</div>
+        <div class="deal-row">${ownerName} ${sideLabel} ${usdtAmount} USDT</div>
+        <div class="deal-row">Сумма: ₽${formatAmount(ad.min_rub, 0)}</div>
         <div class="deal-row deal-row-meta">Создано: ${formatDate(ad.created_at)}</div>
         <div class="deal-row">
           <button class="btn primary" data-merchant-take="${ad.id}">Взять в работу</button>
