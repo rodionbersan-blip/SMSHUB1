@@ -1541,9 +1541,26 @@ async def _api_merchant_take(request: web.Request) -> web.Response:
             comment=ad.terms,
         )
         await deps.advert_service.reduce_volume(ad.id, base_usdt)
+        deal = await deps.deal_service.accept_p2p_offer(deal.id, ad.owner_id)
     except Exception as exc:
         raise web.HTTPBadRequest(text=f"Не удалось создать предложение: {exc}")
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
+    bot = request.app.get("bot")
+    if bot:
+        try:
+            merchant_profile = await deps.user_service.profile_of(user_id)
+            merchant_name = (
+                merchant_profile.display_name
+                or merchant_profile.full_name
+                or merchant_profile.username
+                or str(user_id)
+            )
+            await bot.send_message(
+                ad.owner_id,
+                f"✅ Мерчант {merchant_name} взял вашу заявку. Сделка началась.",
+            )
+        except Exception:
+            pass
     return web.json_response({"ok": True, "deal": payload})
 
 
