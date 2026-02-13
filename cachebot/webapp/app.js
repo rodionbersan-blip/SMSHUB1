@@ -473,6 +473,7 @@
     profileData: null,
     isMerchant: false,
     merchantDeals: [],
+    merchantSellFlow: false,
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
@@ -2987,6 +2988,25 @@
     const rateValue = Number(payload.usd_rate || 0);
     if (!Number.isFinite(rateValue) || rateValue <= 0) return;
     merchantSellRate.textContent = `1 USDT = ${formatAmount(rateValue, 2)} RUB`;
+  };
+
+  const applyMerchantSellMode = async (enabled, side) => {
+    state.merchantSellFlow = enabled;
+    if (p2pSide) {
+      if (side) p2pSide.value = side;
+      p2pSide.disabled = enabled;
+    }
+    if (!p2pPrice) return;
+    p2pPrice.disabled = enabled;
+    if (enabled) {
+      const payload = await fetchJson("/api/rate");
+      if (payload?.ok) {
+        const rateValue = Number(payload.usd_rate || 0);
+        if (Number.isFinite(rateValue) && rateValue > 0) {
+          p2pPrice.value = formatAmount(rateValue, 2);
+        }
+      }
+    }
   };
 
   const loadPublicAds = async (side) => {
@@ -6969,9 +6989,11 @@
 
   p2pCreateClose?.addEventListener("click", () => {
     p2pCreateModal.classList.remove("open");
+    applyMerchantSellMode(false);
   });
 
   p2pCreateBtn?.addEventListener("click", () => {
+    applyMerchantSellMode(false);
     p2pCreateModal.classList.add("open");
   });
 
@@ -6981,13 +7003,13 @@
 
   merchantSellBuy?.addEventListener("click", () => {
     setView("p2p");
-    if (p2pSide) p2pSide.value = "buy";
+    applyMerchantSellMode(true, "buy");
     p2pCreateModal?.classList.add("open");
   });
 
   merchantSellSell?.addEventListener("click", () => {
     setView("p2p");
-    if (p2pSide) p2pSide.value = "sell";
+    applyMerchantSellMode(true, "sell");
     p2pCreateModal?.classList.add("open");
   });
 
