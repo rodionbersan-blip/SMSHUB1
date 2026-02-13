@@ -100,7 +100,6 @@
   const views = document.querySelectorAll(".view");
   const merchantSellNav = document.getElementById("merchantSellNav");
   const merchantSellRate = document.getElementById("merchantSellRate");
-  const merchantSellBuy = document.getElementById("merchantSellBuy");
   const merchantSellSell = document.getElementById("merchantSellSell");
   const merchantDealsModal = document.getElementById("merchantDealsModal");
   const merchantDealsClose = document.getElementById("merchantDealsClose");
@@ -7180,6 +7179,7 @@
 
   p2pCreateClose?.addEventListener("click", () => {
     p2pCreateModal.classList.remove("open");
+    p2pCreateModal.classList.remove("merchant-open");
     if (state.merchantSellFlow) {
       setView("merchant-sell");
     }
@@ -7190,6 +7190,7 @@
   p2pCreateBtn?.addEventListener("click", () => {
     state.merchantEditAdId = null;
     applyMerchantSellMode(false);
+    p2pCreateModal.classList.remove("merchant-open");
     p2pCreateModal.classList.add("open");
   });
 
@@ -7197,13 +7198,9 @@
     merchantDealsModal?.classList.remove("open");
   });
 
-  merchantSellBuy?.addEventListener("click", () => {
-    applyMerchantSellMode(true, "buy");
-    p2pCreateModal?.classList.add("open");
-  });
-
   merchantSellSell?.addEventListener("click", () => {
     applyMerchantSellMode(true, "sell");
+    p2pCreateModal?.classList.add("merchant-open");
     p2pCreateModal?.classList.add("open");
   });
 

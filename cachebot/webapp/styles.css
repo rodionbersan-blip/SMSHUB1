@@ -2049,9 +2049,13 @@ body.modal-open #app {
 
 .merchant-sell-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   margin-top: 16px;
+}
+
+.merchant-sell-actions .btn.full {
+  width: 100%;
 }
 
 .p2p-toolbar {
@@ -4796,12 +4800,28 @@ body.modal-open #app {
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
+  transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
 :root[data-theme="light"] #p2pCreateModal .modal-card {
   background: rgba(255, 255, 255, 0.72);
   border-color: rgba(20, 28, 38, 0.14);
   box-shadow: 0 18px 36px rgba(15, 17, 21, 0.16);
+}
+
+#p2pCreateModal.merchant-open .modal-card {
+  animation: merchantCreateSlide 0.35s ease;
+}
+
+@keyframes merchantCreateSlide {
+  from {
+    transform: translateY(14px);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 #dealModal .modal-card,
