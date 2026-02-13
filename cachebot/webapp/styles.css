@@ -4810,16 +4810,16 @@ body.modal-open #app {
 }
 
 #p2pCreateModal.merchant-open .modal-card {
-  animation: merchantCreateSlide 0.35s ease;
+  animation: merchantCreateSlide 0.35s ease both;
 }
 
 @keyframes merchantCreateSlide {
   from {
-    transform: translateY(14px);
+    transform: translateY(14px) scale(0.92);
     opacity: 0.4;
   }
   to {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
 }
