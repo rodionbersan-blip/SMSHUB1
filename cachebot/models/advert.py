@@ -20,6 +20,7 @@ class Advert:
     price_rub: Decimal
     total_usdt: Decimal
     remaining_usdt: Decimal
+    reserved_usdt: Decimal
     min_rub: Decimal
     max_rub: Decimal
     banks: list[str]
@@ -41,6 +42,7 @@ class Advert:
             "price_rub": str(self.price_rub),
             "total_usdt": str(self.total_usdt),
             "remaining_usdt": str(self.remaining_usdt),
+            "reserved_usdt": str(self.reserved_usdt),
             "min_rub": str(self.min_rub),
             "max_rub": str(self.max_rub),
             "banks": list(self.banks),
@@ -60,6 +62,7 @@ class Advert:
             price_rub=Decimal(data["price_rub"]),
             total_usdt=Decimal(data["total_usdt"]),
             remaining_usdt=Decimal(data.get("remaining_usdt") or data["total_usdt"]),
+            reserved_usdt=Decimal(data.get("reserved_usdt") or "0"),
             min_rub=Decimal(data["min_rub"]),
             max_rub=Decimal(data["max_rub"]),
             banks=list(data.get("banks") or []),

@@ -175,6 +175,58 @@ class DealService:
             await self._persist()
         return deal
 
+    async def create_p2p_deal_reserved(
+        self,
+        *,
+        seller_id: int,
+        buyer_id: int,
+        usd_amount: Decimal,
+        rate: Decimal,
+        advert_id: str | None = None,
+        comment: str | None = None,
+        atm_bank: str | None = None,
+        bank_options: list[str] | None = None,
+    ) -> Deal:
+        if usd_amount <= Decimal("0"):
+            raise ValueError("Amount must be greater than zero")
+        if rate <= Decimal("0"):
+            raise ValueError("Rate must be greater than zero")
+        rate_snapshot = await self._rate_provider.snapshot()
+        fee_multiplier = rate_snapshot.fee_multiplier
+        base_usdt = usd_amount / rate
+        fee = base_usdt * fee_multiplier
+        total_usdt = base_usdt + fee
+        async with self._lock:
+            now = datetime.now(timezone.utc)
+            deal = Deal(
+                id=str(uuid4()),
+                seller_id=seller_id,
+                usd_amount=usd_amount,
+                rate=rate,
+                fee_percent=rate_snapshot.fee_percent,
+                fee_amount=fee,
+                usdt_amount=total_usdt,
+                created_at=now,
+                expires_at=now,
+                status=DealStatus.PAID,
+                buyer_id=buyer_id,
+                comment=comment,
+                public_id=self._next_public_id_locked(),
+                is_p2p=True,
+                advert_id=advert_id,
+                balance_reserved=True,
+                atm_bank=atm_bank,
+            )
+            deal.dispute_available_at = now + self._payment_window
+            deal.dispute_notified = False
+            self._reset_qr_locked(deal)
+            if bank_options:
+                deal.qr_bank_options = list(bank_options)
+            deal.qr_stage = QrStage.AWAITING_SELLER_ATTACH
+            self._deals[deal.id] = deal
+            await self._persist()
+        return deal
+
     async def accept_p2p_offer(self, deal_id: str, actor_id: int) -> Deal:
         async with self._lock:
             deal = self._ensure_deal(deal_id)
@@ -778,6 +830,41 @@ class DealService:
                 raise ValueError("Недостаточно средств")
             self._balances[user_id] = current - amount
             self._record_event_locked(user_id, -amount, "withdraw", {})
+            await self._persist()
+            return self._balances[user_id]
+
+    async def reserve_balance(
+        self,
+        user_id: int,
+        amount: Decimal,
+        *,
+        kind: str = "reserve",
+        meta: dict | None = None,
+    ) -> Decimal:
+        if amount <= 0:
+            raise ValueError("Сумма должна быть больше нуля")
+        async with self._lock:
+            current = self._balances.get(user_id, Decimal("0"))
+            if current < amount:
+                raise ValueError("Недостаточно средств")
+            self._balances[user_id] = current - amount
+            self._record_event_locked(user_id, -amount, kind, meta or {})
+            await self._persist()
+            return self._balances[user_id]
+
+    async def release_balance(
+        self,
+        user_id: int,
+        amount: Decimal,
+        *,
+        kind: str = "release",
+        meta: dict | None = None,
+    ) -> Decimal:
+        if amount <= 0:
+            raise ValueError("Сумма должна быть больше нуля")
+        async with self._lock:
+            self._credit_balance_locked(user_id, amount)
+            self._record_event_locked(user_id, amount, kind, meta or {})
             await self._persist()
             return self._balances[user_id]
 

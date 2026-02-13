@@ -486,6 +486,8 @@ async def _api_balance(request: web.Request) -> web.Response:
     _, user_id = await _require_user(request)
     balance = await deps.deal_service.balance_of(user_id)
     reserved = await deps.deal_service.reserved_of(user_id)
+    reserved_ads = await deps.advert_service.reserved_of(user_id)
+    reserved += reserved_ads
     total = balance + reserved
     return web.json_response(
         {"ok": True, "balance": str(balance), "reserved": str(reserved), "total": str(total)}
@@ -1463,21 +1465,65 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
                 "покупки" if side == "buy" else "продажи" if side == "sell" else "покупки или продажи"
             )
             raise web.HTTPBadRequest(text=f"Объявление {side_label} уже создано")
-    balance = await deps.deal_service.balance_of(user_id)
-    if total_usdt > balance:
-        raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
+    if ad.is_merchant:
+        delta = total_usdt - (ad.reserved_usdt or Decimal("0"))
+        if delta > 0:
+            try:
+                await deps.deal_service.reserve_balance(
+                    user_id,
+                    delta,
+                    kind="merchant_reserve",
+                    meta={"ad_id": ad.id, "public_id": ad.public_id},
+                )
+            except Exception as exc:
+                raise web.HTTPBadRequest(text=str(exc))
+        elif delta < 0:
+            await deps.deal_service.release_balance(
+                user_id,
+                -delta,
+                kind="merchant_release",
+                meta={"ad_id": ad.id, "public_id": ad.public_id},
+            )
+    else:
+        balance = await deps.deal_service.balance_of(user_id)
+        if total_usdt > balance:
+            raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
     _validate_ad_limits(total_usdt, price_rub, min_rub, max_rub)
-    ad = await deps.advert_service.create_ad(
-        user_id,
-        side=side,
-        total_usdt=total_usdt,
-        price_rub=price_rub,
-        min_rub=min_rub,
-        max_rub=max_rub,
-        banks=banks,
-        terms=terms,
-        is_merchant=is_merchant,
-    )
+    reserved_usdt = None
+    if is_merchant:
+        try:
+            await deps.deal_service.reserve_balance(
+                user_id,
+                total_usdt,
+                kind="merchant_reserve",
+                meta={"side": side.value},
+            )
+            reserved_usdt = total_usdt
+        except Exception as exc:
+            raise web.HTTPBadRequest(text=str(exc))
+    try:
+        ad = await deps.advert_service.create_ad(
+            user_id,
+            side=side,
+            total_usdt=total_usdt,
+            price_rub=price_rub,
+            min_rub=min_rub,
+            max_rub=max_rub,
+            banks=banks,
+            terms=terms,
+            is_merchant=is_merchant,
+            reserved_usdt=reserved_usdt,
+        )
+    except Exception:
+        if reserved_usdt:
+            with suppress(Exception):
+                await deps.deal_service.release_balance(
+                    user_id,
+                    reserved_usdt,
+                    kind="merchant_release",
+                    meta={"reason": "create_failed"},
+                )
+        raise
     if is_merchant:
         ad = await deps.advert_service.update_ad(ad.id, active=True)
         bot = request.app.get("bot")
@@ -1553,15 +1599,18 @@ async def _api_merchant_take(request: web.Request) -> web.Response:
     else:
         seller_id = user_id
         buyer_id = ad.owner_id
-    seller_balance = await deps.deal_service.balance_of(seller_id)
-    available = min(ad.remaining_usdt, seller_balance)
+    available = ad.remaining_usdt
+    if ad.is_merchant and ad.reserved_usdt:
+        available = min(available, ad.reserved_usdt)
+    else:
+        seller_balance = await deps.deal_service.balance_of(seller_id)
+        available = min(available, seller_balance)
     if base_usdt > available:
         raise web.HTTPBadRequest(text="Недостаточно объёма")
     try:
-        deal = await deps.deal_service.create_p2p_offer(
+        deal = await deps.deal_service.create_p2p_deal_reserved(
             seller_id=seller_id,
             buyer_id=buyer_id,
-            initiator_id=user_id,
             usd_amount=rub_amount,
             rate=ad.price_rub,
             atm_bank=None if banks else (bank if ad.banks else None),
@@ -1570,7 +1619,6 @@ async def _api_merchant_take(request: web.Request) -> web.Response:
             comment=ad.terms,
         )
         await deps.advert_service.reduce_volume(ad.id, base_usdt)
-        deal = await deps.deal_service.accept_p2p_offer(deal.id, ad.owner_id)
     except Exception as exc:
         raise web.HTTPBadRequest(text=f"Не удалось создать предложение: {exc}")
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
@@ -1628,6 +1676,7 @@ async def _api_p2p_update_ad(request: web.Request) -> web.Response:
         price_rub=price_rub,
         total_usdt=total_usdt,
         remaining_usdt=total_usdt,
+        reserved_usdt=total_usdt if ad.is_merchant else ad.reserved_usdt,
         min_rub=min_rub,
         max_rub=max_rub,
         banks=banks,
@@ -1673,6 +1722,13 @@ async def _api_p2p_delete_ad(request: web.Request) -> web.Response:
         raise web.HTTPNotFound(text="Объявление не найдено")
     if ad.owner_id != user_id:
         raise web.HTTPForbidden(text="Нет доступа")
+    if ad.is_merchant and ad.reserved_usdt:
+        await deps.deal_service.release_balance(
+            user_id,
+            ad.reserved_usdt,
+            kind="merchant_release",
+            meta={"ad_id": ad.id, "public_id": ad.public_id, "reason": "delete"},
+        )
     await deps.advert_service.delete_ad(ad_id)
     return web.json_response({"ok": True})
 
@@ -3933,8 +3989,11 @@ async def _merchant_stats(deps: AppDeps, user_id: int) -> dict[str, int]:
 async def _ensure_ad_availability(
     deps: AppDeps, ad
 ) -> tuple[Any, Decimal]:
-    balance = await deps.deal_service.balance_of(ad.owner_id)
-    available = min(ad.remaining_usdt, balance)
+    if getattr(ad, "is_merchant", False):
+        available = ad.remaining_usdt
+    else:
+        balance = await deps.deal_service.balance_of(ad.owner_id)
+        available = min(ad.remaining_usdt, balance)
     max_possible = available * ad.price_rub
     should_deactivate = available <= 0 or ad.min_rub > max_possible
     if ad.active and should_deactivate:

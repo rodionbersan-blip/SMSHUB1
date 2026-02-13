@@ -36,6 +36,16 @@ class AdvertService:
                 reverse=True,
             )
 
+    async def reserved_of(self, user_id: int) -> Decimal:
+        async with self._lock:
+            reserved = Decimal("0")
+            for ad in self._adverts.values():
+                if ad.owner_id != user_id or not ad.is_merchant:
+                    continue
+                if ad.reserved_usdt > 0:
+                    reserved += ad.reserved_usdt
+            return reserved
+
     async def list_public_ads(self, side: AdvertSide, *, exclude_user_id: int | None = None) -> List[Advert]:
         async with self._lock:
             result = []
@@ -79,6 +89,7 @@ class AdvertService:
         banks: List[str],
         terms: str | None,
         is_merchant: bool = False,
+        reserved_usdt: Decimal | None = None,
     ) -> Advert:
         if total_usdt <= Decimal("0"):
             raise ValueError("Объём должен быть больше нуля")
@@ -94,6 +105,7 @@ class AdvertService:
                 price_rub=price_rub,
                 total_usdt=total_usdt,
                 remaining_usdt=total_usdt,
+                reserved_usdt=reserved_usdt if reserved_usdt is not None else Decimal("0"),
                 min_rub=min_rub,
                 max_rub=max_rub,
                 banks=list(banks),
@@ -138,7 +150,14 @@ class AdvertService:
                 raise LookupError("Объявление не найдено")
             if ad.remaining_usdt < usdt_amount:
                 raise ValueError("Недостаточно объёма в объявлении")
-            updated = replace(ad, remaining_usdt=ad.remaining_usdt - usdt_amount)
+            reserved_usdt = ad.reserved_usdt
+            if ad.is_merchant and reserved_usdt > 0:
+                reserved_usdt = max(Decimal("0"), reserved_usdt - usdt_amount)
+            updated = replace(
+                ad,
+                remaining_usdt=ad.remaining_usdt - usdt_amount,
+                reserved_usdt=reserved_usdt,
+            )
             self._adverts[ad.id] = updated
             await self._persist_locked()
             return updated
@@ -150,7 +169,14 @@ class AdvertService:
             ad = self._adverts.get(advert_id)
             if not ad:
                 raise LookupError("Объявление не найдено")
-            updated = replace(ad, remaining_usdt=ad.remaining_usdt + usdt_amount)
+            reserved_usdt = ad.reserved_usdt
+            if ad.is_merchant:
+                reserved_usdt = ad.reserved_usdt + usdt_amount
+            updated = replace(
+                ad,
+                remaining_usdt=ad.remaining_usdt + usdt_amount,
+                reserved_usdt=reserved_usdt,
+            )
             self._adverts[ad.id] = updated
             await self._persist_locked()
             return updated
