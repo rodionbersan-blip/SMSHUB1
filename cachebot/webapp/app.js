@@ -478,6 +478,7 @@
     merchantSellFlow: false,
     merchantAds: [],
     merchantPollAt: 0,
+    merchantMyAds: [],
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
@@ -2482,6 +2483,12 @@
     }
   };
 
+  const loadMerchantMyAds = async () => {
+    const payload = await fetchJson("/api/merchant/my-ads");
+    if (!payload?.ok) return;
+    state.merchantMyAds = payload.ads || [];
+  };
+
   const loadDeals = async () => {
     const payload = await fetchJson("/api/my-deals");
     if (!payload?.ok) return;
@@ -2570,7 +2577,8 @@
       state.chatInitDone = true;
       persistChatSeen();
     }
-    dealsCount.textContent = `${deals.length}`;
+    await loadMerchantMyAds();
+    dealsCount.textContent = `${deals.length + (state.merchantMyAds?.length || 0)}`;
     const desiredPage = state.dealsPage ?? 0;
     state.deals = deals;
     const totalPages = Math.max(1, Math.ceil(deals.length / 5));
@@ -2654,7 +2662,7 @@
       status === "completed" || status === "canceled" || status === "expired";
     const activeCount = deals.filter(
       (deal) => !["completed", "canceled", "expired"].includes(deal.status)
-    ).length;
+    ).length + (state.merchantMyAds?.length || 0);
     const pendingSet = new Set();
     deals.forEach((deal) => {
       const isPending = deal.status === "pending" && deal.offer_initiator_id;
@@ -2807,12 +2815,25 @@
     const deals = (state.deals || []).filter(
       (deal) => !["completed", "canceled", "expired"].includes(deal.status)
     );
+    const merchantAds = state.merchantMyAds || [];
     const unreadDealIds = state.unreadDealIds || new Set(state.unreadDeals);
     quickDealsList.innerHTML = "";
-    if (!deals.length) {
+    if (!deals.length && !merchantAds.length) {
       quickDealsList.innerHTML = '<div class="deal-empty">Активных сделок нет.</div>';
       return;
     }
+    merchantAds.forEach((ad) => {
+      const row = document.createElement("div");
+      row.className = "quick-deal-item";
+      row.innerHTML = `
+        <div class="quick-deal-info">
+          <div class="quick-deal-id">Заявка #${ad.public_id}</div>
+          <div class="quick-deal-meta">Сумма ₽${formatAmount(ad.min_rub, 0)}</div>
+        </div>
+        <div class="quick-deal-status status-bad">Ожидает мерчанта</div>
+      `;
+      quickDealsList.appendChild(row);
+    });
     deals.forEach((deal) => {
       const row = document.createElement("div");
       row.className = "quick-deal-item";
