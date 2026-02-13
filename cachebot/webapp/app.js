@@ -2832,6 +2832,10 @@
         </div>
         <div class="quick-deal-status status-bad">Ожидает мерчанта</div>
       `;
+      row.addEventListener("click", () => {
+        quickDealsPanel?.classList.remove("open");
+        openMerchantAdInfo(ad);
+      });
       quickDealsList.appendChild(row);
     });
     deals.forEach((deal) => {
@@ -3096,6 +3100,36 @@
       return;
     }
     state.myAds.forEach((ad) => p2pList.appendChild(renderP2PItem(ad, "my")));
+  };
+
+  const openMerchantAdInfo = (ad) => {
+    if (!ad) return;
+    p2pModalTitle.textContent = `Заявка #${ad.public_id}`;
+    p2pModalBody.innerHTML = `
+      <div class="deal-detail-row"><span>Сторона:</span>${ad.side === "sell" ? "Продажа" : "Покупка"}</div>
+      <div class="deal-detail-row"><span>Курс:</span>1 USDT = ${formatAmount(ad.price_rub, 2)} RUB</div>
+      <div class="deal-detail-row"><span>Сумма:</span>₽${formatAmount(ad.min_rub, 0)}</div>
+      <div class="deal-detail-row"><span>Объём:</span>${formatAmount(ad.total_usdt, 3)} USDT</div>
+      <div class="deal-detail-row"><span>Условия:</span>${ad.terms || "—"}</div>
+      <div class="deal-detail-row"><span>Статус:</span>Ожидает мерчанта</div>
+    `;
+    p2pModalActions.innerHTML = "";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "btn";
+    cancelBtn.textContent = "Отменить";
+    cancelBtn.addEventListener("click", async () => {
+      const payload = await fetchJson(`/api/p2p/ads/${ad.id}/delete`, {
+        method: "POST",
+        body: "{}",
+      });
+      if (!payload?.ok) return;
+      p2pModal.classList.remove("open");
+      await loadDeals();
+      await loadMerchantMyAds();
+      renderQuickDeals();
+    });
+    p2pModalActions.appendChild(cancelBtn);
+    p2pModal.classList.add("open");
   };
 
   const openP2PAd = async (adId) => {
