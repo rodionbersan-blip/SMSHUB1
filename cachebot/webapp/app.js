@@ -479,6 +479,7 @@
     merchantAds: [],
     merchantPollAt: 0,
     merchantMyAds: [],
+    merchantEditAdId: null,
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
@@ -3155,6 +3156,13 @@
     state.myAds.forEach((ad) => p2pList.appendChild(renderP2PItem(ad, "my")));
   };
 
+  const applyBankSelections = (banks) => {
+    const set = new Set(banks || []);
+    (p2pBanks?.querySelectorAll("input") || []).forEach((input) => {
+      input.checked = set.has(input.value);
+    });
+  };
+
   const openMerchantAdInfo = (ad) => {
     if (!ad) return;
     p2pModalTitle.textContent = `Заявка #${ad.public_id}`;
@@ -3167,6 +3175,19 @@
       <div class="deal-detail-row"><span>Статус:</span>Ожидает мерчанта</div>
     `;
     p2pModalActions.innerHTML = "";
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn primary";
+    editBtn.textContent = "Редактировать";
+    editBtn.addEventListener("click", () => {
+      state.merchantEditAdId = ad.id;
+      applyMerchantSellMode(true, ad.side);
+      if (p2pVolume) p2pVolume.value = String(ad.total_usdt || "");
+      if (p2pPrice) p2pPrice.value = String(ad.price_rub || "");
+      if (p2pTerms) p2pTerms.value = ad.terms || "";
+      applyBankSelections(ad.banks || []);
+      p2pModal.classList.remove("open");
+      p2pCreateModal?.classList.add("open");
+    });
     const cancelBtn = document.createElement("button");
     cancelBtn.className = "btn";
     cancelBtn.textContent = "Отменить";
@@ -3181,6 +3202,7 @@
       await loadMerchantMyAds();
       renderQuickDeals();
     });
+    p2pModalActions.appendChild(editBtn);
     p2pModalActions.appendChild(cancelBtn);
     p2pModal.classList.add("open");
   };
@@ -7161,10 +7183,12 @@
     if (state.merchantSellFlow) {
       setView("merchant-sell");
     }
+    state.merchantEditAdId = null;
     applyMerchantSellMode(false);
   });
 
   p2pCreateBtn?.addEventListener("click", () => {
+    state.merchantEditAdId = null;
     applyMerchantSellMode(false);
     p2pCreateModal.classList.add("open");
   });
@@ -7672,6 +7696,7 @@
     event.preventDefault();
     let min = null;
     let max = null;
+    let isMerchantFlow = state.merchantSellFlow;
     if (state.merchantSellFlow) {
       const totalRub = computeTotalRub();
       if (!totalRub || totalRub <= 0) {
@@ -7692,7 +7717,9 @@
       if (totalRub !== null) clampLimitsToMax(totalRub);
     }
     const banks = Array.from(p2pBanks.querySelectorAll("input:checked")).map((el) => el.value);
-    const payload = await fetchJson("/api/p2p/ads", {
+    const isEdit = !!state.merchantEditAdId;
+    const url = isEdit ? `/api/p2p/ads/${state.merchantEditAdId}` : "/api/p2p/ads";
+    const payload = await fetchJson(url, {
       method: "POST",
       body: JSON.stringify({
         side: p2pSide.value,
@@ -7712,6 +7739,7 @@
     if (payload?.ok) {
       p2pCreateModal.classList.remove("open");
       p2pCreateForm.reset();
+      state.merchantEditAdId = null;
       await loadMyAds();
       await loadP2PSummary();
       if (state.merchantSellFlow) {
