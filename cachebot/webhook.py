@@ -2583,9 +2583,13 @@ async def _api_admin_actions(request: web.Request) -> web.Response:
         elif action == "unblock_deals":
             title = f"{moderator} включил сделки {target}"
         elif action == "support_open":
-            title = f"{moderator} открыл чат поддержки с {target}"
+            title = f"{moderator} начал чат с {target}"
         elif action == "support_close":
             title = f"{moderator} закрыл чат поддержки с {target}"
+        elif action == "support_close_user":
+            title = f"{moderator} закрыл чат с {target}"
+        elif action == "support_close_declined":
+            title = f"{target} отказал {moderator} в закрытии обращения"
         output.append(
             {
                 "title": title,
@@ -2973,6 +2977,37 @@ async def _api_support_ticket_close_response(request: web.Request) -> web.Respon
         "system",
         f"{SUPPORT_CLOSE_RESPONSE_PREFIX}no",
     )
+    if ticket.assigned_to:
+        try:
+            moderator_profile = await deps.user_service.profile_of(ticket.assigned_to)
+            moderator_name = (
+                moderator_profile.display_name
+                if moderator_profile and moderator_profile.display_name
+                else (moderator_profile.full_name if moderator_profile else None)
+                or (moderator_profile.username if moderator_profile else None)
+                or str(ticket.assigned_to)
+            )
+            target_profile = await deps.user_service.profile_of(ticket.user_id)
+            target_name = (
+                target_profile.display_name
+                if target_profile and target_profile.display_name
+                else (target_profile.full_name if target_profile else None)
+                or (target_profile.username if target_profile else None)
+                or str(ticket.user_id)
+            )
+            await deps.user_service.log_admin_action(
+                {
+                    "action": "support_close_declined",
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "moderator_id": ticket.assigned_to,
+                    "moderator_name": moderator_name,
+                    "target_id": ticket.user_id,
+                    "target_name": target_name,
+                    "ticket_id": ticket.id,
+                }
+            )
+        except Exception:
+            logger.exception("Failed to log support close decline for ticket %s", ticket.id)
     return web.json_response({"ok": True, "closed": False})
 
 
@@ -3033,6 +3068,40 @@ async def _api_support_ticket_close(request: web.Request) -> web.Response:
         if now - created < timedelta(hours=24):
             raise web.HTTPForbidden(text="Можно закрыть через 24 часа")
     await deps.support_service.close(ticket_id)
+    if not can_manage and ticket.user_id == user_id:
+        try:
+            user_profile = await deps.user_service.profile_of(ticket.user_id)
+            user_name = (
+                user_profile.display_name
+                if user_profile and user_profile.display_name
+                else (user_profile.full_name if user_profile else None)
+                or (user_profile.username if user_profile else None)
+                or str(ticket.user_id)
+            )
+            moderator_name = "поддержка"
+            moderator_id = ticket.assigned_to
+            if ticket.assigned_to:
+                moderator_profile = await deps.user_service.profile_of(ticket.assigned_to)
+                moderator_name = (
+                    moderator_profile.display_name
+                    if moderator_profile and moderator_profile.display_name
+                    else (moderator_profile.full_name if moderator_profile else None)
+                    or (moderator_profile.username if moderator_profile else None)
+                    or str(ticket.assigned_to)
+                )
+            await deps.user_service.log_admin_action(
+                {
+                    "action": "support_close_user",
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "moderator_id": ticket.user_id,
+                    "moderator_name": user_name,
+                    "target_id": moderator_id or 0,
+                    "target_name": moderator_name,
+                    "ticket_id": ticket.id,
+                }
+            )
+        except Exception:
+            logger.exception("Failed to log user support close for ticket %s", ticket.id)
     if can_manage and ticket.user_id != user_id:
         try:
             moderator_profile = await deps.user_service.profile_of(user_id)
