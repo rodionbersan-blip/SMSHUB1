@@ -2619,17 +2619,26 @@
     ads.forEach((ad) => {
       const owner = ad.owner || {};
       const ownerName = owner.display_name || owner.full_name || owner.username || "—";
+      const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id;
+      const isOwner = ownerId && state.userId && Number(ownerId) === Number(state.userId);
       const item = document.createElement("div");
       item.className = "deal-item";
       const sideLabel = ad.side === "sell" ? "продает" : "покупает";
       const usdtAmount = formatAmount(ad.total_usdt, 3);
+      const ownerBadge = isOwner ? '<span class="p2p-owner-badge">Ваша заявка</span>' : "";
       item.innerHTML = `
         <div class="deal-id">${ownerName} ${sideLabel} ${usdtAmount} USDT</div>
         <div class="deal-row">Сумма: ₽${formatAmount(ad.min_rub, 0)}</div>
         <div class="deal-row deal-row-meta">Создано: ${formatDate(ad.created_at)}</div>
-        <div class="deal-row deal-row-meta">Заявка #${ad.public_id}</div>
+        <div class="deal-row deal-row-meta">Заявка #${ad.public_id} ${ownerBadge}</div>
       `;
-      item.addEventListener("click", () => openMerchantTakeInfo(ad));
+      item.addEventListener("click", () => {
+        if (isOwner) {
+          openMerchantAdInfo(ad);
+        } else {
+          openMerchantTakeInfo(ad);
+        }
+      });
       merchantDealsList.appendChild(item);
     });
   };
@@ -3134,8 +3143,14 @@
 
   const openMerchantTakeInfo = (ad) => {
     if (!ad) return;
-    merchantDealsModal?.classList.remove("open");
     const owner = ad.owner || {};
+    const ownerId = ad.owner_id ?? ad.ownerId ?? owner.user_id;
+    const isOwner = ownerId && state.userId && Number(ownerId) === Number(state.userId);
+    if (isOwner) {
+      openMerchantAdInfo(ad);
+      return;
+    }
+    merchantDealsModal?.classList.remove("open");
     const ownerName = owner.display_name || owner.full_name || owner.username || "—";
     p2pModalTitle.textContent = `Заявка #${ad.public_id}`;
     const sideLabel = ad.side === "sell" ? "продает" : "покупает";
