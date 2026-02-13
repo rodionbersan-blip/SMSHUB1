@@ -6989,6 +6989,9 @@
 
   p2pCreateClose?.addEventListener("click", () => {
     p2pCreateModal.classList.remove("open");
+    if (state.merchantSellFlow) {
+      setView("merchant-sell");
+    }
     applyMerchantSellMode(false);
   });
 
@@ -7002,13 +7005,11 @@
   });
 
   merchantSellBuy?.addEventListener("click", () => {
-    setView("p2p");
     applyMerchantSellMode(true, "buy");
     p2pCreateModal?.classList.add("open");
   });
 
   merchantSellSell?.addEventListener("click", () => {
-    setView("p2p");
     applyMerchantSellMode(true, "sell");
     p2pCreateModal?.classList.add("open");
   });
@@ -7528,6 +7529,15 @@
       p2pCreateForm.reset();
       await loadMyAds();
       await loadP2PSummary();
+      if (state.merchantSellFlow) {
+        pushSystemNotification({
+          key: `merchant-wait-${Date.now()}`,
+          message: "Сделка создана и ждет мерчанта.",
+          type: "merchant_wait",
+        });
+        setView("merchant-sell");
+        applyMerchantSellMode(false);
+      }
     } else if (payload?.error) {
       showNotice(payload.error);
     }
