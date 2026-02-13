@@ -1722,6 +1722,7 @@ body.modal-open #app {
 }
 
 .p2p-merchant-btn {
+  position: relative;
   height: 30px;
   padding: 0 14px;
   border-radius: 999px;
@@ -1736,6 +1737,24 @@ body.modal-open #app {
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.06),
     0 8px 18px rgba(5, 12, 24, 0.25);
+}
+
+.p2p-merchant-btn .btn-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ff4d4d;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 12px rgba(10, 12, 18, 0.35);
 }
 
 .p2p-merchant-btn:hover {

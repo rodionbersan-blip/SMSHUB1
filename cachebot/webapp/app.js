@@ -102,6 +102,9 @@
   const merchantSellRate = document.getElementById("merchantSellRate");
   const merchantSellBuy = document.getElementById("merchantSellBuy");
   const merchantSellSell = document.getElementById("merchantSellSell");
+  const merchantDealsModal = document.getElementById("merchantDealsModal");
+  const merchantDealsClose = document.getElementById("merchantDealsClose");
+  const merchantDealsList = document.getElementById("merchantDealsList");
 
   const profileName = document.getElementById("profileName");
   const profileUsername = document.getElementById("profileUsername");
@@ -215,6 +218,7 @@
   const p2pSellBtn = document.getElementById("p2pSellBtn");
   const p2pMyAdsBtn = document.getElementById("p2pMyAdsBtn");
   const p2pMerchantBtn = document.getElementById("p2pMerchantBtn");
+  const p2pMerchantBadge = document.getElementById("p2pMerchantBadge");
   const p2pCreateBtn = document.getElementById("p2pCreateBtn");
   const p2pModal = document.getElementById("p2pModal");
   const p2pModalTitle = document.getElementById("p2pModalTitle");
@@ -468,6 +472,7 @@
     canManageDisputes: false,
     profileData: null,
     isMerchant: false,
+    merchantDeals: [],
     nicknameNextAllowed: null,
     settingsNicknameOpen: false,
     settingsAvatarOpen: false,
@@ -2545,6 +2550,18 @@
     dealsCount.textContent = `${deals.length}`;
     const desiredPage = state.dealsPage ?? 0;
     state.deals = deals;
+    const merchantDeals = state.isMerchant
+      ? deals.filter((deal) => deal.is_p2p && deal.actions?.accept_offer)
+      : [];
+    state.merchantDeals = merchantDeals;
+    if (p2pMerchantBadge) {
+      const count = merchantDeals.length;
+      p2pMerchantBadge.textContent = `${count}`;
+      p2pMerchantBadge.style.display = count > 0 ? "inline-flex" : "none";
+    }
+    if (merchantDealsModal?.classList.contains("open")) {
+      renderMerchantDealsList();
+    }
     const totalPages = Math.max(1, Math.ceil(deals.length / 5));
     state.dealsPage = Math.max(0, Math.min(desiredPage, totalPages - 1));
     syncUnreadDeals(deals);
@@ -2570,6 +2587,35 @@
     };
     applyProfileStats(state.profileStats);
     renderDealsPage();
+  };
+
+  const renderMerchantDealsList = () => {
+    if (!merchantDealsList) return;
+    const deals = state.merchantDeals || [];
+    merchantDealsList.innerHTML = "";
+    if (!deals.length) {
+      merchantDealsList.innerHTML = "<div class=\"deal-empty\">Сделок пока нет.</div>";
+      return;
+    }
+    deals.forEach((deal) => {
+      const item = document.createElement("div");
+      item.className = "deal-item";
+      item.innerHTML = `
+        <div class="deal-header">
+          <div class="deal-id">Сделка #${deal.public_id}</div>
+          <div class="deal-status ${statusClass(deal)}">${statusLabel(deal)}</div>
+        </div>
+        <div class="deal-row">${formatAmount(deal.cash_rub, 2)}₽-${formatAmount(
+        deal.usdt_amount
+      )} USDT | 1 USDT = ${formatAmount(deal.rate, 2)} RUB</div>
+        <div class="deal-row deal-row-meta"><span>Дата: ${formatDate(deal.created_at)}</span></div>
+      `;
+      item.addEventListener("click", () => {
+        openDealModal(deal.id);
+        merchantDealsModal?.classList.remove("open");
+      });
+      merchantDealsList.appendChild(item);
+    });
   };
 
   const updateQuickDealsButton = (activeDeals) => {
@@ -4277,10 +4323,19 @@
 
   const updateTabsLayout = () => {
     if (!tabsNav || !disputesTab) return;
-    const adminHidden =
-      !adminTab || adminTab.style.display === "none" || adminTab.classList.contains("is-hidden");
+    const adminVisible =
+      !!adminTab && adminTab.style.display !== "none" && !adminTab.classList.contains("is-hidden");
     const disputesVisible = disputesTab.style.display !== "none";
-    tabsNav.classList.toggle("tabs-only-disputes", adminHidden && disputesVisible);
+    tabsNav.classList.toggle("tabs-only-disputes", !adminVisible && disputesVisible);
+    if (merchantSellNav) {
+      if (adminVisible && disputesVisible) {
+        merchantSellNav.style.gridColumn = "1 / -1";
+      } else if (adminVisible || disputesVisible) {
+        merchantSellNav.style.gridColumn = "span 3";
+      } else {
+        merchantSellNav.style.gridColumn = "1 / -1";
+      }
+    }
   };
 
   const submitModerationAction = async () => {
@@ -6920,6 +6975,10 @@
     p2pCreateModal.classList.add("open");
   });
 
+  merchantDealsClose?.addEventListener("click", () => {
+    merchantDealsModal?.classList.remove("open");
+  });
+
   merchantSellBuy?.addEventListener("click", () => {
     setView("p2p");
     if (p2pSide) p2pSide.value = "buy";
@@ -7404,9 +7463,10 @@
     loadMyAds();
   });
 
-  p2pMerchantBtn?.addEventListener("click", async () => {
-    setView("deals");
-    await loadDeals();
+  p2pMerchantBtn?.addEventListener("click", () => {
+    if (!state.isMerchant) return;
+    renderMerchantDealsList();
+    merchantDealsModal?.classList.add("open");
   });
 
   p2pCreateForm?.addEventListener("submit", async (event) => {

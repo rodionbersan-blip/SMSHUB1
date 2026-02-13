@@ -48,13 +48,13 @@
           </span>
           Сделки
         </button>
-        <span class="tabs-break" aria-hidden="true"></span>
         <button class="tab nav-btn with-icon" data-view="support">
           <span class="nav-icon">
             <img src="/app/assets/support-icon.png?v=2" alt="" />
           </span>
           Помощь
         </button>
+        <span class="tabs-break" aria-hidden="true"></span>
         <button class="tab nav-btn with-icon" data-view="disputes" id="disputesTab">
           <span class="nav-icon">
             <img src="/app/assets/moderation-icon.png?v=1" alt="" />
@@ -139,7 +139,10 @@
             <h2>P2P Маркет</h2>
             <span id="p2pTradingBadge" class="badge">—</span>
           </div>
-          <button id="p2pMerchantBtn" class="btn p2p-merchant-btn">Сделки Мерчанта</button>
+          <button id="p2pMerchantBtn" class="btn p2p-merchant-btn">
+            Сделки Мерчанта
+            <span id="p2pMerchantBadge" class="btn-badge">0</span>
+          </button>
         </div>
         <div class="p2p-toolbar">
           <button id="p2pBuyBtn" class="btn primary">Купить</button>
@@ -633,6 +636,16 @@
             </label>
             <button type="submit" class="btn primary">Создать</button>
           </form>
+        </div>
+      </div>
+
+      <div class="modal" id="merchantDealsModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Сделки Мерчанта</div>
+            <button id="merchantDealsClose" class="btn ghost">Закрыть</button>
+          </div>
+          <div id="merchantDealsList" class="modal-body deal-list"></div>
         </div>
       </div>
 

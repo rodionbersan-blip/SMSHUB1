@@ -707,7 +707,7 @@ async def _api_my_deals(request: web.Request) -> web.Response:
     deals.sort(key=lambda deal: deal.created_at, reverse=True)
     payload = []
     for deal in deals:
-        payload.append(await _deal_payload(deps, deal, user_id, request=request))
+        payload.append(await _deal_payload(deps, deal, user_id, with_actions=True, request=request))
     return web.json_response({"ok": True, "deals": payload})
 
 
