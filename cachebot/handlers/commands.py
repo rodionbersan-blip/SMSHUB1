@@ -4017,7 +4017,16 @@ def _format_buyer_name(profile: UserProfile | None, fallback_id: int) -> str:
 
 async def _cancel_deal_core(user_id: int, deal_id: str) -> tuple[Deal, Decimal | None]:
     deps = get_deps()
-    return await deps.deal_service.cancel_deal(deal_id, user_id)
+    skip_refund = False
+    try:
+        deal = await deps.deal_service.get_deal(deal_id)
+        if deal and deal.is_p2p and deal.advert_id:
+            ad = await deps.advert_service.get_ad(deal.advert_id)
+            if ad and ad.is_merchant:
+                skip_refund = True
+    except Exception:
+        skip_refund = False
+    return await deps.deal_service.cancel_deal(deal_id, user_id, skip_refund=skip_refund)
 
 
 async def _complete_deal_core(user_id: int, deal_id: str, bot) -> Deal:
