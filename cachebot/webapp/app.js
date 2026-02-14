@@ -471,6 +471,8 @@
     dealRefreshTimer: null,
     livePollTimer: null,
     livePollInFlight: false,
+    balancePollTimer: null,
+    balancePollInFlight: false,
     reviewsTargetUserId: null,
     canManageDisputes: false,
     profileData: null,
@@ -6524,6 +6526,25 @@
     }, 500);
   };
 
+  const startBalancePolling = () => {
+    if (state.balancePollTimer) return;
+    state.balancePollTimer = window.setInterval(async () => {
+      if (state.balancePollInFlight) return;
+      state.balancePollInFlight = true;
+      try {
+        await loadBalance();
+      } finally {
+        state.balancePollInFlight = false;
+      }
+    }, 3000);
+  };
+
+  const refreshBalanceOnFocus = () => {
+    if (document.visibilityState === "visible") {
+      loadBalance();
+    }
+  };
+
   const parseInitDataUser = (initData) => {
     if (!initData) return null;
     try {
@@ -6641,6 +6662,7 @@
       await loadP2PSummary();
       await loadPublicAds("sell");
       startLivePolling();
+      startBalancePolling();
       if (p2pBalanceHint && state.balance !== null) {
         p2pBalanceHint.textContent = `Баланс: ${formatAmount(state.balance)} USDT`;
       }
@@ -6651,6 +6673,8 @@
     };
 
     await bootstrapApp();
+    document.addEventListener("visibilitychange", refreshBalanceOnFocus);
+    window.addEventListener("focus", refreshBalanceOnFocus);
     try {
       await fetch("/api/debug/initdata", {
         method: "POST",
