@@ -89,6 +89,7 @@ ADMIN_RATE_SET = "admin:rate:set"
 ADMIN_FEE_SET = "admin:fee:set"
 ADMIN_FEE_KIND_WITHDRAW = "admin:fee:withdraw"
 ADMIN_FEE_KIND_DEAL = "admin:fee:deal"
+ADMIN_FEE_KIND_BUYER = "admin:fee:buyer"
 ADMIN_PANEL_MODERATORS = "admin:panel:moderators"
 ADMIN_MODERATOR_ADD = "admin:moderator:add"
 ADMIN_MODERATOR_VIEW_PREFIX = "admin:moderator:view:"
@@ -1906,10 +1907,12 @@ async def admin_panel_rates(callback: CallbackQuery) -> None:
     builder.row(
         InlineKeyboardButton(text="➕ Добавить модератора", callback_data=ADMIN_MODERATOR_ADD),
     )
+    buyer_fee = await deps.rate_provider.buyer_fee_percent()
     text = (
         "<b>Управление</b>\n"
         f"Текущий курс: 1 USDT = {_format_decimal(snapshot.usd_rate)} RUB\n"
-        f"Комиссия: {snapshot.fee_percent}%\n"
+        f"Комиссия продавца: {snapshot.fee_percent}%\n"
+        f"Комиссия покупателя: {buyer_fee}%\n"
         f"Комиссия на вывод: {deps.config.withdraw_fee_percent}%"
     )
     await callback.bot.send_message(
@@ -2638,8 +2641,11 @@ async def admin_fee_set(callback: CallbackQuery, state: FSMContext) -> None:
         return
     builder = InlineKeyboardBuilder()
     builder.row(
+        InlineKeyboardButton(text="Продавца", callback_data=ADMIN_FEE_KIND_DEAL),
+        InlineKeyboardButton(text="Покупателя", callback_data=ADMIN_FEE_KIND_BUYER),
+    )
+    builder.row(
         InlineKeyboardButton(text="На вывод", callback_data=ADMIN_FEE_KIND_WITHDRAW),
-        InlineKeyboardButton(text="На пополнение", callback_data=ADMIN_FEE_KIND_DEAL),
     )
     await callback.message.answer(
         "Какую комиссию хотите изменить?",
@@ -2648,14 +2654,19 @@ async def admin_fee_set(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.answer()
 
 
-@router.callback_query(F.data.in_({ADMIN_FEE_KIND_WITHDRAW, ADMIN_FEE_KIND_DEAL}))
+@router.callback_query(F.data.in_({ADMIN_FEE_KIND_WITHDRAW, ADMIN_FEE_KIND_DEAL, ADMIN_FEE_KIND_BUYER}))
 async def admin_fee_kind(callback: CallbackQuery, state: FSMContext) -> None:
     deps = get_deps()
     user = callback.from_user
     if not user or user.id not in deps.config.admin_ids:
         await callback.answer("Нет доступа", show_alert=True)
         return
-    kind = "withdraw" if callback.data == ADMIN_FEE_KIND_WITHDRAW else "deal"
+    if callback.data == ADMIN_FEE_KIND_WITHDRAW:
+        kind = "withdraw"
+    elif callback.data == ADMIN_FEE_KIND_BUYER:
+        kind = "buyer"
+    else:
+        kind = "deal"
     await state.set_state(AdminRateState.waiting_fee)
     await state.update_data(fee_kind=kind)
     await callback.message.answer(
@@ -4423,6 +4434,17 @@ async def admin_fee_input(message: Message, state: FSMContext) -> None:
             "Комиссия на вывод обновлена:\n"
             f"Комиссия на вывод: {new_value}%\n"
             f"Комиссия на пополнение: {snapshot.fee_percent}%\n"
+            f"Курс: 1 USDT = {_format_decimal(snapshot.usd_rate)} RUB",
+        )
+        return
+    if fee_kind == "buyer":
+        new_value = await deps.rate_provider.set_buyer_fee_percent(value)
+        await state.clear()
+        await message.answer(
+            "Комиссия покупателя обновлена:\n"
+            f"Комиссия покупателя: {new_value}%\n"
+            f"Комиссия продавца: {snapshot.fee_percent}%\n"
+            f"Комиссия на вывод: {deps.config.withdraw_fee_percent}%\n"
             f"Курс: 1 USDT = {_format_decimal(snapshot.usd_rate)} RUB",
         )
         return

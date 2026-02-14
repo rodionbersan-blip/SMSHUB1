@@ -290,6 +290,7 @@
   const tabsNav = document.querySelector(".tabs");
   const adminRate = document.getElementById("adminRate");
   const adminFee = document.getElementById("adminFee");
+  const adminBuyerFee = document.getElementById("adminBuyerFee");
   const adminWithdrawFee = document.getElementById("adminWithdrawFee");
   const adminTransferFee = document.getElementById("adminTransferFee");
   const adminSaveRates = document.getElementById("adminSaveRates");
@@ -477,6 +478,7 @@
     canManageDisputes: false,
     profileData: null,
     isMerchant: false,
+    rateSettings: null,
     merchantDeals: [],
     merchantSellFlow: false,
     merchantAds: [],
@@ -3031,9 +3033,10 @@
   };
 
   const loadMerchantRate = async () => {
-    if (!merchantSellRate) return;
     const payload = await fetchJson("/api/rate");
     if (!payload?.ok) return;
+    state.rateSettings = payload;
+    if (!merchantSellRate) return;
     const rateValue = Number(payload.usd_rate || 0);
     if (!Number.isFinite(rateValue) || rateValue <= 0) return;
     merchantSellRate.textContent = `1 USDT = ${formatAmount(rateValue, 2)} RUB`;
@@ -3050,6 +3053,7 @@
     if (enabled) {
       const payload = await fetchJson("/api/rate");
       if (payload?.ok) {
+        state.rateSettings = payload;
         const rateValue = Number(payload.usd_rate || 0);
         if (Number.isFinite(rateValue) && rateValue > 0) {
           p2pPrice.value = formatAmount(rateValue, 2);
@@ -3066,6 +3070,8 @@
     }
     if (p2pFeeHint) {
       p2pFeeHint.style.display = enabled ? "" : "none";
+      const sellerFee = Number(state.rateSettings?.fee_percent || 0);
+      p2pFeeHint.textContent = `Комиссия продавца: ${formatAmount(sellerFee, 2)}%`;
     }
   };
 
@@ -4639,6 +4645,9 @@
   if (settings?.ok) {
     adminRate.value = settings.usd_rate;
     adminFee.value = settings.fee_percent;
+    if (adminBuyerFee) {
+      adminBuyerFee.value = settings.buyer_fee_percent || settings.fee_percent;
+    }
     adminWithdrawFee.value = settings.withdraw_fee_percent;
     if (adminTransferFee) {
       adminTransferFee.value = settings.transfer_fee_percent || "2.0";
@@ -7813,6 +7822,7 @@
       body: JSON.stringify({
         usd_rate: adminRate.value,
         fee_percent: adminFee.value,
+        buyer_fee_percent: adminBuyerFee?.value,
         withdraw_fee_percent: adminWithdrawFee.value,
         transfer_fee_percent: adminTransferFee?.value,
       }),

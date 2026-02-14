@@ -1410,7 +1410,14 @@ async def _api_rate(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     await _require_user(request)
     rate = await deps.rate_provider.snapshot()
-    return web.json_response({"ok": True, "usd_rate": str(rate.usd_rate)})
+    return web.json_response(
+        {
+            "ok": True,
+            "usd_rate": str(rate.usd_rate),
+            "fee_percent": str(rate.fee_percent),
+            "buyer_fee_percent": str(rate.buyer_fee_percent),
+        }
+    )
 
 
 async def _api_p2p_banks(_: web.Request) -> web.Response:
@@ -2227,11 +2234,13 @@ async def _api_admin_settings(request: web.Request) -> web.Response:
     rate = await deps.rate_provider.snapshot()
     withdraw_fee = await deps.rate_provider.withdraw_fee_percent()
     transfer_fee = await deps.rate_provider.transfer_fee_percent()
+    buyer_fee = await deps.rate_provider.buyer_fee_percent()
     return web.json_response(
         {
             "ok": True,
             "usd_rate": str(rate.usd_rate),
             "fee_percent": str(rate.fee_percent),
+            "buyer_fee_percent": str(buyer_fee),
             "withdraw_fee_percent": str(withdraw_fee),
             "transfer_fee_percent": str(transfer_fee),
         }
@@ -2249,16 +2258,20 @@ async def _api_admin_settings_update(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Invalid JSON")
     usd_rate = body.get("usd_rate")
     fee_percent = body.get("fee_percent")
+    buyer_fee = body.get("buyer_fee_percent")
     withdraw_fee = body.get("withdraw_fee_percent")
     transfer_fee = body.get("transfer_fee_percent")
     rate_value = _parse_optional_decimal(usd_rate)
     fee_value = _parse_optional_decimal(fee_percent)
+    buyer_value = _parse_optional_decimal(buyer_fee)
     withdraw_value = _parse_optional_decimal(withdraw_fee)
     transfer_value = _parse_optional_decimal(transfer_fee)
     if rate_value is not None or fee_value is not None:
         await deps.rate_provider.set_rate(rate_value, fee_value)
     if withdraw_value is not None:
         await deps.rate_provider.set_withdraw_fee_percent(withdraw_value)
+    if buyer_value is not None:
+        await deps.rate_provider.set_buyer_fee_percent(buyer_value)
     if transfer_value is not None:
         await deps.rate_provider.set_transfer_fee_percent(transfer_value)
     return await _api_admin_settings(request)

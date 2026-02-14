@@ -41,6 +41,7 @@ class DealService:
             raise ValueError("Amount must be greater than zero")
         rate_snapshot = await self._rate_provider.snapshot()
         fee_multiplier = rate_snapshot.fee_multiplier
+        buyer_fee_multiplier = rate_snapshot.buyer_fee_multiplier
         base_usdt = usd_amount / rate_snapshot.usd_rate
         fee = base_usdt * fee_multiplier
         total_usdt = base_usdt + fee
@@ -85,7 +86,7 @@ class DealService:
         fee_multiplier = rate_snapshot.fee_multiplier
         base_usdt = usd_amount / rate
         seller_fee = base_usdt * fee_multiplier
-        buyer_fee = base_usdt * fee_multiplier
+        buyer_fee = base_usdt * buyer_fee_multiplier
         total_fee = seller_fee + buyer_fee
         buyer_credit = base_usdt - buyer_fee
         seller_debit = base_usdt + seller_fee
@@ -139,9 +140,10 @@ class DealService:
             raise ValueError("Rate must be greater than zero")
         rate_snapshot = await self._rate_provider.snapshot()
         fee_multiplier = rate_snapshot.fee_multiplier
+        buyer_fee_multiplier = rate_snapshot.buyer_fee_multiplier
         base_usdt = usd_amount / rate
         seller_fee = base_usdt * fee_multiplier
-        buyer_fee = base_usdt * fee_multiplier
+        buyer_fee = base_usdt * buyer_fee_multiplier
         total_fee = seller_fee + buyer_fee
         buyer_credit = base_usdt - buyer_fee
         async with self._lock:
@@ -198,9 +200,10 @@ class DealService:
             raise ValueError("Rate must be greater than zero")
         rate_snapshot = await self._rate_provider.snapshot()
         fee_multiplier = rate_snapshot.fee_multiplier
+        buyer_fee_multiplier = rate_snapshot.buyer_fee_multiplier
         base_usdt = usd_amount / rate
         seller_fee = base_usdt * fee_multiplier
-        buyer_fee = base_usdt * fee_multiplier
+        buyer_fee = base_usdt * buyer_fee_multiplier
         total_fee = seller_fee + buyer_fee
         buyer_credit = base_usdt - buyer_fee
         async with self._lock:

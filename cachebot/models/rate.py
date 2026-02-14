@@ -8,10 +8,15 @@ from decimal import Decimal
 class RateSnapshot:
     usd_rate: Decimal
     fee_percent: Decimal
+    buyer_fee_percent: Decimal
 
     @property
     def fee_multiplier(self) -> Decimal:
         return self.fee_percent / Decimal("100")
+
+    @property
+    def buyer_fee_multiplier(self) -> Decimal:
+        return self.buyer_fee_percent / Decimal("100")
 
     def usdt_amount(self, cash_amount: Decimal) -> Decimal:
         """
