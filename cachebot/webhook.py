@@ -1465,29 +1465,9 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
                 "покупки" if side == "buy" else "продажи" if side == "sell" else "покупки или продажи"
             )
             raise web.HTTPBadRequest(text=f"Объявление {side_label} уже создано")
-    if ad.is_merchant:
-        delta = total_usdt - (ad.reserved_usdt or Decimal("0"))
-        if delta > 0:
-            try:
-                await deps.deal_service.reserve_balance(
-                    user_id,
-                    delta,
-                    kind="merchant_reserve",
-                    meta={"ad_id": ad.id, "public_id": ad.public_id},
-                )
-            except Exception as exc:
-                raise web.HTTPBadRequest(text=str(exc))
-        elif delta < 0:
-            await deps.deal_service.release_balance(
-                user_id,
-                -delta,
-                kind="merchant_release",
-                meta={"ad_id": ad.id, "public_id": ad.public_id},
-            )
-    else:
-        balance = await deps.deal_service.balance_of(user_id)
-        if total_usdt > balance:
-            raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
+    balance = await deps.deal_service.balance_of(user_id)
+    if total_usdt > balance and not is_merchant:
+        raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
     _validate_ad_limits(total_usdt, price_rub, min_rub, max_rub)
     reserved_usdt = None
     if is_merchant:
