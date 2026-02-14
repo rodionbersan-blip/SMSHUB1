@@ -84,13 +84,16 @@ class DealService:
         rate_snapshot = await self._rate_provider.snapshot()
         fee_multiplier = rate_snapshot.fee_multiplier
         base_usdt = usd_amount / rate
-        fee = base_usdt * fee_multiplier
-        total_usdt = base_usdt + fee
+        seller_fee = base_usdt * fee_multiplier
+        buyer_fee = base_usdt * fee_multiplier
+        total_fee = seller_fee + buyer_fee
+        buyer_credit = base_usdt - buyer_fee
+        seller_debit = base_usdt + seller_fee
         async with self._lock:
             current = self._balances.get(seller_id, Decimal("0"))
-            if current < base_usdt:
+            if current < seller_debit:
                 raise ValueError("Недостаточно баланса")
-            self._balances[seller_id] = current - base_usdt
+            self._balances[seller_id] = current - seller_debit
             now = datetime.now(timezone.utc)
             deal = Deal(
                 id=str(uuid4()),
@@ -98,8 +101,8 @@ class DealService:
                 usd_amount=usd_amount,
                 rate=rate,
                 fee_percent=rate_snapshot.fee_percent,
-                fee_amount=fee,
-                usdt_amount=total_usdt,
+                fee_amount=total_fee,
+                usdt_amount=buyer_credit,
                 created_at=now,
                 expires_at=now,
                 status=DealStatus.RESERVED,
@@ -137,11 +140,13 @@ class DealService:
         rate_snapshot = await self._rate_provider.snapshot()
         fee_multiplier = rate_snapshot.fee_multiplier
         base_usdt = usd_amount / rate
-        fee = base_usdt * fee_multiplier
-        total_usdt = base_usdt + fee
+        seller_fee = base_usdt * fee_multiplier
+        buyer_fee = base_usdt * fee_multiplier
+        total_fee = seller_fee + buyer_fee
+        buyer_credit = base_usdt - buyer_fee
         async with self._lock:
             current = self._balances.get(seller_id, Decimal("0"))
-            if current < base_usdt:
+            if current < (base_usdt + seller_fee):
                 raise ValueError("Недостаточно баланса")
             now = datetime.now(timezone.utc)
             expires_at = now + self._offer_window
@@ -151,8 +156,8 @@ class DealService:
                 usd_amount=usd_amount,
                 rate=rate,
                 fee_percent=rate_snapshot.fee_percent,
-                fee_amount=fee,
-                usdt_amount=total_usdt,
+                fee_amount=total_fee,
+                usdt_amount=buyer_credit,
                 created_at=now,
                 expires_at=expires_at,
                 status=DealStatus.PENDING,
@@ -164,7 +169,7 @@ class DealService:
                 is_p2p=True,
                 advert_id=advert_id,
                 atm_bank=atm_bank,
-                balance_reserved=True,
+                balance_reserved=False,
             )
             deal.dispute_available_at = None
             deal.dispute_notified = False
@@ -194,8 +199,10 @@ class DealService:
         rate_snapshot = await self._rate_provider.snapshot()
         fee_multiplier = rate_snapshot.fee_multiplier
         base_usdt = usd_amount / rate
-        fee = base_usdt * fee_multiplier
-        total_usdt = base_usdt + fee
+        seller_fee = base_usdt * fee_multiplier
+        buyer_fee = base_usdt * fee_multiplier
+        total_fee = seller_fee + buyer_fee
+        buyer_credit = base_usdt - buyer_fee
         async with self._lock:
             now = datetime.now(timezone.utc)
             deal = Deal(
@@ -204,8 +211,8 @@ class DealService:
                 usd_amount=usd_amount,
                 rate=rate,
                 fee_percent=rate_snapshot.fee_percent,
-                fee_amount=fee,
-                usdt_amount=total_usdt,
+                fee_amount=total_fee,
+                usdt_amount=buyer_credit,
                 created_at=now,
                 expires_at=now,
                 status=DealStatus.PAID,
@@ -214,7 +221,7 @@ class DealService:
                 public_id=self._next_public_id_locked(),
                 is_p2p=True,
                 advert_id=advert_id,
-                balance_reserved=False,
+                balance_reserved=True,
                 atm_bank=atm_bank,
             )
             deal.dispute_available_at = now + self._payment_window
@@ -243,9 +250,11 @@ class DealService:
                 raise ValueError("Предложение истекло")
             current = self._balances.get(deal.seller_id, Decimal("0"))
             base_usdt = deal.usd_amount / deal.rate
-            if current < base_usdt:
+            fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
+            seller_debit = base_usdt + (base_usdt * fee_multiplier)
+            if current < seller_debit:
                 raise ValueError("Недостаточно баланса")
-            self._balances[deal.seller_id] = current - base_usdt
+            self._balances[deal.seller_id] = current - seller_debit
             deal.balance_reserved = True
             deal.status = DealStatus.PAID
             deal.offer_expires_at = None
@@ -294,7 +303,9 @@ class DealService:
                 raise PermissionError("Нет доступа")
             base_usdt = deal.usd_amount / deal.rate
             if deal.balance_reserved and base_usdt > 0:
-                self._credit_balance_locked(deal.seller_id, base_usdt)
+                fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
+                seller_debit = base_usdt + (base_usdt * fee_multiplier)
+                self._credit_balance_locked(deal.seller_id, seller_debit)
                 deal.balance_reserved = False
             deal.status = DealStatus.EXPIRED if expired else DealStatus.CANCELED
             deal.offer_expires_at = None
@@ -450,10 +461,12 @@ class DealService:
             if deal.status == DealStatus.PENDING:
                 if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
                     raise PermissionError("Not allowed to cancel")
-                base_usdt = deal.usd_amount / deal.rate
-                if deal.balance_reserved and base_usdt > 0:
-                    self._credit_balance_locked(deal.seller_id, base_usdt)
-                    deal.balance_reserved = False
+            base_usdt = deal.usd_amount / deal.rate
+            if deal.balance_reserved and base_usdt > 0:
+                fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
+                seller_debit = base_usdt + (base_usdt * fee_multiplier)
+                self._credit_balance_locked(deal.seller_id, seller_debit)
+                deal.balance_reserved = False
                 deal.status = DealStatus.CANCELED
                 deal.offer_expires_at = None
                 deal.invoice_id = None
@@ -470,14 +483,18 @@ class DealService:
             refund_amount: Decimal | None = None
             is_seller = actor_id == deal.seller_id
             if is_seller and was_paid and deal.balance_reserved and not skip_refund:
-                refund_amount = max(Decimal("0"), deal.usdt_amount - deal.fee_amount)
+                base_usdt = deal.usd_amount / deal.rate if deal.rate else Decimal("0")
+                fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
+                refund_amount = max(Decimal("0"), base_usdt + (base_usdt * fee_multiplier))
                 self._credit_balance_locked(actor_id, refund_amount)
             if was_paid and skip_refund:
                 deal.balance_reserved = False
             if deal.is_p2p and not was_paid and deal.balance_reserved:
                 base_usdt = deal.usd_amount / deal.rate
-                if base_usdt > 0:
-                    self._credit_balance_locked(deal.seller_id, base_usdt)
+                fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
+                seller_debit = base_usdt + (base_usdt * fee_multiplier)
+                if seller_debit > 0:
+                    self._credit_balance_locked(deal.seller_id, seller_debit)
                 deal.balance_reserved = False
             deal.status = DealStatus.CANCELED
             if not was_paid:
@@ -501,7 +518,9 @@ class DealService:
                     continue
                 base_usdt = deal.usd_amount / deal.rate
                 if deal.balance_reserved and base_usdt > 0:
-                    self._credit_balance_locked(deal.seller_id, base_usdt)
+                    fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
+                    seller_debit = base_usdt + (base_usdt * fee_multiplier)
+                    self._credit_balance_locked(deal.seller_id, seller_debit)
                     deal.balance_reserved = False
                 deal.status = DealStatus.EXPIRED
                 deal.offer_expires_at = None
@@ -640,10 +659,10 @@ class DealService:
                     DealStatus.PAID,
                     DealStatus.DISPUTE,
                 }:
-                    base_usdt = deal.usdt_amount - deal.fee_amount
-                    if base_usdt <= 0 and deal.rate:
-                        base_usdt = deal.usd_amount / deal.rate
-                    reserved += max(Decimal("0"), base_usdt)
+                    base_usdt = deal.usd_amount / deal.rate if deal.rate else Decimal("0")
+                    fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
+                    seller_debit = base_usdt + (base_usdt * fee_multiplier)
+                    reserved += max(Decimal("0"), seller_debit)
             return reserved
 
     def _credit_balance_locked(self, user_id: int, amount: Decimal) -> None:

@@ -239,6 +239,8 @@
   const p2pLimits = document.getElementById("p2pLimits");
   const p2pLimitsLabel = document.getElementById("p2pLimitsLabel");
   const p2pLimitsHint = document.getElementById("p2pLimitsHint");
+  const p2pFeeHint = document.getElementById("p2pFeeHint");
+  if (p2pFeeHint) p2pFeeHint.style.display = "none";
   const p2pBanks = document.getElementById("p2pBanks");
   const p2pTerms = document.getElementById("p2pTerms");
   const p2pBalanceHint = document.getElementById("p2pBalanceHint");
@@ -3059,6 +3061,9 @@
       p2pLimitsHint.textContent = enabled
         ? "Рассчитывается по объему и курсу"
         : "Формат: минимум-максимум";
+    }
+    if (p2pFeeHint) {
+      p2pFeeHint.style.display = enabled ? "" : "none";
     }
   };
 

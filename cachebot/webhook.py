@@ -487,7 +487,10 @@ async def _api_balance(request: web.Request) -> web.Response:
     balance = await deps.deal_service.balance_of(user_id)
     reserved = await deps.deal_service.reserved_of(user_id)
     reserved_ads = await deps.advert_service.reserved_of(user_id)
-    reserved += reserved_ads
+    if reserved_ads:
+        rate_snapshot = await deps.rate_provider.snapshot()
+        fee_multiplier = rate_snapshot.fee_multiplier
+        reserved += reserved_ads + (reserved_ads * fee_multiplier)
     total = balance + reserved
     return web.json_response(
         {"ok": True, "balance": str(balance), "reserved": str(reserved), "total": str(total)}
@@ -1467,11 +1470,12 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
     side, total_usdt, price_rub, min_rub, max_rub, banks, terms = values
     is_merchant = bool(body.get("merchant"))
     existing_ads = await deps.advert_service.list_user_ads(user_id)
+    active_ads = [ad for ad in existing_ads if ad.remaining_usdt > 0]
     if is_merchant:
-        if sum(1 for ad in existing_ads if ad.is_merchant) >= 2:
+        if sum(1 for ad in active_ads if ad.is_merchant) >= 2:
             raise web.HTTPBadRequest(text="Максимум 2 заявки для мерчанта")
     else:
-        if sum(1 for ad in existing_ads if (not ad.is_merchant and ad.side == side)) >= 2:
+        if sum(1 for ad in active_ads if (not ad.is_merchant and ad.side == side)) >= 2:
             side_label = (
                 "покупки" if side == "buy" else "продажи" if side == "sell" else "покупки или продажи"
             )
@@ -1483,9 +1487,12 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
     reserved_usdt = None
     if is_merchant:
         try:
+            rate_snapshot = await deps.rate_provider.snapshot()
+            fee_multiplier = rate_snapshot.fee_multiplier
+            seller_debit = total_usdt + (total_usdt * fee_multiplier)
             await deps.deal_service.reserve_balance(
                 user_id,
-                total_usdt,
+                seller_debit,
                 kind="merchant_reserve",
                 meta={"side": side.value},
             )
@@ -1671,9 +1678,33 @@ async def _api_p2p_update_ad(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Некорректные лимиты")
     if not banks:
         raise web.HTTPBadRequest(text="Нужно выбрать банки")
-    balance = await deps.deal_service.balance_of(user_id)
-    if total_usdt > balance:
-        raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
+    if ad.is_merchant:
+        delta = total_usdt - (ad.reserved_usdt or Decimal("0"))
+        if delta != 0:
+            rate_snapshot = await deps.rate_provider.snapshot()
+            fee_multiplier = rate_snapshot.fee_multiplier
+            delta_with_fee = delta + (delta * fee_multiplier)
+            if delta_with_fee > 0:
+                try:
+                    await deps.deal_service.reserve_balance(
+                        user_id,
+                        delta_with_fee,
+                        kind="merchant_reserve",
+                        meta={"ad_id": ad.id, "public_id": ad.public_id},
+                    )
+                except Exception as exc:
+                    raise web.HTTPBadRequest(text=str(exc))
+            elif delta_with_fee < 0:
+                await deps.deal_service.release_balance(
+                    user_id,
+                    -delta_with_fee,
+                    kind="merchant_release",
+                    meta={"ad_id": ad.id, "public_id": ad.public_id},
+                )
+    else:
+        balance = await deps.deal_service.balance_of(user_id)
+        if total_usdt > balance:
+            raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
     _validate_ad_limits(total_usdt, price_rub, min_rub, max_rub)
     updated = await deps.advert_service.update_ad(
         ad_id,
@@ -1727,9 +1758,12 @@ async def _api_p2p_delete_ad(request: web.Request) -> web.Response:
     if ad.owner_id != user_id:
         raise web.HTTPForbidden(text="Нет доступа")
     if ad.is_merchant and ad.reserved_usdt:
+        rate_snapshot = await deps.rate_provider.snapshot()
+        fee_multiplier = rate_snapshot.fee_multiplier
+        release_amount = ad.reserved_usdt + (ad.reserved_usdt * fee_multiplier)
         await deps.deal_service.release_balance(
             user_id,
-            ad.reserved_usdt,
+            release_amount,
             kind="merchant_release",
             meta={"ad_id": ad.id, "public_id": ad.public_id, "reason": "delete"},
         )
