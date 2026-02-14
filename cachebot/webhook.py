@@ -755,8 +755,19 @@ async def _api_deal_cancel(request: web.Request) -> web.Response:
     deps: AppDeps = request.app["deps"]
     _, user_id = await _require_user(request)
     deal_id = request.match_info["deal_id"]
+    skip_refund = False
+    if deal_id:
+        ad = None
+        try:
+            maybe = await deps.deal_service.get_deal(deal_id)
+            if maybe and maybe.is_p2p and maybe.advert_id:
+                ad = await deps.advert_service.get_ad(maybe.advert_id)
+        except Exception:
+            ad = None
+        if ad and ad.is_merchant:
+            skip_refund = True
     try:
-        deal, _ = await deps.deal_service.cancel_deal(deal_id, user_id)
+        deal, _ = await deps.deal_service.cancel_deal(deal_id, user_id, skip_refund=skip_refund)
     except PermissionError:
         raise web.HTTPForbidden(text="Отмена недоступна")
     except LookupError:

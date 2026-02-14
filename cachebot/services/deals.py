@@ -164,7 +164,7 @@ class DealService:
                 is_p2p=True,
                 advert_id=advert_id,
                 atm_bank=atm_bank,
-                balance_reserved=False,
+                balance_reserved=True,
             )
             deal.dispute_available_at = None
             deal.dispute_notified = False
@@ -438,7 +438,13 @@ class DealService:
             await self._persist()
             return deal, payout
 
-    async def cancel_deal(self, deal_id: str, actor_id: int) -> tuple[Deal, Decimal | None]:
+    async def cancel_deal(
+        self,
+        deal_id: str,
+        actor_id: int,
+        *,
+        skip_refund: bool = False,
+    ) -> tuple[Deal, Decimal | None]:
         async with self._lock:
             deal = self._ensure_deal(deal_id)
             if deal.status == DealStatus.PENDING:
@@ -463,9 +469,11 @@ class DealService:
             was_paid = deal.status == DealStatus.PAID
             refund_amount: Decimal | None = None
             is_seller = actor_id == deal.seller_id
-            if is_seller and was_paid and deal.balance_reserved:
+            if is_seller and was_paid and deal.balance_reserved and not skip_refund:
                 refund_amount = max(Decimal("0"), deal.usdt_amount - deal.fee_amount)
                 self._credit_balance_locked(actor_id, refund_amount)
+            if was_paid and skip_refund:
+                deal.balance_reserved = False
             if deal.is_p2p and not was_paid and deal.balance_reserved:
                 base_usdt = deal.usd_amount / deal.rate
                 if base_usdt > 0:
