@@ -1468,14 +1468,14 @@ async def _api_p2p_create_ad(request: web.Request) -> web.Response:
     is_merchant = bool(body.get("merchant"))
     existing_ads = await deps.advert_service.list_user_ads(user_id)
     if is_merchant:
-        if any(ad.is_merchant for ad in existing_ads):
-            raise web.HTTPBadRequest(text="Объявление для мерчанта уже создано")
+        if sum(1 for ad in existing_ads if ad.is_merchant) >= 2:
+            raise web.HTTPBadRequest(text="Максимум 2 заявки для мерчанта")
     else:
-        if any(ad.side == side and not ad.is_merchant for ad in existing_ads):
+        if sum(1 for ad in existing_ads if (not ad.is_merchant and ad.side == side)) >= 2:
             side_label = (
                 "покупки" if side == "buy" else "продажи" if side == "sell" else "покупки или продажи"
             )
-            raise web.HTTPBadRequest(text=f"Объявление {side_label} уже создано")
+            raise web.HTTPBadRequest(text=f"Максимум 2 объявления {side_label}")
     balance = await deps.deal_service.balance_of(user_id)
     if total_usdt > balance and not is_merchant:
         raise web.HTTPBadRequest(text="Недостаточно баланса для объёма объявления")
@@ -1566,6 +1566,19 @@ async def _api_merchant_take(request: web.Request) -> web.Response:
         raise web.HTTPBadRequest(text="Нельзя взять своё объявление")
     if ad.remaining_usdt <= Decimal("0"):
         raise web.HTTPBadRequest(text="Объявление недоступно")
+    max_active = 4
+    owner_active = await deps.deal_service.active_count(ad.owner_id)
+    if owner_active >= max_active:
+        bot = request.app.get("bot")
+        if bot:
+            await bot.send_message(
+                user_id,
+                "Пользователь занят, попробуйте через 5 минут.",
+            )
+        raise web.HTTPBadRequest(text="Пользователь занят, попробуйте через 5 минут")
+    merchant_active = await deps.deal_service.active_count(user_id)
+    if merchant_active >= max_active:
+        raise web.HTTPBadRequest(text="У вас слишком много активных сделок")
     try:
         body = await request.json()
     except Exception:
@@ -1780,6 +1793,18 @@ async def _api_p2p_offer_ad(request: web.Request) -> web.Response:
     else:
         seller_id = user_id
         buyer_id = ad.owner_id
+    max_active = 4
+    other_id = buyer_id if buyer_id != user_id else seller_id
+    other_active = await deps.deal_service.active_count(other_id)
+    if other_active >= max_active:
+        await bot.send_message(
+            user_id,
+            "Пользователь занят, попробуйте через 5 минут.",
+        )
+        raise web.HTTPBadRequest(text="Пользователь занят, попробуйте через 5 минут")
+    self_active = await deps.deal_service.active_count(user_id)
+    if self_active >= max_active:
+        raise web.HTTPBadRequest(text="У вас слишком много активных сделок")
     seller_balance = await deps.deal_service.balance_of(seller_id)
     available = min(ad.remaining_usdt, seller_balance)
     if base_usdt > available:

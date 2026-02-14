@@ -526,6 +526,21 @@ class DealService:
                 and not deal.dispute_notified
             ]
 
+    async def active_count(self, user_id: int) -> int:
+        active_statuses = {
+            DealStatus.OPEN,
+            DealStatus.PENDING,
+            DealStatus.RESERVED,
+            DealStatus.PAID,
+            DealStatus.DISPUTE,
+        }
+        async with self._lock:
+            return sum(
+                1
+                for deal in self._deals.values()
+                if deal.status in active_statuses and user_id in {deal.seller_id, deal.buyer_id}
+            )
+
     async def list_dispute_deals(self) -> List[Deal]:
         async with self._lock:
             return [deal for deal in self._deals.values() if deal.status == DealStatus.DISPUTE]
