@@ -1326,6 +1326,45 @@ body.modal-open #app {
   margin-top: -72px;
 }
 
+/* Profile main action buttons: contour only (no fill) */
+#balanceManageOpen,
+#balanceHistoryOpen,
+#profileStatsOpen,
+#profileSettingsOpen {
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(135deg, rgba(80, 145, 255, 0.98), rgba(118, 88, 230, 0.98)) border-box !important;
+  border: 3px solid transparent !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+#reviewsOpen {
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(135deg, rgba(236, 169, 70, 0.98), rgba(193, 132, 40, 0.98)) border-box !important;
+  border: 3px solid transparent !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+#balanceManageOpen:hover,
+#balanceHistoryOpen:hover,
+#profileStatsOpen:hover,
+#profileSettingsOpen:hover {
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(135deg, rgba(104, 165, 255, 1), rgba(133, 101, 240, 1)) border-box !important;
+  color: #ffffff !important;
+}
+
+#reviewsOpen:hover {
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(135deg, rgba(246, 181, 82, 1), rgba(207, 145, 52, 1)) border-box !important;
+  color: #ffffff !important;
+}
+
 #profileWithdraw,
 #topupOpen {
   order: 1;
