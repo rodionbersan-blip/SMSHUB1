@@ -2422,11 +2422,13 @@ body.modal-open #app {
   letter-spacing: 0.01em;
 }
 
+#view-p2p .p2p-toolbar .btn:not(.primary) {
+  background: transparent !important;
+}
+
 #view-p2p .p2p-toolbar .btn:hover {
   color: #ffffff;
-  background:
-    linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(130, 178, 255, 0.96), rgba(131, 103, 239, 0.96)) border-box !important;
+  background: transparent !important;
 }
 
 #view-p2p .p2p-toolbar .btn.primary {
@@ -2455,11 +2457,13 @@ body.modal-open #app {
     linear-gradient(135deg, rgba(97, 145, 255, 0.86), rgba(109, 86, 224, 0.86)) border-box !important;
 }
 
+:root[data-theme="light"] #view-p2p .p2p-toolbar .btn:not(.primary) {
+  background: transparent !important;
+}
+
 :root[data-theme="light"] #view-p2p .p2p-toolbar .btn:hover {
   color: #1b2b4a;
-  background:
-    linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(114, 161, 255, 0.95), rgba(127, 102, 238, 0.95)) border-box !important;
+  background: transparent !important;
 }
 
 :root[data-theme="light"] #view-p2p .p2p-toolbar .btn.primary {
