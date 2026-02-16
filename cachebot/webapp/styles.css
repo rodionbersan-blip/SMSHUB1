@@ -1019,7 +1019,16 @@ body.modal-open #app {
   opacity: 0.88;
 }
 
+.tab[data-view="admin"] .nav-icon img.admin-nav-icon {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
 .tab[data-view="support"].active .nav-icon img.support-nav-icon {
+  opacity: 1;
+}
+
+.tab[data-view="admin"].active .nav-icon img.admin-nav-icon {
   opacity: 1;
 }
 
@@ -1027,7 +1036,15 @@ body.modal-open #app {
   filter: brightness(0) invert(1) !important;
 }
 
+:root[data-theme="dark"] .tab[data-view="admin"] .nav-icon img.admin-nav-icon {
+  filter: brightness(0) invert(1) !important;
+}
+
 :root[data-theme="dark"] .tab[data-view="support"].active .nav-icon img.support-nav-icon {
+  filter: brightness(0) invert(0) !important;
+}
+
+:root[data-theme="dark"] .tab[data-view="admin"].active .nav-icon img.admin-nav-icon {
   filter: brightness(0) invert(0) !important;
 }
 
@@ -1036,7 +1053,17 @@ body.modal-open #app {
   opacity: 0.72;
 }
 
+:root[data-theme="light"] .tab[data-view="admin"] .nav-icon img.admin-nav-icon {
+  filter: brightness(0) invert(0) !important;
+  opacity: 0.72;
+}
+
 :root[data-theme="light"] .tab[data-view="support"].active .nav-icon img.support-nav-icon {
+  filter: brightness(0) invert(1) !important;
+  opacity: 1;
+}
+
+:root[data-theme="light"] .tab[data-view="admin"].active .nav-icon img.admin-nav-icon {
   filter: brightness(0) invert(1) !important;
   opacity: 1;
 }
