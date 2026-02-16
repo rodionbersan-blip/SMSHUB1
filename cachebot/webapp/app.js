@@ -3609,6 +3609,45 @@
     });
   };
 
+  let tabsIndicatorEl = null;
+  const ensureTabsIndicator = () => {
+    if (!tabsNav) return null;
+    if (tabsIndicatorEl && tabsIndicatorEl.isConnected) return tabsIndicatorEl;
+    tabsIndicatorEl = document.createElement("span");
+    tabsIndicatorEl.className = "tabs-indicator";
+    tabsNav.prepend(tabsIndicatorEl);
+    return tabsIndicatorEl;
+  };
+
+  const syncTabsIndicator = (immediate = false) => {
+    if (!tabsNav) return;
+    const indicator = ensureTabsIndicator();
+    if (!indicator) return;
+    const activeBtn = tabsNav.querySelector(
+      ".nav-btn.active:not(.is-hidden):not([style*='display: none'])",
+    );
+    if (!activeBtn) {
+      indicator.classList.remove("ready");
+      return;
+    }
+    const navRect = tabsNav.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    const left = btnRect.left - navRect.left;
+    const top = btnRect.top - navRect.top;
+    if (immediate) {
+      indicator.style.transition = "none";
+    }
+    indicator.style.width = `${btnRect.width}px`;
+    indicator.style.height = `${btnRect.height}px`;
+    indicator.style.transform = `translate(${left}px, ${top}px)`;
+    indicator.classList.add("ready");
+    if (immediate) {
+      requestAnimationFrame(() => {
+        indicator.style.transition = "";
+      });
+    }
+  };
+
   const setView = (viewId) => {
     views.forEach((view) => {
       view.classList.toggle("active", view.id === `view-${viewId}`);
@@ -3616,6 +3655,7 @@
     navButtons.forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.view === viewId);
     });
+    syncTabsIndicator();
     if (viewId === "support") {
       loadSupport();
     }
@@ -4586,6 +4626,7 @@
         merchantSellNav.style.gridColumn = "1 / -1";
       }
     }
+    syncTabsIndicator(true);
   };
 
   const submitModerationAction = async () => {
@@ -6857,6 +6898,8 @@
       setView(btn.dataset.view);
     });
   });
+
+  window.addEventListener("resize", () => syncTabsIndicator(true));
 
   const setQuickDealsOpen = (open) => {
     if (!quickDealsPanel) return;
