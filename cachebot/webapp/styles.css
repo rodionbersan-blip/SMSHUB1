@@ -1402,10 +1402,15 @@ body.modal-open #app {
 #profileSettingsOpen {
   background:
     linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(97, 170, 255, 1), rgba(128, 92, 250, 1)) border-box !important;
-  border: 4px solid transparent !important;
+    linear-gradient(
+      135deg,
+      rgba(46, 96, 190, 1) 0%,
+      rgba(76, 122, 219, 1) 45%,
+      rgba(92, 62, 184, 1) 100%
+    ) border-box !important;
+  border: 5px solid transparent !important;
   color: #ffffff !important;
-  box-shadow: 0 10px 20px rgba(52, 77, 148, 0.26) !important;
+  box-shadow: 0 10px 22px rgba(36, 57, 111, 0.34) !important;
   transform: none !important;
   transition:
     background 0.2s ease,
@@ -1417,10 +1422,15 @@ body.modal-open #app {
 #reviewsOpen {
   background:
     linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(248, 196, 102, 1), rgba(211, 145, 45, 1)) border-box !important;
-  border: 4px solid transparent !important;
+    linear-gradient(
+      135deg,
+      rgba(173, 118, 36, 1) 0%,
+      rgba(206, 145, 48, 1) 45%,
+      rgba(149, 97, 25, 1) 100%
+    ) border-box !important;
+  border: 5px solid transparent !important;
   color: #ffffff !important;
-  box-shadow: 0 10px 20px rgba(120, 85, 32, 0.24) !important;
+  box-shadow: 0 10px 22px rgba(104, 68, 24, 0.34) !important;
   transform: none !important;
   transition:
     background 0.2s ease,
@@ -1435,18 +1445,28 @@ body.modal-open #app {
 #profileSettingsOpen:hover {
   background:
     linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(118, 186, 255, 1), rgba(144, 110, 255, 1)) border-box !important;
+    linear-gradient(
+      135deg,
+      rgba(58, 111, 209, 1) 0%,
+      rgba(90, 139, 238, 1) 45%,
+      rgba(108, 74, 201, 1) 100%
+    ) border-box !important;
   color: #ffffff !important;
-  box-shadow: 0 12px 24px rgba(57, 86, 160, 0.34) !important;
+  box-shadow: 0 12px 24px rgba(44, 69, 132, 0.38) !important;
   transform: none !important;
 }
 
 #reviewsOpen:hover {
   background:
     linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(255, 209, 124, 1), rgba(226, 165, 67, 1)) border-box !important;
+    linear-gradient(
+      135deg,
+      rgba(191, 132, 44, 1) 0%,
+      rgba(226, 163, 59, 1) 45%,
+      rgba(167, 108, 31, 1) 100%
+    ) border-box !important;
   color: #ffffff !important;
-  box-shadow: 0 12px 24px rgba(128, 88, 30, 0.34) !important;
+  box-shadow: 0 12px 24px rgba(116, 76, 26, 0.38) !important;
   transform: none !important;
 }
 
