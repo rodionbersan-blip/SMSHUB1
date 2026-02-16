@@ -1419,7 +1419,7 @@ body.modal-open #app {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 5px;
+  padding: 3px;
   background: linear-gradient(
     135deg,
     rgba(46, 96, 190, 1) 0%,
@@ -1451,7 +1451,7 @@ body.modal-open #app {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 5px;
+  padding: 3px;
   background: linear-gradient(
     135deg,
     rgba(173, 118, 36, 1) 0%,
