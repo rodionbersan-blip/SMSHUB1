@@ -458,26 +458,13 @@ class DealService:
         actor_id: int,
         *,
         skip_refund: bool = False,
+        force_refund_seller: bool = False,
     ) -> tuple[Deal, Decimal | None]:
         async with self._lock:
             deal = self._ensure_deal(deal_id)
             if deal.status == DealStatus.PENDING:
                 if actor_id not in {deal.seller_id, deal.buyer_id} and not self._is_admin(actor_id):
                     raise PermissionError("Not allowed to cancel")
-            base_usdt = deal.usd_amount / deal.rate
-            if deal.balance_reserved and base_usdt > 0:
-                fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
-                seller_debit = base_usdt + (base_usdt * fee_multiplier)
-                self._credit_balance_locked(deal.seller_id, seller_debit)
-                deal.balance_reserved = False
-                deal.status = DealStatus.CANCELED
-                deal.offer_expires_at = None
-                deal.invoice_id = None
-                deal.invoice_url = None
-                self._reset_qr_locked(deal)
-                self._deals[deal.id] = deal
-                await self._persist()
-                return deal, base_usdt
             if not self._can_cancel(deal, actor_id):
                 raise PermissionError("Not allowed to cancel")
             if deal.status in {DealStatus.CANCELED, DealStatus.COMPLETED, DealStatus.DISPUTE}:
@@ -485,20 +472,25 @@ class DealService:
             was_paid = deal.status == DealStatus.PAID
             refund_amount: Decimal | None = None
             is_seller = actor_id == deal.seller_id
-            if is_seller and was_paid and deal.balance_reserved and not skip_refund:
+            if deal.is_p2p and deal.balance_reserved:
                 base_usdt = deal.usd_amount / deal.rate if deal.rate else Decimal("0")
                 fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
-                refund_amount = max(Decimal("0"), base_usdt + (base_usdt * fee_multiplier))
-                self._credit_balance_locked(actor_id, refund_amount)
-            if was_paid and skip_refund:
-                deal.balance_reserved = False
-            if deal.is_p2p and not was_paid and deal.balance_reserved:
-                base_usdt = deal.usd_amount / deal.rate
-                fee_multiplier = (deal.fee_percent or Decimal("0")) / Decimal("100")
-                seller_debit = base_usdt + (base_usdt * fee_multiplier)
-                if seller_debit > 0:
-                    self._credit_balance_locked(deal.seller_id, seller_debit)
-                deal.balance_reserved = False
+                seller_debit = max(Decimal("0"), base_usdt + (base_usdt * fee_multiplier))
+                if not was_paid:
+                    # Reserved offers: always return reserved funds to the seller.
+                    if seller_debit > 0:
+                        self._credit_balance_locked(deal.seller_id, seller_debit)
+                        refund_amount = seller_debit
+                    deal.balance_reserved = False
+                else:
+                    # Paid deals: refund only when the flow requires it.
+                    if force_refund_seller or (is_seller and not skip_refund):
+                        if seller_debit > 0:
+                            self._credit_balance_locked(deal.seller_id, seller_debit)
+                            refund_amount = seller_debit
+                        deal.balance_reserved = False
+                    elif skip_refund:
+                        deal.balance_reserved = False
             deal.status = DealStatus.CANCELED
             if not was_paid:
                 deal.buyer_id = None

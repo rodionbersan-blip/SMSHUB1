@@ -759,28 +759,57 @@ async def _api_deal_cancel(request: web.Request) -> web.Response:
     _, user_id = await _require_user(request)
     deal_id = request.match_info["deal_id"]
     skip_refund = False
+    force_refund_seller = False
+    merchant_ad = None
     if deal_id:
-        ad = None
         try:
             maybe = await deps.deal_service.get_deal(deal_id)
             if maybe and maybe.is_p2p and maybe.advert_id:
-                ad = await deps.advert_service.get_ad(maybe.advert_id)
+                merchant_ad = await deps.advert_service.get_ad(maybe.advert_id)
         except Exception:
-            ad = None
-        if ad and ad.is_merchant:
-            skip_refund = True
+            merchant_ad = None
+        if merchant_ad and merchant_ad.is_merchant:
+            # Merchant requests: on cancel we close the request and refund reserved funds to the payer.
+            force_refund_seller = True
     try:
-        deal, _ = await deps.deal_service.cancel_deal(deal_id, user_id, skip_refund=skip_refund)
+        deal, _ = await deps.deal_service.cancel_deal(
+            deal_id,
+            user_id,
+            skip_refund=skip_refund,
+            force_refund_seller=force_refund_seller,
+        )
     except PermissionError:
         raise web.HTTPForbidden(text="Отмена недоступна")
     except LookupError:
         raise web.HTTPNotFound(text="Deal not found")
     if deal.is_p2p and deal.advert_id:
         try:
-            base_usdt = deal.usd_amount / deal.rate
-            await deps.advert_service.restore_volume(deal.advert_id, base_usdt)
+            ad = merchant_ad if (merchant_ad and merchant_ad.id == deal.advert_id) else await deps.advert_service.get_ad(deal.advert_id)
         except Exception:
-            pass
+            ad = None
+        if ad and ad.is_merchant:
+            # Cancel the merchant request itself, release any remaining reserve, do not restore volume.
+            try:
+                if ad.reserved_usdt and ad.reserved_usdt > 0:
+                    rate_snapshot = await deps.rate_provider.snapshot()
+                    fee_multiplier = rate_snapshot.fee_multiplier
+                    release_amount = ad.reserved_usdt + (ad.reserved_usdt * fee_multiplier)
+                    await deps.deal_service.release_balance(
+                        ad.owner_id,
+                        release_amount,
+                        kind="merchant_release",
+                        meta={"ad_id": ad.id, "public_id": ad.public_id, "reason": "deal_canceled"},
+                    )
+            except Exception:
+                pass
+            with suppress(Exception):
+                await deps.advert_service.delete_ad(ad.id)
+        else:
+            try:
+                base_usdt = deal.usd_amount / deal.rate
+                await deps.advert_service.restore_volume(deal.advert_id, base_usdt)
+            except Exception:
+                pass
     payload = await _deal_payload(deps, deal, user_id, with_actions=True, request=request)
     return web.json_response({"ok": True, "deal": payload})
 

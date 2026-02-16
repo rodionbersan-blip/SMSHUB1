@@ -1047,17 +1047,40 @@ async def _cancel_deal(message: Message, deal_id: str) -> None:
     deps = get_deps()
     try:
         skip_refund = False
+        force_refund_seller = False
+        ad = None
         try:
             deal = await deps.deal_service.get_deal(deal_id)
             if deal and deal.is_p2p and deal.advert_id:
                 ad = await deps.advert_service.get_ad(deal.advert_id)
                 if ad and ad.is_merchant:
-                    skip_refund = True
+                    force_refund_seller = True
         except Exception:
             skip_refund = False
+            force_refund_seller = False
+            ad = None
         deal, refund_amount = await deps.deal_service.cancel_deal(
-            deal_id, message.from_user.id, skip_refund=skip_refund
+            deal_id,
+            message.from_user.id,
+            skip_refund=skip_refund,
+            force_refund_seller=force_refund_seller,
         )
+        if deal.is_p2p and deal.advert_id and ad and ad.id == deal.advert_id and ad.is_merchant:
+            try:
+                if ad.reserved_usdt and ad.reserved_usdt > 0:
+                    rate_snapshot = await deps.rate_provider.snapshot()
+                    fee_multiplier = rate_snapshot.fee_multiplier
+                    release_amount = ad.reserved_usdt + (ad.reserved_usdt * fee_multiplier)
+                    await deps.deal_service.release_balance(
+                        ad.owner_id,
+                        release_amount,
+                        kind="merchant_release",
+                        meta={"ad_id": ad.id, "public_id": ad.public_id, "reason": "deal_canceled"},
+                    )
+            except Exception:
+                pass
+            with suppress(Exception):
+                await deps.advert_service.delete_ad(ad.id)
     except Exception as exc:
         await message.answer(f"Не удалось отменить: {exc}")
         return

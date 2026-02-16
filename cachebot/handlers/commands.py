@@ -967,6 +967,11 @@ async def deal_cancel_confirm(callback: CallbackQuery) -> None:
         return
     deps = get_deps()
     deal = await deps.deal_service.get_deal(deal_id)
+    was_merchant_request = False
+    if deal and deal.is_p2p and deal.advert_id:
+        with suppress(Exception):
+            ad = await deps.advert_service.get_ad(deal.advert_id)
+            was_merchant_request = bool(ad and ad.is_merchant)
     if deal and deal.status == DealStatus.PAID and deal.qr_stage == QrStage.READY and deal.qr_photo_id:
         await callback.answer("На данном этапе нельзя отменить сделку.", show_alert=True)
         return
@@ -984,7 +989,7 @@ async def deal_cancel_confirm(callback: CallbackQuery) -> None:
     except Exception as exc:
         await callback.answer(str(exc), show_alert=True)
         return
-    if deal.is_p2p and deal.advert_id:
+    if deal.is_p2p and deal.advert_id and not was_merchant_request:
         try:
             base_usdt = deal.usd_amount / deal.rate
             await deps.advert_service.restore_volume(deal.advert_id, base_usdt)
@@ -4029,15 +4034,43 @@ def _format_buyer_name(profile: UserProfile | None, fallback_id: int) -> str:
 async def _cancel_deal_core(user_id: int, deal_id: str) -> tuple[Deal, Decimal | None]:
     deps = get_deps()
     skip_refund = False
+    force_refund_seller = False
+    ad = None
     try:
         deal = await deps.deal_service.get_deal(deal_id)
         if deal and deal.is_p2p and deal.advert_id:
             ad = await deps.advert_service.get_ad(deal.advert_id)
             if ad and ad.is_merchant:
-                skip_refund = True
+                # Merchant requests: refund reserved funds to the payer on any cancel.
+                force_refund_seller = True
     except Exception:
         skip_refund = False
-    return await deps.deal_service.cancel_deal(deal_id, user_id, skip_refund=skip_refund)
+        force_refund_seller = False
+        ad = None
+    deal, refund_amount = await deps.deal_service.cancel_deal(
+        deal_id,
+        user_id,
+        skip_refund=skip_refund,
+        force_refund_seller=force_refund_seller,
+    )
+    if deal.is_p2p and deal.advert_id and ad and ad.id == deal.advert_id:
+        if ad.is_merchant:
+            try:
+                if ad.reserved_usdt and ad.reserved_usdt > 0:
+                    rate_snapshot = await deps.rate_provider.snapshot()
+                    fee_multiplier = rate_snapshot.fee_multiplier
+                    release_amount = ad.reserved_usdt + (ad.reserved_usdt * fee_multiplier)
+                    await deps.deal_service.release_balance(
+                        ad.owner_id,
+                        release_amount,
+                        kind="merchant_release",
+                        meta={"ad_id": ad.id, "public_id": ad.public_id, "reason": "deal_canceled"},
+                    )
+            except Exception:
+                pass
+            with suppress(Exception):
+                await deps.advert_service.delete_ad(ad.id)
+    return deal, refund_amount
 
 
 async def _complete_deal_core(user_id: int, deal_id: str, bot) -> Deal:
