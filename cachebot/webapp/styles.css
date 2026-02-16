@@ -1392,7 +1392,7 @@ body.modal-open #app {
   text-align: center;
   display: inline-flex;
   align-items: center;
-  margin-top: -72px;
+  margin-top: -60px;
 }
 
 /* Profile main action buttons: transparent fill + thick gradient outlines */
