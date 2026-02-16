@@ -275,27 +275,25 @@ body.modal-open #app {
 .theme-switch {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 4px 10px 4px 6px;
   border-radius: 999px;
-  border: 1px solid rgba(120, 180, 255, 0.24);
-  background: rgba(20, 26, 40, 0.7);
+  border: 1px solid rgba(120, 180, 255, 0.22);
+  background: rgba(20, 26, 40, 0.72);
   color: var(--text);
   cursor: pointer;
   font-weight: 600;
+  line-height: 1;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 10px 24px rgba(0, 0, 0, 0.35),
-    0 0 10px rgba(77, 163, 255, 0.28);
+  box-shadow: none;
 }
 
 .theme-switch-track {
   position: relative;
-  width: 46px;
-  height: 26px;
+  width: 48px;
+  height: 28px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -305,11 +303,11 @@ body.modal-open #app {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--card);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
   display: grid;
   place-items: center;
   font-size: 12px;
@@ -419,6 +417,10 @@ body.modal-open #app {
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     0 12px 24px rgba(15, 17, 21, 0.16),
     0 0 16px rgba(77, 163, 255, 0.25);
+}
+
+:root[data-theme="light"] .theme-switch {
+  box-shadow: none;
 }
 
 :root[data-theme="light"] .topbar {
@@ -4439,8 +4441,8 @@ body.modal-open #app {
 }
 
 .settings-toggle input:checked + .toggle-slider {
-  background: linear-gradient(135deg, rgba(52, 194, 126, 0.95), rgba(34, 155, 98, 0.95));
-  box-shadow: 0 6px 14px rgba(34, 155, 98, 0.35);
+  background: rgba(52, 194, 126, 0.95);
+  box-shadow: none;
 }
 
 .settings-toggle input:checked + .toggle-slider::after {
