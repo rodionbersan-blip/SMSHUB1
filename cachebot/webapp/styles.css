@@ -1332,9 +1332,11 @@ body.modal-open #app {
 #reviewsOpen,
 #profileStatsOpen,
 #profileSettingsOpen {
-  background: transparent !important;
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(135deg, rgba(86, 150, 255, 0.92), rgba(108, 78, 220, 0.92)) border-box !important;
   color: var(--text) !important;
-  border: 1px solid rgba(120, 170, 255, 0.42) !important;
+  border: 3px solid transparent !important;
   box-shadow: none !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -1342,14 +1344,27 @@ body.modal-open #app {
   letter-spacing: 0.01em;
 }
 
+#reviewsOpen {
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(135deg, rgba(243, 174, 76, 0.96), rgba(191, 131, 38, 0.96)) border-box !important;
+}
+
 #balanceManageOpen:hover,
 #balanceHistoryOpen:hover,
 #reviewsOpen:hover,
 #profileStatsOpen:hover,
 #profileSettingsOpen:hover {
-  background: rgba(120, 170, 255, 0.12) !important;
-  border-color: rgba(120, 170, 255, 0.68) !important;
+  background:
+    linear-gradient(rgba(120, 170, 255, 0.12), rgba(120, 170, 255, 0.12)) padding-box,
+    linear-gradient(135deg, rgba(86, 150, 255, 0.96), rgba(108, 78, 220, 0.96)) border-box !important;
   color: #ffffff !important;
+}
+
+#reviewsOpen:hover {
+  background:
+    linear-gradient(rgba(230, 160, 65, 0.14), rgba(230, 160, 65, 0.14)) padding-box,
+    linear-gradient(135deg, rgba(243, 174, 76, 0.98), rgba(191, 131, 38, 0.98)) border-box !important;
 }
 
 :root[data-theme="light"] #balanceManageOpen,
@@ -1357,9 +1372,16 @@ body.modal-open #app {
 :root[data-theme="light"] #reviewsOpen,
 :root[data-theme="light"] #profileStatsOpen,
 :root[data-theme="light"] #profileSettingsOpen {
-  background: transparent !important;
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(135deg, rgba(70, 130, 240, 0.92), rgba(92, 70, 195, 0.92)) border-box !important;
   color: #1b1e28 !important;
-  border-color: rgba(60, 90, 150, 0.36) !important;
+}
+
+:root[data-theme="light"] #reviewsOpen {
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    linear-gradient(135deg, rgba(232, 161, 64, 0.96), rgba(182, 120, 30, 0.96)) border-box !important;
 }
 
 :root[data-theme="light"] #balanceManageOpen:hover,
@@ -1367,9 +1389,16 @@ body.modal-open #app {
 :root[data-theme="light"] #reviewsOpen:hover,
 :root[data-theme="light"] #profileStatsOpen:hover,
 :root[data-theme="light"] #profileSettingsOpen:hover {
-  background: rgba(60, 90, 150, 0.08) !important;
-  border-color: rgba(60, 90, 150, 0.56) !important;
+  background:
+    linear-gradient(rgba(60, 90, 150, 0.08), rgba(60, 90, 150, 0.08)) padding-box,
+    linear-gradient(135deg, rgba(70, 130, 240, 0.95), rgba(92, 70, 195, 0.95)) border-box !important;
   color: #10141f !important;
+}
+
+:root[data-theme="light"] #reviewsOpen:hover {
+  background:
+    linear-gradient(rgba(205, 140, 50, 0.12), rgba(205, 140, 50, 0.12)) padding-box,
+    linear-gradient(135deg, rgba(232, 161, 64, 0.98), rgba(182, 120, 30, 0.98)) border-box !important;
 }
 
 #profileWithdraw,
