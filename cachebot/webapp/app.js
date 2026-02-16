@@ -194,7 +194,15 @@
   const quickDealsBtn = document.getElementById("quickDealsBtn");
   const quickDealsBadge = document.getElementById("quickDealsBadge");
   const quickDealsCount = document.getElementById("quickDealsCount");
+  const quickDealsRadial = document.getElementById("quickDealsRadial");
+  const quickDealsDealsBtn = document.getElementById("quickDealsDealsBtn");
+  const quickDealsDisputesBtn = document.getElementById("quickDealsDisputesBtn");
+  const quickDealsDealsBadge = document.getElementById("quickDealsDealsBadge");
+  const quickDealsDisputesBadge = document.getElementById("quickDealsDisputesBadge");
+  const quickDealsEmptyHint = document.getElementById("quickDealsEmptyHint");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
+  const quickDealsTitle = document.getElementById("quickDealsTitle");
+  const quickDisputesTitle = document.getElementById("quickDisputesTitle");
   const quickDealsList = document.getElementById("quickDealsList");
   const quickDisputesSection = document.getElementById("quickDisputesSection");
   const quickDisputesList = document.getElementById("quickDisputesList");
@@ -435,6 +443,7 @@
     reviewsPage: 0,
     reviewsRating: "all",
     unreadDeals: new Set(),
+    quickPanelMode: "deals",
     chatLastRead: {},
     chatUnreadCounts: {},
     chatLastSeenAt: {},
@@ -2660,6 +2669,7 @@
     const activeCount = deals.filter(
       (deal) => !["completed", "canceled", "expired"].includes(deal.status)
     ).length + (state.merchantMyAds?.length || 0);
+    const disputesCount = Array.isArray(state.assignedDisputes) ? state.assignedDisputes.length : 0;
     const pendingSet = new Set();
     deals.forEach((deal) => {
       const isPending = deal.status === "pending" && deal.offer_initiator_id;
@@ -2713,6 +2723,30 @@
         }
       }
       state.lastQuickBadgeCount = count;
+    }
+    if (quickDealsDealsBadge) {
+      quickDealsDealsBadge.textContent = activeCount > 9 ? "9+" : `${activeCount}`;
+      quickDealsDealsBadge.classList.toggle("show", activeCount > 0);
+    }
+    if (quickDealsDisputesBadge) {
+      quickDealsDisputesBadge.textContent = disputesCount > 9 ? "9+" : `${disputesCount}`;
+      quickDealsDisputesBadge.classList.toggle("show", disputesCount > 0);
+    }
+    if (quickDealsDealsBtn) {
+      const disabled = activeCount <= 0;
+      quickDealsDealsBtn.classList.toggle("is-disabled", disabled);
+      quickDealsDealsBtn.disabled = disabled;
+    }
+    if (quickDealsDisputesBtn) {
+      const disabled = disputesCount <= 0;
+      quickDealsDisputesBtn.classList.toggle("is-disabled", disabled);
+      quickDealsDisputesBtn.disabled = disabled;
+    }
+    if (quickDealsEmptyHint) {
+      quickDealsEmptyHint.textContent =
+        activeCount <= 0 && disputesCount <= 0
+          ? "Активных сделок нет."
+          : "Выберите: сделки или споры.";
     }
   };
 
@@ -2861,6 +2895,34 @@
     });
   };
 
+  const renderQuickDisputesPrimary = () => {
+    if (!quickDealsList) return;
+    const disputes = Array.isArray(state.assignedDisputes) ? state.assignedDisputes : [];
+    quickDealsList.innerHTML = "";
+    if (!disputes.length) {
+      quickDealsList.innerHTML = '<div class="deal-empty">Активных споров нет.</div>';
+      return;
+    }
+    disputes.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "quick-deal-item";
+      const title = `Спор • Сделка #${item.public_id || "—"}`;
+      const reason = item.reason ? `Причина: ${item.reason}` : "Причина: —";
+      row.innerHTML = `
+        <div class="quick-deal-info">
+          <div class="quick-deal-id">${title}</div>
+          <div class="quick-deal-meta">${reason}</div>
+        </div>
+        <div class="quick-deal-status status-warn">Спор</div>
+      `;
+      row.addEventListener("click", () => {
+        quickDealsPanel?.classList.remove("open");
+        if (item.id) openDispute(item.id);
+      });
+      quickDealsList.appendChild(row);
+    });
+  };
+
   const renderQuickDisputes = () => {
     if (!quickDisputesList) return;
     const disputes = Array.isArray(state.assignedDisputes) ? state.assignedDisputes : [];
@@ -2888,6 +2950,20 @@
       });
       quickDisputesList.appendChild(row);
     });
+  };
+
+  const renderQuickPanelByMode = () => {
+    const mode = state.quickPanelMode || "deals";
+    if (mode === "disputes") {
+      if (quickDealsTitle) quickDealsTitle.textContent = "Активные споры";
+      if (quickDisputesSection) quickDisputesSection.style.display = "none";
+      renderQuickDisputesPrimary();
+      return;
+    }
+    if (quickDealsTitle) quickDealsTitle.textContent = "Активные сделки";
+    if (quickDisputesTitle) quickDisputesTitle.textContent = "Активные споры";
+    renderQuickDeals();
+    renderQuickDisputes();
   };
 
   const loadSummary = async () => {
@@ -6392,7 +6468,7 @@
     }
     updateQuickDealsButton(state.deals || []);
     if (quickDealsPanel?.classList.contains("open")) {
-      renderQuickDeals();
+      renderQuickPanelByMode();
     }
     const chatBtn = dealModalActions?.querySelector(".deal-chat-btn");
     chatBtn?.classList.remove("has-badge");
@@ -6452,7 +6528,7 @@
       persistUnreadDeals();
       updateQuickDealsButton(state.deals || []);
       if (quickDealsPanel?.classList.contains("open")) {
-        renderQuickDeals();
+        renderQuickPanelByMode();
       }
     }
     state.pendingRead = state.pendingRead || {};
@@ -6551,7 +6627,7 @@
                 (d) => d.assigned_to && Number(d.assigned_to) === Number(state.userId)
               );
               if (quickDealsPanel?.classList.contains("open")) {
-                renderQuickDisputes();
+                renderQuickPanelByMode();
               }
             }
           } catch {
@@ -6911,26 +6987,72 @@
     quickDealsPanel.setAttribute("aria-hidden", open ? "false" : "true");
   };
 
+  const setQuickRadialOpen = (open) => {
+    if (!quickDealsRadial) return;
+    quickDealsRadial.classList.toggle("open", open);
+    quickDealsRadial.setAttribute("aria-hidden", open ? "false" : "true");
+    if (quickDealsEmptyHint) {
+      const hasDeals = (state.deals || []).some(
+        (deal) => !["completed", "canceled", "expired"].includes(deal.status)
+      ) || (state.merchantMyAds?.length || 0) > 0;
+      const hasDisputes = Array.isArray(state.assignedDisputes) && state.assignedDisputes.length > 0;
+      quickDealsEmptyHint.classList.toggle("show", open && !hasDeals && !hasDisputes);
+    }
+  };
+
   quickDealsBtn?.addEventListener("click", () => {
-    const isOpen = quickDealsPanel?.classList.contains("open");
+    const isOpen = quickDealsRadial?.classList.contains("open");
     if (isOpen) {
       setQuickDealsOpen(false);
+      setQuickRadialOpen(false);
       return;
     }
-    renderQuickDeals();
-    renderQuickDisputes();
+    setQuickDealsOpen(false);
+    setQuickRadialOpen(true);
+  });
+
+  quickDealsDealsBtn?.addEventListener("click", () => {
+    if (quickDealsDealsBtn.disabled) return;
+    state.quickPanelMode = "deals";
+    renderQuickPanelByMode();
+    setQuickRadialOpen(false);
+    setQuickDealsOpen(true);
+  });
+
+  quickDealsDisputesBtn?.addEventListener("click", () => {
+    if (quickDealsDisputesBtn.disabled) return;
+    state.quickPanelMode = "disputes";
+    renderQuickPanelByMode();
+    setQuickRadialOpen(false);
     setQuickDealsOpen(true);
   });
 
   document.addEventListener("click", (event) => {
-    if (!quickDealsPanel?.classList.contains("open")) return;
     const target = event.target;
     if (!target) return;
-    if (quickDealsPanel.contains(target) || quickDealsBtn?.contains(target)) {
+    const panelOpen = quickDealsPanel?.classList.contains("open");
+    const radialOpen = quickDealsRadial?.classList.contains("open");
+    if (!panelOpen && !radialOpen) return;
+    const clickedInsidePanel = quickDealsPanel?.contains(target);
+    const clickedInsideRadial = quickDealsRadial?.contains(target);
+    const clickedMainBtn = quickDealsBtn?.contains(target);
+    if (clickedInsidePanel || clickedInsideRadial || clickedMainBtn) {
       return;
     }
     setQuickDealsOpen(false);
+    setQuickRadialOpen(false);
   });
+
+  // Keep legacy behavior if panel was opened from old flows.
+  const closeQuickOverlays = () => {
+    const isOpen = quickDealsPanel?.classList.contains("open");
+    if (isOpen) {
+      setQuickDealsOpen(false);
+    }
+    if (quickDealsRadial?.classList.contains("open")) {
+      setQuickRadialOpen(false);
+    }
+  };
 
   const removeSystemNotice = (key) => {
     state.systemNotifications = (state.systemNotifications || []).filter((item) => item.key !== key);
@@ -7375,7 +7497,7 @@
       }
       updateQuickDealsButton(state.deals || []);
       if (quickDealsPanel?.classList.contains("open")) {
-        renderQuickDeals();
+        renderQuickPanelByMode();
       }
     } catch (err) {
       showNotice(`Ошибка: ${err.message}`);

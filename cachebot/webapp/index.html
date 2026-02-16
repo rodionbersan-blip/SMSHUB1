@@ -1101,16 +1101,32 @@
       <span id="quickDealsBadge" class="quick-deals-badge"></span>
     </button>
 
+    <div id="quickDealsRadial" class="quick-deals-radial" aria-hidden="true">
+      <button id="quickDealsDealsBtn" class="quick-radial-item quick-radial-deals" aria-label="Активные сделки">
+        <span class="quick-radial-icon">
+          <img src="/app/assets/deals-icon.png" alt="" />
+        </span>
+        <span id="quickDealsDealsBadge" class="quick-radial-badge"></span>
+      </button>
+      <button id="quickDealsDisputesBtn" class="quick-radial-item quick-radial-disputes" aria-label="Активные споры">
+        <span class="quick-radial-icon">
+          <img src="/app/assets/disputes-icon-gavel-solid.png" alt="" />
+        </span>
+        <span id="quickDealsDisputesBadge" class="quick-radial-badge"></span>
+      </button>
+      <div id="quickDealsEmptyHint" class="quick-radial-empty">Активных сделок нет.</div>
+    </div>
+
     <div id="quickDealsPanel" class="quick-deals-panel" aria-hidden="true">
       <div class="quick-deals-card">
         <div class="quick-deals-header">
-          <div class="quick-deals-title">Активные сделки</div>
+          <div id="quickDealsTitle" class="quick-deals-title">Активные сделки</div>
         </div>
         <div id="quickDealsList" class="quick-deals-list"></div>
         <div id="quickDisputesSection">
           <div class="quick-deals-divider"></div>
           <div class="quick-deals-header">
-            <div class="quick-deals-subtitle">Активные споры</div>
+            <div id="quickDisputesTitle" class="quick-deals-subtitle">Активные споры</div>
           </div>
           <div id="quickDisputesList" class="quick-deals-list"></div>
         </div>
