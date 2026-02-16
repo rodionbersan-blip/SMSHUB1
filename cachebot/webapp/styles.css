@@ -2462,6 +2462,22 @@ body.modal-open #app {
   transform: none !important;
 }
 
+#view-p2p .p2p-toolbar .btn,
+#view-p2p .p2p-toolbar .btn:hover,
+#view-p2p .p2p-toolbar .btn.primary,
+#view-p2p .p2p-toolbar .btn.primary:hover {
+  min-height: 36px !important;
+  max-height: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
 #view-p2p .p2p-toolbar .btn:not(.primary) {
   background: transparent !important;
 }
@@ -2506,10 +2522,23 @@ body.modal-open #app {
 :root[data-theme="light"] #view-p2p .p2p-toolbar .btn:hover {
   color: #1b2b4a;
   background: transparent !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  height: 36px !important;
+  transform: none !important;
 }
 
 :root[data-theme="light"] #view-p2p .p2p-toolbar .btn.primary {
   color: #ffffff !important;
+}
+
+:root[data-theme="light"] #view-p2p .p2p-toolbar .btn.primary:hover {
+  color: #ffffff !important;
+  background: transparent !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  height: 36px !important;
+  transform: none !important;
 }
 
 #p2pCreateBtn {
