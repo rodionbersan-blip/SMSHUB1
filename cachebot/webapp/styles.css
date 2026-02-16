@@ -4142,7 +4142,7 @@ body.modal-open #app {
 .profile-actions #profileSettingsOpen {
   flex: 1 1 calc(50% - 6px);
   min-width: 0;
-  height: 52px;
+  height: 46px;
 }
 
 .reviews-tabs {
