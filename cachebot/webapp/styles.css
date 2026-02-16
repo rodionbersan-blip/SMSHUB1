@@ -1434,7 +1434,8 @@ body.modal-open #app {
   pointer-events: none;
 }
 
-#reviewsOpen {
+#reviewsOpen,
+#balanceManageOpen {
   position: relative;
   overflow: hidden;
   background: linear-gradient(
@@ -1456,7 +1457,8 @@ body.modal-open #app {
     color 0.2s ease !important;
 }
 
-#reviewsOpen::before {
+#reviewsOpen::before,
+#balanceManageOpen::before {
   display: none;
 }
 
@@ -1481,7 +1483,8 @@ body.modal-open #app {
   );
 }
 
-#reviewsOpen:hover {
+#reviewsOpen:hover,
+#balanceManageOpen:hover {
   color: #ffffff !important;
   background: linear-gradient(
     135deg,
@@ -1496,11 +1499,13 @@ body.modal-open #app {
   transform: none !important;
 }
 
-#reviewsOpen:hover::before {
+#reviewsOpen:hover::before,
+#balanceManageOpen:hover::before {
   display: none;
 }
 
-:root[data-theme="light"] #reviewsOpen {
+:root[data-theme="light"] #reviewsOpen,
+:root[data-theme="light"] #balanceManageOpen {
   background: linear-gradient(
     135deg,
     rgba(244, 181, 80, 0.99) 0%,
@@ -1513,7 +1518,8 @@ body.modal-open #app {
     inset 0 -10px 16px rgba(146, 88, 26, 0.2) !important;
 }
 
-:root[data-theme="light"] #reviewsOpen:hover {
+:root[data-theme="light"] #reviewsOpen:hover,
+:root[data-theme="light"] #balanceManageOpen:hover {
   background: linear-gradient(
     135deg,
     rgba(251, 195, 102, 0.99) 0%,
