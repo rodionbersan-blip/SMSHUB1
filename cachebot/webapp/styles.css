@@ -1010,24 +1010,35 @@ body.modal-open #app {
   height: 100%;
 }
 
-:root[data-theme="dark"] .tab[data-view="support"] .nav-icon img {
-  filter: none;
-}
-
-:root[data-theme="dark"] .tab[data-view="support"].active .nav-icon img {
-  filter: none !important;
-}
-
 :root[data-theme="light"] .nav-icon img {
   filter: none;
 }
 
-:root[data-theme="light"] .tab[data-view="support"] .nav-icon img {
+.tab[data-view="support"] .nav-icon img.support-nav-icon {
   filter: brightness(0) invert(1);
+  opacity: 0.88;
 }
 
-:root[data-theme="light"] .tab[data-view="support"].active .nav-icon img {
+.tab[data-view="support"].active .nav-icon img.support-nav-icon {
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .tab[data-view="support"] .nav-icon img.support-nav-icon {
   filter: brightness(0) invert(1) !important;
+}
+
+:root[data-theme="dark"] .tab[data-view="support"].active .nav-icon img.support-nav-icon {
+  filter: brightness(0) invert(0) !important;
+}
+
+:root[data-theme="light"] .tab[data-view="support"] .nav-icon img.support-nav-icon {
+  filter: brightness(0) invert(0) !important;
+  opacity: 0.72;
+}
+
+:root[data-theme="light"] .tab[data-view="support"].active .nav-icon img.support-nav-icon {
+  filter: brightness(0) invert(1) !important;
+  opacity: 1;
 }
 
 :root[data-theme="light"] .tab[data-view="disputes"] .nav-icon img {
