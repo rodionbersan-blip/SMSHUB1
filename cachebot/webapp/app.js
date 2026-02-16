@@ -2743,10 +2743,11 @@
       quickDealsDisputesBtn.disabled = disabled;
     }
     if (quickDealsEmptyHint) {
-      quickDealsEmptyHint.textContent =
-        activeCount <= 0 && disputesCount <= 0
-          ? "Активных сделок нет."
-          : "Выберите: сделки или споры.";
+      const noItems = activeCount <= 0 && disputesCount <= 0;
+      quickDealsEmptyHint.textContent = noItems ? "Активных сделок нет." : "Выберите: сделки или споры.";
+      const radialOpen = quickDealsRadial?.classList.contains("open");
+      quickDealsRadial?.classList.toggle("empty-only", !!radialOpen && noItems);
+      quickDealsEmptyHint.classList.toggle("show", !!radialOpen && noItems);
     }
   };
 
@@ -6991,13 +6992,13 @@
     if (!quickDealsRadial) return;
     quickDealsRadial.classList.toggle("open", open);
     quickDealsRadial.setAttribute("aria-hidden", open ? "false" : "true");
-    if (quickDealsEmptyHint) {
-      const hasDeals = (state.deals || []).some(
-        (deal) => !["completed", "canceled", "expired"].includes(deal.status)
-      ) || (state.merchantMyAds?.length || 0) > 0;
-      const hasDisputes = Array.isArray(state.assignedDisputes) && state.assignedDisputes.length > 0;
-      quickDealsEmptyHint.classList.toggle("show", open && !hasDeals && !hasDisputes);
-    }
+    const hasDeals =
+      (state.deals || []).some((deal) => !["completed", "canceled", "expired"].includes(deal.status)) ||
+      (state.merchantMyAds?.length || 0) > 0;
+    const hasDisputes = Array.isArray(state.assignedDisputes) && state.assignedDisputes.length > 0;
+    const emptyOnly = open && !hasDeals && !hasDisputes;
+    quickDealsRadial.classList.toggle("empty-only", emptyOnly);
+    if (quickDealsEmptyHint) quickDealsEmptyHint.classList.toggle("show", emptyOnly);
   };
 
   quickDealsBtn?.addEventListener("click", () => {
@@ -7042,17 +7043,6 @@
     setQuickDealsOpen(false);
     setQuickRadialOpen(false);
   });
-
-  // Keep legacy behavior if panel was opened from old flows.
-  const closeQuickOverlays = () => {
-    const isOpen = quickDealsPanel?.classList.contains("open");
-    if (isOpen) {
-      setQuickDealsOpen(false);
-    }
-    if (quickDealsRadial?.classList.contains("open")) {
-      setQuickRadialOpen(false);
-    }
-  };
 
   const removeSystemNotice = (key) => {
     state.systemNotifications = (state.systemNotifications || []).filter((item) => item.key !== key);

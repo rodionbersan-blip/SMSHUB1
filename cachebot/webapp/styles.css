@@ -7540,6 +7540,14 @@ body.pin-lock {
   pointer-events: none;
 }
 
+.quick-radial-deals {
+  transition-delay: 0.04s;
+}
+
+.quick-radial-disputes {
+  transition-delay: 0s;
+}
+
 .quick-radial-item:disabled,
 .quick-radial-item.is-disabled {
   opacity: 0.5 !important;
@@ -7556,6 +7564,12 @@ body.pin-lock {
 
 .quick-deals-radial.open .quick-radial-disputes {
   transform: translate(64px, -58px) scale(1);
+}
+
+.quick-deals-radial.empty-only .quick-radial-item {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translate(0, 0) scale(0.78) !important;
 }
 
 .quick-radial-icon {
@@ -7599,16 +7613,19 @@ body.pin-lock {
 .quick-radial-empty {
   position: absolute;
   left: 62px;
-  top: -44px;
-  max-width: 180px;
-  border-radius: 14px;
+  top: -26px;
+  min-width: 168px;
+  max-width: 196px;
+  border-radius: 999px;
   border: 1px solid rgba(120, 180, 255, 0.24);
   background: rgba(18, 22, 30, 0.92);
   color: #d8e4ff;
   font-size: 12px;
   font-weight: 600;
-  line-height: 1.25;
-  padding: 8px 10px;
+  line-height: 1;
+  padding: 11px 14px;
+  text-align: center;
+  white-space: nowrap;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.32);
   opacity: 0;
   transform: translateY(6px);
