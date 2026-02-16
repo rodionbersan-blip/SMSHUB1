@@ -104,6 +104,13 @@
   const merchantDealsModal = document.getElementById("merchantDealsModal");
   const merchantDealsClose = document.getElementById("merchantDealsClose");
   const merchantDealsList = document.getElementById("merchantDealsList");
+  const profileLiquidButtonIds = [
+    "balanceManageOpen",
+    "balanceHistoryOpen",
+    "reviewsOpen",
+    "profileStatsOpen",
+    "profileSettingsOpen",
+  ];
 
   const profileName = document.getElementById("profileName");
   const profileUsername = document.getElementById("profileUsername");
@@ -420,6 +427,8 @@
   const statsFundsTotal = document.getElementById("statsFundsTotal");
   const statsSuccessValue = document.getElementById("statsSuccessValue");
   const statsTabButtons = document.querySelectorAll(".stats-tabs .tab-btn");
+  const liquidButtons = new Map();
+  let liquidRafId = 0;
 
   const state = {
     user: null,
@@ -1967,9 +1976,218 @@
     }
   };
 
+  const setLiquidButtonLabel = (button, text) => {
+    if (!button) return;
+    const label = button.querySelector(".btn-liquid-label");
+    if (label) {
+      label.textContent = text;
+      return;
+    }
+    button.textContent = text;
+  };
+
+  const buildLiquidPoints = (state) => {
+    const pointsA = [];
+    const pointsB = [];
+    const buttonWidth = state.width;
+    const buttonHeight = state.height;
+    const pointsCount = 8;
+    const addPoint = (x, y, level) => ({
+      x: 50 + x,
+      y: 50 + y,
+      ix: 50 + x,
+      iy: 50 + y,
+      vx: 0,
+      vy: 0,
+      level,
+    });
+    const x = buttonHeight / 2;
+    for (let j = 1; j < pointsCount; j += 1) {
+      pointsA.push(addPoint(x + ((buttonWidth - buttonHeight) / pointsCount) * j, 0, 1));
+      pointsB.push(addPoint(x + ((buttonWidth - buttonHeight) / pointsCount) * j, 0, 2));
+    }
+    [
+      [buttonWidth - buttonHeight / 5, 0],
+      [buttonWidth + buttonHeight / 10, buttonHeight / 2],
+      [buttonWidth - buttonHeight / 5, buttonHeight],
+    ].forEach(([px, py]) => {
+      pointsA.push(addPoint(px, py, 1));
+      pointsB.push(addPoint(px, py, 2));
+    });
+    for (let j = pointsCount - 1; j > 0; j -= 1) {
+      const px = x + ((buttonWidth - buttonHeight) / pointsCount) * j;
+      pointsA.push(addPoint(px, buttonHeight, 1));
+      pointsB.push(addPoint(px, buttonHeight, 2));
+    }
+    [
+      [buttonHeight / 5, buttonHeight],
+      [-buttonHeight / 10, buttonHeight / 2],
+      [buttonHeight / 5, 0],
+    ].forEach(([px, py]) => {
+      pointsA.push(addPoint(px, py, 1));
+      pointsB.push(addPoint(px, py, 2));
+    });
+    state.pointsA = pointsA;
+    state.pointsB = pointsB;
+  };
+
+  const resizeLiquidButton = (state) => {
+    const rect = state.button.getBoundingClientRect();
+    state.width = Math.max(12, Math.round(rect.width));
+    state.height = Math.max(12, Math.round(rect.height));
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const width = state.width + 100;
+    const height = state.height + 100;
+    state.canvas.width = Math.round(width * dpr);
+    state.canvas.height = Math.round(height * dpr);
+    state.canvas.style.width = `${width}px`;
+    state.canvas.style.height = `${height}px`;
+    state.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    buildLiquidPoints(state);
+    state.relMouseX = state.width / 2 + 50;
+    state.relMouseY = state.height + 120;
+  };
+
+  const updateLiquidPoint = (point, state) => {
+    const viscosity = 20;
+    const damping = 0.05;
+    const mouseDist = 70;
+    point.vx += (point.ix - point.x) / (viscosity * point.level);
+    point.vy += (point.iy - point.y) / (viscosity * point.level);
+    const dx = point.ix - state.relMouseX;
+    const dy = point.iy - state.relMouseY;
+    const relDist = 1 - Math.sqrt(dx * dx + dy * dy) / mouseDist;
+    if (
+      relDist > 0 &&
+      relDist < 1 &&
+      ((state.mouseDirectionX > 0 && state.relMouseX > point.x) ||
+        (state.mouseDirectionX < 0 && state.relMouseX < point.x))
+    ) {
+      point.vx = (state.mouseSpeedX / 4) * relDist;
+    }
+    if (
+      relDist > 0 &&
+      relDist < 1 &&
+      ((state.mouseDirectionY > 0 && state.relMouseY > point.y) ||
+        (state.mouseDirectionY < 0 && state.relMouseY < point.y))
+    ) {
+      point.vy = (state.mouseSpeedY / 4) * relDist;
+    }
+    point.vx *= 1 - damping;
+    point.vy *= 1 - damping;
+    point.x += point.vx;
+    point.y += point.vy;
+  };
+
+  const drawLiquidShape = (ctx, points, fillStyle) => {
+    if (!points.length) return;
+    ctx.fillStyle = fillStyle;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 0; i < points.length; i += 1) {
+      const p = points[i];
+      const next = points[(i + 1) % points.length];
+      const cx = (p.x + next.x) / 2;
+      const cy = (p.y + next.y) / 2;
+      ctx.quadraticCurveTo(p.x, p.y, cx, cy);
+    }
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  const renderLiquidButtons = () => {
+    liquidButtons.forEach((state) => {
+      const { ctx, canvas } = state;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      state.pointsA.forEach((p) => updateLiquidPoint(p, state));
+      state.pointsB.forEach((p) => updateLiquidPoint(p, state));
+      const gx = Math.min(Math.max(state.relMouseX || state.width / 2, 0), state.width + 100);
+      const gy = Math.min(Math.max(state.relMouseY || state.height / 2, 0), state.height + 100);
+      const gradient = ctx.createRadialGradient(gx, gy, 300, gx, gy, 0);
+      gradient.addColorStop(0, "#f7c368");
+      gradient.addColorStop(1, "#bf7e2c");
+      drawLiquidShape(ctx, state.pointsA, "rgba(255, 210, 135, 0.62)");
+      drawLiquidShape(ctx, state.pointsB, gradient);
+    });
+    liquidRafId = window.requestAnimationFrame(renderLiquidButtons);
+  };
+
+  const startLiquidButtons = () => {
+    if (liquidRafId || !liquidButtons.size) return;
+    liquidRafId = window.requestAnimationFrame(renderLiquidButtons);
+  };
+
+  const initLiquidButton = (button) => {
+    if (!button || liquidButtons.has(button)) return;
+    const initialText = (button.textContent || "").trim();
+    button.textContent = "";
+    const canvas = document.createElement("canvas");
+    canvas.className = "btn-liquid-canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    const label = document.createElement("span");
+    label.className = "btn-liquid-label";
+    label.textContent = initialText;
+    button.append(canvas, label);
+    const state = {
+      button,
+      canvas,
+      ctx: canvas.getContext("2d"),
+      relMouseX: 0,
+      relMouseY: 0,
+      mouseX: 0,
+      mouseY: 0,
+      mouseLastX: 0,
+      mouseLastY: 0,
+      mouseDirectionX: 0,
+      mouseDirectionY: 0,
+      mouseSpeedX: 0,
+      mouseSpeedY: 0,
+      pointsA: [],
+      pointsB: [],
+      width: 0,
+      height: 0,
+      speedTimer: 0,
+      resizeObserver: null,
+    };
+    button.addEventListener("mousemove", (event) => {
+      const rect = button.getBoundingClientRect();
+      state.mouseDirectionX = state.mouseX < event.clientX ? 1 : state.mouseX > event.clientX ? -1 : 0;
+      state.mouseDirectionY = state.mouseY < event.clientY ? 1 : state.mouseY > event.clientY ? -1 : 0;
+      state.mouseX = event.clientX;
+      state.mouseY = event.clientY;
+      state.relMouseX = state.mouseX - rect.left + 50;
+      state.relMouseY = state.mouseY - rect.top + 50;
+    });
+    button.addEventListener("mouseleave", () => {
+      state.relMouseX = state.width / 2 + 50;
+      state.relMouseY = state.height + 120;
+      state.mouseDirectionX = 0;
+      state.mouseDirectionY = 0;
+    });
+    state.speedTimer = window.setInterval(() => {
+      state.mouseSpeedX = state.mouseX - state.mouseLastX;
+      state.mouseSpeedY = state.mouseY - state.mouseLastY;
+      state.mouseLastX = state.mouseX;
+      state.mouseLastY = state.mouseY;
+    }, 50);
+    if ("ResizeObserver" in window) {
+      state.resizeObserver = new ResizeObserver(() => resizeLiquidButton(state));
+      state.resizeObserver.observe(button);
+    } else {
+      window.addEventListener("resize", () => resizeLiquidButton(state));
+    }
+    liquidButtons.set(button, state);
+    resizeLiquidButton(state);
+    startLiquidButtons();
+  };
+
+  const initProfileLiquidButtons = () => {
+    profileLiquidButtonIds.forEach((id) => initLiquidButton(document.getElementById(id)));
+  };
+
   const applyProfileStats = (stats) => {
     if (reviewsOpen) {
-      reviewsOpen.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
+      setLiquidButtonLabel(reviewsOpen, `Отзывы: ${stats.reviews_count ?? 0}`);
     }
   };
 
@@ -6896,6 +7114,8 @@
     if (settingsSystemTheme) settingsSystemTheme.checked = false;
     stopSystemThemeWatcher();
   });
+
+  initProfileLiquidButtons();
 
   navButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
