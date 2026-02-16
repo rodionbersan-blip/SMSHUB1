@@ -250,6 +250,7 @@
   const disputesList = document.getElementById("disputesList");
   const moderationDisputesBtn = document.getElementById("moderationDisputesBtn");
   const moderationUsersBtn = document.getElementById("moderationUsersBtn");
+  const moderationTabs = document.querySelector(".moderation-tabs");
   const moderationDisputesPanel = document.getElementById("moderationDisputesPanel");
   const moderationUsersPanel = document.getElementById("moderationUsersPanel");
   const moderationSearchInput = document.getElementById("moderationSearchInput");
@@ -4309,6 +4310,9 @@
     }
     if (moderationUsersBtn) {
       moderationUsersBtn.classList.toggle("active", tab === "users");
+    }
+    if (moderationTabs) {
+      moderationTabs.dataset.pos = tab === "users" ? "2" : "1";
     }
     moderationDisputesPanel?.classList.toggle("is-hidden", tab !== "disputes");
     moderationUsersPanel?.classList.toggle("is-hidden", tab !== "users");

@@ -2905,6 +2905,7 @@ body.modal-open #app {
 }
 
 .moderation-tabs {
+  position: relative;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
@@ -2914,17 +2915,42 @@ body.modal-open #app {
   border-radius: 999px;
   border: 1px solid rgba(120, 180, 255, 0.25);
   background: rgba(18, 22, 30, 0.45);
+  overflow: hidden;
+}
+
+.moderation-tabs::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: calc((100% - 22px) / 2);
+  height: calc(100% - 12px);
+  border-radius: 999px;
+  background: rgba(242, 246, 255, 0.9);
+  transform: translateX(0);
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.moderation-tabs[data-pos="2"]::before {
+  transform: translateX(calc(100% + 10px));
 }
 
 .moderation-tabs .btn.pill {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
   background: transparent;
   color: var(--accent);
   border: none;
   box-shadow: none;
+  transform: none !important;
+  transition: color 0.2s ease;
 }
 
 .moderation-tabs .btn.pill.active {
-  background: rgba(242, 246, 255, 0.9);
+  background: transparent;
   color: #000000;
   box-shadow: none;
 }
@@ -3361,7 +3387,7 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .moderation-tabs .btn.pill.active {
-  background: rgba(31, 41, 55, 0.9);
+  background: transparent;
   color: #ffffff;
   box-shadow: none;
 }
@@ -3374,6 +3400,10 @@ body.modal-open #app {
 :root[data-theme="light"] .moderation-tabs {
   background: rgba(255, 255, 255, 0.7);
   border-color: rgba(20, 28, 38, 0.18);
+}
+
+:root[data-theme="light"] .moderation-tabs::before {
+  background: rgba(31, 41, 55, 0.9);
 }
 
 :root[data-theme="dark"] .moderation-tabs .btn.pill {
