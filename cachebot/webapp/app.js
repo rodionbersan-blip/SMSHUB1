@@ -213,6 +213,7 @@
   const p2pList = document.getElementById("p2pList");
   const p2pTradingBadge = document.getElementById("p2pTradingBadge");
   const p2pTradingToggle = document.getElementById("p2pTradingToggle");
+  const p2pToolbar = document.querySelector("#view-p2p .p2p-toolbar");
   const p2pBuyBtn = document.getElementById("p2pBuyBtn");
   const p2pSellBtn = document.getElementById("p2pSellBtn");
   const p2pMyAdsBtn = document.getElementById("p2pMyAdsBtn");
@@ -7729,10 +7730,20 @@
     }
   });
 
+  const syncP2PToolbarPos = () => {
+    if (!p2pToolbar) return;
+    let pos = "1";
+    if (p2pSellBtn?.classList.contains("primary")) pos = "2";
+    if (p2pMyAdsBtn?.classList.contains("primary")) pos = "3";
+    p2pToolbar.dataset.pos = pos;
+  };
+  syncP2PToolbarPos();
+
   p2pBuyBtn?.addEventListener("click", () => {
     p2pBuyBtn.classList.add("primary");
     p2pSellBtn.classList.remove("primary");
     p2pMyAdsBtn.classList.remove("primary");
+    syncP2PToolbarPos();
     loadPublicAds("sell");
   });
 
@@ -7740,6 +7751,7 @@
     p2pSellBtn.classList.add("primary");
     p2pBuyBtn.classList.remove("primary");
     p2pMyAdsBtn.classList.remove("primary");
+    syncP2PToolbarPos();
     loadPublicAds("buy");
   });
 
@@ -7747,6 +7759,7 @@
     p2pMyAdsBtn.classList.add("primary");
     p2pBuyBtn.classList.remove("primary");
     p2pSellBtn.classList.remove("primary");
+    syncP2PToolbarPos();
     loadMyAds();
   });
 
