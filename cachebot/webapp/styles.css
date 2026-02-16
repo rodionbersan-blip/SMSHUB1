@@ -1359,41 +1359,55 @@ body.modal-open #app {
 
 /* Profile main action buttons: contour only (no fill) */
 #balanceManageOpen,
-#balanceHistoryOpen,
 #profileStatsOpen,
 #profileSettingsOpen {
   background:
     linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(80, 145, 255, 0.98), rgba(118, 88, 230, 0.98)) border-box !important;
-  border: 3px solid transparent !important;
+    linear-gradient(135deg, rgba(232, 166, 68, 0.98), rgba(187, 126, 42, 0.98)) border-box !important;
+  border: 2px solid transparent !important;
   color: #ffffff !important;
-  box-shadow: none !important;
+  box-shadow: 0 6px 14px rgba(110, 74, 24, 0.22) !important;
+  transform: none !important;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease !important;
 }
 
 #reviewsOpen {
   background:
     linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(236, 169, 70, 0.98), rgba(193, 132, 40, 0.98)) border-box !important;
-  border: 3px solid transparent !important;
+    linear-gradient(135deg, rgba(232, 166, 68, 0.98), rgba(187, 126, 42, 0.98)) border-box !important;
+  border: 2px solid transparent !important;
   color: #ffffff !important;
-  box-shadow: none !important;
+  box-shadow: 0 6px 14px rgba(110, 74, 24, 0.22) !important;
+  transform: none !important;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease !important;
 }
 
 #balanceManageOpen:hover,
-#balanceHistoryOpen:hover,
 #profileStatsOpen:hover,
 #profileSettingsOpen:hover {
   background:
-    linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(104, 165, 255, 1), rgba(133, 101, 240, 1)) border-box !important;
+    linear-gradient(135deg, rgba(236, 174, 82, 0.96), rgba(198, 137, 52, 0.96)) padding-box,
+    linear-gradient(135deg, rgba(247, 198, 116, 1), rgba(220, 160, 74, 1)) border-box !important;
   color: #ffffff !important;
+  box-shadow: 0 10px 20px rgba(123, 82, 26, 0.3) !important;
+  transform: none !important;
 }
 
 #reviewsOpen:hover {
   background:
-    linear-gradient(transparent, transparent) padding-box,
-    linear-gradient(135deg, rgba(246, 181, 82, 1), rgba(207, 145, 52, 1)) border-box !important;
+    linear-gradient(135deg, rgba(236, 174, 82, 0.96), rgba(198, 137, 52, 0.96)) padding-box,
+    linear-gradient(135deg, rgba(247, 198, 116, 1), rgba(220, 160, 74, 1)) border-box !important;
   color: #ffffff !important;
+  box-shadow: 0 10px 20px rgba(123, 82, 26, 0.3) !important;
+  transform: none !important;
 }
 
 #profileWithdraw,
