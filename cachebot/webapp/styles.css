@@ -1502,6 +1502,19 @@ body.modal-open #app {
   );
 }
 
+:root[data-theme="dark"] #balanceManageOpen,
+:root[data-theme="dark"] #balanceHistoryOpen,
+:root[data-theme="dark"] #reviewsOpen,
+:root[data-theme="dark"] #profileStatsOpen,
+:root[data-theme="dark"] #profileSettingsOpen,
+:root[data-theme="dark"] #balanceManageOpen:hover,
+:root[data-theme="dark"] #balanceHistoryOpen:hover,
+:root[data-theme="dark"] #reviewsOpen:hover,
+:root[data-theme="dark"] #profileStatsOpen:hover,
+:root[data-theme="dark"] #profileSettingsOpen:hover {
+  color: #000000 !important;
+}
+
 #profileWithdraw,
 #topupOpen {
   order: 1;
