@@ -1326,6 +1326,52 @@ body.modal-open #app {
   margin-top: -72px;
 }
 
+/* Main profile action buttons: outlined style without fill */
+#balanceManageOpen,
+#balanceHistoryOpen,
+#reviewsOpen,
+#profileStatsOpen,
+#profileSettingsOpen {
+  background: transparent !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(120, 170, 255, 0.42) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+#balanceManageOpen:hover,
+#balanceHistoryOpen:hover,
+#reviewsOpen:hover,
+#profileStatsOpen:hover,
+#profileSettingsOpen:hover {
+  background: rgba(120, 170, 255, 0.12) !important;
+  border-color: rgba(120, 170, 255, 0.68) !important;
+  color: #ffffff !important;
+}
+
+:root[data-theme="light"] #balanceManageOpen,
+:root[data-theme="light"] #balanceHistoryOpen,
+:root[data-theme="light"] #reviewsOpen,
+:root[data-theme="light"] #profileStatsOpen,
+:root[data-theme="light"] #profileSettingsOpen {
+  background: transparent !important;
+  color: #1b1e28 !important;
+  border-color: rgba(60, 90, 150, 0.36) !important;
+}
+
+:root[data-theme="light"] #balanceManageOpen:hover,
+:root[data-theme="light"] #balanceHistoryOpen:hover,
+:root[data-theme="light"] #reviewsOpen:hover,
+:root[data-theme="light"] #profileStatsOpen:hover,
+:root[data-theme="light"] #profileSettingsOpen:hover {
+  background: rgba(60, 90, 150, 0.08) !important;
+  border-color: rgba(60, 90, 150, 0.56) !important;
+  color: #10141f !important;
+}
+
 #profileWithdraw,
 #topupOpen {
   order: 1;
