@@ -2418,11 +2418,11 @@ body.modal-open #app {
   height: calc(100% - 10px);
   box-sizing: border-box;
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(111, 155, 255, 0.96), rgba(105, 70, 224, 0.96));
-  border: 2px solid rgba(163, 191, 255, 0.95);
+  background: linear-gradient(135deg, rgba(233, 165, 66, 0.98), rgba(188, 128, 44, 0.98));
+  border: 2px solid rgba(246, 199, 120, 0.95);
   box-shadow:
-    0 6px 16px rgba(49, 76, 156, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    0 6px 16px rgba(120, 82, 26, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
   transform: translateX(0);
   transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
@@ -2501,10 +2501,10 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] #view-p2p .p2p-toolbar::before {
-  background: linear-gradient(135deg, rgba(54, 94, 196, 0.96), rgba(78, 58, 180, 0.96));
-  border-color: rgba(120, 154, 230, 0.85);
+  background: linear-gradient(135deg, rgba(233, 165, 66, 0.98), rgba(188, 128, 44, 0.98));
+  border-color: rgba(236, 181, 96, 0.92);
   box-shadow:
-    0 6px 14px rgba(44, 66, 124, 0.28),
+    0 6px 14px rgba(128, 87, 27, 0.28),
     inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
