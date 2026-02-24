@@ -8275,6 +8275,163 @@ body.pin-lock {
   display: none;
 }
 
+/* Profile balance action cards */
+#profileBalanceCard .profile-balance-row.history-row {
+  display: inline-flex;
+  width: calc(50% - 6px);
+  margin-top: 12px;
+  margin-bottom: 0;
+  vertical-align: top;
+}
+
+#profileBalanceCard .profile-balance-row.history-row + .profile-balance-row.history-row {
+  margin-top: 12px;
+  margin-left: 12px;
+}
+
+#profileBalanceCard #balanceManageOpen,
+#profileBalanceCard #balanceHistoryOpen {
+  width: 100% !important;
+  min-height: 108px !important;
+  height: auto !important;
+  margin-top: 0 !important;
+  padding: 16px 82px 16px 16px !important;
+  border-radius: 22px !important;
+  border: 1px solid transparent !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  line-height: 1.22 !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+  white-space: normal !important;
+  backdrop-filter: blur(2px);
+  transform: none !important;
+}
+
+#profileBalanceCard #balanceManageOpen::before,
+#profileBalanceCard #balanceHistoryOpen::before {
+  display: none !important;
+}
+
+#profileBalanceCard #balanceManageOpen .btn-icon,
+#profileBalanceCard #balanceHistoryOpen .btn-icon {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  width: 58px;
+  height: 58px;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+#profileBalanceCard #balanceManageOpen .btn-icon img,
+#profileBalanceCard #balanceHistoryOpen .btn-icon img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+:root[data-theme="dark"] #profileBalanceCard #balanceManageOpen {
+  background: linear-gradient(145deg, #0c1f35 0%, #122d45 56%, #183d58 100%) !important;
+  border-color: rgba(107, 158, 202, 0.36) !important;
+  color: #d7ecff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(183, 227, 255, 0.18),
+    inset 0 -18px 26px rgba(6, 18, 34, 0.38),
+    0 12px 22px rgba(4, 14, 28, 0.42) !important;
+}
+
+:root[data-theme="dark"] #profileBalanceCard #balanceManageOpen:hover {
+  background: linear-gradient(145deg, #112743 0%, #173655 56%, #1d4767 100%) !important;
+  border-color: rgba(136, 188, 234, 0.46) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(196, 235, 255, 0.22),
+    inset 0 -20px 30px rgba(6, 18, 34, 0.42),
+    0 16px 28px rgba(4, 14, 28, 0.5) !important;
+}
+
+:root[data-theme="dark"] #profileBalanceCard #balanceHistoryOpen {
+  background: linear-gradient(145deg, #0f2034 0%, #15314a 58%, #1a3f5d 100%) !important;
+  border-color: rgba(112, 162, 202, 0.34) !important;
+  color: #ddf1ff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(176, 214, 238, 0.18),
+    inset 0 -18px 26px rgba(8, 19, 32, 0.36),
+    0 12px 22px rgba(7, 16, 29, 0.4) !important;
+}
+
+:root[data-theme="dark"] #profileBalanceCard #balanceHistoryOpen:hover {
+  background: linear-gradient(145deg, #142941 0%, #1b3a57 58%, #225078 100%) !important;
+  border-color: rgba(136, 188, 232, 0.42) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(190, 224, 245, 0.22),
+    inset 0 -20px 30px rgba(8, 19, 32, 0.42),
+    0 16px 28px rgba(7, 16, 29, 0.48) !important;
+}
+
+:root[data-theme="light"] #profileBalanceCard #balanceManageOpen {
+  background: linear-gradient(145deg, #eef9ff 0%, #d9f0ff 56%, #c5e7ff 100%) !important;
+  border-color: rgba(100, 165, 212, 0.46) !important;
+  color: #0f4a75 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -14px 22px rgba(137, 191, 232, 0.25),
+    0 10px 20px rgba(96, 149, 194, 0.26) !important;
+}
+
+:root[data-theme="light"] #profileBalanceCard #balanceManageOpen:hover {
+  background: linear-gradient(145deg, #e6f5ff 0%, #cde9ff 56%, #b8defe 100%) !important;
+  border-color: rgba(80, 149, 200, 0.56) !important;
+  color: #0d436a !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -16px 24px rgba(116, 177, 224, 0.3),
+    0 12px 24px rgba(86, 141, 188, 0.32) !important;
+}
+
+:root[data-theme="light"] #profileBalanceCard #balanceHistoryOpen {
+  background: linear-gradient(145deg, #edf8ff 0%, #d7efff 58%, #c3e5ff 100%) !important;
+  border-color: rgba(110, 167, 215, 0.44) !important;
+  color: #0c4f78 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -14px 22px rgba(124, 188, 232, 0.24),
+    0 10px 20px rgba(99, 154, 196, 0.24) !important;
+}
+
+:root[data-theme="light"] #profileBalanceCard #balanceHistoryOpen:hover {
+  background: linear-gradient(145deg, #e2f4ff 0%, #cbe9ff 58%, #b4ddfb 100%) !important;
+  border-color: rgba(94, 152, 202, 0.54) !important;
+  color: #0a4468 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -16px 24px rgba(112, 176, 222, 0.28),
+    0 12px 24px rgba(85, 141, 185, 0.3) !important;
+}
+
+@media (max-width: 620px) {
+  #profileBalanceCard .profile-balance-row.history-row {
+    width: 100%;
+    display: flex;
+    margin-left: 0 !important;
+  }
+
+  #profileBalanceCard .profile-balance-row.history-row + .profile-balance-row.history-row {
+    margin-left: 0;
+  }
+
+  #profileBalanceCard #balanceManageOpen,
+  #profileBalanceCard #balanceHistoryOpen {
+    min-height: 98px !important;
+  }
+}
+
 @media (hover: none) {
   .btn:hover,
   .btn.pill:hover,
