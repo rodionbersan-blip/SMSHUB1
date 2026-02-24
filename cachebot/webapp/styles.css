@@ -8283,33 +8283,33 @@ body.pin-lock {
 #profileBalanceCard .profile-balance-row.balance-only {
   margin-top: -2px;
   margin-bottom: 6px;
-  min-height: 142px;
-  padding-right: 206px;
+  min-height: 166px;
+  padding-right: 226px;
   align-items: flex-start;
 }
 
 #profileBalanceCard .profile-balance-row.history-row {
   position: absolute;
   right: 0;
-  width: 194px;
+  width: 214px;
   margin: 0;
 }
 
 #profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row {
-  top: 42px;
+  top: 36px;
 }
 
 #profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row + .profile-balance-row.history-row {
-  top: 110px;
+  top: 116px;
 }
 
 #profileBalanceCard #balanceManageOpen,
 #profileBalanceCard #balanceHistoryOpen {
   width: 100% !important;
-  min-height: 62px !important;
+  min-height: 74px !important;
   height: auto !important;
   margin-top: 0 !important;
-  padding: 12px 54px 12px 13px !important;
+  padding: 14px 62px 14px 14px !important;
   border-radius: 16px !important;
   border: 1px solid transparent !important;
   display: flex !important;
@@ -8317,7 +8317,7 @@ body.pin-lock {
   justify-content: flex-start !important;
   text-align: left !important;
   line-height: 1.16 !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
   letter-spacing: 0;
   position: relative;
@@ -8335,12 +8335,19 @@ body.pin-lock {
 #profileBalanceCard #balanceManageOpen .btn-icon,
 #profileBalanceCard #balanceHistoryOpen .btn-icon {
   position: absolute;
-  right: -12px;
-  bottom: -14px;
-  width: 76px;
-  height: 76px;
+  right: -14px;
+  bottom: -16px;
+  width: 88px;
+  height: 88px;
   opacity: 0.26;
   pointer-events: none;
+}
+
+#profileBalanceCard #balanceHistoryOpen .btn-icon {
+  width: 74px;
+  height: 74px;
+  right: -12px;
+  bottom: -14px;
 }
 
 #profileBalanceCard #balanceManageOpen .btn-icon img,
@@ -8431,35 +8438,42 @@ body.pin-lock {
 
 @media (max-width: 540px) {
   #profileBalanceCard .profile-balance-row.balance-only {
-    min-height: 134px;
-    padding-right: 174px;
+    min-height: 152px;
+    padding-right: 186px;
   }
 
   #profileBalanceCard .profile-balance-row.history-row {
-    width: 164px;
+    width: 176px;
   }
 
   #profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row {
-    top: 44px;
+    top: 40px;
   }
 
   #profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row + .profile-balance-row.history-row {
-    top: 108px;
+    top: 112px;
   }
 
   #profileBalanceCard #balanceManageOpen,
   #profileBalanceCard #balanceHistoryOpen {
-    min-height: 58px !important;
-    padding: 11px 48px 11px 11px !important;
-    font-size: 12px !important;
+    min-height: 66px !important;
+    padding: 12px 54px 12px 12px !important;
+    font-size: 12.5px !important;
   }
 
   #profileBalanceCard #balanceManageOpen .btn-icon,
   #profileBalanceCard #balanceHistoryOpen .btn-icon {
     right: -12px;
-    bottom: -16px;
-    width: 68px;
-    height: 68px;
+    bottom: -14px;
+    width: 74px;
+    height: 74px;
+  }
+
+  #profileBalanceCard #balanceHistoryOpen .btn-icon {
+    right: -10px;
+    bottom: -12px;
+    width: 62px;
+    height: 62px;
   }
 }
 
