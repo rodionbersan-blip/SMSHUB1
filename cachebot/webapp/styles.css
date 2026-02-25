@@ -9971,3 +9971,153 @@ body.pin-lock {
     inset 0 -8px 14px rgba(158, 103, 52, 0.16),
     0 10px 16px rgba(149, 103, 63, 0.18) !important;
 }
+
+/* Final lock v22: refined theme switch with smooth animation and vector icons */
+.theme-switch {
+  min-width: 126px;
+  height: 44px;
+  padding: 4px 8px 4px 6px;
+  gap: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(129, 143, 163, 0.45);
+  background: linear-gradient(145deg, rgba(245, 246, 249, 0.86), rgba(226, 230, 236, 0.8));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    0 8px 16px rgba(15, 20, 30, 0.16);
+  transition:
+    background 0.34s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.34s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.34s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.2s ease;
+}
+
+.theme-switch-track {
+  width: 64px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(130, 138, 150, 0.4);
+  background: linear-gradient(145deg, rgba(210, 214, 220, 0.88), rgba(194, 198, 205, 0.88));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  transition:
+    background 0.34s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.34s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.34s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.theme-switch-thumb {
+  top: 2px;
+  left: 2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffffff, #f4f5f8 70%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 2px 6px rgba(16, 20, 28, 0.24);
+  transition:
+    transform 0.38s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.theme-switch[aria-pressed="true"] .theme-switch-thumb {
+  transform: translateX(30px);
+}
+
+.theme-switch-icon {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.theme-icon {
+  position: absolute;
+  inset: 0;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 0.28s ease, transform 0.38s cubic-bezier(0.2, 0.8, 0.2, 1), stroke 0.28s ease, fill 0.28s ease;
+}
+
+.theme-icon-sun {
+  stroke: #d48710;
+  fill: #f5bc45;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-icon-moon {
+  stroke: #6f7fa8;
+  fill: #9fb3de;
+  opacity: 0;
+  transform: scale(0.62) rotate(-35deg);
+}
+
+.theme-switch[aria-pressed="true"] .theme-icon-sun {
+  opacity: 0;
+  transform: scale(0.62) rotate(35deg);
+}
+
+.theme-switch[aria-pressed="true"] .theme-icon-moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-switch-label {
+  min-width: 44px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: rgba(59, 68, 82, 0.96);
+  transition: color 0.28s ease;
+}
+
+.theme-switch:active {
+  transform: translateY(1px);
+}
+
+.theme-switch:active .theme-switch-thumb {
+  transform: translateX(15px) scale(0.95);
+}
+
+.theme-switch[aria-pressed="true"]:active .theme-switch-thumb {
+  transform: translateX(30px) scale(0.95);
+}
+
+:root[data-theme="dark"] .theme-switch {
+  border-color: rgba(116, 150, 198, 0.42);
+  background: linear-gradient(145deg, rgba(17, 27, 44, 0.9), rgba(12, 20, 34, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(176, 210, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 10px 20px rgba(0, 0, 0, 0.38);
+}
+
+:root[data-theme="dark"] .theme-switch-track {
+  border-color: rgba(113, 141, 188, 0.38);
+  background: linear-gradient(145deg, rgba(33, 45, 66, 0.9), rgba(26, 36, 53, 0.9));
+}
+
+:root[data-theme="dark"] .theme-switch-thumb {
+  background: radial-gradient(circle at 30% 30%, #dbe6ff, #aebee8 75%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 3px 8px rgba(1, 6, 16, 0.45);
+}
+
+:root[data-theme="dark"] .theme-switch-label {
+  color: rgba(218, 231, 255, 0.96);
+}
+
+:root[data-theme="light"] .theme-switch {
+  border-color: rgba(174, 180, 189, 0.72);
+  background: linear-gradient(145deg, rgba(246, 246, 247, 0.92), rgba(231, 234, 238, 0.88));
+}

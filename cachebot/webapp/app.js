@@ -1494,9 +1494,7 @@
   const updateThemeToggle = (theme) => {
     if (!themeToggle) return;
     const label = themeToggle.querySelector(".theme-switch-label");
-    const icon = themeToggle.querySelector(".theme-switch-icon");
     if (label) label.textContent = theme === "dark" ? "Ночь" : "День";
-    if (icon) icon.textContent = theme === "dark" ? "🌙" : "☀️";
     themeToggle.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
   };
 
