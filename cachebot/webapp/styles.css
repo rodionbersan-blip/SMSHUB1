@@ -9832,3 +9832,62 @@ body.pin-lock {
 :root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
   filter: brightness(1.01) !important;
 }
+
+/* Final lock v16: stable text on hover, icons match text tone, more orange background */
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(
+    145deg,
+    rgba(240, 170, 84, 0.5) 0%,
+    rgba(222, 141, 58, 0.46) 52%,
+    rgba(194, 114, 40, 0.42) 100%
+  ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 187, 0.42),
+    inset 0 -8px 14px rgba(136, 82, 34, 0.14),
+    0 8px 14px rgba(128, 84, 43, 0.14) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  background-image: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  filter: none !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen .btn-icon img,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
+  filter: hue-rotate(224deg) saturate(2.8) brightness(0.94) contrast(1.06) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 187, 0.42),
+    inset 0 -8px 14px rgba(136, 82, 34, 0.14),
+    0 8px 14px rgba(128, 84, 43, 0.14) !important;
+}
+
+/* Final lock v16b: keep orange card background, static purple-blue text/icons on hover */
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  background: linear-gradient(
+    145deg,
+    rgba(240, 170, 84, 0.5) 0%,
+    rgba(222, 141, 58, 0.46) 52%,
+    rgba(194, 114, 40, 0.42) 100%
+  ) !important;
+  color: #576ff6 !important;
+  filter: none !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen .btn-icon img,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
+  filter: hue-rotate(224deg) saturate(2.8) brightness(0.94) contrast(1.06) !important;
+}
