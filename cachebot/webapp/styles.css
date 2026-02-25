@@ -7706,15 +7706,15 @@ body.pin-lock {
 }
 
 .quick-deals-btn.is-active .quick-deals-toggle-icon span {
-  opacity: 1;
+  opacity: 0;
 }
 
 .quick-deals-btn.is-active .quick-deals-toggle-icon::before {
-  transform: translateY(-5px);
+  transform: rotate(45deg);
 }
 
 .quick-deals-btn.is-active .quick-deals-toggle-icon::after {
-  transform: translateY(5px);
+  transform: rotate(-45deg);
 }
 
 .quick-deals-btn.is-active {
