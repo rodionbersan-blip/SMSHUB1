@@ -2174,7 +2174,7 @@
       }
       if (profileMerchantSince) {
         profileMerchantSince.textContent = isMerchant && data?.merchant_since
-          ? `Мерчант с: ${formatDate(data.merchant_since)}`
+          ? `Назначен: ${formatDate(data.merchant_since)}`
           : "";
       }
       scheduleProfileRoleFit();
