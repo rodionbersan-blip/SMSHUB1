@@ -10121,3 +10121,300 @@ body.pin-lock {
   border-color: rgba(174, 180, 189, 0.72);
   background: linear-gradient(145deg, rgba(246, 246, 247, 0.92), rgba(231, 234, 238, 0.88));
 }
+
+/* Final lock v24: moon/sun toggle inspired by provided design */
+.theme-switch {
+  width: 132px !important;
+  height: 48px !important;
+  min-width: 132px !important;
+  padding: 4px 7px !important;
+  gap: 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(168, 173, 182, 0.85) !important;
+  background: linear-gradient(145deg, #f2f2f3 0%, #e6e8eb 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 8px 16px rgba(18, 24, 35, 0.16) !important;
+  transition: background 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease !important;
+}
+
+.theme-switch-track {
+  width: 70px !important;
+  height: 38px !important;
+  border-radius: 999px !important;
+  border: none !important;
+  background: #24d7f7 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden !important;
+  transition: background 0.45s ease !important;
+}
+
+.theme-switch-thumb {
+  top: 3px !important;
+  left: 3px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: #f7ffff !important;
+  box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.85) !important;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s ease, box-shadow 0.4s ease !important;
+}
+
+.theme-star,
+.theme-crater {
+  position: absolute;
+  display: block;
+  transition: all 0.5s ease;
+}
+
+.theme-crater {
+  border-radius: 50%;
+  background: #faeaf1;
+  opacity: 0;
+}
+
+.theme-crater-1 {
+  width: 9px;
+  height: 9px;
+  top: 5px;
+  left: 15px;
+}
+
+.theme-crater-2 {
+  width: 6px;
+  height: 6px;
+  top: 13px;
+  left: 6px;
+}
+
+.theme-crater-3 {
+  width: 7px;
+  height: 7px;
+  top: 16px;
+  left: 20px;
+}
+
+.theme-crater-4 {
+  width: 5px;
+  height: 5px;
+  top: 23px;
+  left: 12px;
+}
+
+.theme-crater-5 {
+  width: 4px;
+  height: 4px;
+  top: 9px;
+  left: 23px;
+}
+
+.theme-star {
+  border-radius: 50%;
+  background: #ffffff;
+  opacity: 0;
+}
+
+.theme-star-1 {
+  width: 4px;
+  height: 4px;
+  top: 8px;
+  right: 12px;
+}
+
+.theme-star-2 {
+  width: 5px;
+  height: 5px;
+  top: 18px;
+  right: 18px;
+}
+
+.theme-star-3 {
+  width: 3px;
+  height: 3px;
+  top: 6px;
+  right: 24px;
+}
+
+.theme-star-4,
+.theme-star-5,
+.theme-star-6 {
+  width: 9px;
+  height: 2px;
+  border-radius: 2px;
+  transform: rotate(-45deg) translateX(28px);
+  opacity: 0;
+}
+
+.theme-star-4 {
+  right: 10px;
+  bottom: 11px;
+}
+
+.theme-star-5 {
+  right: 18px;
+  bottom: 18px;
+}
+
+.theme-star-6 {
+  right: 26px;
+  bottom: 8px;
+}
+
+.theme-switch-label {
+  min-width: 40px !important;
+  font-size: 39px !important;
+  font-weight: 700 !important;
+  color: #5f6674 !important;
+  letter-spacing: 0 !important;
+}
+
+.theme-switch[aria-pressed="true"] {
+  background: linear-gradient(145deg, #1f103f 0%, #291353 100%) !important;
+  border-color: rgba(114, 124, 166, 0.55) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 18px rgba(10, 8, 24, 0.45) !important;
+}
+
+.theme-switch[aria-pressed="true"] .theme-switch-track {
+  background: #211042 !important;
+}
+
+.theme-switch[aria-pressed="true"] .theme-switch-thumb {
+  transform: translateX(32px) !important;
+  background: #faeaf1 !important;
+  box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.45) !important;
+}
+
+.theme-switch[aria-pressed="true"] .theme-crater {
+  opacity: 1;
+}
+
+.theme-switch[aria-pressed="true"] .theme-star {
+  opacity: 1;
+}
+
+.theme-switch[aria-pressed="true"] .theme-star-4,
+.theme-switch[aria-pressed="true"] .theme-star-5,
+.theme-switch[aria-pressed="true"] .theme-star-6 {
+  animation: themeStarTravel 1.6s ease-out infinite;
+}
+
+.theme-switch[aria-pressed="true"] .theme-star-5 {
+  animation-delay: -0.5s;
+}
+
+.theme-switch[aria-pressed="true"] .theme-star-6 {
+  animation-delay: -1s;
+}
+
+.theme-switch[aria-pressed="true"] .theme-switch-label {
+  color: #d8deea !important;
+}
+
+.theme-switch:not([aria-pressed="true"]) .theme-star {
+  opacity: 1;
+  animation: none !important;
+}
+
+.theme-switch:not([aria-pressed="true"]) .theme-star-1 {
+  width: 18px;
+  height: 6px;
+  border-radius: 6px;
+  background: #ffffff;
+  top: 11px;
+  left: 11px;
+  right: auto;
+  box-shadow: none;
+}
+
+.theme-switch:not([aria-pressed="true"]) .theme-star-2 {
+  width: 9px;
+  height: 9px;
+  top: 10px;
+  left: 17px;
+  right: auto;
+}
+
+.theme-switch:not([aria-pressed="true"]) .theme-star-3 {
+  width: 11px;
+  height: 11px;
+  top: 8px;
+  left: 25px;
+  right: auto;
+}
+
+.theme-switch:not([aria-pressed="true"]) .theme-star-4 {
+  width: 23px;
+  height: 7px;
+  border-radius: 7px;
+  transform: none;
+  top: 20px;
+  left: 18px;
+  right: auto;
+  bottom: auto;
+  opacity: 1;
+}
+
+.theme-switch:not([aria-pressed="true"]) .theme-star-5 {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  transform: none;
+  top: 17px;
+  left: 16px;
+  right: auto;
+  bottom: auto;
+  opacity: 1;
+}
+
+.theme-switch:not([aria-pressed="true"]) .theme-star-6 {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  transform: none;
+  top: 16px;
+  left: 28px;
+  right: auto;
+  bottom: auto;
+  opacity: 1;
+}
+
+@keyframes themeStarTravel {
+  0% {
+    transform: rotate(-45deg) translateX(24px);
+    opacity: 1;
+  }
+  65% {
+    transform: rotate(-45deg) translateX(-9px);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-45deg) translateX(-16px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch,
+  .theme-switch * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Final lock v25: icon-only theme toggle (no day/night text) */
+.theme-switch {
+  width: 86px !important;
+  min-width: 86px !important;
+  height: 48px !important;
+  padding: 4px 6px !important;
+  gap: 0 !important;
+  justify-content: center !important;
+}
+
+.theme-switch .theme-switch-label {
+  display: none !important;
+}
