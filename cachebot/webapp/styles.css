@@ -9943,3 +9943,21 @@ body.pin-lock {
 :root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
   filter: brightness(0) saturate(100%) invert(31%) sepia(87%) saturate(1764%) hue-rotate(208deg) brightness(94%) contrast(97%) !important;
 }
+
+/* Final lock v19: plain black text on light theme balance buttons */
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  color: #000000 !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+/* Final lock v20: translucent black text on light theme balance buttons */
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  color: rgba(0, 0, 0, 0.72) !important;
+}
