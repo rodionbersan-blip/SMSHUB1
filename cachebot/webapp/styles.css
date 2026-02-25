@@ -8571,3 +8571,117 @@ body.pin-lock {
     transform: none !important;
   }
 }
+
+/* Profile layout refinement: registration + two-column role/balance row */
+.profile-registered-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -6px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(120, 180, 255, 0.24);
+  background: rgba(18, 22, 30, 0.5);
+}
+
+.profile-registered-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8fb6d8;
+}
+
+#profileRegistered {
+  text-align: right;
+  font-weight: 600;
+}
+
+.profile-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+#profileRoleCard,
+#profileBalanceCard {
+  background: rgba(18, 22, 30, 0.44);
+  border: 1px solid rgba(120, 180, 255, 0.2);
+  border-radius: 20px;
+  padding: 14px;
+  border-bottom: none;
+}
+
+#profileRoleCard .profile-title,
+#profileBalanceCard .profile-title {
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #8fb6d8;
+}
+
+#profileRoleCard #profileRole {
+  font-size: 36px;
+  line-height: 1;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only {
+  min-height: 168px;
+  padding-right: 250px;
+}
+
+#profileBalanceCard .profile-balance-row.history-row {
+  right: 14px;
+  width: 224px;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row {
+  top: 8px;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row + .profile-balance-row.history-row {
+  top: 92px;
+}
+
+#profileBalanceCard #balanceManageOpen,
+#profileBalanceCard #balanceHistoryOpen {
+  min-height: 76px !important;
+  padding: 13px 64px 13px 14px !important;
+  font-size: 14px !important;
+}
+
+:root[data-theme="light"] .profile-registered-line {
+  background: rgba(240, 247, 255, 0.88);
+  border-color: rgba(120, 160, 220, 0.28);
+}
+
+:root[data-theme="light"] .profile-registered-label {
+  color: #4d6f99;
+}
+
+:root[data-theme="light"] #profileRoleCard,
+:root[data-theme="light"] #profileBalanceCard {
+  background: rgba(246, 251, 255, 0.92);
+  border-color: rgba(120, 160, 220, 0.24);
+}
+
+:root[data-theme="light"] #profileRoleCard .profile-title,
+:root[data-theme="light"] #profileBalanceCard .profile-title {
+  color: #4d6f99;
+}
+
+@media (max-width: 860px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #profileBalanceCard .profile-balance-row.balance-only {
+    min-height: 176px;
+    padding-right: 252px;
+  }
+
+  #profileBalanceCard .profile-balance-row.history-row {
+    right: 18px;
+    width: 220px;
+  }
+}
