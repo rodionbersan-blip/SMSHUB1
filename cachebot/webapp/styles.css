@@ -9627,3 +9627,56 @@ body.pin-lock {
   justify-content: center !important;
   text-align: center !important;
 }
+
+/* Final lock v9: no button borders, stronger card contrast, darker dark-app background */
+.profile-balance-actions-wide #balanceManageOpen,
+.profile-balance-actions-wide #balanceHistoryOpen {
+  border: none !important;
+  outline: none !important;
+}
+
+:root[data-theme="dark"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="dark"] .profile-balance-actions-wide #balanceHistoryOpen {
+  color: #dff2ff !important;
+  background: linear-gradient(145deg, #123356 0%, #1a4872 54%, #235b85 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(193, 231, 255, 0.2),
+    inset 0 -18px 28px rgba(5, 14, 28, 0.4),
+    0 12px 24px rgba(2, 10, 22, 0.5) !important;
+}
+
+:root[data-theme="dark"] .profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(145deg, #14385d 0%, #1d4e79 54%, #26628f 100%) !important;
+}
+
+:root[data-theme="dark"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="dark"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  filter: brightness(1.08) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  color: #0f4268 !important;
+  background: linear-gradient(145deg, #dcecff 0%, #c9e0fb 54%, #b6d4f4 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -10px 16px rgba(106, 155, 202, 0.2),
+    0 9px 16px rgba(85, 126, 167, 0.2) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(145deg, #e0efff 0%, #cde2fb 54%, #b9d6f2 100%) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  filter: brightness(1.05) !important;
+}
+
+:root[data-theme="dark"] {
+  --bg: #090b10 !important;
+}
+
+:root[data-theme="dark"] body {
+  background: #090b10 !important;
+}
