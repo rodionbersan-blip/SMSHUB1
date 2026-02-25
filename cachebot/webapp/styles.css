@@ -7503,7 +7503,7 @@ body.pin-lock {
   -webkit-backdrop-filter: blur(20px) saturate(1.25);
   z-index: 50;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .quick-deals-radial {
@@ -7679,6 +7679,7 @@ body.pin-lock {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
 .quick-deals-toggle-icon span,
@@ -7722,6 +7723,18 @@ body.pin-lock {
     inset 0 0 0 2px rgba(255, 168, 62, 0.95),
     0 16px 30px rgba(0, 0, 0, 0.36);
   z-index: 56;
+}
+
+.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon span {
+  opacity: 1 !important;
+}
+
+.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon::before {
+  transform: translateY(-5px) !important;
+}
+
+.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon::after {
+  transform: translateY(5px) !important;
 }
 
 .quick-deals-btn:active {
