@@ -9961,3 +9961,13 @@ body.pin-lock {
 :root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
   color: rgba(0, 0, 0, 0.72) !important;
 }
+
+/* Final lock v21: subtle hover for light theme balance buttons (like dark theme) */
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  filter: brightness(1.03) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 238, 206, 0.54),
+    inset 0 -8px 14px rgba(158, 103, 52, 0.16),
+    0 10px 16px rgba(149, 103, 63, 0.18) !important;
+}
