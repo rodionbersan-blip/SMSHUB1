@@ -10418,3 +10418,33 @@ body.pin-lock {
 .theme-switch .theme-switch-label {
   display: none !important;
 }
+
+/* Final lock v26: borderless theme toggle like reference */
+.theme-switch,
+.theme-switch:hover,
+.theme-switch:focus-visible,
+.theme-switch:active {
+  border: none !important;
+  outline: none !important;
+  box-shadow:
+    0 10px 20px rgba(14, 10, 35, 0.22) !important;
+}
+
+.theme-switch-track,
+.theme-switch-track:hover,
+.theme-switch-track:active {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.theme-switch-thumb {
+  box-shadow: 0 0 14px 3px rgba(255, 255, 255, 0.45) !important;
+}
+
+:root[data-theme="light"] .theme-switch {
+  background: linear-gradient(145deg, #efeebf 0%, #e8e6ad 100%) !important;
+}
+
+:root[data-theme="dark"] .theme-switch {
+  background: linear-gradient(145deg, #2a1151 0%, #261144 100%) !important;
+}
