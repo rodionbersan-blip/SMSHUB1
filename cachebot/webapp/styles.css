@@ -9608,3 +9608,22 @@ body.pin-lock {
 :root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
   filter: sepia(1) saturate(4.4) hue-rotate(352deg) brightness(1.03) contrast(0.95) !important;
 }
+
+/* Final lock v8: center content in role and balance cards */
+#profileRoleCard .profile-title,
+#profileBalanceCard .profile-title {
+  width: 100% !important;
+  text-align: center !important;
+}
+
+#profileRoleCard #profileRole {
+  width: 100% !important;
+  text-align: center !important;
+  justify-content: center !important;
+}
+
+#profileBalance {
+  width: 100% !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
