@@ -10466,6 +10466,7 @@ body.pin-lock {
   align-items: center;
   justify-content: center;
   overflow: visible !important;
+  line-height: 0 !important;
 }
 
 .theme-switch:focus,
@@ -10491,7 +10492,7 @@ body.pin-lock {
 .theme-switch .toggle {
   cursor: pointer;
   position: relative;
-  display: inline-block;
+  display: block;
   width: 72px;
   height: 40px;
   background-color: #83d8ff;
