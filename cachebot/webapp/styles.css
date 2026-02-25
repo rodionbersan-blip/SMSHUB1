@@ -9520,3 +9520,20 @@ body.pin-lock {
     bottom: -14px !important;
   }
 }
+
+/* Final lock v5: profile balance in one line */
+#profileBalance {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+}
+
+#profileBalance .balance-amount,
+#profileBalance .balance-currency {
+  display: inline !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
