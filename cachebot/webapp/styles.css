@@ -10465,7 +10465,7 @@ body.pin-lock {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  overflow: visible !important;
+  overflow: hidden !important;
   line-height: 0 !important;
 }
 
@@ -10510,7 +10510,7 @@ body.pin-lock {
   background-color: #ffcf96;
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transform: rotate(-45deg);
+  transform: rotate(0deg);
   transition: all 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
