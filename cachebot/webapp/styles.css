@@ -300,6 +300,7 @@ body.modal-open #app {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: background-color 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
 }
 
 .theme-switch-thumb {
@@ -314,11 +315,13 @@ body.modal-open #app {
   display: grid;
   place-items: center;
   font-size: 12px;
-  transition: transform 0.25s ease;
+  transition: transform 0.34s cubic-bezier(0.22, 0.9, 0.32, 1), background-color 0.28s ease;
+  will-change: transform;
 }
 
 .theme-switch-icon {
   line-height: 1;
+  transition: transform 0.28s ease, opacity 0.22s ease;
 }
 
 .theme-switch-label {
@@ -330,9 +333,24 @@ body.modal-open #app {
   background: #0f1115;
 }
 
-:root[data-theme="dark"] .theme-switch-thumb {
+.theme-switch[aria-pressed="true"] .theme-switch-thumb {
   transform: translateX(20px);
+}
+
+:root[data-theme="dark"] .theme-switch-thumb {
   background: #ffffff;
+}
+
+.theme-switch[aria-pressed="true"] .theme-switch-icon {
+  transform: rotate(16deg) scale(1.04);
+}
+
+.theme-switch:active .theme-switch-thumb {
+  transform: translateX(10px) scale(0.96);
+}
+
+.theme-switch[aria-pressed="true"]:active .theme-switch-thumb {
+  transform: translateX(20px) scale(0.96);
 }
 
 :root[data-theme="dark"] .theme-switch-label {
@@ -742,6 +760,11 @@ body.modal-open #app {
   filter: none;
 }
 
+#balanceManageOpen .btn-icon img,
+#balanceHistoryOpen .btn-icon img {
+  filter: none;
+}
+
 .btn.oval {
   height: 40px;
   border-radius: 999px;
@@ -821,13 +844,25 @@ body.modal-open #app {
 
 .btn.review-btn {
   height: 34px;
-  padding: 0 14px;
+  padding: 0 14px 0 12px;
   border-radius: 999px;
   background: linear-gradient(135deg, rgba(199, 152, 62, 0.85), rgba(226, 186, 92, 0.9));
   border: 1px solid rgba(214, 170, 90, 0.5);
   color: #ffffff;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.6);
   box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn.review-btn::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  background: url("/app/assets/icons8-feedback-48.png") center / contain no-repeat;
 }
 
 .btn.review-btn:hover {
@@ -944,6 +979,24 @@ body.modal-open #app {
   padding: 8px 8px;
   text-align: center;
   word-break: break-word;
+  grid-column: 1 / -1;
+}
+
+.nav-btn.merchant-sell-nav .nav-label {
+  display: inline-block;
+  white-space: normal;
+}
+
+.nav-btn.merchant-sell-nav.is-compact {
+  font-size: 10.5px;
+  line-height: 1.02;
+  padding: 6px 6px;
+  gap: 5px;
+}
+
+.nav-btn.merchant-sell-nav.is-compact .nav-label {
+  max-width: 86px;
+  line-height: 1.02;
 }
 
 .nav-btn.has-badge {
@@ -1158,10 +1211,10 @@ body.modal-open #app {
 }
 
 :root[data-theme="light"] .tabs-indicator {
-  background: linear-gradient(135deg, rgba(31, 41, 55, 0.92), rgba(17, 24, 39, 0.9));
+  background: linear-gradient(135deg, rgba(129, 170, 255, 0.9), rgba(111, 129, 242, 0.9));
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.58),
-    0 8px 16px rgba(0, 0, 0, 0.18);
+    inset 0 0 0 1px rgba(220, 236, 255, 0.7),
+    0 8px 16px rgba(35, 64, 126, 0.18);
 }
 
 .panel {
@@ -1850,11 +1903,387 @@ body.modal-open #app {
   }
 }
 
-/* Final profile layout: inline registration, role+balance row, wide action row */
-.profile-registered-line {
-  display: none !important;
+/* Final lock: blue style for profile balance action buttons */
+.profile-balance-actions-wide #balanceManageOpen,
+.profile-balance-actions-wide #balanceHistoryOpen {
+  min-height: 86px !important;
+  border-radius: 32px !important;
+  border: 2px solid rgba(91, 153, 204, 0.55) !important;
+  padding: 18px 84px 18px 22px !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.01em !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  color: #d7edff !important;
+  backdrop-filter: blur(1.5px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(170, 215, 249, 0.22),
+    inset 0 -14px 26px rgba(6, 18, 35, 0.34),
+    0 10px 24px rgba(5, 14, 28, 0.44) !important;
 }
 
+.profile-balance-actions-wide #balanceManageOpen {
+  background: linear-gradient(140deg, #0b1c32 0%, #133150 58%, #1d4666 100%) !important;
+}
+
+.profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(140deg, #0c1d33 0%, #14314f 58%, #1a3f5d 100%) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen:hover,
+.profile-balance-actions-wide #balanceHistoryOpen:hover {
+  border-color: rgba(121, 182, 233, 0.72) !important;
+  filter: brightness(1.06) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen .btn-icon,
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  position: absolute !important;
+  right: -22px !important;
+  bottom: -24px !important;
+  width: 130px !important;
+  height: 130px !important;
+  opacity: 0.3 !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  width: 112px !important;
+  height: 112px !important;
+  right: -18px !important;
+  bottom: -18px !important;
+  opacity: 0.28 !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen .btn-icon img,
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen > :not(.btn-icon),
+.profile-balance-actions-wide #balanceHistoryOpen > :not(.btn-icon) {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  color: #0b436d !important;
+  border-color: rgba(93, 152, 202, 0.5) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    inset 0 -14px 22px rgba(141, 192, 228, 0.24),
+    0 8px 18px rgba(88, 138, 181, 0.24) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen {
+  background: linear-gradient(140deg, #e8f6ff 0%, #d4ecff 58%, #bedfff 100%) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(140deg, #e7f5ff 0%, #d2ebff 58%, #bbdcfb 100%) !important;
+}
+
+@media (max-width: 540px) {
+  .profile-balance-actions-wide #balanceManageOpen,
+  .profile-balance-actions-wide #balanceHistoryOpen {
+    min-height: 78px !important;
+    padding: 14px 72px 14px 16px !important;
+    font-size: 14px !important;
+    border-radius: 28px !important;
+  }
+
+  .profile-balance-actions-wide #balanceManageOpen .btn-icon,
+  .profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+    width: 112px !important;
+    height: 112px !important;
+    right: -18px !important;
+    bottom: -20px !important;
+  }
+
+  .profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+    width: 96px !important;
+    height: 96px !important;
+    right: -15px !important;
+    bottom: -16px !important;
+  }
+}
+
+/* Final profile buttons style lock */
+#profileRoleCard #profileRole {
+  font-size: clamp(32px, 3.2vw, 42px) !important;
+  line-height: 1.05 !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen,
+.profile-balance-actions-wide #balanceHistoryOpen {
+  width: 100% !important;
+  min-height: 80px !important;
+  padding: 12px 18px !important;
+  border-radius: 22px !important;
+  border: 1px solid transparent !important;
+  color: #ffffff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  text-align: center !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.24),
+    inset 0 10px 16px rgba(255, 255, 255, 0.12),
+    inset 0 -10px 16px rgba(24, 34, 60, 0.28),
+    0 10px 22px rgba(8, 14, 28, 0.34) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen {
+  background: linear-gradient(135deg, rgba(234, 167, 63, 0.96), rgba(201, 133, 35, 0.96)) !important;
+  border-color: rgba(255, 206, 128, 0.55) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen:hover {
+  background: linear-gradient(135deg, rgba(245, 181, 84, 0.98), rgba(214, 145, 48, 0.98)) !important;
+}
+
+.profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(135deg, rgba(77, 131, 231, 0.96), rgba(82, 72, 190, 0.96)) !important;
+  border-color: rgba(165, 191, 255, 0.48) !important;
+}
+
+.profile-balance-actions-wide #balanceHistoryOpen:hover {
+  background: linear-gradient(135deg, rgba(92, 148, 245, 0.98), rgba(94, 82, 205, 0.98)) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen .btn-icon,
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  position: static !important;
+  width: 24px !important;
+  height: 24px !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* Profile final tuning: role size + balance action card style */
+#profileRoleCard #profileRole {
+  font-size: clamp(40px, 4.4vw, 52px) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.01em;
+}
+
+.profile-balance-actions-wide #balanceManageOpen,
+.profile-balance-actions-wide #balanceHistoryOpen {
+  min-height: 78px !important;
+  border-radius: 22px !important;
+  padding: 12px 16px !important;
+  border: 1px solid transparent !important;
+  color: #ffffff !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.24),
+    inset 0 10px 16px rgba(255, 255, 255, 0.12),
+    inset 0 -10px 16px rgba(24, 34, 60, 0.28),
+    0 10px 22px rgba(8, 14, 28, 0.34) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen {
+  background: linear-gradient(135deg, rgba(234, 167, 63, 0.96), rgba(201, 133, 35, 0.96)) !important;
+  border-color: rgba(255, 206, 128, 0.55) !important;
+}
+
+.profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(135deg, rgba(77, 131, 231, 0.96), rgba(82, 72, 190, 0.96)) !important;
+  border-color: rgba(165, 191, 255, 0.48) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen:hover {
+  background: linear-gradient(135deg, rgba(245, 181, 84, 0.98), rgba(214, 145, 48, 0.98)) !important;
+}
+
+.profile-balance-actions-wide #balanceHistoryOpen:hover {
+  background: linear-gradient(135deg, rgba(92, 148, 245, 0.98), rgba(94, 82, 205, 0.98)) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen .btn-icon,
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  width: 24px !important;
+  height: 24px !important;
+  opacity: 1 !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.38),
+    inset 0 10px 16px rgba(255, 255, 255, 0.2),
+    inset 0 -10px 16px rgba(28, 42, 74, 0.2),
+    0 10px 20px rgba(28, 42, 74, 0.24) !important;
+}
+
+/* Balance actions style: blue cards with oversized corner icons */
+.profile-balance-actions-wide #balanceManageOpen,
+.profile-balance-actions-wide #balanceHistoryOpen {
+  min-height: 86px !important;
+  border-radius: 30px !important;
+  padding: 12px 60px 12px 20px !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  font-size: 42px !important;
+  font-weight: 700 !important;
+  line-height: 1.02 !important;
+  color: #d9edff !important;
+  border: 2px solid rgba(86, 150, 208, 0.62) !important;
+  background: linear-gradient(135deg, rgba(14, 48, 83, 0.96), rgba(31, 74, 109, 0.96)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(154, 208, 255, 0.1),
+    inset 0 12px 16px rgba(255, 255, 255, 0.05),
+    inset 0 -14px 18px rgba(9, 23, 42, 0.38) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen:hover,
+.profile-balance-actions-wide #balanceHistoryOpen:hover {
+  background: linear-gradient(135deg, rgba(18, 57, 96, 0.98), rgba(39, 88, 126, 0.98)) !important;
+  border-color: rgba(106, 172, 232, 0.72) !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen .btn-icon,
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  position: absolute !important;
+  right: -12px !important;
+  bottom: -14px !important;
+  width: 82px !important;
+  height: 82px !important;
+  opacity: 0.22 !important;
+}
+
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  width: 74px !important;
+  height: 74px !important;
+}
+
+/* Profile layout refinement: registration + two-column role/balance row */
+.profile-registered-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -6px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(120, 180, 255, 0.24);
+  background: rgba(18, 22, 30, 0.5);
+}
+
+.profile-registered-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8fb6d8;
+}
+
+#profileRegistered {
+  text-align: right;
+  font-weight: 600;
+}
+
+.profile-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+#profileRoleCard,
+#profileBalanceCard {
+  background: rgba(18, 22, 30, 0.44);
+  border: 1px solid rgba(120, 180, 255, 0.2);
+  border-radius: 20px;
+  padding: 14px;
+  border-bottom: none;
+}
+
+#profileRoleCard .profile-title,
+#profileBalanceCard .profile-title {
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #8fb6d8;
+}
+
+#profileRoleCard #profileRole {
+  font-size: 36px;
+  line-height: 1;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only {
+  min-height: 168px;
+  padding-right: 250px;
+}
+
+#profileBalanceCard .profile-balance-row.history-row {
+  right: 14px;
+  width: 224px;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row {
+  top: 8px;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row + .profile-balance-row.history-row {
+  top: 92px;
+}
+
+#profileBalanceCard #balanceManageOpen,
+#profileBalanceCard #balanceHistoryOpen {
+  min-height: 76px !important;
+  padding: 13px 64px 13px 14px !important;
+  font-size: 14px !important;
+}
+
+:root[data-theme="light"] .profile-registered-line {
+  background: rgba(240, 247, 255, 0.88);
+  border-color: rgba(120, 160, 220, 0.28);
+}
+
+:root[data-theme="light"] .profile-registered-label {
+  color: #4d6f99;
+}
+
+:root[data-theme="light"] #profileRoleCard,
+:root[data-theme="light"] #profileBalanceCard {
+  background: rgba(246, 251, 255, 0.92);
+  border-color: rgba(120, 160, 220, 0.24);
+}
+
+:root[data-theme="light"] #profileRoleCard .profile-title,
+:root[data-theme="light"] #profileBalanceCard .profile-title {
+  color: #4d6f99;
+}
+
+@media (max-width: 860px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #profileBalanceCard .profile-balance-row.balance-only {
+    min-height: 176px;
+    padding-right: 252px;
+  }
+
+  #profileBalanceCard .profile-balance-row.history-row {
+    right: 18px;
+    width: 220px;
+  }
+}
+
+/* Profile layout override: inline registration + role/balance row + wide action row */
 .profile-registered-inline {
   display: block;
   margin: -8px 0 10px;
@@ -1922,6 +2351,94 @@ body.modal-open #app {
   height: 22px !important;
   opacity: 0.95 !important;
   margin: 0 !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen .btn-icon img,
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (max-width: 860px) {
+  .profile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .profile-balance-actions-wide {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Override: quick deals icon + balance cards placement */
+.quick-deals-icon-wrap,
+.quick-deals-icon-img {
+  display: none !important;
+}
+
+.quick-deals-toggle-icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-deals-toggle-icon span,
+.quick-deals-toggle-icon::before,
+.quick-deals-toggle-icon::after {
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: #ffbf73;
+  transition: transform 0.22s ease, opacity 0.18s ease;
+}
+
+.quick-deals-toggle-icon::before,
+.quick-deals-toggle-icon::after {
+  content: "";
+}
+
+.quick-deals-toggle-icon::before {
+  transform: translateY(-5px);
+}
+
+.quick-deals-toggle-icon::after {
+  transform: translateY(5px);
+}
+
+.quick-deals-btn {
+  box-shadow:
+    inset 0 0 0 1.6px rgba(255, 168, 62, 0.9),
+    0 14px 28px rgba(0, 0, 0, 0.28) !important;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only {
+  min-height: 186px !important;
+  padding-right: 322px !important;
+}
+
+#profileBalanceCard .profile-balance-row.history-row {
+  right: 26px !important;
+  width: 272px !important;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row {
+  top: 2px !important;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row + .profile-balance-row.history-row {
+  top: 98px !important;
+}
+
+#profileBalanceCard #balanceManageOpen,
+#profileBalanceCard #balanceHistoryOpen {
+  min-height: 84px !important;
+  padding: 14px 68px 14px 16px !important;
+  font-size: 15px !important;
 }
 
 .deal-header {
@@ -2002,7 +2519,7 @@ body.modal-open #app {
 .deal-review-block.has-label {
   background: transparent;
   border: 0;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .deal-review-block.has-label .deal-review-body {
@@ -2152,6 +2669,20 @@ body.modal-open #app {
 .p2p-merchant-btn:hover {
   background: rgba(38, 48, 68, 0.65);
   border-color: rgba(120, 180, 255, 0.35);
+}
+
+:root[data-theme="light"] .p2p-merchant-btn {
+  background: linear-gradient(135deg, rgba(151, 175, 214, 0.92), rgba(133, 154, 190, 0.92));
+  border-color: rgba(140, 160, 192, 0.72);
+  color: #f7fbff;
+  box-shadow:
+    inset 0 0 0 1px rgba(230, 240, 255, 0.62),
+    0 8px 18px rgba(28, 44, 72, 0.16);
+}
+
+:root[data-theme="light"] .p2p-merchant-btn:hover {
+  background: linear-gradient(135deg, rgba(162, 186, 224, 0.96), rgba(142, 165, 202, 0.96));
+  border-color: rgba(120, 148, 188, 0.82);
 }
 
 .p2p-bank-logos {
@@ -2447,6 +2978,20 @@ body.modal-open #app {
 
 .merchant-sell-actions .btn.full {
   width: 100%;
+}
+
+:root[data-theme="light"] .merchant-sell-card {
+  background: rgba(246, 250, 255, 0.9);
+  border: 1px solid rgba(120, 160, 220, 0.2);
+  box-shadow: 0 14px 28px rgba(18, 28, 42, 0.12);
+}
+
+:root[data-theme="light"] .merchant-sell-rate {
+  color: #1f2a3a;
+}
+
+:root[data-theme="light"] .merchant-sell-note {
+  color: #6d7d93;
 }
 
 .p2p-toolbar {
@@ -4280,7 +4825,15 @@ body.modal-open #app {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  transition: transform 0.25s ease, width 0.25s ease;
+  opacity: 0;
+  transition:
+    transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 160ms ease;
+}
+
+.reviews-tabs .tab-indicator.ready {
+  opacity: 1;
 }
 
 :root[data-theme="light"] .reviews-tabs .tab-indicator {
@@ -7569,15 +8122,86 @@ body.pin-lock {
   justify-content: center;
   padding: 0;
   cursor: pointer;
-  box-shadow:
-    inset 0 0 0 1.6px rgba(255, 168, 62, 0.88),
-    0 14px 28px rgba(0, 0, 0, 0.28);
   border: 0;
   backdrop-filter: blur(20px) saturate(1.25);
   -webkit-backdrop-filter: blur(20px) saturate(1.25);
   z-index: 50;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  overflow: hidden;
+  overflow: visible;
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 168, 62, 0.62),
+    0 14px 28px rgba(0, 0, 0, 0.28);
+}
+
+.quick-deals-toggle-icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.quick-deals-toggle-icon span,
+.quick-deals-toggle-icon::before,
+.quick-deals-toggle-icon::after {
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: #ffbf73;
+  transition: transform 0.22s ease, opacity 0.18s ease;
+}
+
+.quick-deals-toggle-icon::before,
+.quick-deals-toggle-icon::after {
+  content: "";
+}
+
+.quick-deals-toggle-icon::before {
+  transform: translateY(-5px);
+}
+
+.quick-deals-toggle-icon::after {
+  transform: translateY(5px);
+}
+
+.quick-deals-btn.is-active .quick-deals-toggle-icon span,
+.quick-deals-btn.is-active .quick-deals-toggle-icon::before,
+.quick-deals-btn.is-active .quick-deals-toggle-icon::after {
+  width: 16px;
+}
+
+.quick-deals-btn.is-active .quick-deals-toggle-icon span {
+  opacity: 0;
+}
+
+.quick-deals-btn.is-active .quick-deals-toggle-icon::before {
+  transform: rotate(45deg);
+}
+
+.quick-deals-btn.is-active .quick-deals-toggle-icon::after {
+  transform: rotate(-45deg);
+}
+
+.quick-deals-btn.is-active {
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 168, 62, 0.95),
+    0 16px 30px rgba(0, 0, 0, 0.36);
+  z-index: 56;
+}
+
+.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon span {
+  opacity: 1 !important;
+}
+
+.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon::before {
+  transform: translateY(-5px) !important;
+}
+
+.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon::after {
+  transform: translateY(5px) !important;
 }
 
 .quick-deals-radial {
@@ -7592,6 +8216,10 @@ body.pin-lock {
 
 .quick-deals-radial.open {
   pointer-events: auto;
+}
+
+.quick-deals-radial.open.empty-only {
+  pointer-events: none;
 }
 
 .quick-radial-item {
@@ -7624,14 +8252,22 @@ body.pin-lock {
   transition-delay: 0s;
 }
 
-.quick-radial-item:disabled,
-.quick-radial-item.is-disabled {
+.quick-radial-support {
+  transition-delay: 0.08s;
+}
+
+.quick-deals-radial.open .quick-radial-item:disabled,
+.quick-deals-radial.open .quick-radial-item.is-disabled {
   opacity: 0.5 !important;
 }
 
 .quick-deals-radial.open .quick-radial-item {
   opacity: 1;
   pointer-events: auto;
+  border-color: rgba(255, 168, 62, 0.95);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 226, 178, 0.68),
+    0 10px 20px rgba(0, 0, 0, 0.34);
 }
 
 .quick-deals-radial.open .quick-radial-deals {
@@ -7642,10 +8278,30 @@ body.pin-lock {
   transform: translate(64px, -58px) scale(1);
 }
 
+.quick-deals-radial.open .quick-radial-support {
+  transform: translate(82px, 2px) scale(1);
+}
+
+.quick-radial-item.is-hidden {
+  display: none !important;
+}
+
 .quick-deals-radial.empty-only .quick-radial-item {
   opacity: 0 !important;
   pointer-events: none !important;
   transform: translate(0, 0) scale(0.78) !important;
+}
+
+.quick-deals-radial.empty-only .quick-radial-item:disabled,
+.quick-deals-radial.empty-only .quick-radial-item.is-disabled {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.quick-deals-radial:not(.open) .quick-radial-item {
+  opacity: 0 !important;
+  transform: translate(0, 0) scale(0.72) !important;
+  pointer-events: none !important;
 }
 
 .quick-radial-icon {
@@ -7717,14 +8373,14 @@ body.pin-lock {
 :root[data-theme="dark"] .quick-deals-btn {
   background: rgba(10, 14, 22, 0.22);
   box-shadow:
-    inset 0 0 0 1.6px rgba(255, 168, 62, 0.9),
+    inset 0 0 0 1.5px rgba(255, 168, 62, 0.62),
     0 16px 30px rgba(0, 0, 0, 0.4);
 }
 
 :root[data-theme="light"] .quick-deals-btn {
   background: rgba(255, 255, 255, 0.1);
   box-shadow:
-    inset 0 0 0 1.6px rgba(232, 140, 32, 0.84),
+    inset 0 0 0 1.5px rgba(232, 140, 32, 0.66),
     0 14px 28px rgba(15, 17, 21, 0.16);
 }
 
@@ -7736,6 +8392,13 @@ body.pin-lock {
     0 8px 18px rgba(15, 17, 21, 0.18);
 }
 
+:root[data-theme="light"] .quick-deals-radial.open .quick-radial-item {
+  border-color: rgba(232, 140, 32, 0.95);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 232, 188, 0.75),
+    0 8px 18px rgba(15, 17, 21, 0.18);
+}
+
 :root[data-theme="light"] .quick-radial-icon img {
   filter: brightness(0) invert(0);
 }
@@ -7744,71 +8407,6 @@ body.pin-lock {
   border-color: rgba(20, 28, 38, 0.16);
   background: rgba(255, 255, 255, 0.96);
   color: #1a2433;
-}
-
-.quick-deals-toggle-icon {
-  position: relative;
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.quick-deals-toggle-icon span,
-.quick-deals-toggle-icon::before,
-.quick-deals-toggle-icon::after {
-  position: absolute;
-  width: 18px;
-  height: 2px;
-  border-radius: 2px;
-  background: #ffbf73;
-  transition: transform 0.22s ease, opacity 0.18s ease;
-}
-
-.quick-deals-toggle-icon::before,
-.quick-deals-toggle-icon::after {
-  content: "";
-}
-
-.quick-deals-toggle-icon::before {
-  transform: translateY(-5px);
-}
-
-.quick-deals-toggle-icon::after {
-  transform: translateY(5px);
-}
-
-.quick-deals-btn.is-active .quick-deals-toggle-icon span {
-  opacity: 0;
-}
-
-.quick-deals-btn.is-active .quick-deals-toggle-icon::before {
-  transform: rotate(45deg);
-}
-
-.quick-deals-btn.is-active .quick-deals-toggle-icon::after {
-  transform: rotate(-45deg);
-}
-
-.quick-deals-btn.is-active {
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 168, 62, 0.95),
-    0 16px 30px rgba(0, 0, 0, 0.36);
-  z-index: 56;
-}
-
-.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon span {
-  opacity: 1 !important;
-}
-
-.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon::before {
-  transform: translateY(-5px) !important;
-}
-
-.quick-deals-btn:not(.is-active) .quick-deals-toggle-icon::after {
-  transform: translateY(5px) !important;
 }
 
 .quick-deals-btn:active {
@@ -7826,11 +8424,20 @@ body.pin-lock {
 }
 
 .quick-deals-icon-wrap {
-  display: none !important;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: block;
 }
 
 .quick-deals-icon-img {
-  display: none !important;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+  transform: scale(1.05);
 }
 
 .quick-deals-badge {
@@ -8420,32 +9027,32 @@ body.pin-lock {
   margin-top: -2px;
   margin-bottom: 6px;
   min-height: 186px;
-  padding-right: 322px;
+  padding-right: 306px;
   align-items: flex-start;
 }
 
 #profileBalanceCard .profile-balance-row.history-row {
   position: absolute;
-  right: 26px;
-  width: 272px;
+  right: 24px;
+  width: 258px;
   margin: 0;
 }
 
 #profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row {
-  top: 2px;
+  top: 4px;
 }
 
 #profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row + .profile-balance-row.history-row {
-  top: 98px;
+  top: 96px;
 }
 
 #profileBalanceCard #balanceManageOpen,
 #profileBalanceCard #balanceHistoryOpen {
   width: 100% !important;
-  min-height: 84px !important;
+  min-height: 82px !important;
   height: auto !important;
   margin-top: 0 !important;
-  padding: 14px 68px 14px 16px !important;
+  padding: 14px 66px 14px 16px !important;
   border-radius: 16px !important;
   border: 1px solid transparent !important;
   display: flex !important;
@@ -8574,28 +9181,28 @@ body.pin-lock {
 
 @media (max-width: 540px) {
   #profileBalanceCard .profile-balance-row.balance-only {
-    min-height: 176px;
-    padding-right: 252px;
+    min-height: 168px;
+    padding-right: 228px;
   }
 
   #profileBalanceCard .profile-balance-row.history-row {
-    right: 22px;
-    width: 220px;
+    right: 12px;
+    width: 206px;
   }
 
   #profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row {
-    top: 6px;
+    top: 8px;
   }
 
   #profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row + .profile-balance-row.history-row {
-    top: 94px;
+    top: 90px;
   }
 
   #profileBalanceCard #balanceManageOpen,
   #profileBalanceCard #balanceHistoryOpen {
-    min-height: 78px !important;
-    padding: 13px 64px 13px 14px !important;
-    font-size: 14px !important;
+    min-height: 72px !important;
+    padding: 12px 58px 12px 13px !important;
+    font-size: 13px !important;
   }
 
   #profileBalanceCard #balanceManageOpen .btn-icon,
@@ -8659,224 +9266,117 @@ body.pin-lock {
   }
 }
 
-/* Profile layout refinement: registration + two-column role/balance row */
-.profile-registered-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: -6px;
-  margin-bottom: 12px;
-  padding: 10px 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(120, 180, 255, 0.24);
-  background: rgba(18, 22, 30, 0.5);
-}
-
-.profile-registered-label {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #8fb6d8;
-}
-
-#profileRegistered {
-  text-align: right;
-  font-weight: 600;
-}
-
-.profile-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-#profileRoleCard,
-#profileBalanceCard {
-  background: rgba(18, 22, 30, 0.44);
-  border: 1px solid rgba(120, 180, 255, 0.2);
-  border-radius: 20px;
-  padding: 14px;
-  border-bottom: none;
-}
-
-#profileRoleCard .profile-title,
-#profileBalanceCard .profile-title {
-  font-size: 13px;
-  margin-bottom: 8px;
-  color: #8fb6d8;
-}
-
-#profileRoleCard #profileRole {
-  font-size: 36px;
-  line-height: 1;
-}
-
-#profileBalanceCard .profile-balance-row.balance-only {
-  min-height: 168px;
-  padding-right: 250px;
-}
-
-#profileBalanceCard .profile-balance-row.history-row {
-  right: 14px;
-  width: 224px;
-}
-
-#profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row {
-  top: 8px;
-}
-
-#profileBalanceCard .profile-balance-row.balance-only + .profile-balance-row.history-row + .profile-balance-row.history-row {
-  top: 92px;
-}
-
-#profileBalanceCard #balanceManageOpen,
-#profileBalanceCard #balanceHistoryOpen {
-  min-height: 76px !important;
-  padding: 13px 64px 13px 14px !important;
-  font-size: 14px !important;
-}
-
-:root[data-theme="light"] .profile-registered-line {
-  background: rgba(240, 247, 255, 0.88);
-  border-color: rgba(120, 160, 220, 0.28);
-}
-
-:root[data-theme="light"] .profile-registered-label {
-  color: #4d6f99;
-}
-
-:root[data-theme="light"] #profileRoleCard,
-:root[data-theme="light"] #profileBalanceCard {
-  background: rgba(246, 251, 255, 0.92);
-  border-color: rgba(120, 160, 220, 0.24);
-}
-
-:root[data-theme="light"] #profileRoleCard .profile-title,
-:root[data-theme="light"] #profileBalanceCard .profile-title {
-  color: #4d6f99;
-}
-
-@media (max-width: 860px) {
-  .profile-grid {
-    grid-template-columns: 1fr;
-  }
-
-  #profileBalanceCard .profile-balance-row.balance-only {
-    min-height: 176px;
-    padding-right: 252px;
-  }
-
-  #profileBalanceCard .profile-balance-row.history-row {
-    right: 18px;
-    width: 220px;
-  }
-}
-
-/* Profile final tuning: role size + balance action card style */
-#profileRoleCard #profileRole {
-  font-size: clamp(40px, 4.4vw, 52px) !important;
-  line-height: 1.04 !important;
-  letter-spacing: -0.01em;
-}
-
+/* Final lock v2: keep blue balance buttons style (must be last) */
 .profile-balance-actions-wide #balanceManageOpen,
 .profile-balance-actions-wide #balanceHistoryOpen {
-  min-height: 78px !important;
-  border-radius: 22px !important;
-  padding: 12px 16px !important;
-  border: 1px solid transparent !important;
-  color: #ffffff !important;
+  min-height: 86px !important;
+  border-radius: 32px !important;
+  border: 2px solid rgba(91, 153, 204, 0.55) !important;
+  padding: 18px 84px 18px 22px !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.01em !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  color: #d7edff !important;
+  backdrop-filter: blur(1.5px) !important;
   box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.24),
-    inset 0 10px 16px rgba(255, 255, 255, 0.12),
-    inset 0 -10px 16px rgba(24, 34, 60, 0.28),
-    0 10px 22px rgba(8, 14, 28, 0.34) !important;
+    inset 0 1px 0 rgba(170, 215, 249, 0.22),
+    inset 0 -14px 26px rgba(6, 18, 35, 0.34),
+    0 10px 24px rgba(5, 14, 28, 0.44) !important;
 }
 
 .profile-balance-actions-wide #balanceManageOpen {
-  background: linear-gradient(135deg, rgba(234, 167, 63, 0.96), rgba(201, 133, 35, 0.96)) !important;
-  border-color: rgba(255, 206, 128, 0.55) !important;
+  background: linear-gradient(140deg, #0b1c32 0%, #133150 58%, #1d4666 100%) !important;
 }
 
 .profile-balance-actions-wide #balanceHistoryOpen {
-  background: linear-gradient(135deg, rgba(77, 131, 231, 0.96), rgba(82, 72, 190, 0.96)) !important;
-  border-color: rgba(165, 191, 255, 0.48) !important;
+  background: linear-gradient(140deg, #0c1d33 0%, #14314f 58%, #1a3f5d 100%) !important;
 }
 
-.profile-balance-actions-wide #balanceManageOpen:hover {
-  background: linear-gradient(135deg, rgba(245, 181, 84, 0.98), rgba(214, 145, 48, 0.98)) !important;
-}
-
+.profile-balance-actions-wide #balanceManageOpen:hover,
 .profile-balance-actions-wide #balanceHistoryOpen:hover {
-  background: linear-gradient(135deg, rgba(92, 148, 245, 0.98), rgba(94, 82, 205, 0.98)) !important;
+  border-color: rgba(121, 182, 233, 0.72) !important;
+  filter: brightness(1.06) !important;
 }
 
 .profile-balance-actions-wide #balanceManageOpen .btn-icon,
 .profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
-  width: 24px !important;
-  height: 24px !important;
-  opacity: 1 !important;
+  position: absolute !important;
+  right: -22px !important;
+  bottom: -24px !important;
+  width: 130px !important;
+  height: 130px !important;
+  opacity: 0.3 !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  width: 112px !important;
+  height: 112px !important;
+  right: -18px !important;
+  bottom: -18px !important;
+  opacity: 0.28 !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen .btn-icon img,
+.profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+.profile-balance-actions-wide #balanceManageOpen > :not(.btn-icon),
+.profile-balance-actions-wide #balanceHistoryOpen > :not(.btn-icon) {
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 :root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
 :root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  color: #0b436d !important;
+  border-color: rgba(93, 152, 202, 0.5) !important;
   box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.38),
-    inset 0 10px 16px rgba(255, 255, 255, 0.2),
-    inset 0 -10px 16px rgba(28, 42, 74, 0.2),
-    0 10px 20px rgba(28, 42, 74, 0.24) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    inset 0 -14px 22px rgba(141, 192, 228, 0.24),
+    0 8px 18px rgba(88, 138, 181, 0.24) !important;
 }
 
-/* Final profile buttons style lock */
-#profileRoleCard #profileRole {
-  font-size: clamp(32px, 3.2vw, 42px) !important;
-  line-height: 1.05 !important;
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen {
+  background: linear-gradient(140deg, #e8f6ff 0%, #d4ecff 58%, #bedfff 100%) !important;
 }
 
-.profile-balance-actions-wide #balanceManageOpen,
-.profile-balance-actions-wide #balanceHistoryOpen {
-  width: 100% !important;
-  min-height: 80px !important;
-  padding: 12px 18px !important;
-  border-radius: 22px !important;
-  border: 1px solid transparent !important;
-  color: #ffffff !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 10px !important;
-  text-align: center !important;
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.24),
-    inset 0 10px 16px rgba(255, 255, 255, 0.12),
-    inset 0 -10px 16px rgba(24, 34, 60, 0.28),
-    0 10px 22px rgba(8, 14, 28, 0.34) !important;
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(140deg, #e7f5ff 0%, #d2ebff 58%, #bbdcfb 100%) !important;
 }
 
-.profile-balance-actions-wide #balanceManageOpen {
-  background: linear-gradient(135deg, rgba(234, 167, 63, 0.96), rgba(201, 133, 35, 0.96)) !important;
-  border-color: rgba(255, 206, 128, 0.55) !important;
-}
+@media (max-width: 540px) {
+  .profile-balance-actions-wide #balanceManageOpen,
+  .profile-balance-actions-wide #balanceHistoryOpen {
+    min-height: 78px !important;
+    padding: 14px 72px 14px 16px !important;
+    font-size: 14px !important;
+    border-radius: 28px !important;
+  }
 
-.profile-balance-actions-wide #balanceManageOpen:hover {
-  background: linear-gradient(135deg, rgba(245, 181, 84, 0.98), rgba(214, 145, 48, 0.98)) !important;
-}
+  .profile-balance-actions-wide #balanceManageOpen .btn-icon,
+  .profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+    width: 112px !important;
+    height: 112px !important;
+    right: -18px !important;
+    bottom: -20px !important;
+  }
 
-.profile-balance-actions-wide #balanceHistoryOpen {
-  background: linear-gradient(135deg, rgba(77, 131, 231, 0.96), rgba(82, 72, 190, 0.96)) !important;
-  border-color: rgba(165, 191, 255, 0.48) !important;
-}
-
-.profile-balance-actions-wide #balanceHistoryOpen:hover {
-  background: linear-gradient(135deg, rgba(92, 148, 245, 0.98), rgba(94, 82, 205, 0.98)) !important;
-}
-
-.profile-balance-actions-wide #balanceManageOpen .btn-icon,
-.profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
-  position: static !important;
-  width: 24px !important;
-  height: 24px !important;
-  transform: none !important;
-  opacity: 1 !important;
+  .profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+    width: 96px !important;
+    height: 96px !important;
+    right: -15px !important;
+    bottom: -16px !important;
+  }
 }
