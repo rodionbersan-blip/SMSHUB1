@@ -9680,3 +9680,16 @@ body.pin-lock {
 :root[data-theme="dark"] body {
   background: #090b10 !important;
 }
+
+/* Final lock v10: less rounded corners for balance action buttons */
+.profile-balance-actions-wide #balanceManageOpen,
+.profile-balance-actions-wide #balanceHistoryOpen {
+  border-radius: 20px !important;
+}
+
+@media (max-width: 540px) {
+  .profile-balance-actions-wide #balanceManageOpen,
+  .profile-balance-actions-wide #balanceHistoryOpen {
+    border-radius: 18px !important;
+  }
+}
