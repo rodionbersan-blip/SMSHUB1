@@ -7721,6 +7721,7 @@ body.pin-lock {
   box-shadow:
     inset 0 0 0 2px rgba(255, 168, 62, 0.95),
     0 16px 30px rgba(0, 0, 0, 0.36);
+  z-index: 56;
 }
 
 .quick-deals-btn:active {
