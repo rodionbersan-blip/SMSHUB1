@@ -9380,3 +9380,84 @@ body.pin-lock {
     bottom: -16px !important;
   }
 }
+
+/* Final lock v3: compact role/balance cards + adaptive role label */
+.profile-grid {
+  gap: 10px !important;
+}
+
+#profileRoleCard,
+#profileBalanceCard {
+  padding: 12px !important;
+  border-radius: 16px !important;
+  min-height: 0 !important;
+}
+
+#profileRoleCard .profile-title,
+#profileBalanceCard .profile-title {
+  margin-bottom: 6px !important;
+  font-size: 12px !important;
+}
+
+#profileRoleCard #profileRole {
+  margin-top: 2px !important;
+  font-size: clamp(20px, 4.2vw, 34px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.01em !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  max-width: 100% !important;
+}
+
+#profileMerchantSince {
+  margin-top: 6px !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+}
+
+#profileBalanceCard .profile-balance-row.balance-only {
+  min-height: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 2px !important;
+  padding-right: 0 !important;
+}
+
+#profileBalance {
+  margin-top: 4px !important;
+}
+
+#profileBalance .balance-amount {
+  font-size: 20px !important;
+  line-height: 1 !important;
+}
+
+#profileBalance .balance-currency {
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+
+#profileBalanceReserved {
+  margin-top: 6px !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+}
+
+@media (max-width: 540px) {
+  #profileRoleCard,
+  #profileBalanceCard {
+    padding: 10px !important;
+  }
+
+  #profileRoleCard #profileRole {
+    font-size: clamp(18px, 5vw, 28px) !important;
+  }
+
+  #profileBalance .balance-amount {
+    font-size: 18px !important;
+  }
+
+  #profileBalance .balance-currency {
+    font-size: 16px !important;
+  }
+}

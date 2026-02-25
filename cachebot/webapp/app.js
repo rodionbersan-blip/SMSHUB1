@@ -197,8 +197,10 @@
   const quickDealsRadial = document.getElementById("quickDealsRadial");
   const quickDealsDealsBtn = document.getElementById("quickDealsDealsBtn");
   const quickDealsDisputesBtn = document.getElementById("quickDealsDisputesBtn");
+  const quickDealsSupportBtn = document.getElementById("quickDealsSupportBtn");
   const quickDealsDealsBadge = document.getElementById("quickDealsDealsBadge");
   const quickDealsDisputesBadge = document.getElementById("quickDealsDisputesBadge");
+  const quickDealsSupportBadge = document.getElementById("quickDealsSupportBadge");
   const quickDealsEmptyHint = document.getElementById("quickDealsEmptyHint");
   const quickDealsPanel = document.getElementById("quickDealsPanel");
   const quickDealsTitle = document.getElementById("quickDealsTitle");
@@ -391,6 +393,7 @@
   const supportNavBtn = document.querySelector('.nav-btn[data-view="support"]');
   const systemPanel = document.getElementById("systemPanel");
   const reviewsOpen = document.getElementById("reviewsOpen");
+  const reviewsOpenLabel = document.getElementById("reviewsOpenLabel");
   const reviewsModal = document.getElementById("reviewsModal");
   const reviewsClose = document.getElementById("reviewsClose");
   const reviewsList = document.getElementById("reviewsList");
@@ -449,6 +452,8 @@
     chatLastSeenAt: {},
     chatInitDone: false,
     supportLastSeen: {},
+    supportTickets: [],
+    supportCanManage: false,
     supportPollAt: 0,
     supportChatTimer: null,
     supportChatInFlight: false,
@@ -1000,6 +1005,9 @@
 
   let successAnimInstance = null;
   let successAnimHideTimer = null;
+  let successAnimCleanupTimer = null;
+  let successAnimCompleteHandler = null;
+  let successAnimFailHandler = null;
   let noticeTimer = null;
   const showNotice = (message) => {
     const telegramAlert = window.Telegram?.WebApp?.showAlert;
@@ -1354,44 +1362,65 @@
       window.clearTimeout(successAnimHideTimer);
       successAnimHideTimer = null;
     }
-    const startSegment = () => {
-      const totalSeconds = successAnimInstance.getDuration(false) || 0;
-      const handleFail = () => {
-        successAnim.classList.add("fade-out");
-        successAnim.classList.remove("blur");
-        window.setTimeout(() => {
-          successAnim.classList.remove("show", "fade-out");
-          successAnimInstance.stop();
-        }, 350);
-        successAnimInstance.removeEventListener("data_failed", handleFail);
-      };
-      successAnimInstance.removeEventListener("data_failed", handleFail);
-      successAnimInstance.addEventListener("data_failed", handleFail);
-      successAnimInstance.setSpeed(1);
-      successAnimInstance.goToAndPlay(0, true);
-      if (totalSeconds) {
-        successAnimHideTimer = window.setTimeout(() => {
-          successAnim.classList.add("fade-out");
-          successAnim.classList.remove("blur");
-          window.setTimeout(() => {
-            successAnim.classList.remove("show", "fade-out");
-            successAnimInstance.stop();
-          }, 350);
-        }, Math.ceil(totalSeconds * 1000) + 150);
+    if (successAnimCleanupTimer) {
+      window.clearTimeout(successAnimCleanupTimer);
+      successAnimCleanupTimer = null;
+    }
+
+    const finish = () => {
+      successAnim.classList.add("fade-out");
+      successAnim.classList.remove("blur");
+      if (successAnimCleanupTimer) {
+        window.clearTimeout(successAnimCleanupTimer);
       }
+      successAnimCleanupTimer = window.setTimeout(() => {
+        successAnim.classList.remove("show", "fade-out");
+        successAnimInstance?.stop();
+        successAnimCleanupTimer = null;
+      }, 350);
     };
+
+    if (successAnimCompleteHandler) {
+      successAnimInstance.removeEventListener("complete", successAnimCompleteHandler);
+      successAnimCompleteHandler = null;
+    }
+    if (successAnimFailHandler) {
+      successAnimInstance.removeEventListener("data_failed", successAnimFailHandler);
+      successAnimFailHandler = null;
+    }
+
+    successAnimCompleteHandler = () => {
+      successAnimHideTimer = window.setTimeout(() => {
+        finish();
+      }, 120);
+    };
+    successAnimFailHandler = () => {
+      finish();
+    };
+    successAnimInstance.addEventListener("complete", successAnimCompleteHandler);
+    successAnimInstance.addEventListener("data_failed", successAnimFailHandler);
+
+    const startSegment = () => {
+      const totalFrames = Math.max(1, Math.floor(successAnimInstance.getDuration(true) || 0));
+      successAnimInstance.setSpeed(1);
+      successAnimInstance.goToAndStop(0, true);
+      successAnimInstance.playSegments([0, Math.max(1, totalFrames - 1)], true);
+
+      // Safety timeout only; real close is driven by "complete".
+      const totalSeconds = successAnimInstance.getDuration(false) || 0;
+      const fallbackMs = Math.max(3200, Math.ceil(totalSeconds * 1000) + 1200);
+      successAnimHideTimer = window.setTimeout(() => {
+        finish();
+      }, fallbackMs);
+    };
+
     if (successAnimInstance.isLoaded) {
       startSegment();
     } else {
       successAnimInstance.addEventListener("DOMLoaded", startSegment, { once: true });
       successAnimHideTimer = window.setTimeout(() => {
-        successAnim.classList.add("fade-out");
-        successAnim.classList.remove("blur");
-        window.setTimeout(() => {
-          successAnim.classList.remove("show", "fade-out");
-          successAnimInstance?.stop();
-        }, 350);
-      }, 2000);
+        finish();
+      }, 5000);
     }
   };
 
@@ -1977,8 +2006,8 @@
   };
 
   const applyProfileStats = (stats) => {
-    if (reviewsOpen) {
-      reviewsOpen.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
+    if (reviewsOpenLabel) {
+      reviewsOpenLabel.textContent = `Отзывы: ${stats.reviews_count ?? 0}`;
     }
   };
 
@@ -2073,6 +2102,38 @@
     reader.readAsDataURL(file);
   };
 
+  const fitProfileRoleText = () => {
+    if (!profileRole) return;
+    const value = (profileRole.textContent || "").trim();
+    if (!value) {
+      profileRole.style.fontSize = "";
+      return;
+    }
+    const maxSize = 34;
+    const minSize = 16;
+    const maxLines = 2;
+    profileRole.style.fontSize = `${maxSize}px`;
+    profileRole.style.lineHeight = "1.02";
+    profileRole.style.whiteSpace = "normal";
+    profileRole.style.wordBreak = "break-word";
+    profileRole.style.overflowWrap = "anywhere";
+
+    let size = maxSize;
+    while (size > minSize) {
+      const computed = window.getComputedStyle(profileRole);
+      const lineHeight = Number.parseFloat(computed.lineHeight) || size * 1.02;
+      const tooWide = profileRole.scrollWidth > profileRole.clientWidth + 1;
+      const tooTall = profileRole.scrollHeight > lineHeight * maxLines + 1;
+      if (!tooWide && !tooTall) break;
+      size -= 1;
+      profileRole.style.fontSize = `${size}px`;
+    }
+  };
+
+  const scheduleProfileRoleFit = () => {
+    window.requestAnimationFrame(fitProfileRoleText);
+  };
+
   const loadProfile = async () => {
     try {
       const payload = await fetchJson("/api/profile");
@@ -2116,6 +2177,7 @@
           ? `Мерчант с: ${formatDate(data.merchant_since)}`
           : "";
       }
+      scheduleProfileRoleFit();
       const stats = data?.stats || {};
       state.profileModeration = data?.moderation || null;
       if (profileStatus) {
@@ -2670,6 +2732,12 @@
       (deal) => !["completed", "canceled", "expired"].includes(deal.status)
     ).length + (state.merchantMyAds?.length || 0);
     const disputesCount = Array.isArray(state.assignedDisputes) ? state.assignedDisputes.length : 0;
+    const supportChatsCount = (state.supportTickets || []).filter(
+      (ticket) =>
+        ticket?.status === "in_progress" &&
+        ticket?.assigned_to &&
+        Number(ticket.assigned_to) === Number(state.userId)
+    ).length;
     const pendingSet = new Set();
     deals.forEach((deal) => {
       const isPending = deal.status === "pending" && deal.offer_initiator_id;
@@ -2713,8 +2781,10 @@
     if (quickDealsBadge) {
       const chatCount = Object.values(chatUnreadCounts).reduce((sum, value) => sum + (Number(value) || 0), 0);
       const count = chatCount + pendingSet.size;
-      quickDealsBadge.textContent = count > 9 ? "9+" : `${count}`;
-      quickDealsBadge.classList.toggle("show", count > 0);
+      // Main floating button shows only blue counter.
+      // Red unread badges are shown on radial deals/disputes buttons.
+      quickDealsBadge.textContent = "";
+      quickDealsBadge.classList.remove("show");
       if (count > state.lastQuickBadgeCount) {
         try {
           tg?.HapticFeedback?.notificationOccurred("success");
@@ -2732,6 +2802,10 @@
       quickDealsDisputesBadge.textContent = disputesCount > 9 ? "9+" : `${disputesCount}`;
       quickDealsDisputesBadge.classList.toggle("show", disputesCount > 0);
     }
+    if (quickDealsSupportBadge) {
+      quickDealsSupportBadge.textContent = supportChatsCount > 9 ? "9+" : `${supportChatsCount}`;
+      quickDealsSupportBadge.classList.toggle("show", supportChatsCount > 0);
+    }
     if (quickDealsDealsBtn) {
       const disabled = activeCount <= 0;
       quickDealsDealsBtn.classList.toggle("is-disabled", disabled);
@@ -2742,9 +2816,18 @@
       quickDealsDisputesBtn.classList.toggle("is-disabled", disabled);
       quickDealsDisputesBtn.disabled = disabled;
     }
+    if (quickDealsSupportBtn) {
+      const show = !!state.supportCanManage;
+      quickDealsSupportBtn.classList.toggle("is-hidden", !show);
+      if (show) {
+        const disabled = supportChatsCount <= 0;
+        quickDealsSupportBtn.classList.toggle("is-disabled", disabled);
+        quickDealsSupportBtn.disabled = disabled;
+      }
+    }
     if (quickDealsEmptyHint) {
-      const noItems = activeCount <= 0 && disputesCount <= 0;
-      quickDealsEmptyHint.textContent = noItems ? "Активных сделок нет." : "Выберите: сделки или споры.";
+      const noItems = activeCount <= 0 && disputesCount <= 0 && supportChatsCount <= 0;
+      quickDealsEmptyHint.textContent = noItems ? "Активных сделок нет." : "Выберите раздел.";
       const radialOpen = quickDealsRadial?.classList.contains("open");
       quickDealsRadial?.classList.toggle("empty-only", !!radialOpen && noItems);
       quickDealsEmptyHint.classList.toggle("show", !!radialOpen && noItems);
@@ -2953,8 +3036,47 @@
     });
   };
 
+  const renderQuickSupportPrimary = () => {
+    if (!quickDealsList) return;
+    const tickets = (state.supportTickets || []).filter(
+      (ticket) =>
+        ticket?.status === "in_progress" &&
+        ticket?.assigned_to &&
+        Number(ticket.assigned_to) === Number(state.userId)
+    );
+    quickDealsList.innerHTML = "";
+    if (!tickets.length) {
+      quickDealsList.innerHTML = '<div class="deal-empty">Активных чатов нет.</div>';
+      return;
+    }
+    tickets.forEach((ticket) => {
+      const row = document.createElement("div");
+      row.className = "quick-deal-item";
+      const title = ticket.user_name ? `Чат #${ticket.id} • ${ticket.user_name}` : `Чат #${ticket.id}`;
+      const reason = buildSupportReasonLabel(ticket);
+      row.innerHTML = `
+        <div class="quick-deal-info">
+          <div class="quick-deal-id">${title}</div>
+          <div class="quick-deal-meta">${reason}</div>
+        </div>
+        <div class="quick-deal-status status-ok">В работе</div>
+      `;
+      row.addEventListener("click", () => {
+        quickDealsPanel?.classList.remove("open");
+        openSupportChat(ticket.id, true);
+      });
+      quickDealsList.appendChild(row);
+    });
+  };
+
   const renderQuickPanelByMode = () => {
     const mode = state.quickPanelMode || "deals";
+    if (mode === "support") {
+      if (quickDealsTitle) quickDealsTitle.textContent = "Чаты поддержки";
+      if (quickDisputesSection) quickDisputesSection.style.display = "none";
+      renderQuickSupportPrimary();
+      return;
+    }
     if (mode === "disputes") {
       if (quickDealsTitle) quickDealsTitle.textContent = "Активные споры";
       if (quickDisputesSection) quickDisputesSection.style.display = "none";
@@ -3745,6 +3867,8 @@
   const applySupportPayload = (payload) => {
     if (!payload?.ok) return;
     const tickets = payload.tickets || [];
+    state.supportTickets = tickets;
+    state.supportCanManage = !!payload.can_manage;
     let hasUnread = false;
     if (supportNewBtn && !payload.can_manage) {
       supportNewBtn.classList.toggle("support-new-hidden", tickets.length > 0);
@@ -3849,6 +3973,10 @@
       supportList.appendChild(row);
     });
     setSupportBadge(hasUnread);
+    updateQuickDealsButton(state.deals || []);
+    if (quickDealsPanel?.classList.contains("open") && state.quickPanelMode === "support") {
+      renderQuickPanelByMode();
+    }
   };
 
   const loadSupport = async () => {
@@ -3860,6 +3988,8 @@
   const refreshSupportBadge = async () => {
     const payload = await fetchJson("/api/support/tickets");
     if (!payload?.ok) return;
+    state.supportTickets = payload.tickets || [];
+    state.supportCanManage = !!payload.can_manage;
     const supportView = document.getElementById("view-support");
     if (supportView?.classList.contains("active")) {
       applySupportPayload(payload);
@@ -3887,6 +4017,10 @@
       if (isUnread || assignedNotify) hasUnread = true;
     });
     setSupportBadge(hasUnread);
+    updateQuickDealsButton(state.deals || []);
+    if (quickDealsPanel?.classList.contains("open") && state.quickPanelMode === "support") {
+      renderQuickPanelByMode();
+    }
   };
 
   const SUPPORT_CLOSE_REQUEST_PREFIX = "__close_request__:";
@@ -4697,18 +4831,32 @@
     const adminVisible =
       !!adminTab && adminTab.style.display !== "none" && !adminTab.classList.contains("is-hidden");
     const disputesVisible = disputesTab.style.display !== "none";
-    tabsNav.classList.toggle("tabs-only-disputes", !adminVisible && disputesVisible);
+    const merchantSellVisible =
+      !!merchantSellNav &&
+      merchantSellNav.style.display !== "none" &&
+      !merchantSellNav.classList.contains("is-hidden");
+    // Full-width moderation only when it is literally the only button on the second row.
+    tabsNav.classList.toggle(
+      "tabs-only-disputes",
+      !adminVisible && disputesVisible && !merchantSellVisible
+    );
     if (merchantSellNav) {
       if (adminVisible && disputesVisible) {
         merchantSellNav.style.gridColumn = "1 / -1";
+        merchantSellNav.classList.remove("is-compact");
       } else if (adminVisible || disputesVisible) {
         merchantSellNav.style.gridColumn = "span 3";
+        merchantSellNav.classList.toggle("is-compact", !adminVisible && disputesVisible);
       } else {
         merchantSellNav.style.gridColumn = "1 / -1";
+        merchantSellNav.classList.remove("is-compact");
       }
     }
     syncTabsIndicator(true);
   };
+
+  // Apply stable layout immediately to avoid initial "narrow then expand" jump.
+  updateTabsLayout();
 
   const submitModerationAction = async () => {
     const userId = state.moderationUser?.user_id;
@@ -6865,16 +7013,28 @@
     }
   };
 
-  const updateReviewsIndicator = () => {
+  const updateReviewsIndicator = (immediate = false) => {
     if (!reviewsTabs) return;
     const activeBtn = reviewsTabs.querySelector(".tab-btn.active");
     const indicator = reviewsTabs.querySelector(".tab-indicator");
-    if (!activeBtn || !indicator) return;
-    const styles = window.getComputedStyle(reviewsTabs);
-    const padLeft = parseFloat(styles.paddingLeft) || 0;
-    const offset = activeBtn.offsetLeft - padLeft;
-    indicator.style.width = `${activeBtn.offsetWidth}px`;
-    indicator.style.transform = `translateX(${offset}px)`;
+    if (!activeBtn || !indicator) {
+      indicator?.classList.remove("ready");
+      return;
+    }
+    const wrapRect = reviewsTabs.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    const x = btnRect.left - wrapRect.left - 6;
+    if (immediate) {
+      indicator.style.transition = "none";
+    }
+    indicator.style.width = `${btnRect.width}px`;
+    indicator.style.transform = `translateX(${x}px)`;
+    indicator.classList.add("ready");
+    if (immediate) {
+      requestAnimationFrame(() => {
+        indicator.style.transition = "";
+      });
+    }
   };
 
   const renderReviewsPage = () => {
@@ -6981,29 +7141,43 @@
   });
 
   window.addEventListener("resize", () => syncTabsIndicator(true));
+  window.addEventListener("resize", scheduleProfileRoleFit);
 
   const setQuickDealsOpen = (open) => {
     if (!quickDealsPanel) return;
     quickDealsPanel.classList.toggle("open", open);
     quickDealsPanel.setAttribute("aria-hidden", open ? "false" : "true");
+    const radialOpen = quickDealsRadial?.classList.contains("open");
+    quickDealsBtn?.classList.toggle("is-active", !!open || !!radialOpen);
   };
 
   const setQuickRadialOpen = (open) => {
     if (!quickDealsRadial) return;
     quickDealsRadial.classList.toggle("open", open);
     quickDealsRadial.setAttribute("aria-hidden", open ? "false" : "true");
+    const panelOpen = quickDealsPanel?.classList.contains("open");
+    quickDealsBtn?.classList.toggle("is-active", !!open || !!panelOpen);
     const hasDeals =
       (state.deals || []).some((deal) => !["completed", "canceled", "expired"].includes(deal.status)) ||
       (state.merchantMyAds?.length || 0) > 0;
     const hasDisputes = Array.isArray(state.assignedDisputes) && state.assignedDisputes.length > 0;
-    const emptyOnly = open && !hasDeals && !hasDisputes;
+    const hasSupportChats =
+      !!state.supportCanManage &&
+      (state.supportTickets || []).some(
+        (ticket) =>
+          ticket?.status === "in_progress" &&
+          ticket?.assigned_to &&
+          Number(ticket.assigned_to) === Number(state.userId)
+      );
+    const emptyOnly = open && !hasDeals && !hasDisputes && !hasSupportChats;
     quickDealsRadial.classList.toggle("empty-only", emptyOnly);
     if (quickDealsEmptyHint) quickDealsEmptyHint.classList.toggle("show", emptyOnly);
   };
 
   quickDealsBtn?.addEventListener("click", () => {
-    const isOpen = quickDealsRadial?.classList.contains("open");
-    if (isOpen) {
+    const radialOpen = quickDealsRadial?.classList.contains("open");
+    const panelOpen = quickDealsPanel?.classList.contains("open");
+    if (radialOpen || panelOpen) {
       setQuickDealsOpen(false);
       setQuickRadialOpen(false);
       return;
@@ -7023,6 +7197,14 @@
   quickDealsDisputesBtn?.addEventListener("click", () => {
     if (quickDealsDisputesBtn.disabled) return;
     state.quickPanelMode = "disputes";
+    renderQuickPanelByMode();
+    setQuickRadialOpen(false);
+    setQuickDealsOpen(true);
+  });
+
+  quickDealsSupportBtn?.addEventListener("click", () => {
+    if (quickDealsSupportBtn.disabled) return;
+    state.quickPanelMode = "support";
     renderQuickPanelByMode();
     setQuickRadialOpen(false);
     setQuickDealsOpen(true);
@@ -8526,12 +8708,15 @@
     btn.addEventListener("click", async () => {
       reviewTabButtons.forEach((item) => item.classList.remove("active"));
       btn.classList.add("active");
+      if (reviewsTabs) {
+        reviewsTabs.dataset.active = btn.dataset.tab || "all";
+      }
+      updateReviewsIndicator();
       const reviews = await loadReviews(state.reviewsTargetUserId);
       if (!reviews) return;
       const rating =
         btn.dataset.tab === "positive" ? 1 : btn.dataset.tab === "negative" ? -1 : "all";
       renderReviews(reviews, rating);
-      window.setTimeout(updateReviewsIndicator, 0);
     });
   });
 
