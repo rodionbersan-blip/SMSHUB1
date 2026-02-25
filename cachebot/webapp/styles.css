@@ -9537,3 +9537,46 @@ body.pin-lock {
   line-height: 1 !important;
   white-space: nowrap !important;
 }
+
+/* Final lock v6: center merchant-since and refresh light button palette */
+#profileMerchantSince {
+  width: 100% !important;
+  text-align: center !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  color: #0d3d61 !important;
+  border-color: rgba(126, 173, 214, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -10px 18px rgba(127, 175, 212, 0.18),
+    0 9px 16px rgba(87, 127, 165, 0.2) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen {
+  background: linear-gradient(145deg, #ecf7ff 0%, #dbeeff 52%, #c9e3f8 100%) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen {
+  background: linear-gradient(145deg, #f1f8ff 0%, #dfeeff 52%, #cee3f6 100%) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  border-color: rgba(96, 149, 195, 0.8) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -10px 18px rgba(118, 167, 206, 0.24),
+    0 10px 18px rgba(79, 122, 163, 0.24) !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen .btn-icon,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  opacity: 0.18 !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen .btn-icon img,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
+  filter: saturate(0.65) hue-rotate(182deg) brightness(0.86) contrast(0.95) !important;
+}
