@@ -9920,3 +9920,26 @@ body.pin-lock {
 :root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
   filter: hue-rotate(218deg) saturate(2.5) brightness(0.9) contrast(1.02) !important;
 }
+
+/* Final lock v18: blue icons + white text with dark outline on light theme */
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen:hover,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen:hover {
+  color: #ffffff !important;
+  -webkit-text-stroke: 0.55px rgba(0, 0, 0, 0.82);
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    0 0 1px rgba(0, 0, 0, 0.8) !important;
+  filter: none !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen .btn-icon,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon {
+  opacity: 0.3 !important;
+}
+
+:root[data-theme="light"] .profile-balance-actions-wide #balanceManageOpen .btn-icon img,
+:root[data-theme="light"] .profile-balance-actions-wide #balanceHistoryOpen .btn-icon img {
+  filter: brightness(0) saturate(100%) invert(31%) sepia(87%) saturate(1764%) hue-rotate(208deg) brightness(94%) contrast(97%) !important;
+}
