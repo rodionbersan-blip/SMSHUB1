@@ -932,8 +932,8 @@ body.modal-open #app {
 
 .tabs.liquid-glass::after {
   z-index: 0;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
   filter: url(#glass-distortion);
   -webkit-filter: url(#glass-distortion);
   will-change: filter, backdrop-filter, transform;
