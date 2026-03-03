@@ -906,7 +906,7 @@ body.modal-open #app {
 }
 
 .tabs.liquid-glass {
-  border-radius: 56px !important;
+  border-radius: 30px !important;
   border: none !important;
   background: transparent !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2) !important;
@@ -920,20 +920,20 @@ body.modal-open #app {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 56px;
+  border-radius: 30px;
   pointer-events: none;
 }
 
 .tabs.liquid-glass::before {
   z-index: 1;
-  box-shadow: inset 0 0 31px -11px #000000;
-  background: rgba(255, 255, 255, 0);
+  box-shadow: inset 0 0 17px -4px #f78708;
+  background-color: rgba(207, 42, 42, 0);
 }
 
 .tabs.liquid-glass::after {
   z-index: 0;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
   filter: url(#glass-distortion);
   -webkit-filter: url(#glass-distortion);
 }
