@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "esbuild": "^0.27.3",
+    "liquid-glass-react": "^1.1.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}
