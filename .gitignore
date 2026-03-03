@@ -3,5 +3,3 @@ __pycache__/
 .venv/
 var/
 
-
-node_modules/
