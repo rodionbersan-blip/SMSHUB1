@@ -932,19 +932,10 @@ body.modal-open #app {
 
 .tabs.liquid-glass::after {
   z-index: 0;
-  background:
-    radial-gradient(120% 90% at 18% 30%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.03) 52%, rgba(255, 255, 255, 0) 72%),
-    radial-gradient(90% 120% at 82% 66%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.02) 54%, rgba(255, 255, 255, 0) 74%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 38%, rgba(255, 255, 255, 0.09) 66%, rgba(255, 255, 255, 0.01) 100%);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
   filter: url(#glass-distortion);
   -webkit-filter: url(#glass-distortion);
-  mix-blend-mode: screen;
-  opacity: 0.95;
-  background-size: 170% 170%;
-  background-position: 0% 50%;
-  animation: liquid-wave-drift 9s ease-in-out infinite alternate;
   will-change: filter, backdrop-filter, transform;
   transform: translateZ(0);
 }
@@ -969,21 +960,6 @@ body.modal-open #app {
   grid-column: span 2;
   width: 100%;
   z-index: 2;
-}
-
-@keyframes liquid-wave-drift {
-  0% {
-    background-position: 0% 45%;
-    transform: translateZ(0) scale(1) translateX(0);
-  }
-  50% {
-    background-position: 58% 52%;
-    transform: translateZ(0) scale(1.02) translateX(-0.8%);
-  }
-  100% {
-    background-position: 100% 58%;
-    transform: translateZ(0) scale(1.03) translateX(0.8%);
-  }
 }
 
 .tabs-indicator {
@@ -1274,11 +1250,6 @@ body.modal-open #app {
   background: none !important;
   border: none !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16) !important;
-}
-
-:root[data-theme="light"] .tabs.liquid-glass::after {
-  mix-blend-mode: multiply;
-  opacity: 0.72;
 }
 
 :root[data-theme="light"] .tabs.liquid-glass::before {
